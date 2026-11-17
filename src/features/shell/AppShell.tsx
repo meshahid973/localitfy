@@ -73,9 +73,8 @@ export default function AppShell(props: AppShellProps) {
   const {
     appRootRef, settings, platformInfo, themeMotionReady, showTopUpdateRibbon, isViewSwitching,
     heroMotion, heroMotionAppClass, homeEntranceSettledClass, isAppBackgrounded, scrollBusyRef,
-    themeSettling, themePresetStyle, animatedThemeVisualStyle, customThemeStyle, effectiveTheme,
-    effectiveAmbient, effectiveCoverColorSyncMode, effectiveNotes, statusText, draggedSongTitle,
-    showStarBackdrop
+    themeSettling, themePresetStyle, effectiveTheme,
+    effectiveAmbient, effectiveCoverColorSyncMode, effectiveNotes, statusText, draggedSongTitle
   } = frame;
   const { updatePrompt, askUpdaterToDownload, askUpdaterToInstall, manualUpdateCheck, setUpdatePrompt } = updates;
   const {
@@ -136,8 +135,6 @@ export default function AppShell(props: AppShellProps) {
           "--home-hero-cover-saturation": String(homeHeroCoverSaturation),
           "--home-hero-cover-glow-brightness": String(homeHeroCoverGlowBrightness),
           ...themePresetStyle,
-          ...animatedThemeVisualStyle,
-          ...customThemeStyle,
           "--workspace-cover-color": workspaceCoverColor
         } as CSSProperties
       }
@@ -146,7 +143,6 @@ export default function AppShell(props: AppShellProps) {
       data-theme={effectiveTheme}
       data-anime-visuals={settings.animeVisuals || screensaverPreviewActive || screensaverVisible ? "on" : "off"}
       data-gif-visuals={settings.gifVisualsMode}
-      data-custom-theme={settings.customThemeEnabled ? "true" : "false"}
       data-corners={settings.softCorners ? "soft" : "sharp"}
       data-ambient={effectiveAmbient ? "on" : "off"}
       data-cover-sync={effectiveCoverColorSyncMode}
@@ -171,13 +167,6 @@ export default function AppShell(props: AppShellProps) {
       data-motion-level={settings.reducedMotion ? "reduced" : "smooth"}
       data-drag-title={draggedSongTitle}
     >
-      {showStarBackdrop ? (
-        <div className="localtifyStarsBackdrop" aria-hidden="true">
-          <div className="localtifyStarsLayer localtifyStarsLayerA" />
-          <div className="localtifyStarsLayer localtifyStarsLayerB" />
-          <div className="localtifyStarsLayer localtifyStarsLayerC" />
-        </div>
-      ) : null}
 
       <TitleBar showWindowButtons={platformId !== "mac"} history={effectiveSimpleMode ? undefined : nav}>
         <UpdateIsland

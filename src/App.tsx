@@ -174,7 +174,6 @@ import {
 } from "./features/covers";
 import {
   accentTextColor,
-  buildAnimatedThemeVisualStyle,
   getCustomThemeColorPatch,
   hexToRgbString,
   hexToRgbaString,
@@ -413,7 +412,6 @@ function MainModeApp() {
   const nav = useNavigationHistory(view, changeView, contentRef);
   const [queuePanelOpen, setQueuePanelOpen] = useState(false);
   const [lyricsOpen, setLyricsOpen] = useState(false);
-  const arcadeGhostUnlocked = false;
 
 
   useBodyRuntimeClasses({
@@ -932,45 +930,13 @@ function MainModeApp() {
   }, []);
 
   const effectiveSimpleMode = false;
-  const selectedThemeId = settings.theme as string;
-  const safeTheme: ThemeId = selectedThemeId === "arcadeGhost" && !arcadeGhostUnlocked
-    ? "mint"
-    : normalizeThemeId(selectedThemeId);
-  const effectiveTheme: ThemeId = safeTheme;
+  const effectiveTheme = normalizeThemeId(settings.theme);
   const visibleThemes = themes;
-  const currentTheme = themes.find((theme) => theme.id === effectiveTheme) ?? themes.find((theme) => theme.id === "mint") ?? themes[0];
-  const animatedThemeSeedRef = useRef(`localtify-theme-motion-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+  const currentTheme = themes.find(theme => theme.id === effectiveTheme) ?? themes[1];
   const themePresetStyle = useMemo<CSSProperties>(() => makeThemePresetStyle(effectiveTheme), [effectiveTheme]);
-  const animatedThemeVisualStyle = useMemo<CSSProperties>(
-    () => buildAnimatedThemeVisualStyle(effectiveTheme, animatedThemeSeedRef.current),
-    [effectiveTheme]
-  );
+  const animatedThemeVisualStyle = useMemo<CSSProperties>(() => ({}), []);
   const showStarBackdrop = false;
-
-  useEffect(() => {
-    setThemeMotionReady(false);
-
-    if (settings.reducedMotion || effectiveTheme !== "stars") {
-      setThemeMotionReady(true);
-      return;
-    }
-
-    let firstFrame = 0;
-    let secondFrame = 0;
-    let warmupTimer = 0;
-
-    firstFrame = window.requestAnimationFrame(() => {
-      secondFrame = window.requestAnimationFrame(() => {
-        warmupTimer = window.setTimeout(() => setThemeMotionReady(true), 260);
-      });
-    });
-
-    return () => {
-      window.cancelAnimationFrame(firstFrame);
-      window.cancelAnimationFrame(secondFrame);
-      window.clearTimeout(warmupTimer);
-    };
-  }, [effectiveTheme, settings.reducedMotion]);
+  useEffect(() => { setThemeMotionReady(true); }, [setThemeMotionReady]);
 
   const shouldSuspendProximityMotion = false;
 
@@ -1066,52 +1032,7 @@ function MainModeApp() {
   const customThemeText = normalizeHexColor(settings.customThemeText, "#f5f3ff");
   const customThemeHighlight = normalizeHexColor(settings.customThemeHighlight, "#c084fc");
   const customThemeProgress = normalizeHexColor(settings.customThemeProgress, customThemeColor);
-  const customThemeStyle = useMemo<CSSProperties>(() => {
-    if (!settings.customThemeEnabled) return {};
-
-    return {
-      "--bg": customThemeBackground,
-      "--bg-2": customThemeBackground,
-      "--bg-3": customThemeSurface,
-      "--panel": hexToRgbaString(customThemeSurface, "#151528", 0.42),
-      "--surface": hexToRgbaString(customThemeSurface, "#151528", 0.22),
-      "--surface-2": hexToRgbaString(customThemeSurface, "#151528", 0.32),
-      "--surface-3": hexToRgbaString(customThemeSurface, "#151528", 0.48),
-      "--text": customThemeText,
-      "--text-2": hexToRgbaString(customThemeText, "#f5f3ff", 0.78),
-      "--muted": hexToRgbaString(customThemeText, "#f5f3ff", 0.70),
-      "--accent": customThemeColor,
-      "--button-text-on-accent": accentTextColor(customThemeColor),
-      "--accent-2": customThemeColor2,
-      "--highlight": customThemeHighlight,
-      "--progress": customThemeProgress,
-      "--accent-rgb": hexToRgbString(customThemeColor, "#8dffce"),
-      "--accent-2-rgb": hexToRgbString(customThemeColor2, "#8ecbff"),
-      "--highlight-rgb": hexToRgbString(customThemeHighlight, "#c084fc"),
-      "--progress-rgb": hexToRgbString(customThemeProgress, "#8dffce"),
-      "--accent-soft": hexToRgbaString(customThemeColor, "#8dffce", 0.14),
-      "--accent-line": hexToRgbaString(customThemeColor, "#8dffce", 0.34),
-      "--theme-accent": customThemeColor,
-      "--theme-accent-2": customThemeColor2,
-      "--theme-highlight": customThemeHighlight,
-      "--theme-progress": customThemeProgress,
-      "--theme-card-glass": hexToRgbaString(customThemeColor, "#8dffce", 0.045),
-      "--theme-card-border": hexToRgbaString(customThemeColor, "#8dffce", 0.16),
-      "--theme-hover-glass": hexToRgbaString(customThemeColor, "#8dffce", 0.09),
-      "--theme-hover-border": hexToRgbaString(customThemeColor, "#8dffce", 0.32),
-      "--card-rgb": hexToRgbString(customThemeColor, "#8dffce")
-    } as CSSProperties;
-  }, [
-    settings.customThemeEnabled,
-    customThemeBackground,
-    customThemeSurface,
-    customThemeText,
-    customThemeColor,
-    customThemeColor2,
-    customThemeHighlight,
-    customThemeProgress
-  ]);
-
+  const customThemeStyle = useMemo<CSSProperties>(() => ({}), []);
 
   const customThemeTokens = useMemo(
     () =>
@@ -2754,7 +2675,7 @@ function MainModeApp() {
       nextSettings.simpleMode = false;
 
       const normalizedBootTheme = normalizeThemeId(nextSettings.theme);
-      const shouldRepairBootTheme = normalizedBootTheme !== nextSettings.theme;
+      const shouldRepairBootTheme = normalizedBootTheme !== storedSettings.theme;
       nextSettings.theme = normalizedBootTheme;
 
       const shouldPersistVisualCustomizationDefaults =

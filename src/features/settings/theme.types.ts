@@ -1,4 +1,6 @@
+/** Legacy IDs remain readable for old settings payloads; only dark/light are selectable. */
 export type ThemeId =
+  | "dark" | "light"
   | "mint" | "berry" | "aqua" | "sunset" | "lavender" | "mono" | "rose" | "cotton" | "honey" | "lime"
   | "midnight" | "mocha" | "cherry" | "ice" | "matcha" | "bubblegum" | "sakura" | "dreamcore" | "peach"
   | "moon" | "starlight" | "neonNoir" | "cyberGrape" | "ember" | "forest" | "ocean" | "ruby" | "aurora"

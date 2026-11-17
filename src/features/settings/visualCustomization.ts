@@ -1,3 +1,5 @@
+import { normalizeThemeId } from "./theme.utils";
+
 export const VISUAL_CUSTOMIZATION_DEFAULTS = {
   homeBannerType: "dynamic",
   blurEffects: "normal",
@@ -19,6 +21,8 @@ export function applyVisualCustomizationDefaults<T extends Record<string, any>>(
   // the caller's concrete settings shape without an unsafe generic cast.
   return {
     ...settings,
+    theme: normalizeThemeId(settings.theme),
+    customThemeEnabled: false,
     homeExpanded: false,
     quickLibraryMoreBlur: false,
     showRightColumn: false,
