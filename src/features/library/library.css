@@ -132,9 +132,9 @@
 
 .libraryMissingCopy strong {
   overflow: hidden;
-  color: #b6a08b;
+  color: var(--lt-muted);
   font-size: 10px;
-  font-weight: 750;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -286,7 +286,7 @@
 .libraryPage .songIndex {
   color: var(--lt-faint) !important;
   font-size: 11px !important;
-  font-weight: 700 !important;
+  font-weight: 500 !important;
   text-align: center !important;
 }
 

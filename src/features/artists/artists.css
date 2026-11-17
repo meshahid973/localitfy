@@ -6,5 +6,5 @@
 
 .artistLoadMore {
   justify-self: center;
-  margin: 8px auto;
+  margin: var(--lt-space-2) auto;
 }

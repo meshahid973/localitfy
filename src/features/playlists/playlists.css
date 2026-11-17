@@ -1,7 +1,7 @@
 
 /* Playlists page: compact shelf, useful track area, and predictable drop targets. */
 .playlistsPage {
-  --playlist-surface: var(--lt-surface);
+  --playlist-surface: var(--lt-surface-soft);
   --playlist-border: var(--lt-border);
   --playlist-text: var(--lt-text);
   --playlist-muted: var(--lt-muted);
@@ -11,7 +11,7 @@
   color: var(--playlist-text);
 }
 .playlistsPage *, .playlistsPage *::before, .playlistsPage *::after { box-sizing: border-box; }
-.playlistsPage .eyebrow { margin: 0 0 9px; color: var(--lt-accent); font-size: 11px; letter-spacing: .1em; font-weight: 800; }
+.playlistsPage .eyebrow { margin: 0 0 9px; color: var(--lt-muted); font-size: var(--lt-text-sm); font-weight: 500; }
 .playlistsPage h3 { margin: 0; color: var(--lt-text); font-size: clamp(18px,1.55vw,24px); font-weight: 700; letter-spacing: -.03em; } .playlistsPage p:not(.eyebrow, .pageHeader p) { color: var(--playlist-muted); font-size: 13px; line-height: 1.5; }
 .playlistCoverCollage { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); grid-template-rows: repeat(2,minmax(0,1fr)); aspect-ratio: 1; gap: 2px; overflow: hidden; background: var(--lt-surface-raised); border-radius: 12px; }
 .playlistCoverTile { position: relative; min-width: 0; min-height: 0; display: grid; place-items: center; overflow: hidden; background: var(--lt-surface-raised); }
@@ -24,7 +24,7 @@
 :is(.playlistRenameForm, .smartPlaylistModal) input {
   flex: 1 1 170px; min-height: 40px; padding: 8px 12px;
   border: 1px solid rgba(var(--lt-accent-rgb), .17); border-radius: 9px;
-  background: var(--lt-bg); color: var(--lt-text); font: inherit; font-size: 13px;
+  background: var(--lt-surface-soft); color: var(--lt-text); font: inherit; font-size: 13px;
 }
 :is(.playlistRenameForm, .smartPlaylistModal) input::placeholder { color: var(--lt-faint); }
 :is(.playlistRenameForm, .smartPlaylistModal) input:focus-visible { outline: 2px solid rgba(var(--lt-accent-rgb), .58); outline-offset: 2px; }
@@ -73,7 +73,7 @@
 .playlistTrackIndex { color: var(--lt-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
 .playlistTrackCover,.playlistTrackCover img { width: 44px; height: 44px; object-fit: cover; border-radius: 7px; }
 .playlistTrackText { min-width: 0; display: grid; gap: 4px; }
-.playlistTrackText strong { overflow: hidden; color: var(--lt-text); text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 700; }
+.playlistTrackText strong { overflow: hidden; color: var(--lt-text); text-overflow: ellipsis; white-space: nowrap; font-size: var(--lt-text-base); font-weight: 550; }
 .playlistTrackText small { overflow: hidden; color: var(--lt-muted); text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
 .playlistTrackDuration { color: var(--playlist-muted); font-size: 11px; font-variant-numeric: tabular-nums; text-align: right; }
 .playlistTrackRow .iconAction { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; background: transparent; border: 0; color: var(--lt-muted); cursor: pointer; }

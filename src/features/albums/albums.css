@@ -1,7 +1,7 @@
 
 /* Albums owns its browsing, import preview, and album editor layouts. */
 .albumsPageV318 {
-  --albums-surface: var(--lt-surface);
+  --albums-surface: var(--lt-surface-soft);
   --albums-elevated: var(--lt-surface-raised);
   --albums-border: var(--lt-border);
   --albums-text: var(--lt-text);
@@ -15,8 +15,8 @@
   color: var(--albums-text);
 }
 .albumsPageV318 *, .albumsPageV318 *::before, .albumsPageV318 *::after { box-sizing: border-box; }
-.albumsPageV318 .eyebrow { margin: 0 0 8px; color: var(--lt-accent); font-size: 11px; font-weight: 800; letter-spacing: .1em; }
-.albumsPageV318 h3 { margin: 0; color: var(--lt-text); font-size: 20px; line-height: 1.2; font-weight: 720; letter-spacing: -.03em; }
+.albumsPageV318 .eyebrow { margin: 0 0 8px; color: var(--lt-muted); font-size: var(--lt-text-sm); font-weight: 500; }
+.albumsPageV318 h3 { margin: 0; color: var(--lt-text); font-size: 20px; line-height: 1.2; font-weight: 650; letter-spacing: -.03em; }
 .albumsPageV318 button { cursor: pointer; }
 .albumsPageV318 button:disabled { cursor: not-allowed; opacity: .45; }
 .albumsPageV318 :is(button,input,select):focus-visible { outline: 2px solid rgba(var(--lt-accent-rgb), .58); outline-offset: 2px; }
@@ -34,7 +34,7 @@
 .albumsActionBarV318, .albumFolderImportActionsV309, .albumFolderImportFooterV309 { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
 .albumsPageV318 :is(input:not([type="file"]):not(.pageHeaderSearch), select:not(.albumsSortV318)) {
   min-width: 0; min-height: 40px; padding: 9px 12px; border: 1px solid rgba(var(--lt-accent-rgb), .17);
-  border-radius: 9px; background: var(--lt-bg); color: var(--albums-text); font: inherit; font-size: 13px; outline: none;
+  border-radius: 9px; background: var(--lt-surface-soft); color: var(--albums-text); font: inherit; font-size: 13px; outline: none;
 }
 .albumsPageV318 input::placeholder { color: var(--lt-faint); }
 .albumsDeleteAllV318 { margin-left: auto; }
@@ -49,7 +49,7 @@
 .albumCardMetaV318 { display: grid; gap: var(--lt-space-1); min-width: 0; }
 .albumCardMetaV318 strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 550; }
 .albumCardMetaV318 em { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--lt-text-sm); color: var(--albums-muted); font-style: normal; }
-.albumCardMetaV318 b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--lt-muted); font-size: var(--lt-text-sm); font-weight: 600; }
+.albumCardMetaV318 b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--lt-muted); font-size: var(--lt-text-sm); font-weight: 500; }
 .albumDetailDrawerV318 :is(button,input,select):focus-visible { outline: 2px solid rgba(var(--lt-accent-rgb), .58); outline-offset: 2px; }
 .albumFolderImportHeaderV309 > div:first-child { min-width: 0; }
 .albumFolderImportHeaderV309 p:not(.eyebrow) { max-width: 690px; margin: 7px 0 0; color: var(--albums-muted); font-size: 12px; line-height: 1.5; }

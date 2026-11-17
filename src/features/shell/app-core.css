@@ -499,7 +499,7 @@ button:disabled{
   padding: 28px 24px 22px;
   border-radius: 16px;
   border: 1px solid var(--line);
-  background: rgba(8, 8, 8, 0.96);
+  background: var(--lt-bg-elevated);
   box-shadow: var(--shadow);
   text-align: center;
 }
@@ -533,7 +533,7 @@ button:disabled{
   color: var(--text);
   font-size: clamp(24px, 3vw, 34px);
   line-height: 1.04;
-  font-weight: 900;
+  font-weight: 650;
 }
 
 .deleteModal h3 span{
@@ -749,9 +749,8 @@ button:disabled{
 }
 
 .editorModal{
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.032), rgba(255, 255, 255, 0.012)),
-    rgba(0, 0, 0, 0.86);
-  border-color: rgba(255, 255, 255, 0.11);
+  background: var(--lt-bg-elevated);
+  border-color: var(--lt-border);
 }
 
 :root{
