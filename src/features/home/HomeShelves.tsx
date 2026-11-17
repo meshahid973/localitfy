@@ -135,8 +135,12 @@ type DailyMixRailProps = {
 export function HomeDailyMixRail({ songsById, openDailyMixes, openAnalysisSettings }: DailyMixRailProps) {
   const actions = useAppActions();
   const { result, failed } = useHomeDailyMixes();
-  if (!result) return <section className="homeSection homeReleasesSection homeMixesSection" aria-label="Daily mixes" aria-busy={!failed}>
-    {failed ? <div className="homeShelfNotice"><span>Could not load daily mixes.</span><button className="softButton" type="button" onClick={openDailyMixes}>Open mixes</button></div> : <CollectionLoading label="Loading daily mixes…" />}
+  if (!result) return <section className="homeSection homeReleasesSection homeMixesSection" aria-labelledby="home-daily-mixes-title">
+    <HomeSectionHead id="home-daily-mixes-title" title="Daily mixes" />
+    <div role="status" aria-atomic="true">
+      {failed ? <div className="homeShelfNotice">Could not load daily mixes.</div> : <CollectionLoading label="Loading daily mixes…" announce={false} />}
+    </div>
+    {failed ? <div className="homeShelfNotice"><button className="softButton" type="button" onClick={openDailyMixes}>Open mixes</button></div> : null}
   </section>;
   const mixes = result.mixes
     .map((mix) => ({ ...mix, songs: mix.songIds.flatMap((id) => { const song = songsById.get(id); return song && song.fileExists !== false ? [song] : []; }) }))

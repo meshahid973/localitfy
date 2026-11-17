@@ -72,3 +72,18 @@ test('pending, failed and refreshed mixes expose distinct states and recovery',(
  const failed=mixState({result:null,failed:true});assert.match(failed,/Could not load this mix/);assert.match(failed,/see today/);assert.doesNotMatch(failed,/has been refreshed/);
  const expired=mixState({result:{mixes:[]},failed:false});assert.match(expired,/This mix has been refreshed/);assert.match(expired,/see today/);
 });
+
+test('collection controls use the same size tokens as their grid columns',()=>{
+ const css=fs.readFileSync('src/features/pages/pages.css','utf8');
+ for(const line of css.split('\n').filter(line=>line.includes('--track-columns:'))) {
+   assert.doesNotMatch(line,/\b42px\b/);
+   assert.match(line,/var\(--lt-control-height\)/);
+ }
+});
+test('decorative artwork uses low-resolution source without changing eager loading',()=>{
+ const source=fs.readFileSync('src/features/covers/Cover.tsx','utf8');
+ const backdrop=fs.readFileSync('src/features/covers/ArtworkBackdrop.tsx','utf8');
+ assert.match(source,/const useFullCover = isImmediateCover && !preferThumbnail/);
+ assert.match(source,/const directCover = useFullCover \? getFullCoverUrl\(song\) : getCardCoverUrl\(song\)/);
+ assert.match(backdrop,/priority="high" preferThumbnail/);
+});

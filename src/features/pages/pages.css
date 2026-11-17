@@ -135,7 +135,7 @@
 .trackListCanvas { position: relative; min-width: 0; }
 .trackVirtualRow { position: absolute; left: 0; width: 100%; }
 .trackRow {
-  --track-columns: 42px minmax(0, 1fr) 42px 48px 42px;
+  --track-columns: var(--lt-control-height) minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height);
   min-width: 0;
   min-height: 64px;
   display: grid;
@@ -146,9 +146,9 @@
   border-radius: 8px;
   cursor: pointer;
 }
-.trackList.withCover .trackRow { --track-columns: 42px 40px minmax(0, 1fr) 42px 48px 42px; }
-.trackList.withAlbum .trackRow { --track-columns: 42px minmax(0, 1.4fr) minmax(0, 1fr) 42px 48px 42px; }
-.trackList.withCover.withAlbum .trackRow { --track-columns: 42px 40px minmax(0, 1.4fr) minmax(0, 1fr) 42px 48px 42px; }
+.trackList.withCover .trackRow { --track-columns: var(--lt-control-height) 40px minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
+.trackList.withAlbum .trackRow { --track-columns: var(--lt-control-height) minmax(0, 1.4fr) minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
+.trackList.withCover.withAlbum .trackRow { --track-columns: var(--lt-control-height) 40px minmax(0, 1.4fr) minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
 .trackRow:hover { background: color-mix(in srgb, var(--lt-text) 6%, transparent); }
 .trackRow.active { background: rgba(var(--lt-accent-rgb), .1); }
 .trackRow.missing { cursor: default; opacity: .5; }
@@ -215,8 +215,8 @@
 @media (max-width: 760px) {
   .collectionHero { grid-template-columns: 100px minmax(0, 1fr); column-gap: 16px; padding: 18px 16px; }
   .trackList.withAlbum .trackRow,
-  .trackList.withCover.withAlbum .trackRow { --track-columns: 42px 40px minmax(0, 1fr) 42px 48px 42px; }
-  .trackList:not(.withCover).withAlbum .trackRow { --track-columns: 42px minmax(0, 1fr) 42px 48px 42px; }
+  .trackList.withCover.withAlbum .trackRow { --track-columns: var(--lt-control-height) 40px minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
+  .trackList:not(.withCover).withAlbum .trackRow { --track-columns: var(--lt-control-height) minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
   .collectionHeroCopy h1 { font-size: 26px; }
   .trackRowAlbum { display: none; }
 }

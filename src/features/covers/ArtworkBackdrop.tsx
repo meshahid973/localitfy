@@ -6,7 +6,7 @@ export function ArtworkBackdrop({ song }: { song: Song | null }) {
   if (!song) return null;
   return (
     <div className="artworkBackdrop" aria-hidden="true">
-      <Cover song={song} className="artworkBackdropCover" priority="high" />
+      <Cover song={song} className="artworkBackdropCover" priority="high" preferThumbnail />
     </div>
   );
 }

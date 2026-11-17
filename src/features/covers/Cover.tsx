@@ -22,7 +22,7 @@ export function getCardCoverCssUrl(song?: Song | null) {
   return `url("${coverUrl.replace(/["\\]/g, "\\$&")}")`;
 }
 
-export function Cover({ song, className, priority = "auto" }: { song: Song | null; className: string; priority?: CoverImagePriority }) {
+export function Cover({ song, className, priority = "auto", preferThumbnail = false }: { song: Song | null; className: string; priority?: CoverImagePriority; preferThumbnail?: boolean }) {
   const [failedSources, setFailedSources] = useState<Record<string, boolean>>({});
   // Readiness is tied to the URL that actually loaded. A song update that keeps the same URL must not
   // hide the image again: the mounted <img> would never fire another load event.
@@ -30,9 +30,10 @@ export function Cover({ song, className, priority = "auto" }: { song: Song | nul
   const isImmediateCover = priority === "high" || (priority === "auto" && /\b(heroArt|smallArt|importCoverArt|editorCover)\b/.test(className));
   const coverLoadingMode = isImmediateCover ? "eager" : "lazy";
   const coverFetchPriority = isImmediateCover ? "high" : "low";
-  const coverIntrinsicSize = isImmediateCover ? 512 : 260;
+  const useFullCover = isImmediateCover && !preferThumbnail;
+  const coverIntrinsicSize = useFullCover ? 512 : 260;
 
-  const directCover = isImmediateCover ? getFullCoverUrl(song) : getCardCoverUrl(song);
+  const directCover = useFullCover ? getFullCoverUrl(song) : getCardCoverUrl(song);
   const savedCover = String(song?.coverPath || "").trim();
   const savedCoverSrc = getRendererSafeImageUrl(savedCover);
   const fallbackAsset = song ? pixelArtForSong(song) : null;
