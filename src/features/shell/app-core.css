@@ -1869,7 +1869,7 @@ button{
 
 .app .sidebar .nav .navItem:hover .navIcon,
 .app .sidebar .nav .navItem.active .navIcon{
-  color: #fff !important;
+  color: var(--lt-text) !important;
   background: rgba(var(--accent-rgb), 0.16) !important;
   border: 0 !important;
   box-shadow: none !important;

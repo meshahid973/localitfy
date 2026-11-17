@@ -9,7 +9,3 @@ export function restoreCustomThemeAfterUpdate(nextSettings: Settings, storedSett
   return changed;
 }
 
-/** Old callers are retained while the settings adapter is migrated. */
-export function writeCustomThemeBackupPatch(_source: Partial<Settings> | null | undefined) {
-  // No new palette backups are written.
-}

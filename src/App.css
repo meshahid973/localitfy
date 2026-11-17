@@ -1506,8 +1506,8 @@ button:hover,
 }
 
 .app[data-theme] .navIcon{
-  color: #ffffff !important;
-  stroke: #ffffff !important;
+  color: var(--lt-text) !important;
+  stroke: currentColor !important;
   fill: none !important;
 }
 
@@ -3867,7 +3867,8 @@ body.localtifyBackgroundMode .ambientSurface,
 .app .titleBarUpdateSlot,
 .titleBarUpdateSlot{
   grid-column: 2 !important;
-  width: 100% !important;
+  flex: 1 1 360px;
+  width: auto !important;
   min-width: 0 !important;
   height: 100% !important;
   min-height: 0 !important;
@@ -4082,8 +4083,8 @@ body.localtifyBackgroundMode .ambientSurface,
 
 .app .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton,
 .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton{
-  color: #08020a !important;
-  background: var(--lt-accent, #e65adf) !important;
+  color: var(--accent-contrast) !important;
+  background: var(--lt-accent) !important;
   border-color: transparent !important;
   box-shadow: 0 0 14px rgba(var(--lt-accent-rgb, 230,90,223), .18) !important;
 }

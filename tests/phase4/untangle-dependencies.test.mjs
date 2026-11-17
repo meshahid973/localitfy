@@ -32,13 +32,13 @@ function loadThemePresetStyle() {
 
 test("theme preset builder stays separate from localStorage and the public settings barrel preserves exports", () => {
   const style = read("src/features/settings/themePresetStyle.ts");
-  const storage = read("src/features/settings/customTheme.ts");
+  const migration = read("src/features/settings/customThemePersistence.ts");
   const barrel = read("src/features/settings/index.ts");
   assert.doesNotMatch(style, /localStorage|useState|useEffect|readLocalJson|writeLocalJson/);
-  assert.doesNotMatch(storage, /makeThemePresetStyle|THEME_PRESET_COLORS/);
-  assert.match(storage, /readSavedCustomThemePresets/);
+  assert.doesNotMatch(migration, /makeThemePresetStyle|THEME_PRESET_COLORS/);
+  assert.match(migration, /nextSettings.customThemeEnabled = false/);
   assert.match(barrel, /export \* from "\.\/themePresetStyle"/);
-  assert.match(barrel, /export \* from "\.\/customTheme"/);
+  assert.doesNotMatch(barrel, /export \* from "\.\/(?:customTheme|theme\.visuals)"/);
 });
 
 test("the two palettes share semantic tokens and migrate retired IDs", () => {
