@@ -71,7 +71,7 @@ export function HomeSongRail({ id, title, songs, currentId, selectSong, playSong
           </span>
         ) : null}
       />
-      <div className="homeReleaseRail">
+      <div className="homeReleaseRail" tabIndex={0} role="region" aria-labelledby={headingId}>
         {songs.map((song) => (
           // A song card plays on click, so its round button is the same action; it is there so every card looks alike.
           <MediaCard
@@ -105,7 +105,7 @@ export function HomeAlbumRail({ albums }: AlbumRailProps) {
   return (
     <section className="homeSection homeReleasesSection homeAlbumsSection" aria-labelledby="home-new-albums-title">
       <HomeSectionHead id="home-new-albums-title" title="New albums" />
-      <div className="homeReleaseRail">
+      <div className="homeReleaseRail" tabIndex={0} role="region" aria-labelledby="home-new-albums-title">
         {albums.map((album) => {
           const cover = album.coverSong ?? album.songs[0] ?? null;
           const target = albumTarget(album);
@@ -156,7 +156,7 @@ export function HomeDailyMixRail({ songsById, openDailyMixes, openAnalysisSettin
         action={mixes.length ? <button className="homeSectionAction" type="button" onClick={() => void openDailyMixes()}>See all</button> : null}
       />
       {mixes.length ? (
-        <div className="homeReleaseRail homeMixRail">
+        <div className="homeReleaseRail homeMixRail" tabIndex={0} role="region" aria-labelledby="home-daily-mixes-title">
           {mixes.map((mix) => {
             const artists = [...new Set(mix.songs.map((song) => song.artist).filter(Boolean))];
             const target = mixTarget(mix, mix.songs);

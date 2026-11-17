@@ -208,7 +208,7 @@ export default function HomeView(props: HomeViewProps) {
     mostListened: mostListenedArtists.length ? (
       <section className="homeSection homeArtistsSection" aria-labelledby="home-most-listened-title">
         <h3 id="home-most-listened-title">Most listened</h3>
-        <div className="homeArtistRail">
+        <div className="homeArtistRail" tabIndex={0} role="region" aria-label="Most listened artists">
           {mostListenedArtists.map(({ key, song, target }) => (
             <MediaCard
               key={key}

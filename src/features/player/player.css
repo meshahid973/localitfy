@@ -2178,8 +2178,8 @@ body.localtifyWindowBackgrounded .app .playerBar:hover::before,
 }
 .app[data-player-background="coverBlur"] .playerBar[data-ambient="true"]::before,
 .app[data-player-background="coverBlur"] .playerBar[data-ambient="true"]:hover::before {
-  background: var(--cover-url, none) center / cover no-repeat !important;
-  opacity: .12 !important;
+  background: none !important;
+  opacity: 0 !important;
   filter: blur(20px) saturate(1.1) !important;
   transform: none !important;
   animation: none !important;

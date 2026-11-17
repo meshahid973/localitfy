@@ -12,7 +12,7 @@
 .homeSection {
   contain: layout paint style;
   content-visibility: auto;
-  contain-intrinsic-size: 1px 280px;
+  contain-intrinsic-size: auto 220px;
 }
 
 .app:has(.pageTransition-home) .content {
@@ -40,8 +40,8 @@
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   align-content: start;
-  row-gap: clamp(22px, 2vw, 32px);
-  column-gap: var(--lt-space-3);
+  row-gap: clamp(20px, 1.6vw, 28px);
+  column-gap: var(--lt-space-5);
   color: var(--lt-text);
 }
 
@@ -55,7 +55,8 @@
 .homePage > .homeAtmosphere {
   position: absolute;
   inset: 0 0 auto;
-  height: min(560px, 70vh);
+  grid-column: auto;
+  height: min(680px, 85vh);
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
@@ -185,7 +186,7 @@
   display: flex;
   align-items: center;
   gap: clamp(16px, 3cqi, 36px);
-  padding: var(--lt-space-2) 0;
+  padding: 0;
   isolation: isolate;
   background: transparent;
 }
@@ -232,7 +233,7 @@
   -webkit-line-clamp: 2;
   color: var(--lt-text);
   font-family: "Space Grotesk", Inter, ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(24px, 3.1cqi, 42px);
+  font-size: clamp(24px, 2.3cqi, 36px);
   font-weight: 650;
   line-height: 1.12;
   letter-spacing: -.035em;
@@ -336,8 +337,11 @@
 .homeListenGrid {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--lt-space-2) var(--lt-space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px var(--lt-space-3);
+  padding: var(--lt-space-2);
+  background: var(--lt-surface-soft);
+  border-radius: var(--lt-radius-sm);
 }
 
 .homeListenGrid:is([data-count="2"], [data-count="4"], [data-count="8"]) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -355,7 +359,7 @@
   border: 1px solid transparent;
   border-radius: var(--lt-radius-item);
   color: var(--lt-muted);
-  background: var(--lt-surface-soft);
+  background: transparent;
   text-align: left;
   cursor: pointer;
   transform: none !important;
@@ -395,7 +399,7 @@
   grid-auto-flow: column;
   grid-auto-columns: clamp(100px, 11cqi, 144px);
   gap: clamp(14px, 1.2vw, 22px);
-  padding: 2px 0 5px;
+  padding: 4px 3px 6px;
 }
 
 .homeArtistCard,
@@ -412,7 +416,7 @@
 .homeArtistCard { display:grid; justify-items:center; gap:9px; text-align:center; }
 .homeArtistCoverWrap {
   position:relative;
-  width: min(100%, 116px);
+  width: 100%;
   aspect-ratio:1;
   overflow:hidden;
   display:block;
@@ -426,7 +430,7 @@
 .homeArtistCover,
 .homeArtistCover .coverImage { width:100%; height:100%; object-fit:cover; border-radius:50%; }
 .homePage .mediaCard { --media-play-size:36px; --media-play-inset:6px; }
-.homeArtistCard .mediaCardCover { justify-self:center; }
+.homeArtistCard .mediaCardCover { justify-self:center; width: min(100%, 116px); aspect-ratio: 1; }
 .homeArtistCard > strong { width:100%; overflow:hidden; color:var(--lt-muted); font-size:13px; font-weight:650; text-overflow:ellipsis; white-space:nowrap; }
 
 .homeReleaseRail {
@@ -434,25 +438,31 @@
   grid-auto-flow: column;
   grid-auto-columns: clamp(136px, 16cqi, 208px);
   gap:clamp(14px,1.3vw,22px);
-  padding: 4px 4px 10px;
+  padding: 4px 3px 6px;
 }
 .homeArtistRail,
 .homeReleaseRail {
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-width: thin;
+  scrollbar-width: none;
   scroll-snap-type: x proximity;
 }
+.homeArtistRail::-webkit-scrollbar,
+.homeReleaseRail::-webkit-scrollbar { display: none; }
 .homeArtistCard,
 .homeReleaseCard { scroll-snap-align: start; }
 .homeMixRail { grid-auto-columns: clamp(172px, 23cqi, 280px); }
 @container (min-width: 800px) {
-  .homeMixRail { grid-auto-columns: clamp(300px, 42cqi, 520px); }
+  .homeMixRail { grid-auto-columns: minmax(280px, 1fr); }
   .homeMixRail .homeReleaseCard {
-    grid-template-columns: minmax(0, 46%) minmax(0, 1fr);
+    grid-template-columns: clamp(132px, 12cqi, 184px) minmax(0, 1fr);
     align-items: center;
     gap: var(--lt-space-4);
+    padding: var(--lt-space-2);
+    background: var(--lt-surface-soft);
+    border-radius: var(--lt-radius-sm);
   }
+  .homeMixRail .homeReleaseCopy strong { font-size: 17px; }
 }
 .homeMixCollage .homeReleaseCover { border-radius: 0; min-width: 0; min-height: 0; }
 .homeMixCollage .homeReleaseCover .coverImage { border-radius: 0; }
@@ -505,8 +515,8 @@
   .homeListenGrid[data-count="7"] > .homeListenRow:nth-child(n+4) { grid-column: span 3; }
 }
 @container (min-width: 1100px) {
-  .homeJumpBack:has(+ .homeListenSection) { grid-column: 1 / 8; }
-  .homeJumpBack + .homeListenSection { grid-column: 8 / -1; align-self: center; min-width: 0; }
+  .homeJumpBack:has(+ .homeListenSection) { grid-column: 1 / 6; align-self: center; }
+  .homeJumpBack + .homeListenSection { grid-column: 6 / -1; align-self: center; min-width: 0; }
   .homeJumpBack + .homeListenSection .homeListenGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .homeJumpBack + .homeListenSection .homeListenGrid > .homeListenRow { grid-column: auto; }
   .homeJumpBack + .homeListenSection .homeListenGrid > .homeListenRow:last-child:nth-child(odd) { grid-column: 1 / -1; }
@@ -525,7 +535,7 @@
   .homeFeatureArt { flex-basis: auto; align-self: center; }
 }
 @media (max-width: 700px) {
-  .homePage { padding: 16px 12px var(--lt-space-5); gap: var(--lt-space-5); }
+  .homePage { padding: 16px 12px var(--lt-space-5); gap: var(--lt-space-4); }
   .homeTopBar { min-height: 34px; }
   .homeTopBar h1 { font-size: 22px; }
   .homeCustomizeButton span { display: none; }

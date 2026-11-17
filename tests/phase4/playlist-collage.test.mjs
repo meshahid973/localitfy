@@ -18,6 +18,6 @@ test("playlist covers share one component across all three places", () => {
   assert.match(view, /<PlaylistCoverCollage songs=\{detailSongs\}/);
   assert.match(view, /<PlaylistCoverCollage songs=\{previewSongs\}/);
   assert.match(picker, /<PlaylistCoverCollage songs=\{previewSongs\}/);
-  assert.match(collage, /Array\.from\(\{ length: 4 \}/);
+  assert.match(collage, /songs.length \? songs.slice\(0, 4\) : \[null\]/);
   assert.match(collage, /playlistCoverTile/);
 });

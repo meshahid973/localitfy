@@ -159,7 +159,7 @@ test("Library, Covers and Spotify review fixes remain in place", () => {
   const library = read("src/features/library/library.css");
   const covers = read("src/features/covers/CoverStudio.tsx");
   const downloads = read("src/features/downloads/downloads.css");
-  assert.match(library, /\.songMeta small \{\s*color: var\(--lt-text\)/);
+  assert.match(library, /\.songMeta small \{\s*color: var\(--lt-muted\)/);
   assert.match(library, /\.songInfo \{\s*color: var\(--lt-text\)/);
   assert.match(library, /\.songRow \{[\s\S]*?color: var\(--lt-text\)/);
   assert.match(covers, /Fix missing \{missingCoverSongs\.length/);

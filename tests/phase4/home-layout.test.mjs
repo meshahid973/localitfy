@@ -121,3 +121,22 @@ test("collection browsing prioritizes artwork and retains contextual drag target
   assert.match(collage, /data-count=\{tiles.length\}/);
   assert.match(collage, /preferThumbnail/);
 });
+
+test("artwork rails retain geometry and scrolling without visible scrollbars", () => {
+  const css = read("src/features/home/home.css");
+  assert.match(css, /\.homeArtistCard \.mediaCardCover \{[^}]*width: min\(100%, 116px\); aspect-ratio: 1/);
+  assert.match(css, /scrollbar-width: none/);
+  assert.match(css, /\.homeReleaseRail::-webkit-scrollbar \{ display: none/);
+  assert.match(css, /\.homePage > \.homeAtmosphere \{[^}]*grid-column: auto/);
+  assert.match(read("src/features/home/HomeShelves.tsx"), /className="homeReleaseRail" tabIndex=\{0\}/);
+});
+test("ambience transitions are bounded and respect reduced motion", () => {
+  const backdrop = read("src/features/covers/ArtworkBackdrop.tsx");
+  const css = read("src/features/covers/artwork-backdrop.css");
+  assert.match(backdrop, /pending \? \[displayed, \{ key, song \}\] : \[outgoing, displayed\]/);
+  assert.match(backdrop, /onLoadCapture/);
+  assert.match(backdrop, /window.clearTimeout\(timer\)/);
+  assert.match(css, /transition: opacity 360ms/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.match(read("src/styles/view-shell.css"), /@property --workspace-cover-color/);
+});

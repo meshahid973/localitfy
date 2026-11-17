@@ -1,8 +1,19 @@
 /* Shared application shell only. Feature pages own their own visuals. */
+@property --workspace-cover-color {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+.app[data-ambient="on"]:not(.reducedMotion):not(.appBackgrounded) {
+  transition: --workspace-cover-color 360ms cubic-bezier(.22, 1, .36, 1) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .app[data-ambient="on"]:not(.reducedMotion):not(.appBackgrounded) { transition: none !important; }
+}
 
 .app {
-  --workspace-cover-strength: 30%;
-  --workspace-mood: color-mix(in srgb, var(--workspace-cover-color, var(--lt-bg)) var(--workspace-cover-strength), var(--lt-bg));
+  --workspace-cover-strength: 26%;
+  --workspace-mood: color-mix(in srgb, var(--workspace-cover-color) var(--workspace-cover-strength), var(--lt-bg));
   --workspace-bg: radial-gradient(ellipse at 42% 0%, var(--workspace-mood), var(--lt-bg) 76%);
   --workspace-sidebar: color-mix(in srgb, var(--workspace-mood) 38%, var(--lt-bg));
   --workspace-sidebar-raised: var(--lt-surface);
@@ -506,3 +517,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
     padding-inline: 4px !important;
   }
 }
+
+/* Detail pages own their inset; the shared backdrop can meet the viewport edges. */
+.app .content:has(.collectionPage, .playlistDetailPage) { padding: 0 !important; }
+.app .pageTransition:has(.collectionPage, .playlistDetailPage) { padding: 0 !important; min-height: 100%; }

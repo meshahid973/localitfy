@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties } from "react";
 import { FolderPlus } from "lucide-react";
@@ -93,6 +93,12 @@ export default function AppShell(props: AppShellProps) {
   const detail = nav.detail;
   const { isSeeking, isVolumeDragging, draggedSongId, isPlaying } = playerBar;
   const { isThreeAm } = home;
+  const coverColor = (home.ambientStyle as CSSProperties & { "--cover-average"?: string })["--cover-average"];
+  const [workspaceCoverColor, setWorkspaceCoverColor] = useState<string>();
+  useEffect(() => {
+    if (!effectiveAmbient || !home.currentSong) setWorkspaceCoverColor(undefined);
+    else if (coverColor) setWorkspaceCoverColor(coverColor);
+  }, [effectiveAmbient, home.currentSong, coverColor]);
   const [tagSearchSong, setTagSearchSong] = useState<Song | null>(null);
   const [tagSearchAlbum, setTagSearchAlbum] = useState<TagSearchAlbum | null>(null);
   const [albumTracksRequest, setAlbumTracksRequest] = useState<AlbumTracksDialogProps["request"] | null>(null);
@@ -136,7 +142,7 @@ export default function AppShell(props: AppShellProps) {
           ...themePresetStyle,
           ...animatedThemeVisualStyle,
           ...customThemeStyle,
-          "--workspace-cover-color": effectiveAmbient && !isAppBackgrounded ? (home.ambientStyle as CSSProperties & { "--cover-average"?: string })["--cover-average"] : undefined
+          "--workspace-cover-color": effectiveAmbient && !isAppBackgrounded && home.currentSong ? workspaceCoverColor : undefined
         } as CSSProperties
       }
       data-platform={platformId}

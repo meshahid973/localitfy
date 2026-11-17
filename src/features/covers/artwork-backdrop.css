@@ -6,6 +6,14 @@
   pointer-events: none;
 }
 
+.artworkBackdropLayer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 360ms cubic-bezier(.22, 1, .36, 1);
+}
+.artworkBackdropLayer[data-visible="true"] { opacity: 1; }
+
 .artworkBackdrop .artworkBackdropCover {
   position: absolute;
   inset: -24px;
@@ -34,7 +42,7 @@
 .collectionPage > .artworkBackdrop .artworkBackdropCover,
 .playlistDetailPage > .artworkBackdrop .artworkBackdropCover {
   opacity: .56;
-  filter: blur(24px) saturate(1.12);
+  filter: blur(32px) saturate(1.16);
 }
 .homeAtmosphere .artworkBackdrop::after,
 .collectionPage > .artworkBackdrop::after,
@@ -44,3 +52,8 @@
 .artworkBackdropCover::before { content: none; }
 .app[data-cover-sync="subtle"] .artworkBackdrop { opacity: .45; }
 .app[data-cover-sync="strong"] .artworkBackdrop { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .artworkBackdropLayer { transition: none; }
+}
+.app.reducedMotion .artworkBackdropLayer { transition: none; }
