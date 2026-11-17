@@ -31,7 +31,6 @@ const featureRoots = [".albumsPageV318", ".playlistsPage", ".coverStudioLayout",
 const scopedFeatureStyles = [
   ["src/features/home/home.css", ".homePage"],
   ["src/features/library/library.css", ".libraryPage"],
-  [".albumsPageV318"],
   ["src/features/covers/covers.css", ".coverStudioLayout"],
   ["src/features/downloads/downloads.css", ".downloadsLayoutV031"],
   ["src/features/playlists/playlists.css", ".playlistsPage"],

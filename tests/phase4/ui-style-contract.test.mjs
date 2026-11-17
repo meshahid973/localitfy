@@ -139,7 +139,7 @@ test("overlay menus use Localtify theme surfaces and expose keyboard focus", () 
   assert.match(dropdown, /\.arcDropdownOption:focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\) !important; outline-offset: -2px !important/);
   assert.match(context, /\.songContextMenu\{[\s\S]*?background: color-mix\(in srgb, var\(--lt-bg-elevated\) 94%, transparent\)/);
   assert.match(context, /\.app \.songContextMenuLayer \.songContextMenu button:focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\) !important/);
-  assert.match(context, /color: var\(--accent-contrast, #06100b\)/);
+  assert.match(context, /\.songContextMenu \.songContextMenuIcon\{[^}]*color: var\(--lt-muted\)/);
   assert.match(queue, /\.queuePanel\{[\s\S]*?background: color-mix\(in srgb, var\(--lt-bg-elevated\) 96%, transparent\)/);
   assert.match(queue, /\.app \.queuePanel button\.queuePanelRowMain:focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\) !important/);
   assert.doesNotMatch(context, /background: linear-gradient\(180deg, rgba\(20, 20, 20/);

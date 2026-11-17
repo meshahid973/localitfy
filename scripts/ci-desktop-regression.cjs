@@ -71,8 +71,18 @@ server.listen(5173,async()=>{
         const play=app.querySelector('.playerBar .circleButton.main');
         const playIcon=play?.querySelector('svg');
         const homePlay=app.querySelector('.homeStartButton');
+        const home=sidebar.querySelector('[data-nav-id="home"]'), pinned=sidebar.querySelector('.sidebarPinnedNav [data-nav-id="settings"]');
+        const scroll=sidebar.querySelector('.sidebarNavGroupsV467');
+        const prev=app.querySelector('.playerBar button[aria-label="previous song"] svg');
+        const panel=app.querySelector('.settingsPanelCard');
+        const inside=(el,box)=>!!el&&rect(el).top>=rect(box).top-1&&rect(el).bottom<=rect(box).bottom+1;
         return {
           theme:app.dataset.theme,
+          retired:!!sidebar.querySelector('[data-nav-id="liked"],[data-nav-id="albums"]'),
+          pinned:inside(pinned,sidebar),
+          homeVisible:inside(home,scroll),
+          prev:prev?rgba(style(prev).color):null,
+          panel:panel?rgba(style(panel).backgroundColor):null,
           rail:rgba(style(sidebar).backgroundColor),
           play:play?rgba(style(play).backgroundColor):null,
           playIcon:playIcon?rgba(style(playIcon).color):null,
@@ -85,6 +95,12 @@ server.listen(5173,async()=>{
         };
       })()`);
       assert.equal(chrome.mode,"slim");
+      assert.equal(chrome.retired,false,"retired sidebar destinations");
+      assert.ok(chrome.pinned&&chrome.homeVisible,"Settings and Home must remain visible: "+JSON.stringify(chrome));
+      if(chrome.theme==="light"){
+        if(chrome.prev)assert.ok(Math.max(...chrome.prev.slice(0,3))<170,"light-mode previous glyph must not be white");
+        if(chrome.panel)assert.ok(chrome.panel[3]<72||Math.min(...chrome.panel.slice(0,3))>=180,"light-mode settings panel must use a light or softly translucent fill");
+      }
       assert.ok(chrome.width>=48&&chrome.width<=88&&!chrome.clipped,"compact sidebar must contain its buttons: "+JSON.stringify(chrome));
       assert.ok(chrome.rail[3]>0&&chrome.rail[3]<=26,"sidebar must be a subtle translucent surface: "+JSON.stringify(chrome));
       const fill=chrome.theme==="light"?[24,24,27,255]:[255,255,255,255];
@@ -157,6 +173,9 @@ server.listen(5173,async()=>{
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=library]').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.libraryCollectionShortcuts')").catch(()=>false),"library "+mode);
       await screenshot(win,"library-"+mode);
+      await win.webContents.executeJavaScript("document.querySelector('.libraryCollectionShortcuts button:has([data-kind=liked])').click()");
+      await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.libraryPageLiked')").catch(()=>false),"liked songs "+mode);
+      await screenshot(win,"liked-"+mode);
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=home]').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.homeStartButton')").catch(()=>false),"Home "+mode);
       await assertShellChrome();
@@ -167,7 +186,7 @@ server.listen(5173,async()=>{
       for (const width of [1280,860]) {
         win.setSize(width,800);
         await until(()=>win.webContents.executeJavaScript("window.innerWidth").then(actual=>actual===width),"viewport "+width,5000);
-        for (const view of ["home","library","liked","artists","genres","albums","playlists","discover","downloads","covers","analytics","settings"]) {
+        for (const view of ["home","library","artists","genres","playlists","discover","downloads","covers","analytics","settings"]) {
           await win.webContents.executeJavaScript(`document.querySelector('.sidebar [data-nav-id="${view}"]').click()`);
           await until(()=>win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return !!page?.firstElementChild&&!document.querySelector('.appCrashBoundary')})()`).catch(()=>false),view+" "+mode+" "+width);
           const geometry=await win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return {width:page.clientWidth,scroll:page.scrollWidth}})()`);

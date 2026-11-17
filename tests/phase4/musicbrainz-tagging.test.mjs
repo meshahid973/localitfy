@@ -514,10 +514,9 @@ test("IPC: gated by the setting, proposals stay native, and library-only apply u
   assert.equal(await router.invoke("tagging:album-tracks", { title: "unknown song", artist: "nobody" }), null);
 });
 
-test("songs and albums get a find on musicbrainz menu item only while tagging is on", () => {
+test("songs get a find on musicbrainz menu item only while tagging is on", () => {
   const shell = fs.readFileSync(path.join(root, "src", "features", "shell", "AppShell.tsx"), "utf8");
   assert.match(shell, /findOnMusicBrainz=\{settings\.musicbrainzTagging \? setTagSearchSong : undefined\}/);
-  assert.match(shell, /findAlbumOnMusicBrainz=\{settings\.musicbrainzTagging \? setTagSearchAlbum : undefined\}/);
   assert.match(shell, /<CollectionContextMenu/);
 });
 
