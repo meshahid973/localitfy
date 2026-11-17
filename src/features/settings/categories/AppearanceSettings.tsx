@@ -71,6 +71,18 @@ export default function AppearanceSettings(props: AppearanceSettingsProps) {
         </div>
       </div>
 
+      {!phone ? <div className="settingsPanelCard">
+        <div className="settingsPanelHeader"><div><strong>Sidebar layout</strong><span>Choose icons only, full labels, or expand on hover.</span></div></div>
+        <div className="settingsChoiceRowV491" role="group" aria-label="Sidebar layout">
+          {([["slim", "Collapsed"], ["fixed", "Expanded"], ["hover", "On hover"]] as const).map(([mode, label]) => (
+            <button key={mode} type="button" className={`settingsChoicePillV491 ${settings.sidebarBehavior === mode ? "active" : ""}`}
+              aria-pressed={settings.sidebarBehavior === mode} onClick={() => void updateSetting("sidebarBehavior", mode)}>
+              <strong>{label}</strong>
+            </button>
+          ))}
+        </div>
+      </div> : null}
+
       <details className="settingsDisclosure settingsSidebarDisclosure">
         <summary>{phone ? <>Tabs <span>Choose the pages at the bottom</span></> : <>Sidebar arrangement <span>Reorder or hide sections</span></>}</summary>
         <div className="settingsDisclosureBody"><SidebarTabsSettings settings={settings} updateSetting={updateSetting} /></div>

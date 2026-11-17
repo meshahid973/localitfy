@@ -2247,6 +2247,11 @@ function MainModeApp() {
       } as Settings);
 
       const didRestoreCustomThemeAfterUpdate = restoreCustomThemeAfterUpdate(nextSettings, storedSettings);
+      // The redesigned desktop opens as an icon rail once. Preserve later explicit
+      // choices, and never modify Android navigation or an existing hover layout.
+      const sidebarMigrationKey = "localitfy.sidebar-rail-v1";
+      const migrateSidebar = platformInfo.id !== "android" && window.localStorage.getItem(sidebarMigrationKey) !== "true";
+      if (migrateSidebar && nextSettings.sidebarBehavior === "fixed") nextSettings.sidebarBehavior = "slim";
 
       if (shouldApplyStartWithWindowsDefault) {
         nextSettings.startWithWindows = true;
@@ -2294,7 +2299,11 @@ function MainModeApp() {
       if (shouldPersistBootSettings) {
         if (shouldApplyV013Defaults) window.localStorage.setItem(V013_DEFAULTS_KEY, "true");
         if (shouldApplyStartWithWindowsDefault) window.localStorage.setItem(START_WITH_WINDOWS_DEFAULT_KEY, "true");
-        window.localitfy.saveSettings(nextSettings).catch(() => undefined);
+        window.localitfy.saveSettings(nextSettings).then(() => {
+          if (migrateSidebar) window.localStorage.setItem(sidebarMigrationKey, "true");
+        }).catch(() => undefined);
+      } else if (migrateSidebar) {
+        window.localStorage.setItem(sidebarMigrationKey, "true");
       }
 
       setBootStep(1, "loading your library...");

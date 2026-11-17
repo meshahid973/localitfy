@@ -56,6 +56,26 @@ server.listen(5173,async()=>{
     const startupMs=Date.now()-started;
     win.setSize(1280,800);await sleep(700);
     assert.equal(await win.webContents.executeJavaScript("document.querySelector('.app').dataset.sidebarBehavior"), "slim", "fresh installs use collapsed navigation");
+    async function assertShellChrome() {
+      const chrome=await win.webContents.executeJavaScript(`(()=>{
+        const app=document.querySelector('.app'), sidebar=app.querySelector('.sidebar');
+        const style=el=>getComputedStyle(el);
+        const rect=el=>el.getBoundingClientRect();
+        const buttons=[...sidebar.querySelectorAll('.navItem')].filter(el=>rect(el).width>0);
+        return {
+          mode:app.dataset.sidebarBehavior,
+          width:rect(sidebar).width,
+          title:style(app.querySelector('.titleBar')).backgroundColor,
+          player:style(app.querySelector('.playerBar')).backgroundColor,
+          clipped:buttons.some(el=>rect(el).left<rect(sidebar).left-1||rect(el).right>rect(sidebar).right+1)
+        };
+      })()`);
+      assert.equal(chrome.mode,"slim");
+      assert.ok(chrome.width>=48&&chrome.width<=88&&!chrome.clipped,"compact sidebar must contain its buttons: "+JSON.stringify(chrome));
+      assert.equal(chrome.title,"rgba(0, 0, 0, 0)","title bar must be transparent");
+      assert.equal(chrome.player,"rgba(0, 0, 0, 0)","ambient player bar must be transparent");
+    }
+    await assertShellChrome();
     await screenshot(win,"desktop-home");
     const idle=await metrics("desktop idle");
     // Exercise actual rendered library navigation and playback.
@@ -112,6 +132,7 @@ server.listen(5173,async()=>{
     for(const mode of ["light","dark"]){
       await win.webContents.executeJavaScript(`document.querySelector('.settingsModeButton:has([data-preview-mode="${mode}"])').click()`);
       await until(()=>win.webContents.executeJavaScript(`document.querySelector('.app')?.dataset.theme===${JSON.stringify(mode)} && getComputedStyle(document.querySelector('.app')).getPropertyValue('--lt-bg').trim()===${JSON.stringify(mode==="light"?"#f5f5f7":"#000000")}`).catch(()=>false),"apply "+mode);
+      await assertShellChrome();
       await screenshot(win,"settings-"+mode);
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=library]').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.libraryCollectionShortcuts')").catch(()=>false),"library "+mode);

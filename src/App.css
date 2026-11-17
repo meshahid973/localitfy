@@ -4609,10 +4609,7 @@ body,
   --player-size-used: var(--player-size-live, var(--player-size, 92px));
   --sidebar-width-release: 236px;
   --sidebar-width-used: var(--workspace-sidebar-current, 236px);
-  --sidebar-bg-release:
-    linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.38)),
-    var(--lt-bg, #000);
-  width: 100vw;
+   width: 100vw;
   height: 100vh;
   overflow: hidden;
 
