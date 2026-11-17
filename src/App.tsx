@@ -67,6 +67,7 @@ import { Cover } from "./features/covers/Cover";
 import { useCoversController } from "./features/covers";
 import { VirtualHomeSongCards, VirtualSongRows } from "./features/library/components/SongRows";
 import { useLibraryController } from "./features/library";
+import { subscribeWatchedFoldersChange } from "./features/library/watchedFolderBridge";
 import { reconcileLibraryIndex, patchLibrarySong, replaceLibrarySong } from "./features/search/incrementalLibraryIndex";
 import { createMetadataCleanPreview } from "./features/library/metadataCleanPreview";
 import {
@@ -2858,7 +2859,7 @@ function MainModeApp() {
 
 
   // Watched folders: new files were imported in the background, or a library file went missing or came back.
-  useEffect(() => window.localitfy.onWatchedFoldersChange(({ importedCount, songs: next }) => {
+  useEffect(() => subscribeWatchedFoldersChange(window.localitfy, ({ importedCount, songs: next }) => {
     setSongs(applyLibraryOrder(sanitizeSongList(next)));
     if (importedCount) setStatusText(`added ${importedCount} new song${importedCount === 1 ? "" : "s"} from watched folders`);
   }), []);
