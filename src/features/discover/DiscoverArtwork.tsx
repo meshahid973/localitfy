@@ -3,7 +3,7 @@ import { Disc3, UserRound } from "lucide-react";
 import type { DiscoverArtwork } from "./discover.types";
 let queue = Promise.resolve();
 const cache = new Map<string, {at:number; value:DiscoverArtwork}>();
-const safeCover = (value?: string) => value && /^https:\/\/coverartarchive\.org\/(release|release-group)\/[0-9a-f-]{36}\/front-250$/i.test(value) ? value : undefined;
+const safeCover = (value?: string) => value && /^https:\/\/coverartarchive\.org\/(release|release-group)\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/front-250$/i.test(value) ? value : undefined;
 export function DiscoverCover({ title, artist, artwork, lookup = false, person = false }: {
   title: string; artist: string; artwork?: DiscoverArtwork; lookup?: boolean; person?: boolean;
 }) {

@@ -35,6 +35,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
   const phone = isAndroidApp();
   const [result, setResult] = useState<DiscoverResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showAllRecommended, setShowAllRecommended] = useState(false);
   const [catalogKind, setCatalogKind] = useState<CatalogKind>("recording");
   const [catalogTerm, setCatalogTerm] = useState("");
   const [catalog, setCatalog] = useState<DiscoverResult | null>(null);
@@ -115,7 +116,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
   const needsSetup = !settings.discoverEnabled;
   const setup = phone ? <div className="discoverSetup"><p>Turn on Discover and manage its optional Last.fm connection in localtify on your {computerName()}, then sync this phone.</p></div> : (
     <div className="discoverSetup">
-      <p>Search the public MusicBrainz catalog without an account or key. Only your search text is sent. If you add an optional Last.fm key, Localtify also requests personalized suggestions using artist and song names from your library.</p>
+      <p>Search the public MusicBrainz catalog without an account or key. Only your search text is sent for catalog searches. If you add an optional Last.fm key, Localtify also requests personalized suggestions using artist and song names from your library and looks up suggested tracks in MusicBrainz for artwork. Cover images are loaded from the Cover Art Archive.</p>
       <details className="discoverOptional" open={Boolean(keyDraft) || undefined}>
       <summary>Optional Last.fm recommendations</summary>
       <label className="discoverKey">
@@ -188,7 +189,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       {catalog?.status === "error" ? <p role="alert">{catalog.error}</p> : null}
       {catalog?.status === "catalog" ? catalog.items.length ? <ul className={catalog.kind === "album" ? "discoverShelf discoverCatalogShelf" : "discoverSongList"} aria-label="Search results" tabIndex={catalog.kind === "album" ? 0 : undefined}>
         {catalog.items.map(item => <li key={item.id}>
-          <DiscoverCover title={item.title} artist={item.artist} artwork={item} person={catalog.kind === "artist"} />
+          <DiscoverCover title={item.title} artist={item.artist} artwork={item} lookup={catalog.kind === "recording" && !item.coverUrl} person={catalog.kind === "artist"} />
           <span className="discoverSongText"><strong>{item.title}</strong><small>{item.subtitle}</small></span>
           {catalog.kind === "recording" ? <><span className="discoverDuration">{duration(item.durationMs)}</span>{albumButton(item)}{pickButton(item)}</> : null}
           <button type="button" className="discoverPick" aria-label={"Open " + item.title + " on MusicBrainz"} title="Open on MusicBrainz" onClick={() => openLink(item.url)}><ExternalLink size={14} /></button>
@@ -202,9 +203,9 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
     {result?.status === "no-taste" ? <p className="discoverNotice">Play or like a few songs first. Discover learns from what you listen to.</p> : null}
 
     {recommendedTracks.length ? <section className="discoverSection" aria-labelledby="discover-recommended">
-      <h2 id="discover-recommended" className="discoverHeading">Recommended songs</h2>
+      <div className="discoverSectionHead"><h2 id="discover-recommended" className="discoverHeading">Recommended songs</h2>{recommendedTracks.length > 10 ? <button type="button" className="discoverName discoverMore" aria-expanded={showAllRecommended} onClick={() => setShowAllRecommended(value => !value)}>{showAllRecommended ? "Show less" : "See all"}</button> : null}</div>
       <ul className="discoverSongList">
-        {recommendedTracks.map(track => <li key={trackId(track)}>
+        {(showAllRecommended ? recommendedTracks : recommendedTracks.slice(0, 10)).map(track => <li key={trackId(track)}>
           <DiscoverCover title={track.title} artist={track.artist} artwork={track} lookup />
           <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => openLink(track.url)} title={track.title}>{track.title}</button><small>{track.artist}</small></span>
           {albumButton(track)}{pickButton(track)}

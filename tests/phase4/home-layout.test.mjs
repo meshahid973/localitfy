@@ -109,7 +109,7 @@ test("shared artwork palette follows the existing ambient preference and backgro
   assert.match(workspace, /--workspace-cover-color/);
   assert.match(player, /\.playerBar\[data-ambient\] \{\s*background: transparent !important/);
   assert.match(workspace, /--workspace-sidebar: color-mix\(in srgb, var\(--lt-text\) 5%, transparent\)/);
-  assert.match(player, /\.playerBar\[data-ambient="true"\]:hover::before/);
+  assert.match(player, /\.playerBar\[data-ambient\]:hover::before \{\s*display: none !important/);
   for (const file of ["AlbumPage", "SongGroupPage", "MixPage"]) assert.match(read("src/features/pages/" + file + ".tsx"), /<ArtworkBackdrop song=/);
 });
 
