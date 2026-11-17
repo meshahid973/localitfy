@@ -144,9 +144,6 @@
 .settingsPage.settingsPageV027 .settingsChoiceRowV491 { gap: 7px; }
 
 
-
-
-
 .settingsPage.settingsPageV027 .settingsDisclosure { min-width: 0; border: 1px solid var(--settings-edge); border-radius: 10px; background: var(--settings-surface); }
 
 .settingsPage.settingsPageV027 .settingsDisclosure > summary {
@@ -159,9 +156,6 @@
 .settingsPage.settingsPageV027 .settingsDisclosure[open] > summary::after { content: "−"; }
 .settingsPage.settingsPageV027 .settingsDisclosure > summary > span { margin-left: auto; font-size: 10px; font-weight: 450; color: var(--settings-muted); }
 .settingsPage.settingsPageV027 .settingsDisclosureBody { display: grid; gap: 11px; padding: 13px 16px 16px; border-top: 1px solid var(--settings-edge); }
-
-
-
 
 
 .settingsPage.settingsPageV027 .settingsSidebarDisclosure .sidebarTabsSettings { border: 0; padding: 0; background: transparent; }

@@ -104,6 +104,18 @@ server.listen(5173,async()=>{
     assert.ok(samples.every(n=>n>=1&&n<=2),"ambient transition must keep at most two artwork layers");
     await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.homeAtmosphere .artworkBackdropLayer').length===1 && !!document.querySelector('.homeAtmosphere .artworkBackdropLayer[data-visible=true]')").catch(()=>false),"settled artwork transition",5000);
     await screenshot(win,"home-next-track");
+    await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=settings]').click()");
+    await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.settingsModeButton').length===2").catch(()=>false),"two appearance modes");
+    for(const mode of ["light","dark"]){
+      await win.webContents.executeJavaScript(`document.querySelector('.settingsModeButton:has([data-preview-mode="${mode}"])').click()`);
+      await until(()=>win.webContents.executeJavaScript(`document.querySelector('.app')?.dataset.theme===${JSON.stringify(mode)} && getComputedStyle(document.querySelector('.app')).getPropertyValue('--lt-bg').trim()===${JSON.stringify(mode==="light"?"#f5f5f7":"#000000")}`).catch(()=>false),"apply "+mode);
+      await screenshot(win,"settings-"+mode);
+      await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=library]').click()");
+      await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.libraryCollectionShortcuts')").catch(()=>false),"library "+mode);
+      await screenshot(win,"library-"+mode);
+      await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=settings]').click()");
+      await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.settingsModeButton').length===2").catch(()=>false),"appearance navigation");
+    }
     const result={startupMs,metrics:[idle,playing],platform:process.platform,fixtureSongs:songs.length,layouts,artworkTransitionLayers:samples};
     fs.writeFileSync(path.join(output,"desktop-runtime.json"),JSON.stringify(result,null,2));console.log("[desktop-qa]",JSON.stringify(result));
     clearTimeout(watchdog);server.close();app.exit(0);

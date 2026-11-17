@@ -519,7 +519,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 
-
 .app.viewSwitching .playerBar::before,
 .app.viewSwitching .playerBar::after{
   animation-play-state: paused !important;
@@ -1519,7 +1518,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   mask-image: linear-gradient(to bottom, transparent 0, #000 22px, #000 72%, transparent 100%) !important;
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22px, #000 72%, transparent 100%) !important;
 }
-
 
 
 @media (max-width: 900px){

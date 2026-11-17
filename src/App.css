@@ -5525,8 +5525,6 @@ body.isResizingPlayer .app *{
 }
 
 
-
-
 @media (max-width: 760px){
   .app .topUpdateRibbon,
 .topUpdateRibbon{
@@ -5711,7 +5709,6 @@ body.isResizingPlayer .app *{
 }
 
 
-
 .app .topUpdateRibbonLayer,
 .topUpdateRibbonLayer{
   top: var(--localtify-titlebar-height, 48px) !important;
@@ -5817,4 +5814,3 @@ body.isResizingPlayer .app *{
     linear-gradient(180deg, rgba(var(--lt-accent-rgb), .10), rgba(var(--lt-accent-rgb), .045)),
     rgba(255,255,255,.030) !important;
 }
-

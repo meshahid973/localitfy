@@ -110,9 +110,6 @@
 }
 
 
-
-
-
 .settingsPage .settingsActionRow {
   display: flex; align-items: center; flex-wrap: wrap; gap: 9px;
 }
@@ -131,17 +128,6 @@
   border-color: rgba(var(--lt-accent-rgb),.46);
   background: rgba(var(--lt-accent-rgb),.13);
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 .settingsPage :is(.toggleRow, .rangeRow) {
