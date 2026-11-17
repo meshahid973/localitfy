@@ -382,3 +382,23 @@ test("artwork lookup respects opt-in", async () => {
   settings.discoverEnabled=false; finish([]);
   assert.equal((await pending).status,"off");
 });
+
+test("Discover lazy renderer modules parse as TSX", () => {
+  const ts = require("typescript");
+  for (const file of ["src/features/discover/DiscoverView.tsx", "src/features/discover/DiscoverArtwork.tsx"]) {
+    const output = ts.transpileModule(fs.readFileSync(file, "utf8"), {
+      fileName: file, reportDiagnostics: true,
+      compilerOptions: { jsx: ts.JsxEmit.ReactJSX, module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2023 }
+    });
+    const errors = (output.diagnostics || []).filter(d => d.category === ts.DiagnosticCategory.Error);
+    assert.deepEqual(errors.map(d => ts.flattenDiagnosticMessageText(d.messageText, " ")), [], file);
+  }
+});
+test("analytics cannot download executable PostHog extensions", () => {
+  const analytics = fs.readFileSync("src/analytics.ts", "utf8");
+  const html = fs.readFileSync("index.html", "utf8");
+  assert.match(analytics, /disable_external_dependency_loading: true/);
+  assert.match(analytics, /capture_performance: false/);
+  assert.match(analytics, /disable_surveys: true/);
+  assert.match(html, /script-src 'self';/);
+});

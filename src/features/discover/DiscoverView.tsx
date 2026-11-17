@@ -69,6 +69,8 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
     if (!settings.discoverEnabled) {
       setCatalog(null);
       setCatalogLoading(false);
+      setPicked(new Map());
+      setAlbumOf(null);
     }
     return () => { catalogRequestRef.current += 1; };
   }, [settings.discoverEnabled]);
@@ -184,23 +186,21 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
         <input type="search" aria-label="Search public music catalog" placeholder="Search MusicBrainz" value={catalogTerm} maxLength={160} disabled={catalogLoading} onChange={event => { setCatalogTerm(event.currentTarget.value); setCatalog(null); }} />
         <button className="heroMain" type="submit" disabled={catalogLoading || catalogTerm.trim().length < 2}><Search size={15} /><span>{catalogLoading ? "Searching…" : "Search"}</span></button>
       </form>
-      <p className="discoverBecause">MusicBrainz catalog · Local playback only</p>
-      {catalogLoading ? <p role="status">Searching public catalog…</p> : null}
+      <p className="discoverBecause" role="status">{catalogLoading ? "Searching public catalog…" : "MusicBrainz catalog · Local playback only"}</p>
       {catalog?.status === "error" ? <p role="alert">{catalog.error}</p> : null}
       {catalog?.status === "catalog" ? catalog.items.length ? <ul className={catalog.kind === "album" ? "discoverShelf discoverCatalogShelf" : "discoverSongList"} aria-label="Search results" tabIndex={catalog.kind === "album" ? 0 : undefined}>
         {catalog.items.map(item => <li key={item.id}>
           <DiscoverCover title={item.title} artist={item.artist} artwork={item} lookup={catalog.kind === "recording" && !item.coverUrl} person={catalog.kind === "artist"} />
-          <span className="discoverSongText"><strong>{item.title}</strong><small>{item.subtitle}</small></span>
+          <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => openLink(item.url)} title={item.title}>{item.title}</button><small title={item.subtitle}>{item.subtitle}</small></span>
           {catalog.kind === "recording" ? <><span className="discoverDuration">{duration(item.durationMs)}</span>{albumButton(item)}{pickButton(item)}</> : null}
-          <button type="button" className="discoverPick" aria-label={"Open " + item.title + " on MusicBrainz"} title="Open on MusicBrainz" onClick={() => openLink(item.url)}><ExternalLink size={14} /></button>
         </li>)}
       </ul> : <p role="status">No matching music found.</p> : null}
     </section> : null}
     {result?.status === "needs-key" && settings.discoverEnabled && !phone ? <p className="discoverBecause">Personalized Last.fm suggestions are optional. Add a key in Settings if you want them.</p> : null}
     {phone && !needsSetup ? <p className="discoverHint">Catalog searches and suggestions use your paired {computerName()}. Manage recommendations there.</p> : null}
-    {loading && !ready ? <p className="discoverNotice" role="status">Loading optional personalized suggestions…</p> : null}
-    {result?.status === "error" ? <p className="discoverNotice" role="alert">{result.error} <button type="button" className="softButton" onClick={() => void load(true)}>Retry</button></p> : null}
-    {result?.status === "no-taste" ? <p className="discoverNotice">Play or like a few songs first. Discover learns from what you listen to.</p> : null}
+    {settings.discoverEnabled && loading && !ready ? <p className="discoverNotice" role="status">Loading optional personalized suggestions…</p> : null}
+    {settings.discoverEnabled && result?.status === "error" ? <p className="discoverNotice" role="alert">{result.error} <button type="button" className="softButton" onClick={() => void load(true)}>Retry</button></p> : null}
+    {settings.discoverEnabled && result?.status === "no-taste" ? <p className="discoverNotice">Play or like a few songs first. Discover learns from what you listen to.</p> : null}
 
     {recommendedTracks.length ? <section className="discoverSection" aria-labelledby="discover-recommended">
       <div className="discoverSectionHead"><h2 id="discover-recommended" className="discoverHeading">Recommended songs</h2>{recommendedTracks.length > 10 ? <button type="button" className="discoverName discoverMore" aria-expanded={showAllRecommended} onClick={() => setShowAllRecommended(value => !value)}>{showAllRecommended ? "Show less" : "See all"}</button> : null}</div>
@@ -239,7 +239,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
           {!phone && notForMe ? <button type="button" className="discoverPick" aria-label={`Not for me: ${artist.name}`} title="Not for me" onClick={() => dismissArtist(artist.name)}><UserX size={16} /></button> : null}
         </li>)}
       </ul>
-    </section> : null>
+    </section> : null}
 
     {ready && !ready.artists.length && !ready.tracks.length ? <p className="discoverNotice">Nothing new to suggest right now. Try again after listening to more music.</p> : null}
 

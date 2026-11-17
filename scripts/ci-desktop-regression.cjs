@@ -160,6 +160,9 @@ server.listen(5173,async()=>{
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.homeStartButton')").catch(()=>false),"Home "+mode);
       await assertShellChrome();
       await screenshot(win,"home-"+mode);
+      await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=discover]').click()");
+      await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.discoverPage') && !document.querySelector('.appCrashBoundary')").catch(()=>false),"Discover "+mode);
+      await screenshot(win,"discover-"+mode);
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=settings]').click()");
       await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.settingsModeButton').length===2").catch(()=>false),"appearance navigation");
     }

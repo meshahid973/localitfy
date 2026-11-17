@@ -641,6 +641,11 @@ export function initLocalitfyAnalytics(input?: InitInput): boolean {
         capture_pageview: false,
         capture_pageleave: false,
         disable_session_recording: true,
+        // Electron only permits bundled executable code. Analytics events still use HTTPS.
+        disable_external_dependency_loading: true,
+        disable_surveys: true,
+        capture_performance: false,
+        disable_web_experiments: true,
         persistence: "localStorage+cookie",
         loaded: () => {
           loadedOnce = true;

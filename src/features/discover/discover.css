@@ -1,5 +1,6 @@
 .discoverPage {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 22px;
   min-width: 0;
   font-weight: 500;
@@ -10,9 +11,6 @@
   border: 1px solid var(--lt-border, rgba(255, 255, 255, .1));
   border-radius: var(--lt-radius-sm);
   background: var(--lt-surface);
-}
-
-.discoverSetup {
   display: grid;
   gap: 12px;
   max-width: 720px;
@@ -29,7 +27,7 @@
 .discoverKey {
   display: grid;
   gap: 6px;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .discoverKey input {
@@ -103,13 +101,14 @@
 .discoverShelf { display:flex; gap:clamp(16px,2vw,28px); overflow-x:auto; overscroll-behavior-inline:contain; scrollbar-width:none; padding-block:3px 8px; }
 .discoverShelf::-webkit-scrollbar { display:none; }
 .discoverShelf > li { flex:0 0 clamp(132px,15vw,175px); min-width:0; display:grid; align-content:start; gap:8px; }
+.discoverShelf .discoverSongText { min-width:0; }
+.discoverShelf .discoverArtLink:focus-visible { outline-offset:-3px !important; }
 .discoverShelfArt { position:relative; min-width:0; }
 .discoverArtLink { display:block; width:100%; padding:0; border:0; background:none; cursor:pointer; }
 .discoverShelf .discoverCover { width:100%; border-radius:var(--lt-radius-item); }
 .discoverShelfActions { position:absolute; right:6px; bottom:6px; display:flex; gap:4px; }
 .discoverShelfActions .discoverPick { background:var(--lt-bg-elevated); }
 .discoverShelfActions .discoverPick.active { background:var(--lt-accent); }
-.discoverCatalogShelf .discoverPick { justify-self:start; }
 @media (max-width:960px) { .discoverSongList { grid-template-columns:minmax(0,1fr); } }
 @media (pointer:coarse) { .discoverPick { min-width:40px; min-height:40px; } }
 
