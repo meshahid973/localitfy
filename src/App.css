@@ -5405,20 +5405,6 @@ body.isResizingPlayer .app *{
   contain: layout style;
 }
 
-.app{
-  --panel-calm-outline-soft: var(--lt-border) !important;
-  --panel-calm-outline-strong: var(--lt-border) !important;
-}
-
-/* Accent-driven calm outlines instead of fixed pink borders. */
-.app :is(.panel, .ambientSurface):not(.playerBar):not(.topUpdateRibbon){
-  border-color: var(--panel-calm-outline-soft) !important;
-}
-
-.app :is(.panel, .ambientSurface):not(.playerBar):not(.topUpdateRibbon):hover{
-  border-color: var(--panel-calm-outline-strong) !important;
-}
-
 /* Lighter, prettier header stars: twinkle + drift with theme accent. */
 
 .app .topUpdateRibbonLayer,
