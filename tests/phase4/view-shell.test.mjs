@@ -23,7 +23,8 @@ test("shared shell owns viewport and responsive sidebar behavior only", () => {
   for (const marker of [
     "--workspace-sidebar-expanded",
     "--workspace-sidebar-current",
-    "--workspace-sidebar-rail: 68px",
+    "--workspace-sidebar-rail: var(--lt-sidebar-closed)",
+    "--lt-sidebar-closed: 72px",
     "grid-template-columns: var(--workspace-sidebar-current)",
     '[data-sidebar-behavior="slim"]',
     '[data-sidebar-behavior="hover"]',

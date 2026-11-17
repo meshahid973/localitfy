@@ -560,7 +560,7 @@
   border-radius: 12px;
   display: grid;
   place-items: center;
-  color: #050505;
+  color: var(--button-text-on-accent);
   background: var(--lt-accent);
   font-size: 17px;
   font-weight: 700;
@@ -1353,8 +1353,8 @@ body{
   height: var(--control-circle-main) !important;
   min-width: var(--control-circle-main) !important;
   min-height: var(--control-circle-main) !important;
-  background: linear-gradient(135deg, var(--lt-accent), var(--highlight, var(--accent-2))) !important;
-  color: #050505 !important;
+  background: var(--lt-accent) !important;
+  color: var(--button-text-on-accent) !important;
   border-color: color-mix(in oklab, var(--lt-accent) 65%, white 10%) !important;
 }
 

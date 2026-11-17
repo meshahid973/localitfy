@@ -1713,7 +1713,7 @@ button{
   height: 46px !important;
   min-width: 46px !important;
   border-color: rgba(var(--accent-rgb), 0.58) !important;
-  color: #050505 !important;
+  color: var(--button-text-on-accent) !important;
   background: var(--accent) !important;
   box-shadow: 0 10px 28px rgba(var(--accent-rgb), 0.22) !important;
   font-size: 15px !important;

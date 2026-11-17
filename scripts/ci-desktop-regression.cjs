@@ -156,6 +156,10 @@ server.listen(5173,async()=>{
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=library]').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.libraryCollectionShortcuts')").catch(()=>false),"library "+mode);
       await screenshot(win,"library-"+mode);
+      await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=home]').click()");
+      await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.homeStartButton')").catch(()=>false),"Home "+mode);
+      await assertShellChrome();
+      await screenshot(win,"home-"+mode);
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=settings]').click()");
       await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.settingsModeButton').length===2").catch(()=>false),"appearance navigation");
     }
