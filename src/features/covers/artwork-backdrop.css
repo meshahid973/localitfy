@@ -41,7 +41,7 @@
 .homeAtmosphere .artworkBackdrop .artworkBackdropCover,
 .collectionPage > .artworkBackdrop .artworkBackdropCover,
 .playlistDetailPage > .artworkBackdrop .artworkBackdropCover {
-  opacity: .56;
+  opacity: .52;
   filter: blur(32px) saturate(1.16);
 }
 .homeAtmosphere .artworkBackdrop::after,

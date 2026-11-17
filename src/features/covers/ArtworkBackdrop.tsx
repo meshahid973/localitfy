@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import type { Song } from "../library/song.types";
 import { Cover } from "./Cover";
 import { getSongAmbientSource } from "./cover.ambient";
@@ -13,6 +13,7 @@ function CrossfadeArtwork({ song }: { song: Song }) {
   const [displayed, setDisplayed] = useState<Layer | null>(null);
   const [outgoing, setOutgoing] = useState<Layer | null>(null);
   const pending = displayed?.key !== key;
+  const incomingRef = useRef<HTMLDivElement>(null);
 
   // Keep the last decoded cover until the next one loads. Never retain
   // more than two mounted images, even during rapid track changes.
@@ -24,10 +25,13 @@ function CrossfadeArtwork({ song }: { song: Song }) {
 
   useEffect(() => {
     if (!pending) return;
+    const incoming = incomingRef.current?.querySelector("img");
+    // A → B → A may reuse the already-loaded outgoing element.
+    const delay = incoming?.complete && incoming.naturalWidth > 0 ? 0 : 2000;
     const timer = window.setTimeout(() => {
       setOutgoing(displayed);
       setDisplayed({ key, song });
-    }, 2000);
+    }, delay);
     return () => window.clearTimeout(timer);
   }, [key, pending, displayed, song]);
 
@@ -43,6 +47,7 @@ function CrossfadeArtwork({ song }: { song: Song }) {
       {layers.map((layer) => layer ? (
         <div key={layer.key} className="artworkBackdropLayer"
           data-visible={layer.key !== key || !pending ? "true" : "false"}
+          ref={layer.key === key ? incomingRef : undefined}
           onLoadCapture={layer.key === key ? reveal : undefined}>
           <Cover song={layer.song} className="artworkBackdropCover" priority="high" preferThumbnail />
         </div>

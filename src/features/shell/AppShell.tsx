@@ -98,7 +98,13 @@ export default function AppShell(props: AppShellProps) {
   useEffect(() => {
     if (!effectiveAmbient || !home.currentSong) setWorkspaceCoverColor(undefined);
     else if (coverColor) setWorkspaceCoverColor(coverColor);
-  }, [effectiveAmbient, home.currentSong, coverColor]);
+    else {
+      // Wait for asynchronously sampled art, then fall back to the theme if
+      // the image cannot be sampled rather than retaining an unrelated tint.
+      const timeout = window.setTimeout(() => setWorkspaceCoverColor(undefined), 2000);
+      return () => window.clearTimeout(timeout);
+    }
+  }, [effectiveAmbient, home.currentSong?.id, coverColor]);
   const [tagSearchSong, setTagSearchSong] = useState<Song | null>(null);
   const [tagSearchAlbum, setTagSearchAlbum] = useState<TagSearchAlbum | null>(null);
   const [albumTracksRequest, setAlbumTracksRequest] = useState<AlbumTracksDialogProps["request"] | null>(null);
