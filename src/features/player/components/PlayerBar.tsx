@@ -137,6 +137,7 @@ export default function PlayerBar(props: PlayerBarProps) {
           <footer
             className={`playerBar ambientSurface ${isPlaying ? "playerPlaying" : "playerIdle"} ${draggedSongId ? "songDragActive" : ""} ${queueDropHot ? "queueDropHot" : ""}`}
             style={ambientStyle}
+            aria-label="Music playback"
             data-ambient={effectiveAmbient ? "true" : "false"}
             data-cover-sync={effectiveCoverColorSyncMode}
             onDragOver={handlePlayerDragOver}
@@ -291,6 +292,9 @@ export default function PlayerBar(props: PlayerBarProps) {
                   onClick={toggleQueuePanel}
                   aria-label={queuePanelOpen ? "hide queue" : "show queue"}
                   aria-pressed={queuePanelOpen}
+                  data-queue-trigger
+                  aria-expanded={queuePanelOpen}
+                  aria-controls={queuePanelOpen ? "localtify-play-queue" : undefined}
                   aria-haspopup="dialog"
                   title={queueCount ? `queue · ${queueCount} up next` : "queue"}
                 >

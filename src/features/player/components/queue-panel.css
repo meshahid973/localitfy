@@ -2,19 +2,19 @@
 .queuePanel{
   position: fixed;
   right: 16px;
-  bottom: calc(var(--player-size, 108px) + 14px);
+  bottom: calc(var(--player-size-live, var(--player-size, 108px)) + 14px);
   z-index: 9000;
   width: min(380px, calc(100vw - 32px));
-  max-height: min(560px, calc(100vh - var(--player-size, 108px) - 90px));
+  max-height: min(560px, calc(100dvh - var(--player-size-live, var(--player-size, 108px)) - 90px));
   display: flex;
   flex-direction: column;
   border: 1px solid var(--lt-border);
   border-radius: var(--lt-radius-md);
   color: var(--lt-text);
   background: linear-gradient(var(--lt-surface), var(--lt-surface)), var(--lt-bg);
-  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  box-shadow: var(--lt-shadow-menu);
   outline: 0;
-  animation: queuePanelIn 160ms ease both;
+  animation: queuePanelIn var(--lt-duration-fast) var(--lt-ease-out) both;
 }
 
 .queuePanelHead{
@@ -49,9 +49,8 @@
   margin: 0 8px 6px;
   color: var(--muted);
   font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-weight: 650;
+  letter-spacing: 0.025em;
 }
 
 .queuePanelLabel small{
@@ -76,8 +75,8 @@
   gap: 6px;
   min-height: 52px;
   padding: 0 6px 0 4px;
-  border-radius: 12px;
-  transition: background-color 140ms ease;
+  border-radius: var(--lt-radius-item);
+  transition: background-color var(--lt-duration-fast) ease;
 }
 
 .queuePanelList .queuePanelRow{
@@ -184,12 +183,12 @@
 }
 
 .queuePanelIconButton{
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
 }
 
 .queuePanelTextButton{
-  height: 28px;
+  min-height: 32px;
   padding: 0 10px;
   font-size: 12px;
   font-weight: 760;
@@ -230,6 +229,11 @@
 @keyframes queuePanelIn{
   from{ opacity: 0; transform: translateY(8px); }
   to{ opacity: 1; transform: none; }
+}
+
+@media (pointer: coarse){
+  .queuePanelIconButton { width: 44px; height: 44px; }
+  .queuePanelTextButton { min-height: 44px; }
 }
 
 @media (prefers-reduced-motion: reduce){

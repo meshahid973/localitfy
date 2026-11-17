@@ -242,7 +242,7 @@ export default function PhonePlayer(props: PhonePlayerProps) {
                 <MicVocal size={18} strokeWidth={2.2} aria-hidden="true" /> lyrics
               </button>
             ) : null}
-            <button type="button" className={`phoneChip ${queuePanelOpen ? "active" : ""}`} onClick={toggleQueuePanel} aria-pressed={queuePanelOpen} aria-haspopup="dialog">
+            <button type="button" className={`phoneChip ${queuePanelOpen ? "active" : ""}`} onClick={toggleQueuePanel} data-queue-trigger aria-pressed={queuePanelOpen} aria-expanded={queuePanelOpen} aria-controls={queuePanelOpen ? "localtify-play-queue" : undefined} aria-haspopup="dialog">
               <ListMusic size={18} strokeWidth={2.2} aria-hidden="true" /> up next{queueCount ? ` · ${queueCount}` : ""}
             </button>
           </div>

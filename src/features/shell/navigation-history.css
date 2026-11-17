@@ -15,13 +15,13 @@
   place-items: center;
   padding: 0;
   border: 0;
-  border-radius: 50%;
-  color: var(--lt-text);
+  border-radius: var(--lt-radius-item);
+  color: var(--lt-muted);
   background: var(--lt-surface-raised);
   cursor: pointer;
-  transition: background-color 120ms ease, opacity 120ms ease;
+  transition: background-color var(--lt-duration-fast) ease, color var(--lt-duration-fast) ease;
 }
 
-.titleHistoryNav button:hover:not(:disabled) { background: color-mix(in srgb, var(--lt-text) 10%, var(--lt-surface-raised)); }
+.titleHistoryNav button:hover:not(:disabled) { color: var(--lt-text); background: color-mix(in srgb, var(--lt-text) 10%, var(--lt-surface-raised)); }
 .titleHistoryNav button:disabled { cursor: default; opacity: .35; }
 .titleHistoryNav button:focus-visible { outline: 2px solid rgba(var(--lt-accent-rgb), .62); outline-offset: 1px; }

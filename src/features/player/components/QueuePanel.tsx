@@ -56,23 +56,38 @@ export default function QueuePanel({
   unavailable
 }: QueuePanelProps) {
   const panelRef = useRef<HTMLElement | null>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
+  const closeRef = useRef(onClose);
+  useEffect(() => { closeRef.current = onClose; }, [onClose]);
+  function closeAndRestoreFocus() {
+    closeRef.current();
+    if (openerRef.current?.isConnected) openerRef.current.focus({ preventScroll: true });
+  }
   const [renderLimit, setRenderLimit] = useState(QUEUE_RENDER_STEP);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!open) return;
     setRenderLimit(QUEUE_RENDER_STEP);
+    setDropIndex(null);
+    openerRef.current = document.activeElement instanceof HTMLElement && document.activeElement.hasAttribute("data-queue-trigger")
+      ? document.activeElement
+      : document.querySelector<HTMLElement>('[data-queue-trigger][aria-expanded="true"]');
     panelRef.current?.focus({ preventScroll: true });
 
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key !== "Escape" || document.querySelector(".songContextMenuLayer")) return;
-      onClose();
+      if (event.key !== "Escape" || event.defaultPrevented || document.querySelector(".songContextMenuLayer")) return;
+      const dialog = event.target instanceof Element ? event.target.closest('[role="dialog"]') : null;
+      if (dialog && dialog !== panelRef.current) return;
+      event.preventDefault();
+      closeRef.current();
+      if (openerRef.current?.isConnected) openerRef.current.focus({ preventScroll: true });
     };
     const closeOnOutsidePointer = (event: PointerEvent) => {
       const target = event.target;
       if (!(target instanceof Element)) return;
-      if (panelRef.current?.contains(target) || target.closest(".playerQueueButton, .songContextMenuLayer, .modalBackdrop, [role='dialog']")) return;
-      onClose();
+      if (panelRef.current?.contains(target) || target.closest("[data-queue-trigger], .playerQueueButton, .songContextMenuLayer, .modalBackdrop, [role='dialog']")) return;
+      closeRef.current();
     };
     window.addEventListener("keydown", closeOnEscape);
     window.addEventListener("pointerdown", closeOnOutsidePointer, true);
@@ -80,7 +95,7 @@ export default function QueuePanel({
       window.removeEventListener("keydown", closeOnEscape);
       window.removeEventListener("pointerdown", closeOnOutsidePointer, true);
     };
-  }, [open, onClose]);
+  }, [open]);
 
   const entries = useMemo(
     () => open ? buildQueueEntries(queue, songsById) : [],
@@ -99,16 +114,19 @@ export default function QueuePanel({
   }
 
   function handleDrop(event: ReactDragEvent<HTMLElement>, index: number) {
-    const from = Number(event.dataTransfer.getData(QUEUE_DRAG_TYPE));
+    if (!event.dataTransfer.types.includes(QUEUE_DRAG_TYPE)) return;
+    const raw = event.dataTransfer.getData(QUEUE_DRAG_TYPE);
     setDropIndex(null);
-    if (!Number.isInteger(from)) return;
+    if (!/^\d+$/.test(raw)) return;
+    const from = Number(raw);
+    if (!Number.isSafeInteger(from)) return;
     event.preventDefault();
     event.stopPropagation();
     if (from !== index) setQueue((current) => moveQueueItem(current, from, index));
   }
 
   return (
-    <aside ref={panelRef} className="queuePanel" role="dialog" aria-label="play queue" tabIndex={-1}>
+    <aside ref={panelRef} id="localtify-play-queue" className="queuePanel" role="dialog" aria-label="play queue" tabIndex={-1}>
       <header className="queuePanelHead">
         <strong>queue</strong>
         <div className="queuePanelHeadActions">
@@ -118,7 +136,7 @@ export default function QueuePanel({
               <span>clear</span>
             </button>
           ) : null}
-          <button type="button" className="queuePanelIconButton" onClick={onClose} aria-label="close queue">
+          <button type="button" className="queuePanelIconButton" onClick={closeAndRestoreFocus} aria-label="close queue">
             <X size={16} strokeWidth={2.4} aria-hidden="true" />
           </button>
         </div>

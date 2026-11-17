@@ -19,3 +19,33 @@ test("queue and history controls use Localtify theme tokens and keyboard focus",
   assert.match(history, /background: var\(--lt-surface-raised\)/);
   assert.match(history, /color-mix\(in srgb, var\(--lt-text\) 10%, var\(--lt-surface-raised\)\)/);
 });
+
+
+test("shell interactions are calm, theme-aware and retain the existing native controls", () => {
+  const effects = read("src/features/shell/effects.css");
+  const view = read("src/styles/view-shell.css");
+  const nav = read("src/features/shell/SidebarNav.tsx");
+  assert.doesNotMatch(effects, /@keyframes localtifyNav(?:StrokeDraw|Home|Library|Disc|Playlist|Heart|Covers|Analytics|Download|Settings)V468/);
+  assert.match(effects, /\.navItemAnimatedV468\.active\{[\s\S]*?background: color-mix\(in srgb, var\(--lt-accent\) 12%, transparent\)/);
+  assert.match(view, /\.navText strong \{[\s\S]*?font-size: var\(--lt-text-base\)/);
+  assert.match(nav, /title=\{item\.label\}/);
+  assert.match(nav, /aria-current=\{view === item\.id \? "page" : undefined\}/);
+  const bar = read("src/features/player/player.css");
+  assert.match(bar, /\.playerMeta strong\{[^}]*color: var\(--lt-text\)/);
+  assert.match(bar, /\.playerMeta p\{[^}]*color: var\(--lt-muted\)/);
+});
+
+test("queue uses live player height and keeps desktop and Android trigger semantics aligned", () => {
+  const queue = read("src/features/player/components/QueuePanel.tsx");
+  const css = read("src/features/player/components/queue-panel.css");
+  for (const name of ["PlayerBar", "PhonePlayer"]) {
+    const source = read("src/features/player/components/" + name + ".tsx");
+    assert.match(source, /data-queue-trigger/);
+    assert.match(source, /aria-expanded=\{queuePanelOpen\}/);
+    assert.match(source, /aria-controls=\{queuePanelOpen \? "localtify-play-queue" : undefined\}/);
+  }
+  assert.match(queue, /id="localtify-play-queue" className="queuePanel"/);
+  assert.match(queue, /target\.closest\("\[data-queue-trigger\]/);
+  assert.match(queue, /openerRef\.current\?\.isConnected/);
+  assert.match(css, /bottom: calc\(var\(--player-size-live, var\(--player-size, 108px\)\) \+ 14px\)/);
+});
