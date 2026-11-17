@@ -21,7 +21,7 @@ const SHEET_SLOT = 3;
 const SWIPE_CLOSE_PX = 90;
 const SWIPE_SKIP_PX = 70;
 
-export type PhonePlayerProps = PlayerBarProps & { lyrics: Omit<LyricsViewProps, "anchorRef"> };
+export type PhonePlayerProps = PlayerBarProps & { lyrics: Omit<LyricsViewProps, "anchorRef">; backgroundStyle?: string; backgrounded?: boolean };
 
 /** The phone's player: a mini player above the tabs that opens a full-screen player with the cover or the lyrics. */
 export default function PhonePlayer(props: PhonePlayerProps) {
@@ -129,7 +129,7 @@ export default function PhonePlayer(props: PhonePlayerProps) {
     <>
       <div className="phoneMiniPlayer" style={ambientStyle}>
         <button type="button" className="phoneMiniOpen" aria-label={`open player: ${currentSong.title}`} aria-haspopup="dialog" aria-expanded={expanded} onClick={() => setExpanded(true)} />
-        <Cover song={currentSong} className="phoneMiniArt" priority="high" />
+        <Cover song={currentSong} className="phoneMiniArt" priority="high" preferThumbnail />
         <span className="phoneMiniMeta">
           <strong>{prettyTitle(currentSong.title, 8)}</strong>
           <small>{connect?.remoteName ? `on ${connect.remoteName} · ` : ""}{prettyMeta(currentSong.artist)}</small>
@@ -145,14 +145,16 @@ export default function PhonePlayer(props: PhonePlayerProps) {
       </div>
 
       {expanded ? (
-        <div ref={dialogRef} tabIndex={-1} className="phonePlayerSheet" role="dialog" aria-modal="true" aria-label="now playing" style={ambientStyle}
+        <div ref={dialogRef} tabIndex={-1} className="phonePlayerSheet" data-background={props.backgroundStyle || "coverBlur"} role="dialog" aria-modal="true" aria-label="now playing" style={ambientStyle}
           onKeyDown={(event) => {
             if (event.key !== "Escape" || event.defaultPrevented) return;
             event.preventDefault();
             if (lyrics.open) lyrics.onClose();
             else setExpanded(false);
           }}>
-          <div className="phonePlayerBackdrop" aria-hidden="true"><Cover song={currentSong} className="phonePlayerBackdropArt" /></div>
+          {props.backgroundStyle !== "flat" && props.backgroundStyle !== "oledBlack" && props.effectiveAmbient && !props.backgrounded ? (
+            <div className="phonePlayerBackdrop" aria-hidden="true"><Cover song={currentSong} className="phonePlayerBackdropArt" preferThumbnail /></div>
+          ) : null}
 
           <header className="phonePlayerTop" onTouchStart={swipeStart} onTouchEnd={swipeEnd}>
             <button type="button" className="phoneIconButton" onClick={() => setExpanded(false)} aria-label="close player">
@@ -206,6 +208,7 @@ export default function PhonePlayer(props: PhonePlayerProps) {
               onChange={(event) => previewSeek(event.currentTarget.value, event.currentTarget)}
               onPointerUp={(event) => { event.currentTarget.releasePointerCapture?.(event.pointerId); commitSeek(event.currentTarget.value); }}
               onPointerCancel={(event) => commitSeek(event.currentTarget.value)}
+              onKeyUp={(event) => commitSeek(event.currentTarget.value)}
               onBlur={(event) => isSeeking && commitSeek(event.currentTarget.value)}
             />
             <span className="phonePlayerTimes">

@@ -73,6 +73,8 @@ export type PlayerBarProps = {
   volumeRangeStyle: CSSProperties;
   /** Devices on the live connection; null when no phone is connected. */
   connect?: ConnectControls | null;
+  openImmersive?: () => void;
+  immersiveOpen?: boolean;
 };
 
 export default function PlayerBar(props: PlayerBarProps) {
@@ -138,6 +140,7 @@ export default function PlayerBar(props: PlayerBarProps) {
             className={`playerBar ambientSurface ${isPlaying ? "playerPlaying" : "playerIdle"} ${draggedSongId ? "songDragActive" : ""} ${queueDropHot ? "queueDropHot" : ""}`}
             style={ambientStyle}
             aria-label="Music playback"
+            inert={props.immersiveOpen || undefined}
             data-ambient={effectiveAmbient ? "true" : "false"}
             data-cover-sync={effectiveCoverColorSyncMode}
             onDragOver={handlePlayerDragOver}
@@ -162,9 +165,17 @@ export default function PlayerBar(props: PlayerBarProps) {
                 if (currentSong) openSongContextMenu(event, currentSong);
               }}
             >
-              <div className={`playerArtSwap nowPlayingPlayerArtSwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
-                <Cover song={currentSong} className="smallArt" priority="high" />
-              </div>
+              {currentSong && props.openImmersive ? (
+                <button type="button" className={`playerArtSwap nowPlayingPlayerArtSwap immersiveEntry ${nowPlayingSongMotionClass}`}
+                  data-song-motion-key={nowPlayingTransitionKey} onClick={props.openImmersive}
+                  aria-label="Open immersive player" aria-haspopup="dialog" aria-expanded={Boolean(props.immersiveOpen)} title="Open immersive player">
+                  <Cover song={currentSong} className="smallArt" priority="high" preferThumbnail />
+                </button>
+              ) : (
+                <div className={`playerArtSwap nowPlayingPlayerArtSwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
+                  <Cover song={currentSong} className="smallArt" priority="high" preferThumbnail />
+                </div>
+              )}
 
               <div className={`playerMeta nowPlayingMiniCopySwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
                 {currentSong ? (

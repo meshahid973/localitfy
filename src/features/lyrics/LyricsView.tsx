@@ -20,6 +20,7 @@ export type LyricsViewProps = {
   openSettings: () => unknown;
   /** The main content area the view covers. */
   anchorRef: RefObject<HTMLElement | null>;
+  embedded?: boolean;
 };
 
 // Highlight a touch early so the line lights up as it is sung, not after.
@@ -28,7 +29,7 @@ const MANUAL_SCROLL_HOLD_MS = 3500;
 const VIEW_GAP = 12;
 const sessionCache = new Map<string, LyricsResult>();
 
-export default function LyricsView({ open, onClose, song, isPlaying, getTime, seekTo, openSettings, anchorRef }: LyricsViewProps) {
+export default function LyricsView({ open, onClose, song, isPlaying, getTime, seekTo, openSettings, anchorRef, embedded = false }: LyricsViewProps) {
   const viewRef = useRef<HTMLElement | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const lineRefs = useRef<Array<HTMLElement | null>>([]);
@@ -97,7 +98,7 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
 
   // Follow the content area with an even gap, stopping above the player bar.
   useLayoutEffect(() => {
-    if (!open) return;
+    if (!open || embedded) return;
     const measure = () => {
       const view = viewRef.current;
       const anchor = anchorRef.current?.getBoundingClientRect();
@@ -119,7 +120,7 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
     if (anchorRef.current) observer.observe(anchorRef.current);
     window.addEventListener("resize", measure);
     return () => { observer.disconnect(); window.removeEventListener("resize", measure); };
-  }, [open, anchorRef]);
+  }, [open, anchorRef, embedded]);
 
   useEffect(() => {
     if (!open) return;
@@ -130,9 +131,10 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
         else onClose();
       }
     };
+    if (embedded) return;
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [open, onClose, matcherOpen]);
+  }, [open, onClose, matcherOpen, embedded]);
 
   const synced = result?.status === "synced" ? result.lines : null;
 
@@ -214,7 +216,13 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
   }
 
   return (
-    <section ref={viewRef} className="lyricsView" role="dialog" aria-label="lyrics" tabIndex={-1} style={box}>
+    <section ref={viewRef} className="lyricsView" role="dialog" aria-label="lyrics" tabIndex={-1} style={embedded ? undefined : box}
+      onKeyDown={embedded ? (event) => {
+        if (event.key !== "Escape" || event.defaultPrevented) return;
+        event.preventDefault();
+        if (matcherOpen) setMatcherOpen(false);
+        else onClose();
+      } : undefined}>
       <header className="lyricsHead">
         {song ? (
           <div className="lyricsSong">
