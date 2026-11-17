@@ -136,7 +136,7 @@ import {
   discordStyleOptions
 } from "./features/discord/discord.constants";
 import { PLAYLIST_STORAGE_KEY } from "./features/playlists/playlist.constants";
-import { clamp, collapseSpaces, formatTime } from "./shared/utils/format";
+import { clamp, formatTime } from "./shared/utils/format";
 import { useStableCallback } from "./shared/hooks/useStableCallback";
 import { makeLocalId, readLocalJson } from "./shared/storage/localStorage";
 import {

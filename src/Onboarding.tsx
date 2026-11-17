@@ -15,7 +15,7 @@ type IntroStage = "blank" | "orb" | "card";
 type CssVars = CSSProperties & Record<string, string | number>;
 
 type ThemeChoice = {
-  id: string;
+  id: "dark" | "light";
   name: string;
   note: string;
   color: string;
@@ -251,7 +251,7 @@ export default function Onboarding({
     goToStep(step - 1);
   }
 
-  function chooseTheme(themeId: string) {
+  function chooseTheme(themeId: ThemeChoice["id"]) {
     if (busy) return;
     setPreviewThemeId(themeId);
     onChooseTheme?.(themeId);
