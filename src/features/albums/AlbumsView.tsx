@@ -249,7 +249,7 @@ export default function AlbumsView(props: AlbumsViewProps) {
                             onOpen={() => actions.openCollection(albumTarget(album))}
                             onPlay={() => actions.playCollection(albumTarget(album))}
                             onContextMenu={(event) => actions.openCollectionMenu(event, albumTarget(album))}
-                            cover={<Cover song={album.coverSong} className="albumCardCoverV318" />}
+                            cover={<Cover song={album.coverSong} className="albumCardCoverV318" preferThumbnail />}
                           >
                             <span className="albumCardMetaV318">
                               <strong title={album.title}>{prettyTitle(album.title, 6)}</strong>

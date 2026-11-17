@@ -47,7 +47,7 @@
 .albumCardCoverV318 { width: 100%; aspect-ratio: 1; display: block; overflow: hidden; border-radius: 8px; background: var(--lt-surface-raised); }
 .albumCardCoverV318 img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .albumCardMetaV318 { display: grid; gap: var(--lt-space-1); min-width: 0; }
-.albumCardMetaV318 strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 700; }
+.albumCardMetaV318 strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 550; }
 .albumCardMetaV318 em { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--lt-text-sm); color: var(--albums-muted); font-style: normal; }
 .albumCardMetaV318 b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--lt-muted); font-size: var(--lt-text-sm); font-weight: 600; }
 .albumDetailDrawerV318 :is(button,input,select):focus-visible { outline: 2px solid rgba(var(--lt-accent-rgb), .58); outline-offset: 2px; }

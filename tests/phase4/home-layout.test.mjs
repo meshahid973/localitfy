@@ -110,3 +110,14 @@ test("shared artwork palette follows the existing ambient preference and backgro
   assert.match(player, /\.playerBar\[data-ambient="true"\]:hover::before/);
   for (const file of ["AlbumPage", "SongGroupPage", "MixPage"]) assert.match(read("src/features/pages/" + file + ".tsx"), /<ArtworkBackdrop song=/);
 });
+
+test("collection browsing prioritizes artwork and retains contextual drag targets", () => {
+  const shelf = read("src/features/playlists/PlaylistsView.tsx");
+  const css = read("src/features/playlists/playlists.css");
+  const collage = read("src/features/playlists/components/PlaylistCoverCollage.tsx");
+  assert.match(css, /\.playlistShelfCard \.playlistCoverCollage \{ width: 100%; aspect-ratio: 1;/);
+  assert.match(shelf, /playlistDragOverPlaylistId === playlist.id \? <span className="playlistShelfDropHint">Drop to add/);
+  assert.match(shelf, /onDrop=\{\(event\) => handlePlaylistShelfDrop/);
+  assert.match(collage, /data-count=\{tiles.length\}/);
+  assert.match(collage, /preferThumbnail/);
+});

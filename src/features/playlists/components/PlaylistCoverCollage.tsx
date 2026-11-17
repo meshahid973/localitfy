@@ -1,6 +1,7 @@
 import { Images } from "lucide-react";
 import type { Song } from "../../library/song.types";
 import { Cover } from "../../covers/Cover";
+import "./playlist-cover-collage.css";
 
 type PlaylistCoverCollageProps = {
   songs: Song[];
@@ -11,17 +12,17 @@ export default function PlaylistCoverCollage({
   songs,
   className = "playlistCoverCollage"
 }: PlaylistCoverCollageProps) {
-  const tiles = Array.from({ length: 4 }, (_, index) => songs[index] ?? null);
+  const tiles = songs.length ? songs.slice(0, 4) : [null];
 
   return (
-    <div className={className} aria-hidden="true">
+    <div className={className} data-count={tiles.length} aria-hidden="true">
       {tiles.map((song, index) => (
         <div
           className={song ? "playlistCoverTile" : "playlistCoverTile empty"}
           key={song ? `${song.id}-${index}` : `empty-${index}`}
         >
           {song ? (
-            <Cover song={song} className="playlistCoverImage" />
+            <Cover song={song} className="playlistCoverImage" preferThumbnail />
           ) : (
             <span><Images size={18} aria-hidden="true" /></span>
           )}

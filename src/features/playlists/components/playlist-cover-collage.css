@@ -1,0 +1,6 @@
+/* A partial collage fills its square instead of displaying empty filler tiles. */
+.playlistCoverCollage[data-count="1"] > .playlistCoverTile { grid-area: 1 / 1 / 3 / 3; }
+.playlistCoverCollage[data-count="2"] > .playlistCoverTile { grid-row: 1 / 3; }
+.playlistCoverCollage[data-count="3"] > .playlistCoverTile:first-child { grid-row: 1 / 3; }
+.playlistCoverCollage > .playlistCoverTile { min-height: 0; }
+.playlistCoverCollage .playlistCoverImage::before { content: none; }

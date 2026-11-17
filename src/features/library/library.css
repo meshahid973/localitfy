@@ -310,14 +310,14 @@
 
 .libraryPage .songMeta strong {
   color: var(--lt-text) !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
+  font-size: 14px !important;
+  font-weight: 550 !important;
 }
 
 .libraryPage .songMeta small {
-  color: var(--lt-text) !important;
-  font-size: 11px !important;
-  font-weight: 550 !important;
+  color: var(--lt-muted) !important;
+  font-size: var(--lt-text-base) !important;
+  font-weight: 500 !important;
 }
 
 .libraryPage .songInfo {
