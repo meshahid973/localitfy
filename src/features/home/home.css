@@ -40,7 +40,8 @@
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   align-content: start;
-  gap: clamp(22px, 2vw, 32px);
+  row-gap: clamp(22px, 2vw, 32px);
+  column-gap: var(--lt-space-3);
   color: var(--lt-text);
 }
 
@@ -505,7 +506,7 @@
 }
 @container (min-width: 1100px) {
   .homeJumpBack:has(+ .homeListenSection) { grid-column: 1 / 8; }
-  .homeJumpBack + .homeListenSection { grid-column: 8 / -1; align-self: center; }
+  .homeJumpBack + .homeListenSection { grid-column: 8 / -1; align-self: center; min-width: 0; }
   .homeJumpBack + .homeListenSection .homeListenGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .homeJumpBack + .homeListenSection .homeListenGrid > .homeListenRow { grid-column: auto; }
   .homeJumpBack + .homeListenSection .homeListenGrid > .homeListenRow:last-child:nth-child(odd) { grid-column: 1 / -1; }

@@ -97,3 +97,16 @@ test("wide Home aligns adjacent sections without rearranging persisted order", (
   assert.match(css, /\.homeJumpBack \+ \.homeListenSection/);
   assert.match(css, /\.homeMixRail \.homeReleaseCard/);
 });
+
+test("shared artwork palette follows the existing ambient preference and background state", () => {
+  const shell = read("src/features/shell/AppShell.tsx");
+  const backdrop = read("src/features/covers/ArtworkBackdrop.tsx");
+  const workspace = read("src/styles/view-shell.css");
+  const player = read("src/features/player/player.css");
+  assert.match(shell, /<ArtworkAmbientContext.Provider value=\{effectiveAmbient && !isAppBackgrounded\}>/);
+  assert.match(backdrop, /if \(!song \|\| !enabled\) return null/);
+  assert.match(workspace, /--workspace-cover-color/);
+  assert.match(player, /\.playerBar\[data-ambient\] \{\s*background: var\(--workspace-sidebar/);
+  assert.match(player, /\.playerBar\[data-ambient="true"\]:hover::before/);
+  for (const file of ["AlbumPage", "SongGroupPage", "MixPage"]) assert.match(read("src/features/pages/" + file + ".tsx"), /<ArtworkBackdrop song=/);
+});

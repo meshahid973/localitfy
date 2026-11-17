@@ -315,7 +315,7 @@
 }
 
 .app[data-player-background="flat"] .playerBar{
-  background: rgba(8, 8, 12, 0.94) !important;
+  background: var(--lt-bg-elevated) !important;
   border-color: rgba(255,255,255,0.06) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.04) !important;
 }
@@ -326,7 +326,7 @@
 }
 
 .app[data-player-background="coverBlur"] .playerBar{
-  background: rgba(8, 8, 12, 0.70) !important;
+  background: var(--workspace-sidebar, var(--lt-bg)) !important;
   border-color: rgba(255,255,255,0.075) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 -18px 54px rgba(0,0,0,0.28) !important;
 }
@@ -867,9 +867,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIconMotionV468{
 }
 
 .app[data-platform="linux"] .playerBar{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,.012)),
-    rgba(0,0,0,.94) !important;
+  background: var(--workspace-sidebar, var(--lt-bg)) !important;
 }
 
 .app[data-platform="linux"] .playerBar::before{

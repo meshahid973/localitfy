@@ -9,7 +9,7 @@ import { runtimePixelArtImageUrl } from "./pixelArt";
 export function getAmbientStyle(coverUrl?:string|null):CSSProperties|undefined{return coverUrl?{"--cover-url":toCssUrl(coverUrl),"--cover-art-url":toCssUrl(coverUrl)} as CSSProperties:undefined;}
 export function isRendererSafeImageUrl(value?:string|null){return Boolean(value&&/^(?:data:image\/|blob:|https?:\/\/|localtify-media:\/\/|\/|pixelart\/)/i.test(String(value).trim()));}
 export function getRendererSafeImageUrl(value?:string|null){const source=String(value||"").trim();return isRendererSafeImageUrl(source)?source:"";}
-export function getSongAmbientSource(song?:Song|null){if(!song)return"";return getRendererSafeImageUrl(song.coverUrl)||getRendererSafeImageUrl(song.coverPath)||runtimePixelArtImageUrl(pixelArtForSong(song));}
+export function getSongAmbientSource(song?:Song|null){if(!song)return"";return getRendererSafeImageUrl(song.coverThumbUrl)||getRendererSafeImageUrl(song.coverThumbnailUrl)||getRendererSafeImageUrl(song.thumbnailUrl)||getRendererSafeImageUrl(song.coverUrl)||getRendererSafeImageUrl(song.coverPath)||getRendererSafeImageUrl(song.coverFullUrl)||runtimePixelArtImageUrl(pixelArtForSong(song));}
 export type CoverAverageStyle=CSSProperties&{"--cover-rgb"?:string;"--player-ambient-rgb"?:string;"--active-cover-rgb"?:string;"--cover-average"?:string};
 const MAX_COVER_COLORS = 512;
 const coverAverageColorCache = new Map<string, CoverAverageStyle>();

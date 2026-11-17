@@ -1769,13 +1769,11 @@ button{
 .app .sidebar{
   overflow: hidden !important;
   padding: 16px 12px !important;
-  background:
-    linear-gradient(180deg, rgba(var(--accent-rgb), 0.055), rgba(0, 0, 0, 0.02) 42%),
-    rgba(0, 0, 0, 0.76) !important;
-  border-right: 1px solid rgba(var(--accent-rgb), 0.18) !important;
-  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.035) !important;
-  backdrop-filter: blur(14px) saturate(120%) !important;
-  -webkit-backdrop-filter: blur(14px) saturate(120%) !important;
+  background: var(--workspace-sidebar, var(--lt-bg)) !important;
+  border-right: 1px solid transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   contain: layout paint !important;
 }
 

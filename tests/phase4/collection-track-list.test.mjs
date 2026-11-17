@@ -62,6 +62,7 @@ function mixState(state) {
   '../home/useHomeDailyMixes':{useHomeDailyMixes:()=>state},
   '../player/playbackSource':{buildAlbumIdBySongId:()=>new Map()},
   '../shell/appActions':{useAppActions:()=>({nav:{go(){}}})},
+  '../covers/ArtworkBackdrop':{ArtworkBackdrop:()=>null},
   './CollectionHero':{}, './TrackList':{}
  };
  const exports={};runInNewContext(output,{exports,require:n=>dependencies[n]??require(n)});

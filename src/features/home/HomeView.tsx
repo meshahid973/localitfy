@@ -145,7 +145,7 @@ export default function HomeView(props: HomeViewProps) {
         aria-label="jump back in"
       >
         {currentSong ? <div className="homeFeatureArt" aria-hidden="true">
-          <Cover key={currentSong.id} song={currentSong} className="homeFeatureCover" priority="high" preferThumbnail={!settings.heroExpanded || android} />
+          <Cover song={currentSong} className="homeFeatureCover" priority="high" preferThumbnail={!settings.heroExpanded || android} />
         </div> : null}
         <div className={`homeJumpCopy nowPlayingCopySwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
           {currentSong ? <span className="homeFeatureLabel">Jump back in</span> : null}

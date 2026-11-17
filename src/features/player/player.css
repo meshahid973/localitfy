@@ -1681,12 +1681,8 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 .app[data-player-background="coverBlur"] .playerBar{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.030), rgba(255,255,255,0.010)),
-    rgba(0,0,0,0.82) !important;
-  border-top-color: rgba(255,255,255,0.088) !important;
-  backdrop-filter: blur(18px) saturate(126%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(126%) !important;
+  background: var(--workspace-sidebar, var(--lt-bg)) !important;
+  border-top-color: var(--lt-border) !important;
 }
 
 .app[data-player-background="coverBlur"] .playerBar::before{
@@ -1727,7 +1723,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 .app[data-player-background="flat"] .playerBar{
-  background: rgba(5,5,9,0.95) !important;
+  background: var(--lt-bg-elevated) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
@@ -1993,8 +1989,8 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   --player-perf-hover-opacity: 0.42;
   --player-perf-saturate: 1.42;
   --player-perf-brightness: 1.00;
-  backdrop-filter: blur(14px) saturate(1.08) !important;
-  -webkit-backdrop-filter: blur(14px) saturate(1.08) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .app .playerBar::before{
@@ -2169,4 +2165,37 @@ body.localtifyWindowBackgrounded .app .playerBar:hover::before,
   font-weight: 900;
   line-height: 16px;
   text-align: center;
+}
+
+/* The persistent bar shares the listening palette; a single static thumbnail
+   filter replaces the stacked, hover-animated glass layers. */
+.app[data-player-background="coverBlur"] .playerBar[data-ambient] {
+  background: var(--workspace-sidebar, var(--lt-bg)) !important;
+  border-top-color: var(--lt-border) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.app[data-player-background="coverBlur"] .playerBar[data-ambient="true"]::before,
+.app[data-player-background="coverBlur"] .playerBar[data-ambient="true"]:hover::before {
+  background: var(--cover-url, none) center / cover no-repeat !important;
+  opacity: .12 !important;
+  filter: blur(20px) saturate(1.1) !important;
+  transform: none !important;
+  animation: none !important;
+  transition: none !important;
+}
+.app[data-player-background="coverBlur"] .playerBar[data-ambient]::after {
+  display: none !important;
+}
+.app[data-player-background="flat"] .playerBar[data-ambient] {
+  background: var(--lt-bg-elevated) !important;
+  box-shadow: none !important;
+}
+.app[data-player-background="oledBlack"] .playerBar[data-ambient] {
+  background: #000 !important;
+  box-shadow: none !important;
+}
+.app[data-player-background="coverBlur"]:is(.appBackgrounded, .localtifyInteractionBusy) .playerBar[data-ambient="true"]::before {
+  display: none !important;
 }
