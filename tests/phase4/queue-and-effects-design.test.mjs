@@ -28,7 +28,7 @@ test("shell interactions are calm, theme-aware and retain the existing native co
   const view = read("src/styles/view-shell.css");
   const nav = read("src/features/shell/SidebarNav.tsx");
   assert.doesNotMatch(effects, /@keyframes localtifyNav(?:StrokeDraw|Home|Library|Disc|Playlist|Heart|Covers|Analytics|Download|Settings)V468/);
-  assert.match(effects, /\.navItemAnimatedV468\.active\{[\s\S]*?background: color-mix\(in srgb, var\(--lt-accent\) 12%, transparent\)/);
+  assert.match(effects, /\.navItemAnimatedV468\.active\{[\s\S]*?background: color-mix\(in srgb, var\(--lt-text\) 10%, transparent\)/);
   assert.match(view, /\.navText strong \{[\s\S]*?font-size: var\(--lt-text-base\)/);
   assert.match(nav, /title=\{item\.label\}/);
   assert.match(nav, /aria-current=\{view === item\.id \? "page" : undefined\}/);

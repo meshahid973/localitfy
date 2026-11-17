@@ -2,7 +2,7 @@
 
 .app:has(.libraryPage) .content {
   overflow-x: hidden !important;
-  background: var(--workspace-bg, var(--lt-bg)) !important;
+  background: transparent !important;
 }
 
 .app:has(.libraryPage) .pageTransition {

@@ -2461,10 +2461,7 @@ body.localtifyIdle .app:not(.songDragActive) :where( .secretLayer, .coverSpark){
 }
 
 .app{
-  background:
-    radial-gradient(circle at 50% 100%, rgba(var(--player-ambient-rgb, var(--lt-accent-rgb)), 0.075), transparent 46%),
-    radial-gradient(circle at top left, rgba(var(--lt-accent-rgb), 0.10), transparent 31%),
-    var(--lt-bg) !important;
+  background: var(--workspace-bg, var(--lt-bg)) !important;
 }
 
 .sidebarNav {
@@ -4623,9 +4620,8 @@ body,
 }
 
 .titleBar{
-  background: var(--lt-bg, #000);
-  background-image: none;
-  border-bottom: 1px solid rgba(var(--lt-accent-rgb), .28);
+  background: transparent;
+  border-bottom: 0;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
@@ -4639,7 +4635,7 @@ body,
   gap: 0 !important;
   row-gap: 0 !important;
   min-height: 0 !important;
-  background: var(--lt-bg, #000);
+  background: transparent;
 }
 
 /* Fixed sidebar: not transparent, not glass, and content cannot slide underneath it. */
@@ -4659,9 +4655,7 @@ body,
   gap: 12px;
   overflow: hidden;
   color: var(--lt-text);
-  background: var(--sidebar-bg-release);
-  background-color: var(--lt-bg, #000);
-  background-image: linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.38));
+  background: var(--workspace-sidebar);
   border-right: 1px solid rgba(var(--lt-accent-rgb), .25);
   box-shadow: inset -1px 0 0 rgba(255,255,255,.025);
   opacity: 1;
@@ -4673,9 +4667,7 @@ body,
 
 .sidebar:hover,
 .app .sidebar:hover{
-  background: var(--sidebar-bg-release);
-  background-color: var(--lt-bg, #000);
-  background-image: linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.38));
+  background: var(--workspace-sidebar);
   box-shadow: inset -1px 0 0 rgba(255,255,255,.025);
   transform: none;
 }

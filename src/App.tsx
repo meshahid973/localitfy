@@ -1451,7 +1451,6 @@ function MainModeApp() {
       libraryArtistCount,
       view,
       settings.theme,
-      settings.customThemeEnabled,
       settings.discordEnabled
     ].join(":");
 
@@ -1469,7 +1468,7 @@ function MainModeApp() {
         artist_count: libraryArtistCount,
         current_view: view,
         theme_id: settings.theme,
-        custom_theme_enabled: settings.customThemeEnabled,
+        custom_theme_enabled: false,
         discord_enabled: settings.discordEnabled
       });
     }, 2200);
@@ -1485,7 +1484,6 @@ function MainModeApp() {
     libraryArtistCount,
     view,
     settings.theme,
-    settings.customThemeEnabled,
     settings.discordEnabled
   ]);
 
@@ -4003,7 +4001,7 @@ function MainModeApp() {
 
     const shouldTrackThemeChange =
       bootedRef.current &&
-      (previous.theme !== next.theme || previous.customThemeEnabled !== next.customThemeEnabled);
+      normalizeThemeId(previous.theme) !== normalizeThemeId(next.theme);
     const shouldTrackDiscordToggle = bootedRef.current && previous.discordEnabled !== next.discordEnabled;
 
     settingsRef.current = next;
@@ -4017,7 +4015,7 @@ function MainModeApp() {
     if (!bootedRef.current) return;
 
     if (shouldTrackThemeChange) {
-      trackThemeChanged(next.customThemeEnabled ? "custom" : next.theme, next.customThemeEnabled);
+      trackThemeChanged(normalizeThemeId(next.theme), false);
     }
 
     if (shouldTrackDiscordToggle) {
@@ -4102,7 +4100,7 @@ function MainModeApp() {
     await persistSettings(next, debounce, isImmediateSettingsKey(String(key)) ? "immediate" : "transition");
 
     if (!debounce && bootedRef.current) {
-      if (key === "theme" || key === "customThemeEnabled") {
+      if (key === "theme") {
         showAppToast("Theme changed", "success");
       } else if (String(key).startsWith("discord")) {
         showAppToast("Discord presence updated", "success");
@@ -4164,14 +4162,6 @@ function MainModeApp() {
     void updateSettingsPatch({
       theme: defaultSettings.theme,
       themePanelCollapsed: defaultSettings.themePanelCollapsed,
-      customThemeEnabled: defaultSettings.customThemeEnabled,
-      customThemeColor: defaultSettings.customThemeColor,
-      customThemeColor2: defaultSettings.customThemeColor2,
-      customThemeBackground: defaultSettings.customThemeBackground,
-      customThemeSurface: defaultSettings.customThemeSurface,
-      customThemeText: defaultSettings.customThemeText,
-      customThemeHighlight: defaultSettings.customThemeHighlight,
-      customThemeProgress: defaultSettings.customThemeProgress,
       showAmbientGradient: defaultSettings.showAmbientGradient,
       coverColorSyncMode: defaultSettings.coverColorSyncMode,
       showFloatingNotes: defaultSettings.showFloatingNotes,
@@ -7102,8 +7092,7 @@ function MainModeApp() {
 
     void updateSettingsPatch(
       {
-        theme: nextTheme,
-        customThemeEnabled: false
+        theme: nextTheme
       },
       false
     );
@@ -7840,7 +7829,7 @@ function MainModeApp() {
     onboarding: {
       open: onboardingOpen,
       songsCount: songs.length,
-      currentTheme: settings.customThemeEnabled ? "custom" : settings.theme,
+      currentTheme: normalizeThemeId(settings.theme),
       discordEnabled: settings.discordEnabled,
       onChooseTheme: handleOnboardingTheme,
       onSetDiscordEnabled: handleOnboardingDiscord,

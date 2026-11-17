@@ -18,7 +18,7 @@
 .app:has(.pageTransition-home) .content {
   padding: 0 !important;
   overflow-x: hidden !important;
-  background: var(--workspace-bg, var(--lt-bg)) !important;
+  background: transparent !important;
 }
 
 .app:has(.pageTransition-home) .pageTransition-home {

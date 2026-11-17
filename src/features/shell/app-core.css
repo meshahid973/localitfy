@@ -770,7 +770,7 @@ button:disabled{
 
 .titleBar{
   height: 48px;
-  background: var(--workspace-sidebar, var(--lt-bg)) !important;
+  background: transparent !important;
   border-bottom: 0 !important;
 }
 
@@ -1756,7 +1756,7 @@ button{
 }
 
 .app .content{
-  background: var(--workspace-bg, var(--lt-bg)) !important;
+  background: transparent !important;
   scroll-behavior: auto !important;
   contain: paint !important;
 }

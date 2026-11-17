@@ -7,7 +7,7 @@ export const VISUAL_CUSTOMIZATION_DEFAULTS = {
   homeLayoutMode: "balanced",
   libraryRowStyle: "comfyRows",
   starsIntensity: "off",
-  sidebarBehavior: "fixed",
+  sidebarBehavior: "slim",
   playerBackgroundStyle: "coverBlur"
 } as const;
 

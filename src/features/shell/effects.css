@@ -316,9 +316,9 @@
 }
 
 .app[data-player-background="coverBlur"] .playerBar{
-  background: var(--workspace-sidebar, var(--lt-bg)) !important;
-  border-color: rgba(255,255,255,0.075) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 -18px 54px rgba(0,0,0,0.28) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 
 .app[data-player-background="coverBlur"] .playerBar::before{
@@ -406,7 +406,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItem{
   gap: 9px !important;
   border-radius: 15px !important;
   overflow: hidden !important;
-  color: rgba(255,255,255,.70) !important;
+  color: var(--lt-muted) !important;
   background: transparent !important;
   border: 1px solid transparent !important;
   box-shadow: none !important;
@@ -419,15 +419,15 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItem{
 
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItem:hover,
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItem:hover{
-  color: #fff !important;
-  background: rgba(255,255,255,.045) !important;
-  border-color: rgba(255,255,255,.065) !important;
+  color: var(--lt-text) !important;
+  background: var(--lt-surface-soft) !important;
+  border-color: transparent !important;
   transform: translate3d(0,0,0) !important;
 }
 
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItem.active,
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItem.active{
-  color: #fff !important;
+  color: var(--lt-text) !important;
   background:
     linear-gradient(180deg, rgba(var(--accent-rgb), .14), rgba(var(--accent-rgb), .055)),
     rgba(255,255,255,.018) !important;
@@ -544,7 +544,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .importMainAc
   width: 18px !important;
   height: 18px !important;
   margin: 0 !important;
-  color: #fff !important;
+  color: var(--button-text-on-accent) !important;
   opacity: 1 !important;
   flex: 0 0 auto !important;
 }
@@ -752,7 +752,7 @@ main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItemAnimat
 main.app.app > .appShell > .sidebar .navItemAnimatedV468.active,
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItemAnimatedV468.active,
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItemAnimatedV468.active{
-  background: color-mix(in srgb, var(--lt-accent) 12%, transparent) !important;
+  background: color-mix(in srgb, var(--lt-text) 10%, transparent) !important;
 }
 
 /* do not allow old pseudo indicators/circles to show */
@@ -793,8 +793,8 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIconMotionV468{
 
 .app[data-platform="linux"] .titleBar{
 
-  background: var(--workspace-sidebar, var(--lt-bg)) !important;
-  border-bottom: 1px solid var(--lt-border) !important;
+  background: transparent !important;
+  border-bottom: 0 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
@@ -856,8 +856,8 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIconMotionV468{
   background-color: var(--linux-surface-solid) !important;
 }
 
-.app[data-platform="linux"] .playerBar{
-  background: var(--workspace-sidebar, var(--lt-bg)) !important;
+.app[data-platform="linux"][data-player-background="coverBlur"] .playerBar{
+  background: transparent !important;
 }
 
 .app[data-platform="linux"] .playerBar::before{

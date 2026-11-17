@@ -3,7 +3,7 @@
   "version": "0.5.1",
   "private": true,
   "productName": "localtify",
-  "description": "Spotify-style local music player with playlists, downloads, Discord RPC, custom themes, and pixel-art covers.",
+  "description": "Local music player with playlists, downloads, Discord RPC, light and dark modes, and pixel-art covers.",
   "author": {
     "name": "meshahid973",
     "email": "coderpixelbusiness@gmail.com"

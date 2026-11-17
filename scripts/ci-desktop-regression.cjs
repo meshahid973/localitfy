@@ -55,6 +55,7 @@ server.listen(5173,async()=>{
     await until(()=>win.webContents.executeJavaScript("!document.querySelector('.appCrashBoundary') && !!document.querySelector('.appShell')").catch(()=>false),"desktop shell");
     const startupMs=Date.now()-started;
     win.setSize(1280,800);await sleep(700);
+    assert.equal(await win.webContents.executeJavaScript("document.querySelector('.app').dataset.sidebarBehavior"), "slim", "fresh installs use collapsed navigation");
     await screenshot(win,"desktop-home");
     const idle=await metrics("desktop idle");
     // Exercise actual rendered library navigation and playback.
@@ -71,7 +72,8 @@ server.listen(5173,async()=>{
     await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=home]').click()");
     await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.homeFeatureCover') && !!document.querySelector('.homeAtmosphere .artworkBackdropLayer[data-visible=true]')").catch(()=>false),"artwork-led Home");
     async function homeGeometry(width,height) {
-      win.setSize(width,height);await sleep(500);
+      win.setSize(width,height);
+      await until(()=>win.getSize()[0]===width && win.webContents.executeJavaScript("window.innerWidth").then(actual=>actual===width),"requested viewport "+width,5000);
       const state=await win.webContents.executeJavaScript(`(()=>{
         const page=document.querySelector('.homePage');
         const atmosphere=page.querySelector('.homeAtmosphere');
@@ -80,8 +82,9 @@ server.listen(5173,async()=>{
         artist?.scrollIntoView({block:'center'});
         const rect=e=>{const r=e?.getBoundingClientRect();return r?{x:r.x,right:r.right,width:r.width,height:r.height}:null};
         const shelves=[...page.querySelectorAll('.homeArtistRail,.homeReleaseRail')];
-        return {page:rect(page),atmosphere:rect(atmosphere),artist:rect(artist),rail:rail?{width:rail.clientWidth,scrollWidth:rail.scrollWidth}:null,hidden:shelves.every(e=>getComputedStyle(e).scrollbarWidth==='none')};
+        return {viewport:window.innerWidth,page:rect(page),atmosphere:rect(atmosphere),artist:rect(artist),rail:rail?{width:rail.clientWidth,scrollWidth:rail.scrollWidth}:null,hidden:shelves.every(e=>getComputedStyle(e).scrollbarWidth==='none')};
       })()`);
+      assert.equal(state.viewport,width,"actual renderer viewport");
       assert.ok(state.artist&&state.artist.width>=64&&Math.abs(state.artist.width-state.artist.height)<=3,"artist artwork collapsed at "+width+": "+JSON.stringify(state));
       assert.ok(state.atmosphere&&Math.abs(state.page.x-state.atmosphere.x)<=3&&Math.abs(state.page.right-state.atmosphere.right)<=3,"ambient image should reach Home boundaries: "+JSON.stringify(state));
       assert.ok(state.hidden,"artwork shelves should not expose scrollbars");

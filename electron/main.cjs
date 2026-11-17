@@ -2140,7 +2140,7 @@ function createWindow() {
 
 const MAIN_WINDOW_DEFAULT_WIDTH = 1380;
 const MAIN_WINDOW_DEFAULT_HEIGHT = 860;
-const MAIN_WINDOW_MIN_WIDTH = 980;
+const MAIN_WINDOW_MIN_WIDTH = 860;
 const MAIN_WINDOW_MIN_HEIGHT = 640;
 function getSafeMainWindowSize() {
   const display = screen.getPrimaryDisplay();
