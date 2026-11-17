@@ -7716,7 +7716,7 @@ function MainModeApp() {
     checkForUpdates: () => { openSettingsPanel("updates"); return manualUpdateCheck(); }
   });
 
-  const nowPlayingContext = resolveNowPlayingContext(currentSong, activePlaylist, playbackSource, [], new Map());
+  const nowPlayingContext = resolveNowPlayingContext(currentSong, activePlaylist, playbackSource);
   const queuePanelAutoNextSong = queuePanelOpen && !playQueue.length && !isShuffle ? getNextPlayableSongForCache() : null;
   // Repeat and shuffle already decide what plays forever, so radio only fills in when playback would run out.
   const songRadioEnabled = settings.songRadio && settings.experimentalMusicAnalysis && repeatMode === "off" && !repeatPlaylist && !isShuffle;

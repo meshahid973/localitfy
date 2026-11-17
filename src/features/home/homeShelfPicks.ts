@@ -1,5 +1,4 @@
 import type { Song } from "../library/song.types";
-import type { LocalAlbumEntry } from "../albums/album.types";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 export const REDISCOVER_AFTER_DAYS = 30;
@@ -67,12 +66,6 @@ export function pickRecentlyPlayed(songs: readonly Song[], limit = 10): Song[] {
     const last = time(song.lastPlayed);
     return last > 0 ? { value: song, primary: last, secondary: 0 } : null;
   });
-}
-
-export function pickNewAlbums(albums: readonly LocalAlbumEntry[], limit = 10): LocalAlbumEntry[] {
-  return takeBest(albums, limit, (album) => album.songs.some(playable)
-    ? { value: album, primary: album.latestAdded || 0, secondary: 0 }
-    : null);
 }
 
 export function pickLikedSongs(songs: readonly Song[], limit = 10): Song[] {

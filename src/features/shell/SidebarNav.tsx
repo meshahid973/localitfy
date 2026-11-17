@@ -38,10 +38,7 @@ export default function SidebarNav({ view, changeView, sidebarNavOrder, sidebarH
 
   const menuItem = menu ? navItems.find((item) => item.id === menu.view) : null;
 
-  return (
-    <>
-      <div className="sidebarNavGroupsV467" aria-label="localtify navigation groups">
-        {groups.map((group, groupIndex) => (
+  const renderGroup = (group: (typeof groups)[number], divider = false) => (
           <div key={group.id} className={`sidebarNavGroupV467 sidebarNavGroup-${group.id}`}>
             <p className="sidebarGroupLabelV467">{group.label}</p>
 
@@ -80,10 +77,16 @@ export default function SidebarNav({ view, changeView, sidebarNavOrder, sidebarH
               })}
             </nav>
 
-            {groupIndex < groups.length - 1 ? <div className="navDivider" aria-hidden="true" /> : null}
+            {divider ? <div className="navDivider" aria-hidden="true" /> : null}
           </div>
-        ))}
+  );
+  const scrollGroups = groups.filter(group => group.id !== "app");
+  return (
+    <>
+      <div className="sidebarNavGroupsV467" aria-label="localtify navigation groups">
+        {scrollGroups.map((group, index) => renderGroup(group, index < scrollGroups.length - 1))}
       </div>
+      <div className="sidebarPinnedNav">{groups.filter(group => group.id === "app").map(group => renderGroup(group))}</div>
 
       {menu && menuItem ? (
         <ContextMenuLayer anchor={menu} identity={menu.view} className="sidebarContextMenu"

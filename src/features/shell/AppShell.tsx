@@ -384,7 +384,7 @@ export default function AppShell(props: AppShellProps) {
 
       <SongContextMenu {...modals.songContextMenu} findOnMusicBrainz={settings.musicbrainzTagging ? setTagSearchSong : undefined} />
       <CollectionContextMenu state={collectionMenu} onClose={closeCollectionMenu} open={actions.openCollection} play={actions.playCollection} queue={actions.queueCollection}
-        goToArtist={nav.openArtistPage} findSimilar={(target) => target.playlist
+        findSimilar={(target) => target.playlist
           ? collections.openSimilar({ kind: "playlist", playlistId: target.playlist.id })
           : openSimilarSongs(playableIds(target.songs), `${target.kind}:${target.id}`, target.title)} />
       {tagSearchSong ? <Suspense fallback={null}><TagSearchDialog key={tagSearchSong.id} song={tagSearchSong} onClose={() => setTagSearchSong(null)} /></Suspense> : null}

@@ -155,6 +155,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
 
 .sidebarNavGroupsV467::-webkit-scrollbar { display: none; }
 .sidebarNavGroupV467 { min-width: 0; }
+.sidebarPinnedNav { flex: 0 0 auto; min-width: 0; padding-inline: 4px; }
 
 .sidebarGroupLabelV467 {
   display: block !important;
@@ -530,9 +531,9 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
 
 /* Keep the icon-only rail compact without clipping accessible navigation buttons. */
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar {
-  border-radius: var(--lt-radius-sm) !important;
+  border-radius: var(--lt-radius-sm);
   padding: 6px 4px !important;
-  gap: 4px !important;
+  gap: 4px;
   box-shadow: none !important;
   will-change: auto !important;
 }

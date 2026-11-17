@@ -1,5 +1,5 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, Compass, Disc3, ExternalLink, Plus, RefreshCw, Search, Settings2, UserX } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Check, Compass, ExternalLink, Plus, RefreshCw, Search, Settings2, UserX } from "lucide-react";
 import { PageHeader } from "../../shared/ui/PageHeader";
 import { isAndroidApp, computerName } from "../../app/platform";
 import { splitArtistCredits } from "../artists/artistCredits";
@@ -11,7 +11,6 @@ import { DiscoverCover } from "./DiscoverArtwork";
 import { ArcDropdownMenu } from "../../shared/ui/ArcDropdownMenu";
 import "./discover.css";
 
-const AlbumTracksDialog = lazy(() => import("../tagging/AlbumTracksDialog"));
 
 export type DiscoverViewProps = {
   settings: Pick<Settings, "discoverEnabled" | "lastfmApiKey" | "musicbrainzTagging">;
@@ -46,8 +45,6 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
   const [keyDraft, setKeyDraft] = useState(settings.lastfmApiKey || "");
   const [picked, setPicked] = useState<Map<string, DiscoverTrack>>(() => new Map());
   const requestVersionRef = useRef(0);
-  // The song whose whole album is being looked up on MusicBrainz.
-  const [albumOf, setAlbumOf] = useState<DiscoverTrack | null>(null);
 
   const load = useCallback(async (refresh = false) => {
     const requestVersion = ++requestVersionRef.current;
@@ -71,7 +68,6 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       setCatalog(null);
       setCatalogLoading(false);
       setPicked(new Map());
-      setAlbumOf(null);
     }
     return () => { catalogRequestRef.current += 1; };
   }, [settings.discoverEnabled]);
@@ -147,10 +143,6 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
     return `Based on ${shown.join(", ")}${more > 0 ? ` and ${more} more artists you play` : ""}.`;
   }, [ready]);
 
-  const albumButton = (track: DiscoverTrack) => !phone && settings.musicbrainzTagging
-    ? <button type="button" className="discoverPick" aria-label={`Get the album ${track.title} is from`} title="Get the whole album" onClick={() => setAlbumOf(track)}><Disc3 size={14} /></button>
-    : null;
-
   const pickButton = (track: DiscoverTrack) => {
     if (phone) return null;
     const on = picked.has(trackId(track));
@@ -181,17 +173,17 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
     {settings.discoverEnabled ? <section className="discoverCatalog" aria-labelledby="discover-catalog-title">
       <h2 id="discover-catalog-title" className="discoverHeading">Explore music</h2>
       <form className="discoverSearch" onSubmit={event => { event.preventDefault(); void searchCatalog(); }}>
-        <ArcDropdownMenu<CatalogKind> ariaLabel="Search category" value={catalogKind} disabled={catalogLoading} items={[{ value: "recording", label: "Songs" }, { value: "artist", label: "Artists" }, { value: "album", label: "Albums" }]} onValueChange={value => { setCatalogKind(value); setCatalog(null); }} />
+        <ArcDropdownMenu<CatalogKind> ariaLabel="Search category" value={catalogKind} disabled={catalogLoading} items={[{ value: "recording", label: "Songs" }, { value: "artist", label: "Artists" }]} onValueChange={value => { setCatalogKind(value); setCatalog(null); }} />
         <input type="search" aria-label="Search public music catalog" placeholder="Search MusicBrainz" value={catalogTerm} maxLength={160} disabled={catalogLoading} onChange={event => { setCatalogTerm(event.currentTarget.value); setCatalog(null); }} />
         <button className="heroMain" type="submit" disabled={catalogLoading || catalogTerm.trim().length < 2}><Search size={15} /><span>{catalogLoading ? "Searching…" : "Search"}</span></button>
       </form>
       <p className="discoverBecause" role="status">{catalogLoading ? "Searching public catalog…" : "MusicBrainz catalog · Local playback only"}</p>
       {catalog?.status === "error" ? <p role="alert">{catalog.error}</p> : null}
-      {catalog?.status === "catalog" ? catalog.items.length ? <ul className={catalog.kind === "album" ? "discoverShelf discoverCatalogShelf" : "discoverSongList"} aria-label="Search results" tabIndex={catalog.kind === "album" ? 0 : undefined}>
+      {catalog?.status === "catalog" ? catalog.items.length ? <ul className="discoverSongList" aria-label="Search results">
         {catalog.items.map(item => <li key={item.id}>
           <DiscoverCover title={item.title} artist={item.artist} artwork={item} lookup={catalog.kind === "recording" && !item.coverUrl} person={catalog.kind === "artist"} />
           <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => openLink(item.url)} title={item.title}>{item.title}</button><small title={item.subtitle}>{item.subtitle}</small></span>
-          {catalog.kind === "recording" ? <><span className="discoverDuration">{duration(item.durationMs)}</span>{albumButton(item)}{pickButton(item)}</> : null}
+          {catalog.kind === "recording" ? <><span className="discoverDuration">{duration(item.durationMs)}</span>{pickButton(item)}</> : null}
         </li>)}
       </ul> : <p role="status">No matching music found.</p> : null}
     </section> : null}
@@ -207,7 +199,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
         {(showAllRecommended ? recommendedTracks : recommendedTracks.slice(0, 10)).map(track => <li key={trackId(track)}>
           <DiscoverCover title={track.title} artist={track.artist} artwork={track} lookup />
           <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => openLink(track.url)} title={track.title}>{track.title}</button><small>{track.artist}</small></span>
-          {albumButton(track)}{pickButton(track)}
+          {pickButton(track)}
         </li>)}
       </ul>
     </section> : null}
@@ -220,7 +212,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
             <button type="button" className="discoverArtLink" onClick={() => openLink(track.url)} aria-label={`Open ${track.title} on Last.fm`}>
               <DiscoverCover title={track.title} artist={track.artist} artwork={track} lookup />
             </button>
-            <div className="discoverShelfActions">{albumButton(track)}{pickButton(track)}</div>
+            <div className="discoverShelfActions">{pickButton(track)}</div>
           </div>
           <span className="discoverSongText"><strong title={track.title}>{track.title}</strong><small>{track.artist}</small></span>
         </li>)}
@@ -248,7 +240,5 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       <button type="button" className="heroMain" onClick={sendPicked}><Plus size={15} /><span>Send to Downloads</span></button>
     </div> : null}
 
-    {albumOf ? <Suspense fallback={null}><AlbumTracksDialog request={{ title: albumOf.title, artist: albumOf.artist, label: albumOf.title }}
-      sendToDownloads={sendToDownloads} onClose={() => setAlbumOf(null)} /></Suspense> : null}
   </section>;
 }

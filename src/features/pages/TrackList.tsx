@@ -18,19 +18,15 @@ export type TrackListProps = {
   playFrom: (songId: string) => unknown;
   toggleLike: (songId: string) => unknown;
   openPlaylistPicker: (song: Song) => unknown;
-  /** Album pages leave out the (identical) artwork and album column. */
   showCover?: boolean;
-  /** Album id of a song, for its album link. Without it the album column is hidden. */
-  albumIdOf?: (songId: string) => string | undefined;
   /** Artist page: its own name is not repeated as a link on every row. */
   hideArtist?: string;
 };
 
 /**
- * Songs on a collection page. Clicking a row plays from it, right-click opens the song menu, artist and
- * album names open their pages.
+ * Songs on a collection page. Clicking a row plays from it; right-click opens the song menu.
  */
-export default function TrackList({ songs, currentId, isPlaying, playFrom, toggleLike, openPlaylistPicker, showCover = true, albumIdOf, hideArtist }: TrackListProps) {
+export default function TrackList({ songs, currentId, isPlaying, playFrom, toggleLike, openPlaylistPicker, showCover = true, hideArtist }: TrackListProps) {
   const { nav, openSongMenu } = useAppActions();
   const hidden = hideArtist?.toLocaleLowerCase();
   const windowed = songs.length > 80;
@@ -46,7 +42,6 @@ export default function TrackList({ songs, currentId, isPlaying, playFrom, toggl
     const missing = song.fileExists === false;
     const credits = splitArtistCredits(song.artist);
     const shown = hidden && credits.length > 1 ? credits.filter((name) => name.toLocaleLowerCase() !== hidden) : credits;
-    const albumId = albumIdOf?.(song.id);
     return (
       <div key={song.id} role="listitem" aria-posinset={index + 1} aria-setsize={songs.length} className={`trackRow ${active ? "active" : ""} ${active && isPlaying ? "playing" : ""} ${missing ? "missing" : ""}`}
         title={missing ? "Local audio file missing" : undefined}
@@ -69,13 +64,6 @@ export default function TrackList({ songs, currentId, isPlaying, playFrom, toggl
             )) : prettyMeta(song.artist || "unknown artist")}
           </small>
         </span>
-        {albumIdOf ? (
-          <span className="trackRowAlbum">
-            {albumId && song.album?.trim() ? (
-              <button className="trackLink" type="button" title={song.album} onClick={(event) => { event.stopPropagation(); nav.openAlbumPage(albumId); }}>{prettyMeta(song.album)}</button>
-            ) : <span>{prettyMeta(song.album || "")}</span>}
-          </span>
-        ) : null}
         <button className={`iconAction likeActionV443 noActionHoverV444 ${song.liked ? "liked likeActionActiveV443" : ""}`} type="button"
           onClick={(event) => { event.stopPropagation(); void toggleLike(song.id); }} aria-label={song.liked ? "unlike song" : "like song"} aria-pressed={song.liked}>
           <LikeHeartAnimationV443 liked={song.liked} />
@@ -89,7 +77,7 @@ export default function TrackList({ songs, currentId, isPlaying, playFrom, toggl
     );
   };
   return (
-    <div ref={listRef} className={`trackList ${showCover ? "withCover" : ""} ${albumIdOf ? "withAlbum" : ""}`} role="list" aria-label="Tracks">
+    <div ref={listRef} className={`trackList ${showCover ? "withCover" : ""}`} role="list" aria-label="Tracks">
       {windowed ? (
         <div className="trackListCanvas" role="presentation" style={{ height: virtualizer.getTotalSize() }}>
           {virtualizer.getVirtualItems().map((row) => (

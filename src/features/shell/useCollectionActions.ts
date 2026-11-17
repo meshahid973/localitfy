@@ -16,9 +16,8 @@ export function useCollectionActions(nav: NavigationHistory, collections: ShellC
     openCollection: (target) => nav.open({ kind: target.kind, id: target.id }),
     playCollection(target, options = {}) {
       if (target.playlist && !options.startId) return void collections.playPlaylist(target.playlist, Boolean(options.shuffle));
-      // Albums, artists and genres play as a source, so repeat-all loops them and the player can reveal them.
-      const source = target.kind === "album" ? playbackSourceRef("album", target.title, target.id)
-        : target.kind === "artist" || target.kind === "genre" ? playbackSourceRef(target.kind, target.title) : null;
+      // Artists and genres play as a source so repeat-all loops their tracks.
+      const source = target.kind === "artist" || target.kind === "genre" ? playbackSourceRef(target.kind, target.title) : null;
       collections.playSongs(playableIds(target.songs), target.title, source, Boolean(options.shuffle), options.startId);
     },
     queueCollection: (target) => void collections.queueSongs(playableIds(target.songs), target.title),

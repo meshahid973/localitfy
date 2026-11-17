@@ -138,13 +138,7 @@ export function useNavigationHistory(view: View, changeView: (view: View, source
     back,
     forward,
     gesture,
-    openAlbumPage: (albumId: string) => open({ kind: "album", id: albumId }),
     openArtistPage: (artistName: string) => open({ kind: "artist", id: artistDetailId(artistName) }),
-    goToSongAlbum(songId: string, albumIds: Map<string, string>, onMissing: () => void) {
-      const albumId = albumIds.get(songId);
-      if (albumId) open({ kind: "album", id: albumId });
-      else onMissing();
-    },
     revealNowPlaying(context: NowPlayingContext) {
       if (context.kind === "library") go("library", "unknown");
       else open({ kind: context.kind, id: context.kind === "artist" ? artistDetailId(context.id) : context.id });

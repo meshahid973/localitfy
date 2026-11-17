@@ -1,19 +1,17 @@
 import { createContext, useContext, type MouseEvent as ReactMouseEvent } from "react";
 import type { Song } from "../library/song.types";
-import type { LocalAlbumEntry } from "../albums/album.types";
 import type { Playlist } from "../playlists/playlist.types";
 import type { PageDetail, NavigationHistory } from "./useNavigationHistory";
 import { artistDetailId } from "./useNavigationHistory";
 
 /** Anything that opens as a page and plays as a whole: an album, artist, genre, playlist or daily mix. */
 export type CollectionTarget = {
-  kind: PageDetail["kind"];
+  kind: Exclude<PageDetail["kind"], "album">;
   id: string;
   title: string;
   subtitle: string;
   songs: readonly Song[];
   coverSong: Song | null;
-  album?: LocalAlbumEntry;
   playlist?: Playlist;
 };
 
@@ -43,10 +41,6 @@ export function useAppActions() {
 export const playableIds = (songs: readonly Song[]) => songs.filter((song) => song.fileExists !== false).map((song) => song.id);
 const firstCover = (songs: readonly Song[]) => songs.find((song) => Boolean(song.coverUrl || song.coverPath || song.coverThumbnailUrl)) || songs[0] || null;
 const trackCount = (count: number) => `${count} track${count === 1 ? "" : "s"}`;
-
-export function albumTarget(album: LocalAlbumEntry): CollectionTarget {
-  return { kind: "album", id: album.id, title: album.title, subtitle: album.albumArtist || album.artist, songs: album.songs, coverSong: album.coverSong ?? firstCover(album.songs), album };
-}
 
 export function artistTarget(name: string, songs: readonly Song[]): CollectionTarget {
   return { kind: "artist", id: artistDetailId(name), title: name, subtitle: `artist · ${trackCount(songs.length)}`, songs, coverSong: firstCover(songs) };
