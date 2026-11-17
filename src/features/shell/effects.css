@@ -140,20 +140,20 @@
   --v321-list-card-shadow: none;
 }
 
-.app :where(.panel, .settingsPanelCard, .coverTargetPanelCleanOnly){
+.app :where(.panel, .coverTargetPanelCleanOnly){
   background: var(--v321-panel-bg) !important;
   border-color: var(--v321-panel-border) !important;
   box-shadow: var(--v321-card-shadow) !important;
   transition: background-color var(--v321-fast), border-color var(--v321-fast), box-shadow var(--v321-fast), transform var(--v321-fast) !important;
 }
 
-.app[data-card-background="glassy"] :where(.panel, .settingsPanelCard, .coverTargetPanelCleanOnly){
+.app[data-card-background="glassy"] :where(.panel, .coverTargetPanelCleanOnly){
   backdrop-filter: blur(16px) saturate(1.08) !important;
   -webkit-backdrop-filter: blur(16px) saturate(1.08) !important;
 }
 
-.app[data-card-background="solid"] :where(.panel, .settingsPanelCard, .coverTargetPanelCleanOnly),
-.app[data-card-background="oledFlat"] :where(.panel, .settingsPanelCard, .coverTargetPanelCleanOnly){
+.app[data-card-background="solid"] :where(.panel, .coverTargetPanelCleanOnly),
+.app[data-card-background="oledFlat"] :where(.panel, .coverTargetPanelCleanOnly){
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
@@ -788,7 +788,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIconMotionV468{
 .app[data-platform="linux"]{
   --linux-titlebar-height: var(--localtify-titlebar-height, 48px);
   --linux-scrollbar-size: 11px;
-  --linux-surface-solid: color-mix(in srgb, var(--bg, #000) 88%, #050508 12%);
+  --linux-surface-solid: var(--lt-bg-elevated);
 }
 
 .app[data-platform="linux"] .titleBar{
@@ -847,12 +847,12 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIconMotionV468{
   background: rgba(var(--accent-rgb), .64) !important;
 }
 
-.app[data-platform="linux"] :is(.panel, .settingsPanelCard, .modalWrap, .editorModal, .playerBar, .sidebar){
+.app[data-platform="linux"] :is(.panel, .modalWrap, .editorModal, .playerBar, .sidebar){
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
-.app[data-platform="linux"] :is(.panel, .settingsPanelCard){
+.app[data-platform="linux"] :is(.panel){
   background-color: var(--linux-surface-solid) !important;
 }
 

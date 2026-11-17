@@ -1,7 +1,7 @@
 
 /* Settings owns its layout and controls; global overlays are unaffected. */
 .settingsPage {
-  --settings-surface: var(--lt-surface);
+  --settings-surface: var(--lt-surface-soft);
   --settings-elevated: var(--lt-surface-raised);
   --settings-edge: var(--lt-border);
   --settings-muted: var(--lt-muted);

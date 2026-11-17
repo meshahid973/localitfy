@@ -83,9 +83,10 @@
 .settingsPage.settingsPageV027 .settingsPanelCard,
 .settingsPage.settingsPageV027 .settingGroup,
 .settingsPage.settingsPageV027 .settingsCardStack {
-  gap: 15px; padding: 19px 21px;
+  gap: 14px; padding: 18px 20px;
   border-radius: var(--lt-radius-sm); border: 0;
   background: var(--settings-surface);
+  box-shadow: none;
 }
 .settingsPage.settingsPageV027 .settingsPanelHeader { gap: 12px; align-items: center; }
 .settingsPage.settingsPageV027 .settingsPanelHeader > div { gap: 4px; }

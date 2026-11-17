@@ -5364,36 +5364,28 @@ body.isResizingPlayer .app *{
 }
 
 .app{
-  --panel-calm-bg: rgba(5, 5, 10, .70);
-  --panel-calm-bg-strong: rgba(7, 7, 13, .78);
-  --panel-calm-shadow: 0 12px 32px rgba(0,0,0,.18);
-  --panel-calm-shadow-hover: 0 16px 38px rgba(0,0,0,.22);
+  --panel-calm-bg: var(--lt-surface-soft);
+  --panel-calm-bg-strong: var(--lt-surface-soft);
+  --panel-calm-shadow: none;
+  --panel-calm-shadow-hover: none;
 }
 
-.app :is(.panel, .ambientSurface, .settingsPanel, .settingsCard, .settingsPanelCard):not(.playerBar):not(.topUpdateRibbon){
+.app :is(.panel, .ambientSurface):not(.playerBar):not(.topUpdateRibbon){
 
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.034), rgba(255,255,255,.012)),
-    var(--panel-calm-bg) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.032),
-    var(--panel-calm-shadow) !important;
+  background: var(--panel-calm-bg) !important;
+  box-shadow: none !important;
   color: color-mix(in srgb, var(--text) 90%, transparent) !important;
   isolation: isolate;
   contain: layout paint style;
 }
 
-.app :is(.panel, .ambientSurface, .settingsCard, .settingsPanelCard):not(.playerBar):not(.topUpdateRibbon):hover{
+.app :is(.panel, .ambientSurface):not(.playerBar):not(.topUpdateRibbon):hover{
 
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.044), rgba(255,255,255,.016)),
-    var(--panel-calm-bg-strong) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.04),
-    var(--panel-calm-shadow-hover) !important;
+  background: var(--panel-calm-bg) !important;
+  box-shadow: none !important;
 }
 
-.app :is(.active, .selected, .playing, .loggedIn):is(.panel, .ambientSurface, .settingsCard){
+.app :is(.active, .selected, .playing, .loggedIn):is(.panel, .ambientSurface){
   border-color: rgba(var(--lt-accent-rgb), .22) !important;
   background:
     linear-gradient(180deg, rgba(var(--lt-accent-rgb), .070), rgba(255,255,255,.014)),
@@ -5414,16 +5406,16 @@ body.isResizingPlayer .app *{
 }
 
 .app{
-  --panel-calm-outline-soft: color-mix(in oklab, rgba(255,255,255,.055) 62%, var(--lt-accent) 38%) !important;
-  --panel-calm-outline-strong: color-mix(in oklab, rgba(255,255,255,.08) 42%, var(--lt-accent) 58%) !important;
+  --panel-calm-outline-soft: var(--lt-border) !important;
+  --panel-calm-outline-strong: var(--lt-border) !important;
 }
 
 /* Accent-driven calm outlines instead of fixed pink borders. */
-.app :is(.panel, .ambientSurface, .settingsPanel, .settingsCard, .settingsPanelCard):not(.playerBar):not(.topUpdateRibbon){
+.app :is(.panel, .ambientSurface):not(.playerBar):not(.topUpdateRibbon){
   border-color: var(--panel-calm-outline-soft) !important;
 }
 
-.app :is(.panel, .ambientSurface, .settingsCard, .settingsPanelCard):not(.playerBar):not(.topUpdateRibbon):hover{
+.app :is(.panel, .ambientSurface):not(.playerBar):not(.topUpdateRibbon):hover{
   border-color: var(--panel-calm-outline-strong) !important;
 }
 
@@ -5679,15 +5671,15 @@ body.isResizingPlayer .app *{
 }
 
 /* Fewer outlines globally. Accent outline is mostly active/important only. */
-.app :is(.panel, .ambientSurface, .settingsCard):not(.playerBar):not(.topUpdateRibbon){
+.app :is(.panel, .ambientSurface):not(.playerBar):not(.topUpdateRibbon){
   border-color: var(--outline-calm-v487) !important;
 }
 
-.app :is(.panel, .ambientSurface, .settingsCard):not(.playerBar):not(.topUpdateRibbon):hover{
+.app :is(.panel, .ambientSurface):not(.playerBar):not(.topUpdateRibbon):hover{
   border-color: var(--outline-hover-v487) !important;
 }
 
-.app :is(.active, .playing, .selected):is(.panel, .ambientSurface, .settingsCard){
+.app :is(.active, .playing, .selected):is(.panel, .ambientSurface){
   border-color: var(--outline-active-v487) !important;
 }
 

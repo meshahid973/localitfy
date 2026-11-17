@@ -1,7 +1,7 @@
 import { isAndroidApp, computerName } from "../../app/platform";
 import "./library.css";
 import { lazy, Suspense, useState, type DragEventHandler, type ReactNode } from "react";
-import { Copy, FileWarning, FolderInput, ListMusic, Radio, Shuffle, Trash2, Grid2X2, List, Heart, Disc3, Users } from "lucide-react";
+import { Copy, FileWarning, FolderInput, ListMusic, Radio, Shuffle, Trash2, Grid2X2, List, Heart, Users } from "lucide-react";
 import type { SimilarSeedRequest } from "../analysis/similarSeed";
 import type { DuplicatesMergeResult } from "./duplicates/DuplicatesDialog";
 import { ActionLabel } from "../../shared/ui/ActionLabel";
@@ -54,7 +54,6 @@ export default function LibraryView(props: LibraryViewProps) {
     handleLibraryAreaDrop,
     handleSearchInput,
     importSongs,
-    libraryAlbumCount,
     libraryArtistCount,
     libraryMissingLabel,
     librarySortMode,
@@ -82,7 +81,7 @@ export default function LibraryView(props: LibraryViewProps) {
     <section data-page-section="library" className={`libraryPage ${isLiked ? "libraryPageLiked" : ""}`}>
       <PageHeader title={isLiked ? "Liked songs" : "Library"}>
         <nav className="libraryNavigation" aria-label="Library collections">
-          {([{ id: "library", title: "Songs" }, { id: "liked", title: "Liked" }, { id: "playlists", title: "Playlists" }, { id: "albums", title: "Albums" }, { id: "artists", title: "Artists" }] as const).map(item => <button key={item.id} type="button" aria-current={view === item.id ? "page" : undefined} onClick={() => changeView(item.id, "library-navigation")}>{item.title}</button>)}
+          {([{ id: "library", title: "Songs" }, { id: "liked", title: "Liked" }, { id: "playlists", title: "Playlists" }, { id: "artists", title: "Artists" }] as const).map(item => <button key={item.id} type="button" aria-current={view === item.id ? "page" : undefined} onClick={() => changeView(item.id, "library-navigation")}>{item.title}</button>)}
         </nav>
         <input
           className="pageHeaderSearch librarySearch"
@@ -122,7 +121,6 @@ export default function LibraryView(props: LibraryViewProps) {
       {!isLiked && !query.trim() && !showingMissingFiles ? (
         <nav className="libraryCollectionShortcuts" aria-label="Your collections">
           <button type="button" onClick={() => changeView("liked", "library-collection")}><span className="libraryCollectionArtwork" data-kind="liked"><Heart size={36} fill="currentColor" /></span><strong>Liked songs</strong><small>{songs.filter(song => song.liked).length} songs</small></button>
-          <button type="button" onClick={() => changeView("albums", "library-collection")}><span className="libraryCollectionArtwork" data-kind="albums"><Disc3 size={36}/></span><strong>Albums</strong><small>{libraryAlbumCount} albums</small></button>
           <button type="button" onClick={() => changeView("artists", "library-collection")}><span className="libraryCollectionArtwork" data-kind="artists"><Users size={36}/></span><strong>Artists</strong><small>{libraryArtistCount} artists</small></button>
         </nav>
       ) : null}

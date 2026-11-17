@@ -132,7 +132,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
 
 .sidebarNavGroupsV467 {
   width: 100%;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-height: 0;
   padding: var(--lt-space-3) var(--lt-space-3) var(--lt-space-2) !important;
   overflow-x: hidden;
@@ -532,6 +532,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar {
   border-radius: var(--lt-radius-sm) !important;
   padding: 6px 4px !important;
+  gap: 4px !important;
   box-shadow: none !important;
   will-change: auto !important;
 }
@@ -543,8 +544,8 @@ main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .sidebarNavGro
 }
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItem {
   width: 100% !important;
-  height: 40px !important;
-  min-height: 40px !important;
+  height: 36px !important;
+  min-height: 36px !important;
   padding: 0 !important;
   grid-template-columns: 1fr !important;
   justify-items: center !important;
