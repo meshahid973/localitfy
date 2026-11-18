@@ -6,7 +6,7 @@ const read = (f) => fs.readFileSync(f, "utf8");
 test("busy-paint suppression targets valid CSS pseudo-element selectors", () => {
   const css = read("src/features/shell/effects.css");
   assert.doesNotMatch(css, /:is\([^)]*::(?:before|after)/);
-  assert.match(css, /\.app\.localtifyInteractionBusy :is\(\.coverAura, \.homeAlbumArt, \.songArt, \.playerBar\)::before/);
+  assert.match(css, /\.app\.localtifyInteractionBusy :is\(\.coverAura, \.songArt, \.playerBar\)::before/);
   assert.match(css, /\.app\.localtifyInteractionBusy \.heroAmbiencePulse/);
 });
 

@@ -34,14 +34,14 @@ function rememberCoverStyle(source: string, style: CoverAverageStyle) {
 }
 const fastAverageColor=typeof window!=="undefined"?new FastAverageColor():null;
 export function buildCoverAverageStyle(hex:string):CoverAverageStyle{const safe=normalizeHexColor(hex,"#8dffce"),rgb=hexToRgbString(safe,"#8dffce");return{"--cover-rgb":rgb,"--player-ambient-rgb":rgb,"--active-cover-rgb":rgb,"--cover-average":safe} as CoverAverageStyle;}
-export function useCoverAverageStyle(source: string, enabled: boolean) {
+export function useCoverAverageStyle(source: string, enabled: boolean, visible = true) {
   const coverSource = enabled ? String(source || "").trim() : "";
   const [sample, setSample] = useState<{ source: string; style: CoverAverageStyle } | null>(null);
   const requestIdRef = useRef(0);
 
   useEffect(() => {
     const requestId = ++requestIdRef.current;
-    if (!coverSource || !fastAverageColor) return;
+    if (!coverSource || !fastAverageColor || !visible) return;
     const cached = cachedCoverStyle(coverSource);
     if (cached) {
       setSample({ source: coverSource, style: cached });
@@ -59,7 +59,7 @@ export function useCoverAverageStyle(source: string, enabled: boolean) {
       });
     }, 80);
     return () => { cancelled = true; window.clearTimeout(timer); };
-  }, [coverSource]);
+  }, [coverSource, visible]);
 
   // No stale tint between a track change and its artwork-color result.
   return coverSource && sample?.source === coverSource ? sample.style : EMPTY_COVER_STYLE;

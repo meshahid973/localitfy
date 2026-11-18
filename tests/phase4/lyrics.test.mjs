@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import ts from "typescript";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
@@ -264,4 +265,18 @@ test("exact artist takes priority over a wrong-artist fallback with synced lyric
   ], { track: "Mayonaka No Door Stay With Me", artist: "Miki Matsubara", duration: 300 });
   assert.equal(result.status, "plain");
   assert.equal(result.lines[0].text, "Correct artist's lyrics");
+});
+
+test("lyrics schedule wakes at line boundaries, bounds clock drift and handles speed changes", () => {
+  const code = fs.readFileSync(path.join(root, "src/features/lyrics/lyrics.utils.ts"), "utf8");
+  const compiled = ts.transpileModule(code, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
+  const functions = {};
+  new Function("exports", compiled)(functions);
+  const lines = [{ time: 1, text: "one" }, { time: 3, text: "two" }, {time: 3, text: "duplicate"}];
+  assert.equal(functions.activeLyricIndex(lines, 0), -1);
+  assert.equal(functions.nextLyricCheckDelay(lines, -1, 0, 1), 250);
+  assert.equal(functions.nextLyricCheckDelay(lines, 0, 2.8, 2), 101);
+  assert.equal(functions.nextLyricCheckDelay(lines, 0, 2.999, 1), 16);
+  assert.equal(functions.activeLyricIndex(lines, 3), 2);
+  assert.equal(functions.nextLyricCheckDelay(lines, 2, 3, 1), 250);
 });

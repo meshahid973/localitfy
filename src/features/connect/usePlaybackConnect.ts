@@ -549,13 +549,15 @@ export function usePlaybackConnect(local: LocalPlayer) {
       };
     },
 
-    lyrics<T extends Pick<LyricsViewProps, "song" | "isPlaying" | "getTime" | "seekTo">>(props: T): T {
+    lyrics<T extends Pick<LyricsViewProps, "song" | "isPlaying" | "getTime" | "getPlaybackRate" | "subscribeClock" | "seekTo">>(props: T): T {
       if (!remote || !remoteSong) return props;
       return {
         ...props,
         song: remoteSong,
         isPlaying: remote.playing,
         getTime: () => (liveRef.current.state ? livePositionMs(liveRef.current.state, serverNow()) / 1000 : 0),
+        getPlaybackRate: () => liveRef.current.state?.rate || 1,
+        subscribeClock: undefined,
         seekTo: (seconds: number) => command({ action: "seek", positionMs: seconds * 1000 }, { positionMs: seconds * 1000, at: serverNow() })
       };
     }

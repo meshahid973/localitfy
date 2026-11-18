@@ -1491,7 +1491,7 @@ function MainModeApp() {
     [volumeDraft]
   );
   const ambientSource = useMemo(() => getSongAmbientSource(currentSong), [currentSong]);
-  const coverAverageStyle = useCoverAverageStyle(ambientSource, effectiveAmbient);
+  const coverAverageStyle = useCoverAverageStyle(ambientSource, effectiveAmbient, !isAppBackgrounded);
   const ambientStyle = useMemo(() => {
     const sourceStyle = getAmbientStyle(ambientSource) ?? {};
     return { ...sourceStyle, ...coverAverageStyle } as CSSProperties;
@@ -5480,6 +5480,14 @@ function MainModeApp() {
   const closeQueuePanel = useCallback(() => setQueuePanelOpen(false), []);
   const closeLyrics = useCallback(() => setLyricsOpen(false), []);
   const getLyricsTime = useCallback(() => audioRef.current?.currentTime ?? timeRef.current, []);
+  const getLyricsRate = useCallback(() => audioRef.current?.playbackRate || 1, []);
+  const subscribeLyricsClock = useCallback((listener: () => void) => {
+    const audio = audioRef.current;
+    if (!audio) return () => undefined;
+    const events = ["seeked", "ratechange", "playing", "pause", "loadedmetadata"] as const;
+    for (const event of events) audio.addEventListener(event, listener);
+    return () => { for (const event of events) audio.removeEventListener(event, listener); };
+  }, []);
 
   function revealNowPlaying() {
     nav.revealNowPlaying(nowPlayingContext);
@@ -8101,6 +8109,8 @@ function MainModeApp() {
         song: visualCurrentSong,
         isPlaying,
         getTime: getLyricsTime,
+        getPlaybackRate: getLyricsRate,
+        subscribeClock: subscribeLyricsClock,
         seekTo: (seconds: number) => handleSeek((seconds / (durationRef.current || currentDuration || currentSong?.duration || 1)) * 100),
         openSettings: () => { setLyricsOpen(false); setSettingsSearch(""); setSettingsCategory("experimental"); changeView("settings"); }
       }),

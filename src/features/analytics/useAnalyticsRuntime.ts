@@ -10,14 +10,7 @@ import {
 } from "./analyticsSnapshot";
 import { trackAudienceSnapshot, trackMarketingSnapshot, trackPlaylistSnapshot } from "../../analytics";
 
-function runIdleTask(task: () => void, timeout = 1400) {
-  if (typeof window === "undefined") return;
-  const requestIdleCallback = (window as typeof window & {
-    requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
-  }).requestIdleCallback;
-  if (typeof requestIdleCallback === "function") requestIdleCallback(task, { timeout });
-  else window.setTimeout(task, 0);
-}
+import { runLocaltifyIdleTask as runIdleTask } from "../../app/runtime/idle";
 
 export type UseAnalyticsRuntimeOptions = {
   ready: boolean;
@@ -50,6 +43,7 @@ export function useAnalyticsRuntime(options: UseAnalyticsRuntimeOptions) {
   const [analyticsAudienceSnapshotReady, setAnalyticsAudienceSnapshotReady] = useState(false);
 
   useEffect(() => {
+    if (!ready) return;
     const requestId = analyticsWorkerRequestRef.current + 1;
     analyticsWorkerRequestRef.current = requestId;
     setAnalyticsAudienceSnapshotReady(false);
@@ -92,18 +86,26 @@ export function useAnalyticsRuntime(options: UseAnalyticsRuntimeOptions) {
       setAnalyticsAudienceSnapshot(snapshot);
       setAnalyticsAudienceSnapshotReady(true);
     };
-    const applyFallback = () => runIdleTask(() => applySnapshot(makeLocaltifyAnalyticsSnapshotFallback(workerPayload)), 900);
+    let cancelFallback: (() => void) | undefined;
+    const applyFallback = () => {
+      cancelFallback?.();
+      if (cancelled) return;
+      cancelFallback = runIdleTask(() => {
+        if (!cancelled) applySnapshot(makeLocaltifyAnalyticsSnapshotFallback(workerPayload));
+      }, 900);
+    };
     const worker = analyticsWorkerRef.current || createLocaltifyLibraryWorker();
     if (!worker) {
       applyFallback();
-      return () => { cancelled = true; };
+      return () => { cancelled = true; cancelFallback?.(); };
     }
 
     analyticsWorkerRef.current = worker;
     const handleMessage = (event: MessageEvent) => {
       const data = event.data || {};
       if (data.type !== "analytics-snapshot" || data.requestId !== requestId) return;
-      applySnapshot(data.snapshot || makeLocaltifyAnalyticsSnapshotFallback(workerPayload));
+      if (data.snapshot && !data.error) applySnapshot(data.snapshot);
+      else applyFallback();
     };
     const handleError = () => {
       try {
@@ -117,14 +119,30 @@ export function useAnalyticsRuntime(options: UseAnalyticsRuntimeOptions) {
 
     worker.addEventListener("message", handleMessage);
     worker.addEventListener("error", handleError);
-    try { worker.postMessage(workerPayload); } catch { handleError(); }
+    // Rapid settings/navigation changes coalesce before structured cloning.
+    // The worker needs seven song fields and playlist lengths, not URLs,
+    // cover data, file paths, or full playlist ID arrays.
+    const sendTimer = window.setTimeout(() => {
+      if (cancelled) return;
+      try {
+        worker.postMessage({
+          ...workerPayload,
+          songs: songs.map(({ title, artist, album, duration, playCount, dateAdded, fileExists }) =>
+            ({ title, artist, album, duration, playCount, dateAdded, fileExists })),
+          playlists: undefined,
+          playlistSongCounts: playlists.map(playlist => playlist.songIds.length)
+        });
+      } catch { handleError(); }
+    }, 120);
     return () => {
       cancelled = true;
+      window.clearTimeout(sendTimer);
+      cancelFallback?.();
       worker.removeEventListener("message", handleMessage);
       worker.removeEventListener("error", handleError);
     };
   }, [
-    songs, likedCount, playlists, view,
+    ready, songs, likedCount, playlists, view,
     settings.discordEnabled, settings.discordPrivacyMode, settings.discordButtons,
     settings.discordArtMode, settings.discordActivityStyle, settings.startWithWindows,
     settings.minimizeToTray, settings.customThemeEnabled, settings.theme,
@@ -141,9 +159,7 @@ export function useAnalyticsRuntime(options: UseAnalyticsRuntimeOptions) {
 
   useEffect(() => {
     if (!ready || !analyticsAudienceSnapshotReady) return;
-    let cancelled = false;
-    runIdleTask(() => {
-      if (cancelled) return;
+    const cancel = runIdleTask(() => {
       trackAudienceSnapshot(analyticsAudienceSnapshot);
       trackMarketingSnapshot(analyticsAudienceSnapshot);
       trackPlaylistSnapshot({
@@ -154,7 +170,7 @@ export function useAnalyticsRuntime(options: UseAnalyticsRuntimeOptions) {
         audience_segment: String(analyticsAudienceSnapshot.audience_segment || "new_local_music_user")
       });
     }, 2600);
-    return () => { cancelled = true; };
+    return cancel;
   }, [ready, analyticsAudienceSnapshotReady, analyticsAudienceSnapshot]);
 
   return { analyticsAudienceSnapshot, analyticsAudienceSnapshotReady };
