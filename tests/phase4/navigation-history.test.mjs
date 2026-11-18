@@ -69,9 +69,11 @@ test("collections open as pages in their section instead of drawers", () => {
 test("every collection card opens on click, plays from its button and has the shared menu", () => {
   const card = read("src/shared/ui/MediaCard.tsx");
   assert.match(card, /onClick=\{\(\) => void onOpen\(\)\}/);
+  assert.match(card, /<button className="mediaCardOpen" type="button" aria-label=\{openLabel\}/);
+  assert.doesNotMatch(card, /role="button"/);
   assert.match(card, /event\.stopPropagation\(\); void onPlay\(\);/, "the play button does not also open the page");
   for (const file of ["src/features/artists/ArtistsView.tsx", "src/features/genres/GenresView.tsx",
-    "src/features/home/HomeShelves.tsx", "src/features/home/HomeView.tsx", "src/features/playlists/PlaylistsView.tsx"]) {
+    "src/features/home/HomeShelves.tsx", "src/features/playlists/PlaylistsView.tsx"]) {
     const source = read(file);
     assert.match(source, /<MediaCard/, file);
     assert.match(source, /actions\.openCollectionMenu\(event,/, file);

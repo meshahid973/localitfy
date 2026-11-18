@@ -364,7 +364,7 @@ button:disabled{
 
 .iconAction:hover{
   transform: translateY(-1px);
-  color: #fff;
+  color: var(--lt-text);
   background: var(--surface-3);
 }
 

@@ -6,7 +6,7 @@
   user-select: none;
 }
 
-.mediaCard:focus-visible {
+.mediaCard:has(.mediaCardOpen:focus-visible) {
   outline: 2px solid rgba(var(--lt-accent-rgb), .62);
   outline-offset: 2px;
 }
@@ -17,6 +17,21 @@
   min-width: 0;
   max-width: 100%;
 }
+
+.mediaCardOpen {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.mediaCardOpen:focus-visible { outline: 2px solid var(--lt-accent); outline-offset: 2px; }
 
 .mediaCardPlay {
   position: absolute;

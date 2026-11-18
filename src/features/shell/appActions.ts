@@ -4,7 +4,7 @@ import type { Playlist } from "../playlists/playlist.types";
 import type { PageDetail, NavigationHistory } from "./useNavigationHistory";
 import { artistDetailId } from "./useNavigationHistory";
 
-/** Anything that opens as a page and plays as a whole: an album, artist, genre, playlist or daily mix. */
+/** Anything that opens as a page and plays as a whole: an artist, genre, playlist or daily mix. */
 export type CollectionTarget = {
   kind: PageDetail["kind"];
   id: string;
