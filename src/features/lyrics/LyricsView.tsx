@@ -240,7 +240,7 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, ge
       <div className={`lyricsLines ${result.status === "synced" ? "isSynced" : "isPlain"}`}>
         {result.status === "plain" ? <p className="lyricsNote">These lyrics aren’t synced to the song yet.</p> : null}
         {result.lines.map((line, index) => <LyricRow key={index} line={line} index={index} synced={Boolean(synced)} state={!synced ? "" : index === activeIndex ? "isActive" : index < activeIndex ? "isPast" : ""} register={registerLine} seek={seekLine} companions={showCompanions} />)}
-        <p className="lyricsCredit">{result.manual ? "Manually selected LRCLIB lyrics" : result.source === "file" ? "Lyrics from a local .lrc file" : result.source === "embedded" ? "Lyrics embedded in the audio file" : "Lyrics provided by LRCLIB"}</p>
+        <p className="lyricsCredit">{result.source === "manual" ? "Your saved lyrics" : result.manual ? "Manually selected LRCLIB lyrics" : result.source === "file" ? "Lyrics from a local .lrc file" : result.source === "embedded" ? "Lyrics embedded in the audio file" : "Lyrics provided by LRCLIB"}</p>
       </div>
     );
   } else {
@@ -310,7 +310,7 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, ge
       {saveError ? <p className="lyricsNote" role="alert">{saveError}</p> : null}
       <div ref={scrollerRef} className="lyricsScroller" tabIndex={0} aria-label="Scrollable lyrics" onWheel={holdManualScroll} onTouchMove={holdManualScroll} onPointerDown={(event) => { if (event.target === event.currentTarget) holdManualScroll(); }} onKeyDown={(event) => { if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End"].includes(event.key)) holdManualScroll(); }}>
         {matcherOpen && song
-          ? <LyricsMatchPanel key={songRevision} songId={song.id} title={song.title} artist={song.artist} onSelected={adoptLyrics} />
+          ? <LyricsMatchPanel key={songRevision} songId={song.id} title={song.title} artist={song.artist} result={result} onSelected={adoptLyrics} />
           : body}
       </div>
     </section>

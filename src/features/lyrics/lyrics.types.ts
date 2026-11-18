@@ -5,7 +5,7 @@ export type LyricsLine = { time: number; text: string; words?: LyricsWord[]; rom
 export type LyricsResult = {
   status: "synced" | "plain" | "instrumental" | "missing" | "offline" | "disabled" | "error";
   /** Where the lyrics came from: a `.lrc` file next to the song, LRCLIB, or nowhere. */
-  source: "file" | "embedded" | "lrclib" | "none";
+  source: "file" | "embedded" | "manual" | "lrclib" | "none";
   lines: LyricsLine[];
   error?: string;
   manual?: boolean;

@@ -355,3 +355,7 @@
 .lyricsScroller:focus-visible { outline: 2px solid var(--lt-accent); outline-offset: -2px; }
 .app.reducedMotion .lyricsView, .app.reducedMotion .lyricsScroller, .app.reducedMotion .lyricsLine, .app.reducedMotion [data-lyric-word] { animation: none; transition: none; }
 @media (prefers-reduced-motion: reduce) { .lyricsLine.isActive [data-lyric-word] { transition: none; } }
+
+.lyricsLocalEditor { display: grid; gap: var(--lt-space-2); }
+.lyricsLocalEditor textarea { width: 100%; resize: vertical; padding: var(--lt-space-3); border: 1px solid var(--lt-border); border-radius: var(--lt-radius-item); background: var(--lt-surface-soft); color: var(--lt-text); font: inherit; line-height: 1.5; }
+.lyricsLocalEditor textarea:focus-visible { outline: 2px solid var(--lt-accent); outline-offset: 2px; }

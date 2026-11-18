@@ -415,7 +415,7 @@ function createLyricsService({
     return true;
   }
 
-  return { get, searchManual, getManual, clearCache };
+  return { get, searchManual, getManual, attachCompanions, clearCache };
 }
 
 module.exports = { createLyricsService, shapeResult, chooseLyricsResult, retryAfterMs, embeddedLyricsResult };
