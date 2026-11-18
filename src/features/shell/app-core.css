@@ -458,10 +458,6 @@ button:disabled{
   text-align: center;
 }
 
-.fullList{
-  padding-right: 4px;
-}
-
 .dangerButton{
   min-height: 38px;
   padding: 0 15px;
