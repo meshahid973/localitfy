@@ -4,7 +4,7 @@ import fs from "node:fs";
 import ts from "typescript";
 const source = fs.readFileSync(new URL("../../src/features/covers/artworkPalette.ts", import.meta.url), "utf8");
 const js = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
-const { extractArtworkPalette, PaletteCache, safeAtmosphere, contrastRatio, rgbHex } = await import("data:text/javascript;base64," + Buffer.from(js).toString("base64"));
+const { extractArtworkPalette, PaletteCache, safeAtmosphere, contrastRatio, rgbHex, advanceArtworkFrame } = await import("data:text/javascript;base64," + Buffer.from(js).toString("base64"));
 
 test("palette detects distinct hues and ignores transparent pixels", () => {
   const data = new Uint8ClampedArray([...Array(100)].flatMap(() => [240, 20, 90, 255, 20, 180, 240, 255, 90, 20, 180, 255, 255, 255, 255, 0]));
@@ -33,4 +33,15 @@ test("atmosphere preserves muted text contrast in both themes and selected surfa
       assert.ok(contrastRatio(ink,selected)>=4.5);
     }
   }
+});
+
+test("decoded frames retain only the current and preceding source; failures clear both", () => {
+  let frame = {current:"",previous:""};
+  for (const source of ["a","b","c","a","b"]) {
+    const previous = frame.current;
+    frame = advanceArtworkFrame(frame, source,true);
+    assert.deepEqual(frame,{current:source,previous});
+    assert.equal(advanceArtworkFrame(frame,source,true),frame);
+  }
+  assert.deepEqual(advanceArtworkFrame(frame,"broken",false),{current:"",previous:""});
 });

@@ -1,21 +1,21 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { Song } from "../library/song.types";
 import { decodeArtwork, getSongAmbientSource } from "./cover.ambient";
+import { advanceArtworkFrame, type ArtworkFrame } from "./artworkPalette";
 import "./artwork-backdrop.css";
 
 export const ArtworkAmbientContext = createContext(true);
 const FADE_MS = 360;
-type Frame = { current: string; previous: string };
+ 
 
 function CrossfadeArtwork({ source }: { source: string }) {
-  const [frame, setFrame] = useState<Frame>({ current: "", previous: "" });
+  const [frame, setFrame] = useState<ArtworkFrame>({ current: "", previous: "" });
   useEffect(() => {
     if (!source) { setFrame({ current: "", previous: "" }); return; }
     const controller = new AbortController();
     void decodeArtwork(source, controller.signal).then(ready => {
       if (controller.signal.aborted) return;
-      setFrame(old => !ready ? { current: "", previous: "" } :
-        old.current === source ? old : { current: source, previous: old.current });
+      setFrame(old => advanceArtworkFrame(old, source, ready === true));
     });
     return () => controller.abort();
   }, [source]);

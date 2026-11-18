@@ -90,3 +90,11 @@ export function safeAtmosphere(palette: ArtworkPalette, light: boolean, strength
   }
   return [base, base, base];
 }
+
+export type ArtworkFrame = { current: string; previous: string };
+/** Call only for the latest completed request; a failed decode clears the
+ * outgoing art instead of promoting an unloaded image. */
+export function advanceArtworkFrame(frame: ArtworkFrame, source: string, decoded: boolean): ArtworkFrame {
+  if (!source || !decoded) return { current: "", previous: "" };
+  return frame.current === source ? frame : { current: source, previous: frame.current };
+}
