@@ -14,9 +14,8 @@ test("Home keeps the reference music hierarchy without renderer hacks", () => {
   for (const marker of [
     "Listen now",
     "Most listened",
-    "New Releases",
+    "Recently added",
     "homeListenGrid",
-    "homeArtistRail",
     "homeReleaseRail",
     "Customize Home"
   ]) {
@@ -39,7 +38,6 @@ test("Home fills the content pane while the shell owns sidebar geometry", () => 
     ".app:has(.pageTransition-home) .content",
     ".homeJumpBack",
     ".homeListenGrid",
-    ".homeArtistRail",
     ".homeReleaseRail",
     "width: 100%",
     "--workspace-sidebar-current"
@@ -149,6 +147,7 @@ test("Home most-listened work is memoized, bounded, and hidden when unused", () 
   assert.match(home, /const mostPlayedSongs = useMemo/);
   assert.match(home, /showMostListened \? pickMostPlayedSongs\(songs\) : \[\]/);
   assert.match(home, /title="Most listened of all time"/);
+  const css = read("src/features/home/home.css");
   assert.match(css, /\.homeSection > h3 \{ margin-bottom: 14px; \}/);
   assert.doesNotMatch(css, /\.homeSectionHead > h3 \{ margin:0; \}/);
 });

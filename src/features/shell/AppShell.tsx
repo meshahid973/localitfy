@@ -15,6 +15,7 @@ import SongContextMenu from "../library/components/SongContextMenu";
 import CollectionContextMenu from "../library/components/CollectionContextMenu";
 import { AppActionsContext, playableIds } from "./appActions";
 import { useCollectionActions } from "./useCollectionActions";
+import { CollectionLoading } from "../../shared/ui/CollectionLoading";
 import { MascotStateArt, UpdateStatusIcon, WindowCloseIcon } from "../../shared/ui/LocaltifyViewUi";
 import type { MascotStateKey } from "../../shared/ui/LocaltifyViewUi";
 import WhatsNewModal from "../updates/WhatsNewModal";
@@ -359,7 +360,7 @@ export default function AppShell(props: AppShellProps) {
             >
               {view === "home" ? <HomeView {...home} artworkAmbient={effectiveAmbient && !isAppBackgrounded} bannerType={homeBanner} /> : null}
 
-              <Suspense fallback={<div role="status" className="collectionLoading">Loading…</div>}>
+              <Suspense fallback={<CollectionLoading label="Loading page…" />}>
                 {(view === "library" || view === "liked") ? <LibraryView {...library} /> : null}
                 {view === "artists" ? (detail?.kind === "artist"
                   ? <ArtistPage key={detail.id} id={detail.id} {...pageProps} openSimilar={openSimilarSongs} />

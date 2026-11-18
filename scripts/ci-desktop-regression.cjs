@@ -133,15 +133,15 @@ server.listen(5173,async()=>{
       const state=await win.webContents.executeJavaScript(`(()=>{
         const page=document.querySelector('.homePage');
         const atmosphere=page.querySelector('.homeAtmosphere');
-        const artist=page.querySelector('.homeArtistCard .mediaCardCover');
+        const artist=page.querySelector('.homeReleaseRail .mediaCardCover');
         const rail=page.querySelector('.homeReleaseRail');
         artist?.scrollIntoView({block:'center'});
         const rect=e=>{const r=e?.getBoundingClientRect();return r?{x:r.x,right:r.right,width:r.width,height:r.height}:null};
-        const shelves=[...page.querySelectorAll('.homeArtistRail,.homeReleaseRail')];
+        const shelves=[...page.querySelectorAll('.homeReleaseRail')];
         return {viewport:window.innerWidth,page:rect(page),atmosphere:rect(atmosphere),artist:rect(artist),rail:rail?{width:rail.clientWidth,scrollWidth:rail.scrollWidth}:null,hidden:shelves.every(e=>getComputedStyle(e).scrollbarWidth==='none')};
       })()`);
       assert.equal(state.viewport,width,"actual renderer viewport");
-      assert.ok(state.artist&&state.artist.width>=64&&Math.abs(state.artist.width-state.artist.height)<=3,"artist artwork collapsed at "+width+": "+JSON.stringify(state));
+      assert.ok(state.artist&&state.artist.width>=64&&Math.abs(state.artist.width-state.artist.height)<=3,"song artwork collapsed at "+width+": "+JSON.stringify(state));
       assert.ok(state.atmosphere&&Math.abs(state.page.x-state.atmosphere.x)<=3&&Math.abs(state.page.right-state.atmosphere.right)<=3,"ambient image should reach Home boundaries: "+JSON.stringify(state));
       assert.ok(state.hidden,"artwork shelves should not expose scrollbars");
       if(state.rail&&state.rail.scrollWidth>state.rail.width+10){
@@ -188,7 +188,7 @@ server.listen(5173,async()=>{
         await until(()=>win.webContents.executeJavaScript("window.innerWidth").then(actual=>actual===width),"viewport "+width,5000);
         for (const view of ["home","library","artists","genres","playlists","discover","downloads","covers","analytics","settings"]) {
           await win.webContents.executeJavaScript(`document.querySelector('.sidebar [data-nav-id="${view}"]').click()`);
-          await until(()=>win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return !!page?.firstElementChild&&!document.querySelector('.appCrashBoundary')})()`).catch(()=>false),view+" "+mode+" "+width);
+          await until(()=>win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return !!page?.firstElementChild&&!page.querySelector('.collectionLoading')&&!document.querySelector('.appCrashBoundary')})()`).catch(()=>false),view+" "+mode+" "+width);
           const geometry=await win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return {width:page.clientWidth,scroll:page.scrollWidth}})()`);
           assert.ok(geometry.width>0&&geometry.scroll<=geometry.width+3,"page overflow "+view+" "+mode+" "+JSON.stringify(geometry));
           await screenshot(win,view+"-"+mode+"-"+width);

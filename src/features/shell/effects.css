@@ -807,7 +807,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIconMotionV468{
 
 .app[data-platform="linux"] .windowButtons button:hover{
 
-  background: rgba(255,255,255,.105) !important;
+  background: color-mix(in srgb, var(--lt-text) 10.5%, transparent) !important;
 }
 
 .app[data-platform="linux"] .windowButtons .closeWin:hover{
@@ -834,11 +834,11 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIconMotionV468{
 }
 
 .app[data-platform="linux"] *::-webkit-scrollbar-track{
-  background: rgba(255,255,255,.035) !important;
+  background: color-mix(in srgb, var(--lt-text) 3.5%, transparent) !important;
 }
 
 .app[data-platform="linux"] *::-webkit-scrollbar-thumb{
-  border: 3px solid rgba(0,0,0,.72) !important;
+  border: 3px solid var(--lt-bg) !important;
   border-radius: 999px !important;
   background: rgba(var(--accent-rgb), .42) !important;
 }
@@ -883,7 +883,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIconMotionV468{
 }
 
 .app[data-platform="linux"] .search{
-  background: rgba(255,255,255,.06) !important;
+  background: var(--lt-surface-soft) !important;
 }
 
 @media (prefers-reduced-motion: reduce){
@@ -1087,7 +1087,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIconMotionV468{
 }
 
 .app .windowButtons button:hover{
-  color: #fff !important;
+  color: var(--lt-text) !important;
 }
 
 .app .windowButtons .closeWin:hover{
@@ -1271,7 +1271,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIconMotionV468{
 
 .app[data-platform="linux"] :is(.content, .sidebar, .pageTransition, .songList, .settingsContent){
   scrollbar-width: thin;
-  scrollbar-color: rgba(var(--lt-accent-rgb), .34) rgba(255,255,255,.055);
+  scrollbar-color: rgba(var(--lt-accent-rgb), .34) color-mix(in srgb, var(--lt-text) 5.5%, transparent);
 }
 
 .app[data-platform="linux"] :is(.songRow){

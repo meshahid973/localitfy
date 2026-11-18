@@ -5542,10 +5542,10 @@ function MainModeApp() {
     nav.revealNowPlaying(nowPlayingContext);
   }
 
-  function playAlbumSongs(songIds: string[], albumTitle = "album", source: PlaybackSourceRef | null = null, shuffled = false, startId?: string) {
+  function playCollectionSongs(songIds: string[], collectionTitle = "collection", source: PlaybackSourceRef | null = null, shuffled = false, startId?: string) {
     const ids = getPlayableUniqueSongIds(songIds, songsById);
     if (!ids.length) {
-      setStatusText("album has no playable songs");
+      setStatusText("collection has no playable songs");
       return;
     }
 
@@ -5554,23 +5554,23 @@ function MainModeApp() {
     setActivePlaylistId(null);
     setPlayQueue(order.slice(start + 1));
     void selectSong(order[start], true, { playlistId: null, source: source ? { ...source, songIds: order } : null });
-    setStatusText(`${shuffled ? "shuffling" : "playing"} ${albumTitle}`);
+    setStatusText(`${shuffled ? "shuffling" : "playing"} ${collectionTitle}`);
   }
 
-  function queueAlbumSongs(songIds: string[], albumTitle = "album") {
+  function queueCollectionSongs(songIds: string[], collectionTitle = "collection") {
     if (connect.queue(songIds, false)) return;
     const ids = getPlayableUniqueSongIds(songIds, songsById);
     if (!ids.length) {
-      setStatusText("album has no playable songs");
+      setStatusText("collection has no playable songs");
       return;
     }
 
     setPlayQueue((queue) => {
-      const albumIdSet = new Set(ids);
-      const cleanedQueue = queue.filter((songId) => !albumIdSet.has(songId));
+      const collectionIdSet = new Set(ids);
+      const cleanedQueue = queue.filter((songId) => !collectionIdSet.has(songId));
       return [...cleanedQueue, ...ids];
     });
-    setStatusText(`queued ${ids.length} track${ids.length === 1 ? "" : "s"} from ${albumTitle}`);
+    setStatusText(`queued ${ids.length} track${ids.length === 1 ? "" : "s"} from ${collectionTitle}`);
   }
 
   function readDraggedSongId(event: DragEvent<HTMLElement>) {
@@ -7861,7 +7861,7 @@ function MainModeApp() {
       openSimilarSongs: setSimilarRequest,
       playableSongCount: playableSongs.length,
       playerError,
-      playSongs: playAlbumSongs,
+      playSongs: playCollectionSongs,
       selectSong,
       songs,
       settings,
@@ -7925,7 +7925,7 @@ function MainModeApp() {
       openPlaylistSongContextMenuAction,
       playPlaylist,
       openSimilarSongs: setSimilarRequest,
-      playSongs: (ids: string[], label: string) => playAlbumSongs(ids, label),
+      playSongs: (ids: string[], label: string) => playCollectionSongs(ids, label),
       selectSong,
       playlistDragOverPlaylistId,
       playlistSummaries,
@@ -8130,7 +8130,7 @@ function MainModeApp() {
         seed: similarSeed, songsById, currentId, returnFocusTo: similarRequest?.kind === "song" ? songContextAnchorRef.current : null,
         onClose: () => setSimilarRequest(null),
         openAnalysisSettings: () => { setSimilarRequest(null); setSettingsSearch(""); setSettingsCategory("experimental"); changeView("settings"); },
-        selectSong, queueSong, playSongs: playAlbumSongs, queueSongs: queueAlbumSongs
+        selectSong, queueSong, playSongs: playCollectionSongs, queueSongs: queueCollectionSongs
       },
       queuePanel: connect.queuePanel({
         open: queuePanelOpen,
@@ -8199,7 +8199,7 @@ function MainModeApp() {
         removeSong
       }
     },
-    collections: { playSongs: playAlbumSongs, queueSongs: queueAlbumSongs, playPlaylist, openSimilar: setSimilarRequest },
+    collections: { playSongs: playCollectionSongs, queueSongs: queueCollectionSongs, playPlaylist, openSimilar: setSimilarRequest },
     playbackAudio: {
       audioRef,
       currentSong: visualCurrentSong,

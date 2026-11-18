@@ -147,3 +147,11 @@ test("Daily mix artwork is distinct, ordered, and limited to four covers", () =>
   assert.deepEqual(ids(picks.pickHomeMixArtwork([tracks[0], tracks[1]])), ["first"]);
   assert.equal(tracks.length, 6);
 });
+
+
+test("Most played shelves rank real listening history and exclude unplayed or missing tracks", () => {
+  const source = [song("new"), song("two", { playCount: 2 }), song("old", { playCount: 10, lastPlayed: daysAgo(30) }), song("recent", { playCount: 10, lastPlayed: daysAgo(1) }), song("missing", { playCount: 100, fileExists: false })];
+  assert.deepEqual(ids(picks.pickMostPlayedSongs(source)), ["recent", "old", "two"]);
+  assert.deepEqual(ids(picks.pickMostPlayedSongs(source, 1)), ["recent"]);
+  assert.deepEqual(ids(picks.pickMostPlayedSongs(source, 0)), []);
+});
