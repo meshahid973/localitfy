@@ -5,7 +5,8 @@ export const SAMPLE_SIZE = 64;
 
 export class PaletteCache<T> {
   private readonly entries = new Map<string, T>();
-  constructor(private readonly limit = PALETTE_LIMIT) {}
+  private readonly limit: number;
+  constructor(limit = PALETTE_LIMIT) { this.limit = limit; }
   get(key: string): T | undefined {
     const entry = this.entries.get(key);
     if (entry !== undefined) {
