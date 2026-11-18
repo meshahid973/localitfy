@@ -352,19 +352,6 @@
   display: none !important;
 }
 
-/* keep audio smooth by sleeping expensive paint while the renderer is busy. */
-.app.localtifyInteractionBusy :is(.coverAura, .songArt, .playerBar)::before{
-  opacity: 0 !important;
-  filter: none !important;
-  animation: none !important;
-  transition: none !important;
-}
-
-.app.localtifyInteractionBusy :is(.nowPlayingCopySwap, .songRow, .playlistSongRow){
-  animation: none !important;
-  transition-duration: 0ms !important;
-}
-
 /* Disable old pulse/scale/sidebar hover effects. */
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar,
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar *,

@@ -3,10 +3,10 @@ import fs from "node:fs";
 import test from "node:test";
 const read = (f) => fs.readFileSync(f, "utf8");
 
-test("busy-paint suppression targets valid CSS pseudo-element selectors", () => {
+test("effects use valid pseudo-element selectors without retired busy styles", () => {
   const css = read("src/features/shell/effects.css");
   assert.doesNotMatch(css, /:is\([^)]*::(?:before|after)/);
-  assert.match(css, /\.app\.localtifyInteractionBusy :is\(\.coverAura, \.songArt, \.playerBar\)::before/);
+  assert.doesNotMatch(css, /\.localtifyInteractionBusy/);
   assert.doesNotMatch(css, /\.heroAmbiencePulse\b/);
 });
 
@@ -16,7 +16,7 @@ test("queue and history controls use Localtify theme tokens and keyboard focus",
   assert.match(queue, /border-radius: var\(--lt-radius-md\)/);
   assert.doesNotMatch(queue, /backdrop-filter: blur\(22px\)/);
   assert.match(queue, /\.queuePanelIconButton:focus-visible,[\s\S]*?outline: 2px solid var\(--lt-accent\)/);
-  assert.match(history, /background: var\(--lt-surface-soft\)/);
+  assert.match(history, /\.titleHistoryNav \{[^}]*background: transparent/);
   assert.match(history, /\.titleHistoryNav button:focus-visible/);
   assert.match(history, /-webkit-app-region: no-drag/);
   assert.match(history, /color-mix\(in srgb, var\(--lt-text\) 10%, var\(--lt-surface-raised\)\)/);
