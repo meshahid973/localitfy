@@ -98,7 +98,7 @@ export default function HomeView(props: HomeViewProps) {
   const showRediscover = showing("rediscover"), showUnplayed = showing("notPlayedYet"), showMixes = showing("dailyMixes");
   const recentlyPlayedSongs = useMemo(() => (showRecent ? pickRecentlyPlayed(songs) : []), [showRecent, songs]);
   const likedSongs = useMemo(() => (showLiked ? pickLikedSongs(songs) : []), [showLiked, songs]);
-  const rediscoverSongs = useMemo(() => (showRediscover ? pickRediscover(songs, new Date(day + "T00:00:00")) : []), [showRediscover, songs, day]);
+  const rediscoverSongs = useMemo(() => (showRediscover ? pickRediscover(songs, new Date()) : []), [showRediscover, songs, day]);
   const notPlayedSongs = useMemo(() => (showUnplayed ? pickNotPlayedYet(songs, new Date(day + "T00:00:00")) : []), [showUnplayed, songs, day]);
   const songsById = useMemo(() => (showMixes ? new Map(songs.map((song) => [song.id, song])) : new Map<string, Song>()), [showMixes, songs]);
 

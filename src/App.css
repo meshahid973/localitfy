@@ -1675,10 +1675,6 @@ html{
   background-repeat: no-repeat !important;
 }
 
-.loadingScreen{
-  animation-duration: 140ms !important;
-}
-
 .editorModal{
   background-image: none !important;
   background-size: auto !important;
@@ -2485,7 +2481,6 @@ body.localtifyIdle .app:not(.songDragActive) :where( .secretLayer, .coverSpark){
   contain-intrinsic-size: 1px 280px;
 }
 
-.loadingScreen,
 .editorModal{
   background:
     radial-gradient(circle at 50% 100%, rgba(var(--lt-accent-rgb), 0.09), transparent 42%),

@@ -7,8 +7,7 @@
  */
 
 .app,
-.simpleShell,
-.loadingScreen {
+.simpleShell {
   --motion-instant: 80ms;
   --motion-fast: 150ms;
   --motion-normal: 220ms;
@@ -70,7 +69,6 @@ button:disabled:active {
 
 /* Page/modal entrances are one-shot; dense rows never get mount animations. */
 .settingsPage,
-.loadingScreen,
 .content > .pageTransition {
   animation: localtifyPageIn var(--motion-normal) var(--motion-ease) both;
 }

@@ -5744,7 +5744,7 @@ function MainModeApp() {
     const blockedDragOrigin =
       event.target instanceof HTMLElement
         ? event.target.closest(
-            "button, input, textarea, select, a, [role='button'], .homeAlbumPlayZone, .homeAlbumCoverButton, .homeAlbumActions, .iconAction"
+            "button, input, textarea, select, a, [role='button'], .iconAction"
           )
         : null;
 
@@ -5838,7 +5838,7 @@ function MainModeApp() {
     const blockedDragOrigin =
       event.target instanceof HTMLElement
         ? event.target.closest(
-            "button, input, textarea, select, a, [role='button'], .homeAlbumPlayZone, .homeAlbumCoverButton, .homeAlbumActions, .iconAction"
+            "button, input, textarea, select, a, [role='button'], .iconAction"
           )
         : null;
 

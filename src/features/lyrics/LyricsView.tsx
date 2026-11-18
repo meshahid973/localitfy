@@ -39,10 +39,13 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
   const [activeIndex, setActiveIndex] = useState(-1);
   const [box, setBox] = useState<CSSProperties>({ top: 0, left: 0 });
   const songId = song?.id || "";
+  const songRevision = JSON.stringify([songId, song?.filePath, song?.title, song?.artist, song?.album]);
   const currentSongId = useRef(songId);
+  const currentRevision = useRef(songRevision);
   const requestGeneration = useRef(0);
   const openRef = useRef(open);
   currentSongId.current = songId;
+  currentRevision.current = songRevision;
   openRef.current = open;
   useEffect(() => { setMatcherOpen(false); }, [songId]);
 
@@ -51,12 +54,12 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
     setResult(null);
     setActiveIndex(-1);
     if (!songId) return;
-    const isCurrent = () => openRef.current && currentSongId.current === songId && requestGeneration.current === generation;
+    const isCurrent = () => openRef.current && currentRevision.current === songRevision && requestGeneration.current === generation;
     // The backend owns the disk/offline cache and its invalidation.
     window.localitfy.getLyrics({ id: songId, refresh })
       .then((next) => { if (isCurrent()) setResult(next); })
       .catch(() => { if (isCurrent()) setResult({ status: "error", source: "none", lines: [], error: "lyrics lookup failed" }); });
-  }, [songId]);
+  }, [songId, songRevision]);
 
   useEffect(() => {
     if (open) load(false);
@@ -74,20 +77,22 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
   const clearMatch = async () => {
     if (!songId) return;
     const expected = songId;
+    const generation = ++requestGeneration.current;
     try {
       const next = await window.localitfy.clearLyricsMatch({ id: expected });
-      adoptLyrics(expected, next);
+      if (requestGeneration.current === generation && currentRevision.current === songRevision) adoptLyrics(expected, next);
     } catch (error) { console.warn("[localtify lyrics reset]", error); }
   };
 
   const shiftLyrics = async (deltaMs: number) => {
     if (!songId || offsetSaving) return;
     const expected = songId;
+    const generation = requestGeneration.current;
     const offsetMs = Math.max(-30000, Math.min(30000, (result?.offsetMs || 0) + deltaMs));
     setOffsetSaving(true);
     try {
       const saved = await window.localitfy.setLyricsOffset({ id: expected, offsetMs });
-      if (currentSongId.current === expected) {
+      if (openRef.current && currentRevision.current === songRevision && requestGeneration.current === generation) {
         setResult(previous => {
           if (!previous) return previous;
           const next = { ...previous, offsetMs: saved.offsetMs };

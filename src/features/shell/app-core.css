@@ -596,17 +596,6 @@ button:disabled{
   }
 }
 
-.loadingScreen{
-  width: 100vw;
-  height: 100vh;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    #000;
-  background-size: 42px 42px;
-}
-
 [data-notes="off"] .eq{
   display: none;
 }
@@ -1736,9 +1725,7 @@ button{
 .simpleShell::after,
 .app,
 .content,
-.loadingScreen,
 .editorModal,
-.loadingScreen::before,
 .editorModal::before{
   background-image: none !important;
   background-size: auto !important;
@@ -1748,8 +1735,7 @@ button{
 .app .content,
 .app .panel,
 .app .coverPage,
-.app .editorModal,
-.app .loadingScreen{
+.app .editorModal{
   background-image: none !important;
   background-size: auto !important;
 }
