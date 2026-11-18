@@ -20,7 +20,11 @@ function createArtworkLookup(client,now=Date.now) {
   const cache=new Map(), pending=new Map();
   return async (title,artist) => {
     const key=JSON.stringify([norm(title),norm(artist)]), hit=cache.get(key);
-    if(hit && now()-hit.at<86400000) return hit.value;
+    if(hit && now()-hit.at<(hit.value.coverUrl || hit.value.fallbackCoverUrl ? 86400000 : 600000)) {
+      cache.delete(key); cache.set(key,hit);
+      return hit.value;
+    }
+    cache.delete(key);
     if(pending.has(key)) return pending.get(key);
     if(pending.size>=4 || !client?.searchRecordings) return {};
     const task=Promise.resolve().then(()=>client.searchRecordings(title,artist)).then(items=>{

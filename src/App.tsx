@@ -2511,7 +2511,7 @@ function MainModeApp() {
 
       if (event.code === "KeyM") {
         event.preventDefault();
-        updateVolumeFast(settings.volume > 0 ? 0 : 0.75);
+        toggleMuteFromNative();
       }
     };
 
@@ -6592,8 +6592,9 @@ function MainModeApp() {
   function updateVolumeFast(nextVolume: number) {
     const safeVolume = clamp(Number(nextVolume) || 0, 0, 1);
     const safePercent = Math.round(safeVolume * 100);
-    const nextSettings = { ...settings, volume: safeVolume };
+    const nextSettings = { ...settingsRef.current, volume: safeVolume };
 
+    settingsRef.current = nextSettings;
     volumeRef.current = safeVolume;
     volumeDraftRef.current = safePercent;
     setVolumeDraft(safePercent);
@@ -8184,17 +8185,13 @@ function MainModeApp() {
   if (!ready) {
     if (!bootError) return null;
     return (
-      <main className="loadingScreen bootScreen bootScreenError" aria-label="Localtify startup error">
-        <section className="bootCard" role="alert">
-          <div className="bootCopy">
-            <h1>Localtify had trouble starting</h1>
-            <p>{bootError}</p>
-            <div className="bootActions">
-              <button type="button" className="bootButton bootButtonPrimary" onClick={retryStartup}>Retry</button>
-              <button type="button" className="bootButton" onClick={copyStartupLog}>
-                {bootLogCopied ? "Copied error" : "Copy error"}
-              </button>
-            </div>
+      <main className="appCrashBoundary" aria-label="Localtify startup error">
+        <section className="appCrashCard" role="alert">
+          <h1>Localtify had trouble starting</h1>
+          <pre className="appCrashMessage">{bootError}</pre>
+          <div className="appCrashActions">
+            <button type="button" className="appCrashPrimary" onClick={retryStartup}>Retry</button>
+            <button type="button" onClick={copyStartupLog}>{bootLogCopied ? "Copied error" : "Copy error"}</button>
           </div>
         </section>
       </main>
