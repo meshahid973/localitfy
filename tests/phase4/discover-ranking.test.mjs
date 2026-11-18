@@ -16,3 +16,7 @@ test("store metadata omits promotional artwork and rejects unsafe URLs",()=>{
   const result=appleItems({results:[item,{...item,trackViewUrl:"https://other.example/"}]});
   assert.equal(result.length,1);assert.equal(result[0].coverUrl,undefined);
 });
+
+test("recording search does not return unrelated artist-only titles when a title matches", () => {
+  assert.deepEqual(rankCatalog("kick back", [{id:"1",title:"Unrelated",artist:"Kick Back City"},{id:"2",title:"KICK BACK",artist:"Kenshi Yonezu"}]).map(x=>x.id),["2"]);
+});

@@ -60,7 +60,7 @@ function rankCatalog(query, musicbrainz, store=[], popular=[]) {
     const contextual=words.filter(word=>context.split(" ").includes(word)).length;
     const albumHint=words.filter(word=>!title.split(" ").includes(word)&&context.split(" ").includes(word)).length;
     const score=(exact?300:pref?245:starts?150:phrase?140:0)+titleHits*12+contextual*4+albumHint*10+
-      (item.storeRank?Math.max(0,55-item.storeRank):0)+Math.min(65,Math.log10(1+(Number(item.listeners)||0))*10);
+      (item.storeRank?Math.max(0,55-item.storeRank):0)+Math.min(85,Math.log10(1+Math.max(0,Number(item.listeners)||0))*12);
     return {item,score,hasTitleMatch:Boolean(exact||pref||starts||phrase||titleHits),relevant:Boolean(exact||pref||starts||phrase||titleHits||artist===q)};
   }).filter(entry=>entry.relevant).sort((a,b)=>b.score-a.score);
   const hasTitleMatches=ranked.some(entry=>entry.hasTitleMatch);

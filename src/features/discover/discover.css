@@ -165,3 +165,6 @@
 .discoverOptional > summary { padding: var(--lt-space-2) 0; cursor: pointer; color: var(--lt-text); }
 .discoverOptional[open] > .discoverKey { margin-block: var(--lt-space-2); }
 .discoverOptional > summary:focus-visible { outline: 2px solid var(--lt-accent); outline-offset: 2px; }
+
+.discoverTopResult { display:flex; align-items:center; gap:var(--lt-space-3); min-width:0; }
+.discoverTopResult .discoverCover { flex-basis:88px; width:88px; }

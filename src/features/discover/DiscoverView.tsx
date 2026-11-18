@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, Compass, ExternalLink, Plus, RefreshCw, Search, Settings2, UserX } from "lucide-react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { Check, Compass, ExternalLink, Play, Plus, RefreshCw, Search, Settings2, UserX } from "lucide-react";
 import { PageHeader } from "../../shared/ui/PageHeader";
 import { isAndroidApp, computerName } from "../../app/platform";
 import { splitArtistCredits } from "../artists/artistCredits";
@@ -8,12 +8,16 @@ import type { SpotifyTrack } from "../downloads/download.types";
 import type { Settings } from "../settings/settings.types";
 import type { CatalogKind, DiscoverResult, DiscoverTrack } from "./discover.types";
 import { DiscoverCover } from "./DiscoverArtwork";
+import type { Song } from "../library/song.types";
+import { Cover } from "../covers/Cover";
 import { buildDiscoverShelves } from "./discoverShelves";
 import { ArcDropdownMenu } from "../../shared/ui/ArcDropdownMenu";
 import "./discover.css";
 
 
 export type DiscoverViewProps = {
+  songs: Song[];
+  selectLocalSong: (id: string) => void;
   settings: Pick<Settings, "discoverEnabled" | "lastfmApiKey" | "musicbrainzTagging">;
   updateSetting: <K extends keyof Settings>(key: K, value: Settings[K]) => unknown;
   /** Opens Downloads with these songs selected, ready to download. */
@@ -32,13 +36,27 @@ const toDownload = (track: DiscoverTrack): SpotifyTrack => ({ id: trackId(track)
 const listNames = (names: string[]) => names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
 const openLink = (url: string) => { if (url) void window.localitfy.openExternal?.(url); };
 
-export default function DiscoverView({ settings, updateSetting, sendToDownloads, notForMe }: DiscoverViewProps) {
+export default function DiscoverView({ settings, updateSetting, sendToDownloads, notForMe, songs, selectLocalSong }: DiscoverViewProps) {
   const phone = isAndroidApp();
   const [result, setResult] = useState<DiscoverResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [showAllRecommended, setShowAllRecommended] = useState(false);
   const [catalogKind, setCatalogKind] = useState<CatalogKind>("recording");
   const [catalogTerm, setCatalogTerm] = useState("");
+  const deferredTerm = useDeferredValue(catalogTerm);
+  const localMatches = useMemo(() => {
+    const normalize = (value: string) => value.normalize("NFKC").toLocaleLowerCase().trim();
+    const query = normalize(deferredTerm);
+    if (catalogKind !== "recording" || query.length < 2) return [];
+    const results: { song: Song; score: number }[] = [];
+    for (const song of songs) {
+      if (song.fileExists === false || !song.filePath) continue;
+      const title = normalize(song.title || ""), artist = normalize(song.artist || "");
+      const score = title === query ? 300 : title.startsWith(query) ? 200 : title.includes(query) ? 130 : (title + " " + artist).includes(query) ? 90 : artist.includes(query) ? 50 : 0;
+      if (score) results.push({song, score});
+    }
+    return results.sort((a,b)=>b.score-a.score || (Number(b.song.playCount)||0)-(Number(a.song.playCount)||0)).slice(0,6).map(entry=>entry.song);
+  }, [songs, deferredTerm, catalogKind]);
   const [catalog, setCatalog] = useState<DiscoverResult | null>(null);
   const [catalogLoading, setCatalogLoading] = useState(false);
   const catalogRequestRef = useRef(0);
@@ -169,18 +187,36 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       <h2 id="discover-catalog-title" className="discoverHeading">Explore music</h2>
       <form className="discoverSearch" onSubmit={event => { event.preventDefault(); void searchCatalog(); }}>
         <ArcDropdownMenu<CatalogKind> ariaLabel="Search category" value={catalogKind} disabled={catalogLoading} items={[{ value: "recording", label: "Songs" }, { value: "artist", label: "Artists" }]} onValueChange={value => { setCatalogKind(value); setCatalog(null); }} />
-        <input type="search" aria-label="Search public music catalog" placeholder="Search MusicBrainz" value={catalogTerm} maxLength={160} disabled={catalogLoading} onChange={event => { setCatalogTerm(event.currentTarget.value); setCatalog(null); }} />
+        <input type="search" aria-label="Search public music catalog" placeholder="Search songs and artists" value={catalogTerm} maxLength={160} disabled={catalogLoading} onChange={event => { setCatalogTerm(event.currentTarget.value); setCatalog(null); }} />
         <button className="heroMain" type="submit" disabled={catalogLoading || catalogTerm.trim().length < 2}><Search size={15} /><span>{catalogLoading ? "Searching…" : "Search"}</span></button>
       </form>
       <p className="discoverBecause" role="status">{catalogLoading ? "Searching public catalog…" : "Music catalog · Local playback only"}</p>
+      {localMatches.length && deferredTerm === catalogTerm ? <>
+        <h3 className="discoverHeading">In your library</h3>
+        <ul className="discoverSongList" aria-label="Local search results">
+          {localMatches.map(song => <li key={song.id}>
+            <Cover song={song} className="discoverCover" preferThumbnail />
+            <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => selectLocalSong(song.id)} title={song.title}>{song.title}</button><small>{song.artist}</small></span>
+            <button type="button" className="discoverPick" aria-label={"Play " + song.title} onClick={() => selectLocalSong(song.id)}><Play size={16} /></button>
+          </li>)}
+        </ul>
+      </> : null}
       {catalog?.status === "error" ? <p role="alert">{catalog.error}</p> : null}
-      {catalog?.status === "catalog" ? catalog.items.length ? <><h3 className="discoverHeading">Best matches</h3><ul className="discoverSongList" aria-label="Search results">
-        {catalog.items.map(item => <li key={item.id}>
+      {catalog?.status === "catalog" ? catalog.items.length ? <>
+        <h3 className="discoverHeading">Top result</h3>
+        {catalog.items.slice(0,1).map(item => <div key={item.id} className="discoverTopResult">
+          <DiscoverCover title={item.title} artist={item.artist} artwork={item} lookup={catalog.kind === "recording"} person={catalog.kind === "artist"} />
+          <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => openLink(item.url)} title={item.title}>{item.title}</button><small>{item.subtitle}</small></span>
+          {catalog.kind === "recording" ? <><span className="discoverDuration">{duration(item.durationMs)}</span>{pickButton(item)}</> : null}
+        </div>)}
+        {catalog.items.length > 1 ? <h3 className="discoverHeading">More matches</h3> : null}
+        <ul className="discoverSongList" aria-label="Search results">
+        {catalog.items.slice(1).map(item => <li key={item.id}>
           <DiscoverCover title={item.title} artist={item.artist} artwork={item} lookup={catalog.kind === "recording"} person={catalog.kind === "artist"} />
           <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => openLink(item.url)} title={item.title}>{item.title}</button><small title={item.subtitle}>{item.subtitle}</small></span>
           {catalog.kind === "recording" ? <><span className="discoverDuration">{duration(item.durationMs)}</span>{pickButton(item)}</> : null}
         </li>)}
-      </ul></> : <p role="status">No matching music found.</p> : null}
+      </ul></> : <p role="status">No matching catalog results.</p> : null}
     </section> : null}
     {result?.status === "needs-key" && settings.discoverEnabled && !phone ? <p className="discoverBecause">Personalized Last.fm suggestions are optional. Add a key in Settings if you want them.</p> : null}
     {phone && !needsSetup ? <p className="discoverHint">Catalog searches and suggestions use your paired {computerName()}. Manage recommendations there.</p> : null}
