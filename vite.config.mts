@@ -25,7 +25,6 @@ export default defineConfig({
           if (/[\\/]node_modules[\\/](?:react|react-dom|scheduler)[\\/]/.test(id)) return "vendor-react";
           if (/[\\/]node_modules[\\/](?:motion|motion-dom|motion-utils|framer-motion)[\\/]/.test(id)) return "vendor-motion";
           if (id.includes("lucide-react") || id.includes("@animateicons")) return "vendor-icons";
-          if (id.includes("posthog-js")) return "vendor-analytics";
           if (id.includes("fast-average-color")) return "vendor-cover-tools";
           return undefined;
         }
@@ -33,8 +32,7 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    include: ["react", "react-dom", "lucide-react", "motion"],
-    exclude: ["posthog-js"]
+    include: ["react", "react-dom", "lucide-react", "motion"]
   }
 });
 

@@ -8,7 +8,6 @@ import {
   makeLocaltifyAnalyticsSnapshotFallback,
   type LocaltifyAnalyticsSnapshot
 } from "./analyticsSnapshot";
-import { isLocaltifyAnalyticsConfigured, trackAudienceSnapshot, trackMarketingSnapshot, trackPlaylistSnapshot } from "../../analytics";
 
 import { runLocaltifyIdleTask as runIdleTask } from "../../app/runtime/idle";
 
@@ -154,22 +153,6 @@ export function useAnalyticsRuntime(options: UseAnalyticsRuntimeOptions) {
     try { analyticsWorkerRef.current?.terminate(); } catch { /* best-effort */ }
     analyticsWorkerRef.current = null;
   }, []);
-
-  useEffect(() => {
-    if (!ready || !analyticsAudienceSnapshotReady || !isLocaltifyAnalyticsConfigured()) return;
-    const cancel = runIdleTask(() => {
-      trackAudienceSnapshot(analyticsAudienceSnapshot);
-      trackMarketingSnapshot(analyticsAudienceSnapshot);
-      trackPlaylistSnapshot({
-        playlist_count: Number(analyticsAudienceSnapshot.playlist_count || 0),
-        playlist_song_total: Number(analyticsAudienceSnapshot.playlist_song_total || 0),
-        has_playlists: Boolean(analyticsAudienceSnapshot.has_playlists),
-        user_stage: String(analyticsAudienceSnapshot.user_stage || "new_no_library"),
-        audience_segment: String(analyticsAudienceSnapshot.audience_segment || "new_local_music_user")
-      });
-    }, 2600);
-    return cancel;
-  }, [ready, analyticsAudienceSnapshotReady, analyticsAudienceSnapshot]);
 
   return { analyticsAudienceSnapshot, analyticsAudienceSnapshotReady };
 }

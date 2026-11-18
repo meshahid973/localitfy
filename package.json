@@ -78,7 +78,6 @@
     "js-yaml": "4.3.2",
     "lucide-react": "^1.14.0",
     "motion": "^12.40.0",
-    "posthog-js": "^1.372.10",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "sharp": "^0.35.3",

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Dispatch, RefObject, SetStateAction } from "react";
-import { trackUpdatePopupSeen } from "../../analytics";
-import type { AppToastKind, View } from "../shell/view.types";
+import type { Dispatch, SetStateAction } from "react";
+import type { AppToastKind } from "../shell/view.types";
 import { APP_VERSION, WHATS_NEW_SEEN_KEY, defaultUpdatePrompt } from "./update.constants";
 import type { AutoUpdateEvent, UpdatePromptState } from "./update.types";
 import { friendlyUpdateError, updateWasLeftAlone } from "./update.utils";
@@ -9,7 +8,6 @@ import { friendlyUpdateError, updateWasLeftAlone } from "./update.utils";
 type UpdatesControllerOptions = {
   ready: boolean;
   autoUpdateEnabled: boolean;
-  analyticsViewRef: RefObject<View>;
   setStatusText: Dispatch<SetStateAction<string>>;
   showAppToast: (message: string, kind?: AppToastKind) => void;
 };
@@ -17,14 +15,12 @@ type UpdatesControllerOptions = {
 export function useUpdatesController({
   ready,
   autoUpdateEnabled,
-  analyticsViewRef,
   setStatusText,
   showAppToast
 }: UpdatesControllerOptions) {
   const [updatePrompt, setUpdatePrompt] = useState<UpdatePromptState>(defaultUpdatePrompt);
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
   const [lastUpdateCheckedLabel, setLastUpdateCheckedLabel] = useState("not checked yet");
-  const updateAnalyticsSeenRef = useRef("");
   const updateNagTimerRef = useRef<number | null>(null);
   const updateNagVersionRef = useRef("");
   const updateNagStatusRef = useRef<"available" | "downloaded">("available");
@@ -205,20 +201,6 @@ export function useUpdatesController({
   }, [ready, autoUpdateEnabled]);
 
   useEffect(() => () => clearUpdateNagTimer(), [clearUpdateNagTimer]);
-
-  useEffect(() => {
-    if (!updatePrompt.visible) return;
-    const signature = [updatePrompt.status, updatePrompt.version || "none", updatePrompt.nagStage || 0].join(":");
-    if (updateAnalyticsSeenRef.current === signature) return;
-    updateAnalyticsSeenRef.current = signature;
-    trackUpdatePopupSeen({
-      update_status: updatePrompt.status,
-      current_version: APP_VERSION,
-      latest_version: updatePrompt.version || null,
-      current_view: analyticsViewRef.current,
-      has_error: Boolean(updatePrompt.error)
-    });
-  }, [analyticsViewRef, updatePrompt.visible, updatePrompt.status, updatePrompt.version, updatePrompt.error, updatePrompt.nagStage]);
 
   useEffect(() => {
     if (!updatePrompt.visible) return;

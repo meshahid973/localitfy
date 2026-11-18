@@ -9,27 +9,6 @@ import { useSongRadio } from "./features/player/useSongRadio";
 import { useNotForMe } from "./features/analysis/notForMe";
 import { devPerfStart, devPerfEnd, measureDevTime } from "./shared/perf/devPerf";
 import type { PlayerEngineSource } from "./features/player/engine/PlayerEngine";
-import {
-  initLocalitfyAnalytics,
-  trackAcquisitionSource,
-  trackAppActive,
-  trackAppBackgrounded,
-  trackAppForegrounded,
-  trackAppLaunched,
-  trackAppSessionEnded,
-  trackAppView,
-  trackSettingsOpened,
-  trackThemeChanged,
-  trackSongsImported,
-  trackImportFailed,
-  trackLibrarySnapshot,
-  trackLibraryViewChanged,
-  trackDownloadsOpened,
-  trackDiscordToggled,
-  trackOnboardingCompleted,
-  trackOnboardingSkipped,
-  trackError
-} from "./analytics";
 import { useAnalyticsRuntime } from "./features/analytics/useAnalyticsRuntime";
 import {
   enrichDownloadResultsWithLibraryMatches,
@@ -226,8 +205,7 @@ function MainModeApp() {
   const heroReflowTimerRef = useRef<number | null>(null);
   const heroCoverMotionTimerRef = useRef<number | null>(null);
   const appRootRef = useRef<HTMLElement | null>(null);
-  const analyticsViewRef = useRef<View>("home");
-  const librarySnapshotSignatureRef = useRef("");
+  const activeViewRef = useRef<View>("home");
   const libraryOrderSaveTimerRef = useRef<number | null>(null);
   const lastSavedOrderRef = useRef<string[]>([]);
   const rememberCurrentSongTimerRef = useRef<number | null>(null);
@@ -318,7 +296,6 @@ function MainModeApp() {
   } = useUpdatesController({
     ready,
     autoUpdateEnabled: settings.autoUpdateEnabled,
-    analyticsViewRef,
     setStatusText,
     showAppToast
   });
@@ -413,20 +390,7 @@ function MainModeApp() {
   }
 
   useAppLifecycleRuntime({
-    appVersion: APP_VERSION,
-    ready,
     isPlaying,
-    analytics: {
-      init: initLocalitfyAnalytics,
-      appLaunched: trackAppLaunched,
-      appSessionEnded: trackAppSessionEnded,
-      appActive: trackAppActive,
-      appBackgrounded: trackAppBackgrounded,
-      appForegrounded: trackAppForegrounded,
-      acquisitionSource: trackAcquisitionSource,
-      error: trackError
-    },
-    analyticsViewRef,
     appRootRef,
     playingRef,
     setIsAppBackgrounded,
@@ -470,7 +434,6 @@ function MainModeApp() {
   }
 
   function openSettingsPanel(category: SettingsCategory = "appearance") {
-    trackSettingsOpened();
     setSettingsCategory(category);
     setEditorSong(null);
     setDeleteTarget(null);
@@ -482,7 +445,7 @@ function MainModeApp() {
     revealSidebarSettingsPanel(settings.reducedMotion);
   }
 
-  function changeView(nextView: View, source: "nav" | "onboarding" | "settings" | "unknown" = "nav") {
+  function changeView(nextView: View, _source: "nav" | "onboarding" | "settings" | "unknown" = "nav") {
     setLyricsOpen(false);
     // Old runtime callers may still provide the retired album destination.
     if (String(nextView) === "albums") nextView = "library";
@@ -499,24 +462,6 @@ function MainModeApp() {
     // but do not add the extra visual shutdown state.
     setIsViewSwitching(false);
 
-    trackAppView(nextView, source, {
-      previous_view: view,
-      song_count: songs.length,
-      liked_count: likedSongs.length
-    });
-
-    if (nextView === "library" || nextView === "artists" || nextView === "genres" || nextView === "liked" || view === "library" || view === "artists" || view === "genres" || view === "liked") {
-      trackLibraryViewChanged({
-        previous_view: view,
-        library_view: nextView,
-        source
-      });
-    }
-
-    if (nextView === "downloads") {
-      trackDownloadsOpened({ source, previous_view: view });
-    }
-
     startTransition(() => {
       setView(nextView);
     });
@@ -531,7 +476,7 @@ function MainModeApp() {
   }, [view, deferredQuery, settings.denseList]);
 
   useEffect(() => {
-    analyticsViewRef.current = view;
+    activeViewRef.current = view;
   }, [view]);
 
   useEffect(() => {
@@ -744,7 +689,7 @@ function MainModeApp() {
       appRootRef.current?.classList.add("isScrolling");
 
       const nearBottom = node.scrollTop + node.clientHeight >= node.scrollHeight - 680;
-      const activeView = analyticsViewRef.current;
+      const activeView = activeViewRef.current;
       const shouldLoadMore = nearBottom && (activeView === "library" || activeView === "liked" || activeView === "home");
 
       if (shouldLoadMore && libraryRenderLimitRef.current < libraryListLengthRef.current) {
@@ -1220,7 +1165,7 @@ function MainModeApp() {
   );
 
 
-  const { analyticsAudienceSnapshot, analyticsAudienceSnapshotReady } = useAnalyticsRuntime({
+  const { analyticsAudienceSnapshot } = useAnalyticsRuntime({
     ready,
     view,
     songs,
@@ -1387,54 +1332,6 @@ function MainModeApp() {
     totalMinutes,
     libraryHealthLabel,
     effectiveMissingFileCount
-  ]);
-
-  useEffect(() => {
-    if (!ready || !analyticsAudienceSnapshotReady) return;
-
-    const signature = [
-      songs.length,
-      likedSongs.length,
-      playedSongCount,
-      totalPlays,
-      libraryAlbumCount,
-      libraryArtistCount,
-      view,
-      settings.theme,
-      settings.discordEnabled
-    ].join(":");
-
-    if (librarySnapshotSignatureRef.current === signature) return;
-    librarySnapshotSignatureRef.current = signature;
-
-    runLocaltifyIdleTask(() => {
-      trackLibrarySnapshot({
-        song_count: songs.length,
-        liked_count: likedSongs.length,
-        played_song_count: playedSongCount,
-        never_played_count: neverPlayedCount,
-        total_plays: totalPlays,
-        album_count: libraryAlbumCount,
-        artist_count: libraryArtistCount,
-        current_view: view,
-        theme_id: settings.theme,
-        custom_theme_enabled: false,
-        discord_enabled: settings.discordEnabled
-      });
-    }, 2200);
-  }, [
-    ready,
-    analyticsAudienceSnapshotReady,
-    songs.length,
-    likedSongs.length,
-    playedSongCount,
-    neverPlayedCount,
-    totalPlays,
-    libraryAlbumCount,
-    libraryArtistCount,
-    view,
-    settings.theme,
-    settings.discordEnabled
   ]);
 
   // Keep playback progress hot-path out of React renders as much as possible.
@@ -2240,7 +2137,6 @@ function MainModeApp() {
       console.error("localtify startup failed", error);
       setBootError(message);
       setReady(false);
-      trackError("startup_bootstrap_failed", message, { category: "startup" });
     });
 
     return () => {
@@ -3876,11 +3772,6 @@ function MainModeApp() {
     const previous = settingsRef.current;
     if (settingsAreSame(previous, next)) return;
 
-    const shouldTrackThemeChange =
-      bootedRef.current &&
-      normalizeThemeId(previous.theme) !== normalizeThemeId(next.theme);
-    const shouldTrackDiscordToggle = bootedRef.current && previous.discordEnabled !== next.discordEnabled;
-
     settingsRef.current = next;
 
     if (priority === "immediate") {
@@ -3890,14 +3781,6 @@ function MainModeApp() {
     }
 
     if (!bootedRef.current) return;
-
-    if (shouldTrackThemeChange) {
-      trackThemeChanged(normalizeThemeId(next.theme), false);
-    }
-
-    if (shouldTrackDiscordToggle) {
-      trackDiscordToggled(next.discordEnabled);
-    }
 
     await saveSettingsSafely(next, debounce);
   }
@@ -4673,7 +4556,6 @@ function MainModeApp() {
       const previewSongs = (importedNewSongs.length ? importedNewSongs : imported.slice(-12)).slice(0, 12);
 
       if (addedCount > 0) {
-        trackSongsImported(addedCount, "import_dialog");
         setImportAnimation(
           createImportAnimationState({
             active: true,
@@ -4719,7 +4601,6 @@ function MainModeApp() {
       }
     } catch (error) {
       console.error("[localitfy import failed]", error);
-      trackImportFailed("import_dialog_failed", "import_dialog");
       setImportAnimation(
         createImportAnimationState({
           active: true,
@@ -4896,7 +4777,6 @@ function MainModeApp() {
       }
 
       if (successCount > 0) {
-        trackSongsImported(result.changedCount || successCount, "downloads");
         const importedCount = enrichedDownloads.filter((item: any) => item.ok && item.importedToLibrary).length;
         const notImportedCount = enrichedDownloads.filter((item: any) => item.ok && !item.importedToLibrary).length;
         setStatusText(
@@ -4914,7 +4794,6 @@ function MainModeApp() {
         );
         if (settings.downloadAutoAdd) changeView("library", "unknown");
       } else {
-        trackImportFailed("download_no_audio", "downloads");
         setStatusText("download failed");
         setPlayerError("no audio files downloaded. check the results below.");
       }
@@ -4924,7 +4803,6 @@ function MainModeApp() {
       }
     } catch (error) {
       console.error("[localitfy download failed]", error);
-      trackImportFailed("download_failed", "downloads");
       const message = friendlyDownloadError((error as Error)?.message || "Download failed.");
       const failedDownloads = urls.map((url) => ({
         ok: false,
@@ -5194,7 +5072,6 @@ function MainModeApp() {
         if (successCount > 0) {
           const importedCount = enrichedDownloads.filter((item: any) => item.ok && item.importedToLibrary).length;
           const notImportedCount = enrichedDownloads.filter((item: any) => item.ok && !item.importedToLibrary).length;
-          trackSongsImported(result.changedCount || importedCount || successCount, "downloads");
           setStatusText(
             failCount > 0
               ? `spotify finished: ${successCount} done, ${failCount} failed`
@@ -5297,7 +5174,6 @@ function MainModeApp() {
       }
 
       if (successCount > 0) {
-        trackSongsImported(result.changedCount || successCount, "conversion");
         setConvertProgress(100);
         setConvertMessage("conversion complete");
         setStatusText(
@@ -5305,13 +5181,11 @@ function MainModeApp() {
         );
         changeView("library", "unknown");
       } else {
-        trackImportFailed("conversion_no_files", "conversion");
         setStatusText("nothing converted");
         setConvertMessage("no files converted");
       }
     } catch (error) {
       console.error("[localitfy convert failed]", error);
-      trackImportFailed("conversion_failed", "conversion");
       setPlayerError("conversion failed. check terminal.");
       setConvertMessage("conversion failed");
       setStatusText("conversion failed");
@@ -6868,7 +6742,6 @@ function MainModeApp() {
   }
 
   function skipOnboarding() {
-    trackOnboardingSkipped(undefined, songs.length);
     dismissOnboarding();
   }
 
@@ -6910,7 +6783,6 @@ function MainModeApp() {
   }
 
   function handleOnboardingStartListening() {
-    trackOnboardingCompleted(undefined, songs.length);
     dismissOnboarding();
     changeView("home", "onboarding");
     setStatusText(songs.length ? "ready to listen" : "add songs when you are ready");
