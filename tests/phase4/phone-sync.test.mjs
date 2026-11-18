@@ -195,3 +195,7 @@ test("playlist artwork changes merge without losing independent name or track ch
   assert.deepEqual(plain(merge.phonePlaylistChanges(base,mac,phone)).put,[{...mac[0],coverArtwork:"new",songIds:["1","2"]}]);
   assert.equal(plain(merge.phonePlaylistChanges(base,mac,[playlist("p",["1"])])).put[0].coverArtwork,undefined);
 });
+
+test("playlist sync removes duplicate IDs without dropping unique concurrent additions",()=>{
+  assert.deepEqual(merge.mergeSongIds(["a","b"],["a","a","b","c"],["a","d"]),["a","d","c"]);
+});

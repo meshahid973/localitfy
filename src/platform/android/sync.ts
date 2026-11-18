@@ -219,6 +219,7 @@ async function syncFiles() {
       Object.assign(local, { audio: fileKey(song.file), audioExt: song.file.ext });
       bytesDone += song.file.size;
       phoneLibrary.files[song.id] = { ...local }; // Do not retransfer audio if the cover fails.
+      if (song.cover && local.cover !== fileKey(song.cover)) await phoneLibrary.save(["files"]);
     }
     if (song.cover && local.cover !== fileKey(song.cover)) {
       const coverId = `${song.id}:cover`;

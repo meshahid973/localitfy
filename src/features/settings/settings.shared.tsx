@@ -18,7 +18,7 @@ export function ToggleRow({ label, help, checked, onChange, disabled }: {
         </span>
         {help ? <small>{help}</small> : null}
       </span>
-      <input type="checkbox" checked={checked} disabled={disabled} onChange={(event) => onChange(event.currentTarget.checked)} />
+      <input type="checkbox" role="switch" checked={checked} disabled={disabled} onChange={(event) => onChange(event.currentTarget.checked)} />
     </label>
   );
 }

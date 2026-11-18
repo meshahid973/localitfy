@@ -10,7 +10,7 @@ const { outputText } = ts.transpileModule(read("src/features/downloads/downloadP
 });
 const exports = {};
 runInNewContext(outputText, {
-  exports, require(name) {
+  exports, URL, require(name) {
     throw new Error("Unexpected dependency: " + name);
   }
 });
@@ -29,8 +29,10 @@ function referenceMatch(result, librarySongs) {
       String(song.filePath || "").trim().toLowerCase() === filePath);
     if (match) return match;
   }
-  if (filename) return librarySongs.find((song) =>
-    String(song.filePath || "").trim().toLowerCase().endsWith(filename)) || null;
+  if (filename && !filePath) {
+    const matches = librarySongs.filter(song => String(song.filePath || "").trim().toLowerCase().split(/[\\/]/).pop() === filename);
+    return matches.length === 1 ? matches[0] : null;
+  }
   return null;
 }
 
@@ -39,7 +41,7 @@ function song(id, patch = {}) {
     sourceTrackId: "spotify-" + id, ...patch };
 }
 
-test("batch download lookup preserves Spotify > path > suffix precedence", () => {
+test("batch download lookup preserves Spotify > path > unique basename precedence", () => {
   const songs = [
     song("a", { sourceTrackId: "double", filePath: "/music/MYSong.mp3" }),
     song("b", { sourceTrackId: "double", filePath: "/music/song.mp3" }),
@@ -96,4 +98,16 @@ test("queue view only rebuilds derived entries when its inputs change", () => {
   assert.match(queue, /const entries = useMemo\(/);
   assert.match(queue, /\(\) => open \? buildQueueEntries\(queue, songsById\) : \[\]/);
   assert.match(queue, /\[open, queue, songsById\]/);
+});
+
+test("canonical duplicates disappear but unsupported links stay available for error reporting", () => {
+  assert.deepEqual(Array.from(exports.parseDownloadUrls("https://youtu.be/dQw4w9WgXcQ?t=2,https://www.youtube.com/watch?v=dQw4w9WgXcQ\ninvalid")),["https://www.youtube.com/watch?v=dQw4w9WgXcQ","invalid"]);
+  assert.equal(exports.parseDownloadUrls("https://youtube.com/not-watch?v=dQw4w9WgXcQ")[0],"https://youtube.com/not-watch?v=dQw4w9WgXcQ");
+});
+test("ambiguous basenames and mismatched explicit files do not claim an import",()=> {
+  const songs=[song("a",{filePath:"/music/a/song.mp3"}),song("b",{filePath:"/music/b/song.mp3"}),song("c",{filePath:"/music/other.mp3"})];
+  const lookup=exports.buildDownloadSongLookup(songs);
+  assert.equal(exports.findDownloadedSongMatch({filename:"song.mp3"},songs,lookup),null);
+  assert.equal(exports.findDownloadedSongMatch({filename:"other.mp3",filePath:"/missing/other.mp3"},songs,lookup),null);
+  assert.equal(exports.findDownloadedSongMatch({filename:"other.mp3"},songs,lookup).id,"c");
 });

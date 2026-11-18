@@ -136,7 +136,8 @@ async function resolveSongCover(input = {}) {
   if (!input.preferFolderCover && song.coverSource === "custom" && existingCoverIsUsable(song)) {
     return { coverPath: song.coverPath, coverSource: "custom", coverUpdatedAt: song.coverUpdatedAt || now };
   }
-  const folderCover = input.folderCoverPath || findFolderCover(input.filePath || song.filePath || "");
+  const proposedFolder = input.folderCoverPath || findFolderCover(input.filePath || song.filePath || "");
+  const folderCover = fileExists(proposedFolder) && isImageFile(proposedFolder) ? proposedFolder : "";
 
   if (input.preferFolderCover && folderCover) {
     const cached = copyCoverToAppStorage(folderCover, {

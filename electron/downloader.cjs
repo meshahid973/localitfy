@@ -915,6 +915,8 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
   fs.mkdirSync(destinationDirectory, { recursive: true });
 
   const results = [];
+  const seenTracks = new Set();
+  tracks = tracks.filter(track => { const id = getSpotifyTrackId(track); if (!id) return true; if (seenTracks.has(id)) return false; seenTracks.add(id); return true; });
   const total = tracks.length;
 
   for (let index = 0; index < total; index++) {
