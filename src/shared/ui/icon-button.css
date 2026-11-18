@@ -1,0 +1,27 @@
+:where(.ltIconButton) {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--lt-control-height);
+  height: var(--lt-control-height);
+  padding: 0;
+  border: 0;
+  border-radius: var(--lt-radius-item);
+  color: var(--lt-text);
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color var(--lt-duration-fast) ease, color var(--lt-duration-fast) ease;
+}
+.ltIconButton:focus-visible {
+  outline: 2px solid var(--lt-accent);
+  outline-offset: 2px;
+}
+.ltIconButton:disabled { cursor: not-allowed; }
+@media (pointer: coarse) {
+  .ltIconButton { min-width: 44px; min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ltIconButton { transition: none; }
+}

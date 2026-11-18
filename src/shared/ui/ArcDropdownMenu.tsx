@@ -4,6 +4,8 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Check, ChevronDown } from "lucide-react";
 import "./ArcDropdownMenu.css";
+import "./surface.css";
+import { useMenuTypeahead } from "../hooks/useMenuTypeahead";
 
 /**
  * Localtify's dependency-free Radix alternative, adapted from Arc UI's MIT-licensed
@@ -28,7 +30,7 @@ export type ArcDropdownMenuProps<T extends string> = {
 
 const EDGE_GAP = 12;
 const MENU_PADDING = 5;
-const THEME_VARS = ["--lt-text", "--lt-muted", "--lt-accent", "--lt-surface", "--lt-surface-raised", "--lt-surface-soft", "--lt-bg-elevated", "--lt-border", "--lt-bg"] as const;
+const THEME_VARS = ["--lt-text", "--lt-muted", "--lt-accent", "--lt-surface", "--lt-surface-raised", "--lt-surface-soft", "--lt-bg-elevated", "--lt-glass-background", "--lt-glass-blur", "--lt-fill", "--lt-gap-control", "--lt-menu-item-height", "--lt-border", "--lt-bg"] as const;
 
 export function ArcDropdownMenu<T extends string>({
   ariaLabel, value, items, onValueChange, className = "", disabled = false
@@ -42,6 +44,7 @@ export function ArcDropdownMenu<T extends string>({
   const menuRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const [open, setOpen] = useState(false);
+  const typeahead = useMenuTypeahead(open);
   const [activeIndex, setActiveIndex] = useState(0);
   const [position, setPosition] = useState({ left: EDGE_GAP, top: EDGE_GAP, width: 176 });
   const [themeStyle, setThemeStyle] = useState<CSSProperties>({});
@@ -82,10 +85,17 @@ export function ArcDropdownMenu<T extends string>({
     placeMenu();
     const root = triggerRef.current?.closest<HTMLElement>(".app");
     if (root) {
-      const computed = getComputedStyle(root);
-      const copied = {} as Record<string, string>;
-      for (const key of THEME_VARS) copied[key] = computed.getPropertyValue(key).trim();
-      setThemeStyle(copied as CSSProperties);
+      const sync = () => {
+        const computed = getComputedStyle(root);
+        const copied = {} as Record<string, string>;
+        for (const key of THEME_VARS) copied[key] = computed.getPropertyValue(key).trim();
+        setThemeStyle(copied as CSSProperties);
+      };
+      sync();
+      const observer = new MutationObserver(sync);
+      observer.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+      optionRefs.current[activeIndex]?.focus({ preventScroll: true });
+      return () => observer.disconnect();
     }
     optionRefs.current[activeIndex]?.focus({ preventScroll: true });
   }, [open, placeMenu]);
@@ -144,6 +154,10 @@ export function ArcDropdownMenu<T extends string>({
       event.preventDefault();
       const index = event.key === "Home" ? firstEnabled : items.findLastIndex(item => !item.disabled);
       if (index >= 0) { setActiveIndex(index); optionRefs.current[index]?.focus(); }
+    } else {
+      const enabled = items.map((item, index) => ({ ...item, index })).filter(item => !item.disabled);
+      const index = typeahead(event, enabled.map(item => item.label), enabled.findIndex(item => item.index === activeIndex));
+      if (index >= 0) { setActiveIndex(enabled[index].index); optionRefs.current[enabled[index].index]?.focus(); }
     }
   };
   const choose = (item: ArcDropdownItem<T>) => {
@@ -192,7 +206,7 @@ export function ArcDropdownMenu<T extends string>({
               ref={menuRef}
               role="menu"
               aria-label={ariaLabel}
-              className="arcDropdownMenu"
+              className="arcDropdownMenu ltOverlaySurface"
               style={{ ...themeStyle, left: position.left, top: position.top, width: position.width }}
               initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -5, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}

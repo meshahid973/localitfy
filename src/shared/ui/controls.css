@@ -4,12 +4,12 @@
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 9px !important;
+  gap: var(--lt-gap-control) !important;
   padding: 0 16px !important;
   border-radius: var(--lt-control-radius) !important;
   border: 1px solid transparent !important;
   background: var(--lt-accent) !important;
-  color: var(--accent-contrast, #06100b) !important;
+  color: var(--accent-contrast, var(--lt-bg)) !important;
   font-weight: 600 !important;
   letter-spacing: -.01em !important;
   text-decoration: none !important;
@@ -42,7 +42,7 @@
 
 .app :is(.softButton, .heroGhost, .settingsActionButton, .settingsTinyButton):not(.primary):not(.danger):not(.main):hover:not(:disabled){
   border-color: transparent !important;
-  background: color-mix(in srgb, var(--lt-text) 9%, transparent) !important;
+  background: var(--lt-fill-hover) !important;
   color: var(--lt-text) !important;
   box-shadow: none !important;
   filter: none !important;
@@ -89,7 +89,7 @@
 .app :is(.iconAction, .songMenuButton, .closeModalButton, .updateToastClose):hover:not(:disabled),
 .app :is(.circleButton):not(.playerBar *):hover:not(:disabled){
   border-color: transparent !important;
-  background: color-mix(in srgb, var(--lt-text) 9%, transparent) !important;
+  background: var(--lt-fill-hover) !important;
   color: var(--lt-text) !important;
   box-shadow: none !important;
 }
@@ -100,7 +100,7 @@
 }
 
 .app :is(.mainAction, .softButton, .iconAction, .closeModalButton, .settingsActionButton, .settingsTinyButton) {
-  transition: background-color var(--lt-duration-fast) ease, border-color var(--lt-duration-fast) ease, transform var(--lt-duration-fast) var(--lt-ease-out) !important;
+  transition: background-color var(--lt-control-motion) ease, border-color var(--lt-control-motion) ease, transform var(--lt-control-motion) var(--lt-ease-out) !important;
 }
 .app :is(.mainAction, .softButton, .iconAction, .closeModalButton, .settingsActionButton, .settingsTinyButton):active:not(:disabled) {
   transform: translateY(1px) !important;

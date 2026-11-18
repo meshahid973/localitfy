@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { createPortal } from "react-dom";
+import "./surface.css";
 import { clampContextMenuPosition, type ContextMenuPoint } from "./contextMenuPosition";
+import { useMenuTypeahead } from "../hooks/useMenuTypeahead";
 
 type ContextMenuLayerProps = {
   anchor: ContextMenuPoint | null;
@@ -17,6 +19,7 @@ export function ContextMenuLayer({
   anchor, identity, label, onClose, children, className = ""
 }: ContextMenuLayerProps) {
   const menuRef = useRef<HTMLDivElement>(null);
+  const typeahead = useMenuTypeahead(Boolean(anchor));
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const onCloseRef = useRef(onClose);
   useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
@@ -90,13 +93,17 @@ export function ContextMenuLayer({
       if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
       return;
     }
-    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
     const menu = menuRef.current;
     if (!menu) return;
     const enabled = Array.from(menu.querySelectorAll<HTMLButtonElement>('button[role="menuitem"]:not(:disabled)'));
     if (!enabled.length) return;
-    event.preventDefault();
     const current = enabled.indexOf(document.activeElement as HTMLButtonElement);
+    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
+      const index = typeahead(event, enabled.map(item => item.textContent || ""), current);
+      if (index >= 0) enabled[index].focus({ preventScroll: true });
+      return;
+    }
+    event.preventDefault();
     const next = event.key === "Home" ? 0 : event.key === "End" ? enabled.length - 1
       : current < 0 ? (event.key === "ArrowDown" ? 0 : enabled.length - 1)
       : (current + (event.key === "ArrowDown" ? 1 : -1) + enabled.length) % enabled.length;
@@ -109,7 +116,7 @@ export function ContextMenuLayer({
       onContextMenu={(event) => { event.preventDefault(); onClose(); }}>
       <div
         ref={menuRef}
-        className={`songContextMenu${className ? ` ${className}` : ""}`}
+        className={`songContextMenu ltOverlaySurface${className ? ` ${className}` : ""}`}
         style={{ left: anchor.x, top: anchor.y }}
         role="menu"
         aria-label={label}

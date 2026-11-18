@@ -1,6 +1,8 @@
 import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import { ListEnd, MoreHorizontal, Play, Shuffle } from "lucide-react";
 import type { Song } from "../library/song.types";
+import { IconButton } from "../../shared/ui/IconButton";
+import { Surface } from "../../shared/ui/Surface";
 
 export type CollectionHeroProps = {
   typeLabel: string;
@@ -23,7 +25,7 @@ export type CollectionHeroProps = {
 /** Top of every album, artist, genre, playlist and mix page: artwork, title, then play · shuffle · queue · more. */
 export default function CollectionHero({ typeLabel, title, cover, round = false, byline, stats, playable, onPlay, onShuffle, onQueue, onMore, children }: CollectionHeroProps) {
   return (
-    <header className={`collectionHero ${round ? "isRound" : ""}`}>
+    <Surface as="header" variant="transparent" className={`collectionHero ${round ? "isRound" : ""}`}>
       <div className="collectionHeroArt">{cover}</div>
       <div className="collectionHeroCopy">
         <h1 title={title}>{title}</h1>
@@ -35,17 +37,17 @@ export default function CollectionHero({ typeLabel, title, cover, round = false,
           <Play size={16} fill="currentColor" strokeWidth={2} aria-hidden="true" />
           <span>Play all</span>
         </button>
-        <button className="collectionIconButton" type="button" onClick={() => void onShuffle()} disabled={playable < 2} aria-label={`shuffle ${title}`} title="Shuffle">
+        <IconButton className="collectionIconButton" type="button" onClick={() => void onShuffle()} disabled={playable < 2} aria-label={`shuffle ${title}`} title="Shuffle">
           <Shuffle size={17} strokeWidth={2.2} aria-hidden="true" />
-        </button>
-        <button className="collectionIconButton" type="button" onClick={() => void onQueue()} disabled={!playable} aria-label={`add ${title} to queue`} title="Add to queue">
+        </IconButton>
+        <IconButton className="collectionIconButton" type="button" onClick={() => void onQueue()} disabled={!playable} aria-label={`add ${title} to queue`} title="Add to queue">
           <ListEnd size={17} strokeWidth={2.2} aria-hidden="true" />
-        </button>
+        </IconButton>
         {children}
-        <button className="collectionIconButton" type="button" onClick={(event) => void onMore(event)} aria-label={`more options for ${title}`} title="More options">
+        <IconButton className="collectionIconButton" type="button" onClick={(event) => void onMore(event)} aria-label={`more options for ${title}`} title="More options">
           <MoreHorizontal size={18} strokeWidth={2.2} aria-hidden="true" />
-        </button>
+        </IconButton>
       </div>
-    </header>
+    </Surface>
   );
 }

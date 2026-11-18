@@ -32,8 +32,8 @@
 }
 .app[data-theme][data-workspace-artwork] { background: var(--workspace-bg) !important; }
 .app[data-workspace-artwork]:not(.reducedMotion):not(.appBackgrounded):not(.themeSettling) {
-  transition: --workspace-cover-color 360ms ease-out, --workspace-cover-secondary 360ms ease-out,
-    --workspace-cover-tertiary 360ms ease-out !important;
+  transition: --workspace-cover-color var(--lt-duration-atmosphere) var(--lt-ease-out), --workspace-cover-secondary var(--lt-duration-atmosphere) var(--lt-ease-out),
+    --workspace-cover-tertiary var(--lt-duration-atmosphere) var(--lt-ease-out) !important;
 }
 @media (prefers-reduced-motion: reduce) {
   .app[data-workspace-artwork] { transition: none !important; }

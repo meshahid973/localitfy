@@ -60,6 +60,7 @@
   color-scheme: light;
 }
 .app[data-theme] {
+  --lt-glass-background: color-mix(in srgb, var(--lt-bg-elevated) 94%, transparent);
   --bg-2: var(--bg);
   --bg-3: var(--surface);
   --panel: var(--surface);
