@@ -112,7 +112,7 @@ export function createAndroidBridge(): Bridge {
       seedId: "songId" in query ? query.songId : "seedKey" in query ? query.seedKey : "recent", status: "seed-unavailable", matches: [], compared: 0, seedCount: 0
     }),
     scorePromptSound: (payload) => fromMacOrKept("analysis:prompt-sound", payload, `mac:prompt:${payload.text.trim().toLowerCase()}`, { status: "model-missing", scores: [] }),
-    getLyrics: (payload) => payload.cancel ? fromMac<LyricsResult>("lyrics:get", payload) : fromMacOrKept<LyricsResult>("lyrics:get", payload, `mac:lyrics:${payload.id}`, { status: "offline", source: "none", lines: [] }, (result) => result.status !== "error" && result.status !== "offline"),
+    getLyrics: (payload) => !payload.cancel && phoneLibrary.effectiveSettings().lyricsEnabled !== true ? Promise.resolve({ status: "disabled", source: "none", lines: [] }) : payload.cancel ? fromMac<LyricsResult>("lyrics:get", payload) : fromMacOrKept<LyricsResult>("lyrics:get", payload, `mac:lyrics:${payload.id}`, { status: "offline", source: "none", lines: [] }, (result) => ["synced","plain","instrumental"].includes(result.status), 45000),
     searchLyrics: (payload) => fromMac("lyrics:search", payload, 15000),
     selectLyricsMatch: (payload) => keepLyrics(payload.id, fromMac("lyrics:select-match", payload, 15000)),
     clearLyricsMatch: (payload) => keepLyrics(payload.id, fromMac("lyrics:clear-selection", payload, 15000)),

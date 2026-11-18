@@ -34,7 +34,7 @@ function fixtureCover(index) {
   fs.writeFileSync(target,image.toPNG());return target;
 }
 const songs=Array.from({length:12},(_,i)=>({id:"qa-"+i,title:"test track "+i,artist:"test artist "+(i%8),album:"test album "+Math.floor(i/4),genre:"ambient",filePath:wav("qa-"+i),coverPath:fixtureCover(i),coverSource:"local",duration:20,dateAdded:"2026-01-01T00:00:00Z",playCount:12-i,lastPlayed:"2026-11-16T00:00:00Z",liked:i===0}));
-for (const song of songs) fs.writeFileSync(song.filePath.replace(/\.wav$/, ".lrc"), "[00:00.00]Local lyric fixture\n[00:05.00]Second lyric line\n");
+for (const song of songs) fs.writeFileSync(song.filePath.replace(/\.wav$/, ".lrc"), "[00:00.00]<00:00.00>Local <00:01.00>lyric fixture\n[00:05.00]Second lyric line\n");
 const seed=spawnSync(process.execPath,["-e",
   "const db=require(process.argv[1]);db.initDatabase(process.argv[2]);const songs=JSON.parse(process.argv[3]);db.insertSongs(songs);db.savePlaylists([{id:'qa-playlist',name:'qa playlist',songIds:songs.map(s=>s.id),createdAt:Date.now()}]);db.saveSettings({startWithWindows:false,idleScreensaverEnabled:false,discordRpcEnabled:false,reducedMotion:false,discoverEnabled:true,lyricsEnabled:true,lyricsOnlineLookup:false,coverColorSyncMode:'strong',homeBannerType:'dynamic',showAmbientGradient:true,playerBackgroundStyle:'coverBlur',homeHiddenSections:['dailyMixes','likedSongs','rediscover','notPlayedYet']});",
   path.join(root,"electron/db.cjs"),path.join(app.getPath("userData"),"localitfy.sqlite"),JSON.stringify(songs)],{env:{...process.env,ELECTRON_RUN_AS_NODE:"1"},encoding:"utf8"});
@@ -333,6 +333,7 @@ server.listen(5173,async()=>{
     await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.immersivePlayer .artworkBackdropLayer[data-visible=true]')"),"independent immersive artwork");
     await win.webContents.executeJavaScript("document.querySelector('.immersiveActions [aria-label=Lyrics]').click()");
     await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.immersiveLyrics .lyricsLine')"),"embedded local lyrics");
+    assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('.immersiveLyrics [data-lyric-word]').length"),2,"real enhanced LRC timestamps rendered");
     const lyricTime=await win.webContents.executeJavaScript("document.querySelector('audio').currentTime");
     await win.webContents.executeJavaScript("document.querySelector('.immersiveLyrics .lyricsScroller').dispatchEvent(new WheelEvent('wheel',{deltaY:120,bubbles:true}))");
     await until(()=>win.webContents.executeJavaScript("[...document.querySelectorAll('.lyricsHeadActions button')].some(b=>b.textContent==='Follow lyrics')"),"manual lyric browsing");
@@ -343,6 +344,9 @@ server.listen(5173,async()=>{
     assert.ok(split.shown&&split.left>=split.right,"wide listening keeps cover beside lyrics: "+JSON.stringify(split));
     await sleep(250);
     await screenshot(win,"immersive-wide-lyrics");
+    await win.webContents.executeJavaScript("document.querySelector('[aria-label=\"Focus on lyrics\"]').click()");
+    await until(()=>win.webContents.executeJavaScript("document.querySelector('.immersiveStage').dataset.lyricsOnly==='true' && getComputedStyle(document.querySelector('.immersiveArtwork')).display==='none'"),"lyrics-only layout");
+    await win.webContents.executeJavaScript("document.querySelector('[aria-label=\"Show artwork beside lyrics\"]').click()");
     win.setMinimumSize(320,480);win.setSize(390,844);
     await until(()=>win.webContents.executeJavaScript("window.innerWidth===390"),"narrow listening viewport");
     const narrow=await win.webContents.executeJavaScript("(()=>{const a=document.querySelector('.immersiveArtwork'),s=document.querySelector('.immersivePlayer'),l=document.querySelector('.immersiveLyrics');return {hidden:getComputedStyle(a).display==='none',overflow:s.scrollWidth>s.clientWidth+2,lyrics:l.clientWidth}})()");

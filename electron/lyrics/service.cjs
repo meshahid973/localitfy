@@ -13,7 +13,7 @@ const PLACEHOLDER_ARTIST = /^(?:unknown artist|unknown|various artists?|n\/a|non
 function shapeResult(source, { synced = "", plain = "", instrumental = false } = {}) {
   const lines = parseLrc(synced);
   if (lines.length) return { status: "synced", source, lines };
-  const text = plainLines(plain || synced);
+  const text = plainLines(plain || synced).filter(line => !/^\s*\[[a-z]+\s*:/i.test(line));
   if (text.length) return { status: "plain", source, lines: text.map((line) => ({ time: -1, text: line })) };
   return { status: instrumental ? "instrumental" : "missing", source, lines: [] };
 }
@@ -26,7 +26,7 @@ function normalized(value) {
 function matchTitle(candidateTitle, trackTitle) {
   const candidate = normalized(cleanTitle(candidateTitle));
   const track = normalized(trackTitle);
-  if (!candidate) return true; // Covers legacy metadata-less test fixtures, not LRCLIB's real records.
+  if (!candidate) return false;
   if (!track) return false;
   if (candidate === track) return true;
   // A title may include a subtitle or an extra edition suffix.
@@ -48,7 +48,7 @@ function chooseLyricsResult(records, { track, artist, duration }) {
     const knownRuntime = duration > 0 && Number.isFinite(seconds) && seconds > 0;
     const gap = knownRuntime ? Math.abs(seconds - duration) : 0;
     const exactTitle = normalized(cleanTitle(item.trackName || item.name)) === normalized(track);
-    const matchingArtist = !targetArtist || !actualArtist || targetArtist === actualArtist ||
+    const matchingArtist = !targetArtist || targetArtist === actualArtist ||
       actualArtist.startsWith(targetArtist + " ") || targetArtist.startsWith(actualArtist + " ");
     // Permit an incorrectly tagged local artist only for an unusually specific title
     // with an extremely close runtime. Never use loose matches with wrong artists.
@@ -88,6 +88,41 @@ function retryAfterMs(response, fallbackMs, timestamp = Date.now()) {
   return Number.isFinite(date) ? Math.max(0, date - timestamp) : fallbackMs;
 }
 
+function embeddedLyricsResult(values) {
+  let fallback = null;
+  for (const value of Array.isArray(values) ? values : []) {
+    if (value?.timeStampFormat === 2 && value.contentType === 1 && Array.isArray(value.syncText)) {
+      const entries = value.syncText.slice(0, 2000).filter(item => Number.isFinite(item.timestamp) && item.timestamp >= 0 && typeof item.text === "string");
+      if (entries.some((entry, i) => i > 0 && entry.timestamp < entries[i - 1].timestamp)) continue;
+      const lines = [];
+      let current = null;
+      const hasBreaks = entries.some(item => /\r|\n/.test(item.text));
+      for (const entry of entries) {
+        const time = entry.timestamp / 1000;
+        if (!current || !hasBreaks || /^[\r\n]/.test(entry.text)) {
+          current = { time, text: "", words: [] };
+          lines.push(current);
+        }
+        const text = entry.text.replace(/[\r\n]+/g, " ");
+        current.text += text;
+        current.words.push({ time, text });
+      }
+      if (lines.some(line => line.text.trim())) {
+        for (const line of lines) {
+          line.text = line.text.trim();
+          if (line.words.length < 2) delete line.words;
+        }
+        return { status: "synced", source: "embedded", lines };
+      }
+    }
+    const plain = typeof value === "string" ? value : typeof value?.text === "string" ? value.text : "";
+    const result = shapeResult("embedded", { synced: plain, plain });
+    if (result.status === "synced") return result;
+    if (result.status === "plain" && !fallback) fallback = result;
+  }
+  return fallback;
+}
+
 async function readEmbeddedLyrics(filePath) {
   if (!filePath) return null;
   try {
@@ -95,11 +130,7 @@ async function readEmbeddedLyrics(filePath) {
     if (!stat.isFile()) return null;
     const { parseFile } = await import("music-metadata");
     const { common } = await parseFile(filePath, { duration: false, skipCovers: true });
-    for (const value of common.lyrics || []) {
-      const plain = typeof value === "string" ? value : value?.text || "";
-      const result = shapeResult("embedded", { synced: plain, plain });
-      if (result.lines.length) return result;
-    }
+    return embeddedLyricsResult(common.lyrics);
   } catch { /* inaccessible or unsupported local tags */ }
   return null;
 }
@@ -283,8 +314,7 @@ function createLyricsService({
     // Structured search can be too strict for locally imported/remixed metadata.
     const structured = await request("search", artist ? { track_name: track, artist_name: artist } : { track_name: track }, signal);
     const direct = chooseLyricsResult(structured, { track, artist, duration: queryDuration });
-    if (direct?.status === "synced" || direct?.status === "instrumental") return direct;
-    if (direct?.status === "plain") fallback = direct;
+    if (direct?.status && direct.status !== "missing") return direct;
     // LRCLIB's q searches across title, artist, and album, like its website.
     const broad = await request("search", { q: track }, signal);
     const broadMatch = chooseLyricsResult(broad, { track, artist, duration: queryDuration });
@@ -310,7 +340,7 @@ function createLyricsService({
     signal?.throwIfAborted();
     const embedded = await waitFor(Promise.resolve(readEmbedded(song.filePath)), signal);
     if (embedded?.lines?.length) return attachCompanions(song.filePath, embedded);
-    // v2 invalidates earlier false misses caused by strict search/duration filtering.
+    // v3 isolates album variants and invalidates earlier unvalidated timestamps.
     const key = crypto.createHash("sha1")
       .update(["v3", cleanTitle(song.title), primaryArtist(song.artist), cleanTitle(song.album), Math.round(Number(song.duration) || 0)].join("\u0000").toLowerCase())
       .digest("hex");
@@ -388,4 +418,4 @@ function createLyricsService({
   return { get, searchManual, getManual, clearCache };
 }
 
-module.exports = { createLyricsService, shapeResult, chooseLyricsResult, retryAfterMs };
+module.exports = { createLyricsService, shapeResult, chooseLyricsResult, retryAfterMs, embeddedLyricsResult };

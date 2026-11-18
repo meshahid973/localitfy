@@ -33,7 +33,7 @@ type Props = {
 
 /** A presentation-only surface: transport, seek, queue and device state stay with the app. */
 export default function ImmersivePlayer({ player, song, queue, lyrics, backgroundStyle, backgrounded, onClose }: Props) {
-  const dialog = useModalFocus(true, true);
+  const dialog = useModalFocus<HTMLElement>(true, true);
   const stage = useRef<HTMLDivElement>(null);
   const queueTrigger = useRef<HTMLButtonElement>(null);
   const lyricsTrigger = useRef<HTMLButtonElement>(null);
@@ -83,7 +83,7 @@ export default function ImmersivePlayer({ player, song, queue, lyrics, backgroun
     onKeyDown={(event) => {
       if (event.key !== "Escape" || event.defaultPrevented || document.querySelector(".songContextMenuLayer")) return;
       event.preventDefault();
-      if (document.fullscreenElement === dialog.current) { void document.exitFullscreen().catch(() => undefined); return; }
+      if (document.fullscreenElement && document.fullscreenElement === dialog.current) { void document.exitFullscreen().catch(() => undefined); return; }
       if (queue.open) closeQueue();
       else if (lyrics.open) closeLyrics();
       else onClose();

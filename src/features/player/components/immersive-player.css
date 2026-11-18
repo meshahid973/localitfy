@@ -218,8 +218,8 @@
 .immersiveStage[data-lyrics-only="true"] > .immersiveArtwork { display: none; }
 .immersiveLyrics .lyricsView { background: transparent; border: 0; }
 .immersiveIntensity { min-width: 0; max-width: 90px; color: var(--lt-text); background: var(--lt-surface-soft); border: 0; border-radius: var(--lt-radius-item); font: inherit; padding: var(--lt-space-1) var(--lt-space-2); }
-.immersivePlayer[data-intensity="subtle"] .artworkBackdrop { opacity: .45; }
-.immersivePlayer[data-intensity="strong"] .artworkBackdrop { opacity: 1; }
+.app .immersivePlayer[data-intensity="subtle"] .artworkBackdrop { opacity: .45; }
+.app .immersivePlayer[data-intensity="strong"] .artworkBackdrop { opacity: 1; }
 .immersivePlayer .artworkBackdropCover { inset: -48px; width: calc(100% + 96px); height: calc(100% + 96px); filter: blur(48px) saturate(.85); opacity: .32; }
 .immersivePlayer .artworkBackdropLayer[data-visible="true"] .artworkBackdropCover { animation: immersiveDrift 36s ease-in-out infinite alternate; }
 @keyframes immersiveDrift { from { transform: scale(1.02) translate3d(-1%, 0, 0); } to { transform: scale(1.11) translate3d(2%, -2%, 0); } }

@@ -71,7 +71,7 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, ge
     if (!songId) return;
     const isCurrent = () => openRef.current && currentRevision.current === songRevision && requestGeneration.current === generation;
     // The backend owns the disk/offline cache and its invalidation.
-    const requestId = crypto.randomUUID();
+    const requestId = globalThis.crypto.randomUUID?.() ?? `lyrics-${Date.now()}-${generation}-${Math.random().toString(36).slice(2)}`;
     pendingRequest.current = { id: songId, requestId };
     window.localitfy.getLyrics({ id: songId, refresh, requestId })
       .then((next) => { if (isCurrent()) setLoaded({ revision: songRevision, result: next }); })
@@ -85,7 +85,7 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, ge
   }, [open, load, cancelLookup]);
 
   const adoptLyrics = (expectedId: string, next: LyricsResult) => {
-    if (!openRef.current || currentSongId.current !== expectedId) return;
+    if (!openRef.current || currentSongId.current !== expectedId || currentRevision.current !== songRevision) return;
     requestGeneration.current++;
     cancelLookup();
     setLoaded({ revision: songRevision, result: next });
@@ -310,7 +310,7 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, ge
       {saveError ? <p className="lyricsNote" role="alert">{saveError}</p> : null}
       <div ref={scrollerRef} className="lyricsScroller" tabIndex={0} aria-label="Scrollable lyrics" onWheel={holdManualScroll} onTouchMove={holdManualScroll} onPointerDown={(event) => { if (event.target === event.currentTarget) holdManualScroll(); }} onKeyDown={(event) => { if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End"].includes(event.key)) holdManualScroll(); }}>
         {matcherOpen && song
-          ? <LyricsMatchPanel key={song.id} songId={song.id} title={song.title} artist={song.artist} onSelected={adoptLyrics} />
+          ? <LyricsMatchPanel key={songRevision} songId={song.id} title={song.title} artist={song.artist} onSelected={adoptLyrics} />
           : body}
       </div>
     </section>

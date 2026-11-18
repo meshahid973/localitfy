@@ -345,7 +345,7 @@
 }
 
 .lyricsPrimary { display: block; white-space: pre-wrap; }
-.lyricsPrimary:lang(ja) { font-family: inherit, "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif; letter-spacing: normal; line-break: strict; word-break: normal; overflow-wrap: anywhere; }
+.lyricsPrimary:lang(ja) { font-family: "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif; letter-spacing: normal; line-break: strict; word-break: normal; overflow-wrap: anywhere; }
 .lyricsCompanion { display: block; margin-top: var(--lt-space-1); font-size: .52em; font-weight: 500; line-height: 1.45; color: var(--lt-muted); letter-spacing: normal; }
 .lyricsLine.isActive [data-lyric-word] { color: var(--lt-muted); transition: color var(--lt-control-motion) linear; }
 .lyricsLine.isActive [data-lyric-word][data-sung="true"] { color: var(--lt-text); }

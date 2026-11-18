@@ -7608,7 +7608,7 @@ function MainModeApp() {
       lyrics: connect.lyrics({
         open: lyricsOpen && settings.lyricsEnabled,
         onClose: closeLyrics,
-        song: visualCurrentSong,
+        song: currentSong,
         isPlaying,
         getTime: getLyricsTime,
         getPlaybackRate: getLyricsRate,
