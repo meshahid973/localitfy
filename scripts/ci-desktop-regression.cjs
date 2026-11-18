@@ -38,8 +38,11 @@ const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function until(fn,label,timeout=35000){const end=Date.now()+timeout;while(Date.now()<end){const v=await fn();if(v)return v;await sleep(200);}throw Error("Timeout: "+label);}
 async function screenshot(win,name){const image=await win.webContents.capturePage();assert.ok(!image.isEmpty());fs.writeFileSync(path.join(output,name+".png"),image.toPNG());}
 async function metrics(label){
+  // Prime Electron's interval-based CPU counters before sampling.
+  app.getAppMetrics();
   const readings=[];for(let i=0;i<5;i++){await sleep(1000);const m=app.getAppMetrics();readings.push({workingSetMiB:m.reduce((s,p)=>s+(p.memory?.workingSetSize||0),0)/1024,cpuPercent:m.reduce((s,p)=>s+(p.cpu?.percentCPUUsage||0),0),processes:m.length});}
-  return{label,readings};
+  const median=key=>readings.map(r=>r[key]).sort((a,b)=>a-b)[Math.floor(readings.length/2)];
+  return{label,readings,medianWorkingSetMiB:median("workingSetMiB"),peakWorkingSetMiB:Math.max(...readings.map(r=>r.workingSetMiB)),medianCpuPercent:median("cpuPercent")};
 }
 const watchdog=setTimeout(()=>{console.error("Integrated visual smoke timed out");server.close();app.exit(1);},210000);
 server.listen(5173,async()=>{
@@ -51,10 +54,13 @@ server.listen(5173,async()=>{
     session.defaultSession.webRequest.onBeforeRequest((details,callback)=>callback({cancel:/^https?:/i.test(details.url)&&!/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::|\/)/i.test(details.url)}));
     const win=await until(()=>BrowserWindow.getAllWindows().find(w=>!w.isDestroyed()&&w.webContents.getURL().includes("localhost:5173")),"desktop window");
     await until(()=>win.webContents.executeJavaScript("document.readyState === 'complete' && !!document.querySelector('#root')").catch(()=>false),"document ready");
+    await until(()=>win.webContents.executeJavaScript("!document.querySelector('.appCrashBoundary') && !!document.querySelector('.appShell') && !!document.querySelector('.sidebar [data-nav-id=home]')").catch(()=>false),"initial desktop shell");
+    const startupMs=Date.now()-started;
     await win.webContents.executeJavaScript(`localStorage.setItem('localitfy.onboarding.v1','done');localStorage.setItem('localitfy.onboarding.release-showcase.' + ${JSON.stringify(version)},'done');localStorage.setItem('localitfy.whatsNewSeenVersion',${JSON.stringify(version)})`);
+    const reloadStarted=Date.now();
     win.webContents.reload();
     await until(()=>win.webContents.executeJavaScript("!document.querySelector('.appCrashBoundary') && !!document.querySelector('.appShell')").catch(()=>false),"desktop shell");
-    const startupMs=Date.now()-started;
+    const reloadMs=Date.now()-reloadStarted;
     win.setSize(1280,800);await sleep(700);
     assert.equal(await win.webContents.executeJavaScript("document.querySelector('.app').dataset.sidebarBehavior"), "slim", "fresh installs use collapsed navigation");
     async function assertShellChrome() {
@@ -176,7 +182,20 @@ server.listen(5173,async()=>{
     await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.settingsModeButton').length===2").catch(()=>false),"two appearance modes");
     for(const mode of ["light","dark"]){
       await win.webContents.executeJavaScript(`document.querySelector('.settingsModeButton:has([data-preview-mode="${mode}"])').click()`);
-      await until(()=>win.webContents.executeJavaScript(`document.querySelector('.app')?.dataset.theme===${JSON.stringify(mode)} && getComputedStyle(document.querySelector('.app')).getPropertyValue('--lt-bg').trim()===${JSON.stringify(mode==="light"?"#f5f5f7":"#000000")}`).catch(()=>false),"apply "+mode);
+      // Compare the actual resolved color, not the spelling of a minified CSS token
+      // (#000 and #000000 are identical). Also verify the selected control.
+      await until(()=>win.webContents.executeJavaScript(`(()=>{
+        const root=document.querySelector('.app');
+        const mode=${JSON.stringify(mode)};
+        const button=document.querySelector('.settingsModeButton:has([data-preview-mode="'+mode+'"])');
+        if(!root||root.dataset.theme!==mode||button?.getAttribute('aria-pressed')!=='true')return false;
+        const probe=document.createElement('span');
+        probe.style.backgroundColor='var(--lt-bg)';
+        root.appendChild(probe);
+        const actual=getComputedStyle(probe).backgroundColor;
+        probe.remove();
+        return actual===(mode==='light'?'rgb(245, 245, 247)':'rgb(0, 0, 0)');
+      })()`).catch(()=>false),"apply "+mode);
       await assertShellChrome();
       await screenshot(win,"settings-"+mode);
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=library]').click()");
@@ -212,7 +231,7 @@ server.listen(5173,async()=>{
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=settings]').click()");
       await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.settingsModeButton').length===2").catch(()=>false),"appearance navigation");
     }
-    const result={startupMs,metrics:[idle,playing],platform:process.platform,fixtureSongs:songs.length,layouts,artworkTransitionLayers:samples};
+    const result={startupMs,reloadMs,startupDefinition:"desktop entry to initial rendered shell; excludes fixture creation and Electron process spawn",metrics:[idle,playing],memoryDefinition:"sum of Electron process working sets; may double count shared pages",platform:process.platform,fixtureSongs:songs.length,layouts,artworkTransitionLayers:samples};
     fs.writeFileSync(path.join(output,"desktop-runtime.json"),JSON.stringify(result,null,2));console.log("[desktop-qa]",JSON.stringify(result));
     clearTimeout(watchdog);server.close();app.exit(0);
   }catch(error){
@@ -220,7 +239,7 @@ server.listen(5173,async()=>{
     const win=BrowserWindow.getAllWindows().find(w=>!w.isDestroyed());
     if(win) {
       try { await screenshot(win,"desktop-failure"); } catch {}
-      try { console.log("[desktop-qa state]",await win.webContents.executeJavaScript("JSON.stringify({title:document.title,headings:[...document.querySelectorAll('h1,h2')].map(e=>e.textContent),audio:[...document.querySelectorAll('audio')].map(a=>({paused:a.paused,currentTime:a.currentTime,readyState:a.readyState,error:a.error?.message}))})")); } catch {}
+      try { console.log("[desktop-qa state]",await win.webContents.executeJavaScript("JSON.stringify({title:document.title,theme:document.querySelector('.app')?.dataset.theme,themeToken:document.querySelector('.app')?getComputedStyle(document.querySelector('.app')).getPropertyValue('--lt-bg'):null,themeButtons:[...document.querySelectorAll('.settingsModeButton')].map(b=>({label:b.textContent,pressed:b.getAttribute('aria-pressed')})),headings:[...document.querySelectorAll('h1,h2')].map(e=>e.textContent),audio:[...document.querySelectorAll('audio')].map(a=>({paused:a.paused,currentTime:a.currentTime,readyState:a.readyState,error:a.error?.message}))})")); } catch {}
     }
     clearTimeout(watchdog);server.close();app.exit(1);
   }

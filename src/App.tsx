@@ -3828,6 +3828,7 @@ function MainModeApp() {
 
   function isImmediateSettingsKey(key: string) {
     return [
+      "theme",
       "volume",
       "playbackSpeed",
       "crossfadeSeconds",
