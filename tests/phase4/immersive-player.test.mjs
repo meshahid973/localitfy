@@ -47,7 +47,7 @@ test("cover color results cannot tint a different track and Android closes its o
   const phone = read(dir + "PhonePlayer.tsx");
   const focus = read("src/shared/hooks/useModalFocus.ts");
   assert.match(ambient, /sample\?\.source === coverSource \? sample\.style : EMPTY_COVER_STYLE/);
-  assert.match(ambient, /cancelled \|\| requestIdRef\.current !== requestId/);
+  assert.match(ambient, /if \(controller.signal.aborted\) return/);
   assert.match(phone, /if \(queuePanelOpen\) toggleQueuePanel\(\)/);
   assert.match(phone, /progressInputRefs\.current\[MINI_SLOT\] = expanded \? null : node/);
   assert.match(focus, /element\.id === "localtify-play-queue"/);

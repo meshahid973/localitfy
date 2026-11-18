@@ -84,8 +84,11 @@ test('collection controls use the same size tokens as their grid columns',()=>{
 test('decorative artwork uses low-resolution source without changing eager loading',()=>{
  const source=fs.readFileSync('src/features/covers/Cover.tsx','utf8');
  const backdrop=fs.readFileSync('src/features/covers/ArtworkBackdrop.tsx','utf8');
+ const ambient=fs.readFileSync('src/features/covers/cover.ambient.ts','utf8');
  assert.match(source,/const useFullCover = isImmediateCover && !preferThumbnail/);
  assert.match(source,/const directCover = useFullCover \? getFullCoverUrl\(song\) : getCardCoverUrl\(song\)/);
- assert.match(backdrop,/priority="high" preferThumbnail/);
+ assert.match(backdrop,/const source = getSongAmbientSource\(song\)/);
+ assert.match(backdrop,/decodeArtwork\(source, controller.signal\)/);
+ assert.match(ambient,/return getRendererSafeImageUrl\(song.coverThumbUrl\)\|\|getRendererSafeImageUrl\(song.coverThumbnailUrl\)/);
  assert.match(source,/preferThumbnail \? getFullCoverUrl\(song\) : ""/);
 });

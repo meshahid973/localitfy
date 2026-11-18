@@ -12,7 +12,8 @@
   opacity: 0;
   transition: opacity 360ms cubic-bezier(.22, 1, .36, 1);
 }
-.artworkBackdropLayer[data-visible="true"] { opacity: 1; }
+.artworkBackdropLayer[data-visible="true"] { opacity: 1; animation: artworkReveal 360ms cubic-bezier(.22, 1, .36, 1); }
+@keyframes artworkReveal { from { opacity: 0; } to { opacity: 1; } }
 
 .artworkBackdrop .artworkBackdropCover {
   position: absolute;
@@ -54,6 +55,6 @@
 .app[data-cover-sync="strong"] .artworkBackdrop { opacity: 1; }
 
 @media (prefers-reduced-motion: reduce) {
-  .artworkBackdropLayer { transition: none; }
+  .artworkBackdropLayer { transition: none; animation: none; }
 }
-.app.reducedMotion .artworkBackdropLayer { transition: none; }
+.app.reducedMotion .artworkBackdropLayer { transition: none; animation: none; }
