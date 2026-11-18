@@ -86,7 +86,9 @@ test("Home shelves size against available content width and deduplicate mix artw
   assert.match(css, /\.homeListenGrid \{[^}]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(css, /@container \(max-width: 460px\)/);
   assert.match(css, /\.homeMixRail \{ grid-auto-columns:/);
-  assert.match(source, /pickHomeMixArtwork\(mix.songs\)/);
+  assert.match(source, /<HomeMixArtwork id=\{mix.id\}/);
+  assert.match(read("src/features/home/HomeMixArtwork.tsx"), /pickHomeMixArtwork\(songs\)/);
+  assert.doesNotMatch(css, /homeMixCollage/);
   assert.match(source, /className="homeReleaseCover" preferThumbnail/);
 });
 
@@ -150,4 +152,14 @@ test("Home most-listened work is memoized, bounded, and hidden when unused", () 
   const css = read("src/features/home/home.css");
   assert.match(css, /\.homeSection > h3 \{ margin-bottom: 14px; \}/);
   assert.doesNotMatch(css, /\.homeSectionHead > h3 \{ margin:0; \}/);
+});
+
+test("Home 3.1 keeps Listen Now on the workspace atmosphere and generated mixes in the shared card rail", () => {
+  const css = read("src/features/home/home.css");
+  const artwork = read("src/features/home/HomeMixArtwork.tsx");
+  assert.match(css, /\.homeListenGrid \{[^}]*background: transparent/);
+  assert.match(artwork, /new PaletteCache<ArtworkPalette>\(96\)/);
+  assert.match(artwork, /IntersectionObserver/);
+  assert.match(artwork, /controller.abort\(\)/);
+  assert.match(css, /\.homeMixArtwork \{[^}]*radial-gradient/);
 });

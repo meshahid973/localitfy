@@ -184,6 +184,8 @@ server.listen(5173,async()=>{
     const layouts=[];
     for(const [width,height] of [[1280,800],[1920,1080],[860,760]])layouts.push(await homeGeometry(width,height));
     win.setSize(1280,800);
+    const listenBackground = await win.webContents.executeJavaScript("getComputedStyle(document.querySelector('.homeListenGrid')).backgroundColor");
+    assert.equal(listenBackground, "rgba(0, 0, 0, 0)", "Listen Now must not paint a separate container");
     const previous=await win.webContents.executeJavaScript("document.querySelector('.homeFeatureCover').dataset.coverTitle");
     await win.webContents.executeJavaScript("document.querySelector('.playerBar button[aria-label=\\\"next song\\\"]').click()");
     await until(()=>win.webContents.executeJavaScript("document.querySelector('.homeFeatureCover')?.dataset.coverTitle").then(title=>title&&title!==previous).catch(()=>false),"next track");

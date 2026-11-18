@@ -85,7 +85,7 @@ export function HomeSongRail({ id, title, songs, currentId, selectSong, playSong
             cover={<span className="homeReleaseCoverWrap"><Cover song={song} className="homeReleaseCover" preferThumbnail /></span>}
           >
             <span className="homeReleaseCopy">
-              <strong>{prettyTitle(song.title, 5)}</strong>
+              <strong title={song.title}>{song.title || prettyTitle(song.title, 5)}</strong>
               <small>{prettyMeta(song.artist)}</small>
             </span>
           </MediaCard>

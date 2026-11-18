@@ -156,7 +156,7 @@ export default function HomeView(props: HomeViewProps) {
                 >
                   <Cover song={song} className="homeListenCover" preferThumbnail />
                   <span className="homeListenCopy">
-                    <strong>{prettyTitle(song.title, 6)}</strong>
+                    <strong>{song.title || prettyTitle(song.title, 6)}</strong>
                     <small>{prettyMeta(song.artist)}</small>
                   </span>
                   <span className="homeListenPlay" aria-hidden="true">{active && isPlaying ? <AudioLines size={16} /> : <Play size={14} fill="currentColor" />}</span>
