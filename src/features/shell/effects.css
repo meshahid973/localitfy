@@ -136,20 +136,20 @@
   --v321-list-card-shadow: none;
 }
 
-.app :where(.panel, .coverTargetPanelCleanOnly){
+.app :where(.panel){
   background: var(--v321-panel-bg) !important;
   border-color: var(--v321-panel-border) !important;
   box-shadow: var(--v321-card-shadow) !important;
   transition: background-color var(--v321-fast), border-color var(--v321-fast), box-shadow var(--v321-fast), transform var(--v321-fast) !important;
 }
 
-.app[data-card-background="glassy"] :where(.panel, .coverTargetPanelCleanOnly){
+.app[data-card-background="glassy"] :where(.panel){
   backdrop-filter: blur(16px) saturate(1.08) !important;
   -webkit-backdrop-filter: blur(16px) saturate(1.08) !important;
 }
 
-.app[data-card-background="solid"] :where(.panel, .coverTargetPanelCleanOnly),
-.app[data-card-background="oledFlat"] :where(.panel, .coverTargetPanelCleanOnly){
+.app[data-card-background="solid"] :where(.panel),
+.app[data-card-background="oledFlat"] :where(.panel){
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
