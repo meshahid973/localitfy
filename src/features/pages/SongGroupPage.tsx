@@ -2,6 +2,7 @@ import "./pages.css";
 import { useEffect, useMemo, useState } from "react";
 import { Radio } from "lucide-react";
 import { Cover } from "../covers/Cover";
+import { CollectionArtwork } from "../covers/CollectionArtwork";
 import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
 import { formatTime } from "../../shared/utils/format";
 import { splitArtistCredits } from "../artists/artistCredits";
@@ -77,7 +78,7 @@ function SongGroupBody({ kind, name, members, loading, currentId, isPlaying, tog
         typeLabel={kind}
         title={name}
         round={kind === "artist"}
-        cover={<Cover song={target.coverSong} className="collectionHeroCover" priority="high" />}
+        cover={kind === "genre" ? <CollectionArtwork id={`genre:${target.id}`} name={name} songs={members} className="collectionHeroCover" /> : <Cover song={target.coverSong} className="collectionHeroCover" priority="high" />}
         coverSong={target.coverSong}
         stats={[`${members.length} track${members.length === 1 ? "" : "s"}`, formatTime(duration)].join(" · ")}
         playable={playable.length}
