@@ -190,13 +190,6 @@
     0 0 0 0 rgba(var(--lt-accent-rgb), 0),
     0 14px 34px rgba(var(--lt-accent-rgb), 0.17) !important;
 }
-
-.app .circleButton.main:hover:not(.playerBar *){
-  box-shadow:
-    0 0 0 7px rgba(var(--lt-accent-rgb), 0.11),
-    0 18px 44px rgba(var(--lt-accent-rgb), 0.24) !important;
-}
-
 .app .appToast{
   transform: translateZ(0);
   backface-visibility: hidden;
@@ -1013,20 +1006,6 @@ body.isResizingSidebar{
   background: rgba(255, 255, 255, 0.06) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045) !important;
 }
-
-.iconAction:hover,
-.circleButton:hover:not(.playerBar *),
-.softButton:hover,
-.heroGhost:hover:hover:not(:disabled){
-  color: #fff !important;
-  background: rgba(var(--lt-accent-rgb), 0.13) !important;
-  border-color: rgba(var(--lt-accent-rgb), 0.24) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 12px 26px rgba(var(--lt-accent-rgb), 0.075) !important;
-  transform: translate3d(0, -1px, 0) !important;
-}
-
 .circleButton.main:not(.playerBar *),
 .mainAction,
 .heroMain,
@@ -1039,16 +1018,6 @@ body.isResizingSidebar{
     0 12px 34px rgba(var(--lt-accent-rgb), 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
 }
-
-.circleButton.main:hover:not(.playerBar *),
-.mainAction:hover,
-.heroMain:hover{
-  box-shadow:
-    0 0 0 7px rgba(var(--lt-accent-rgb), 0.10),
-    0 18px 46px rgba(var(--lt-accent-rgb), 0.23),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28) !important;
-}
-
 .editorFields input{
   border-color: rgba(255, 255, 255, 0.09) !important;
   background: rgba(255, 255, 255, 0.055) !important;
@@ -1273,14 +1242,6 @@ body{
   transform: none;
   transition: transform 160ms ease, background 160ms ease, border-color 160ms ease, color 160ms ease !important;
 }
-
-.circleButton:hover:not(.playerBar *){
-  transform: translateY(-1px) scale(1.04) !important;
-  background: color-mix(in oklab, var(--lt-accent) 12%, transparent) !important;
-  border-color: color-mix(in oklab, var(--lt-accent) 45%, transparent) !important;
-  box-shadow: 0 0 14px color-mix(in oklab, var(--lt-accent) 18%, transparent) !important;
-}
-
 .circleButton.main:not(.playerBar *){
   width: var(--control-circle-main) !important;
   height: var(--control-circle-main) !important;
@@ -1392,21 +1353,6 @@ body{
 .coverAura:hover::before{
   opacity: .42 !important;
 }
-
-button,
-.button,
-.circleButton:not(.playerBar *),
-.softButton,
-.heroGhost,
-.mainAction,
-.heroMain {
-  transition: transform 150ms cubic-bezier(.2,.8,.2,1),
-    background 150ms ease,
-    border-color 150ms ease,
-    color 150ms ease,
-    filter 150ms ease !important;
-}
-
 .app[data-theme]::before{
   opacity: 0 !important;
   display: none !important;
@@ -2376,11 +2322,6 @@ body::after,
   backface-visibility: hidden !important;
   transform-origin: center !important;
 }
-
-.app .settingsCategoryButton:hover{
-  transform: translate3d(0,0,0) !important;
-}
-
 .app .whatsNewCard{
   overflow: hidden !important;
   border-radius: 28px !important;
@@ -3788,19 +3729,7 @@ body.localitfyThemePainting .app{
 
 /* Do not run expensive hover/lift work while dragging a color picker. */
 
-/* no hover movement on quick action buttons + full playlist modal overlay. */
-.app .iconAction.noActionHoverV444,
-.app .homeAlbumActions .iconAction,
-.app .songRow > .iconAction,
-.app .playlistAddAction,
-.app .likeActionV443{
-  transform: none !important;
-  transition: none !important;
-  filter: none !important;
-  box-shadow: none !important;
-}
-
-.app .playlistPickerWrap.modalWrap,
+/* no hover movement on quick action buttons + full playlist modal overlay. */.app .playlistPickerWrap.modalWrap,
 .modalWrap.playlistPickerWrap{
   position: fixed !important;
   inset: var(--localtify-titlebar-height, 48px) 0 92px 0 !important;
@@ -4393,7 +4322,6 @@ body.isResizingPlayer .app *{
   color: color-mix(in srgb, var(--text) 92%, transparent) !important;
   background: rgba(255,255,255,.045) !important;
   border-color: rgba(255,255,255,.075) !important;
-  transform: translate3d(2px,0,0) !important;
   box-shadow: none !important;
 }
 
@@ -4405,7 +4333,6 @@ body.isResizingPlayer .app *{
     linear-gradient(180deg, rgba(var(--lt-accent-rgb), .135), rgba(var(--lt-accent-rgb), .072)),
     rgba(var(--lt-accent-rgb), .052) !important;
   border-color: rgba(var(--lt-accent-rgb), .24) !important;
-  transform: translate3d(2px,0,0) !important;
   box-shadow: inset 0 0 0 1px rgba(var(--lt-accent-rgb), .06) !important;
 }
 
@@ -4424,7 +4351,6 @@ body.isResizingPlayer .app *{
 .app .sidebar .navItem:focus-visible .navIcon,
 .app .sidebar .navItem.active .navIcon{
   color: var(--lt-text) !important;
-  transform: translate3d(0,0,0) scale(1.04) !important;
 }
 
 .app .sidebar .navItem.active .navText strong,
@@ -4444,7 +4370,6 @@ body.isResizingPlayer .app *{
 .app .sidebar .navItem[aria-label="open settings"]:hover .navLucideIcon,
 .app .sidebar .navItem[aria-label="open liked"]:hover .navLucideIcon{
   animation: none !important;
-  transform: translate3d(0,0,0) scale(1.04) !important;
 }
 
 .app .sidebarNavGroupV467 .navDivider{

@@ -98,7 +98,6 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
     renamingPlaylistId,
     renamingPlaylistName,
     savePlaylistRename,
-    selectPlaylistSongAction,
     selectedPlaylist,
     setNewPlaylistName,
     setRenamingPlaylistName,
@@ -124,7 +123,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
   const detailId = props.detailPlaylistId || null;
   // Adding a song to another playlist selects that one; the page keeps the selection on its own playlist,
   // which the track list's play, drop and remove actions act on.
-  useEffect(() => { if (detailId && selectedPlaylist?.id !== detailId) setSelectedPlaylistId(detailId); }, [detailId, selectedPlaylist?.id]);
+  useEffect(() => { if (detailId && selectedPlaylist?.id !== detailId) setSelectedPlaylistId(detailId); }, [detailId, selectedPlaylist?.id, setSelectedPlaylistId]);
   const detailPlaylist: Playlist | null = detailId ? playlistSummaries.find((summary: { playlist: Playlist }) => summary.playlist.id === detailId)?.playlist ?? null : null;
   const detailSongs = useMemo(() => detailPlaylist?.songIds.flatMap((id) => songsById.get(id) ?? []) ?? [], [detailPlaylist, songsById]);
   useEffect(() => { setTrackQuery(""); setCoverError(""); }, [detailId]);
@@ -237,7 +236,8 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
           {trackQuery.trim() && !filteredDetailSongs.length ? <p role="status">No matching tracks.</p> : <VirtualPlaylistTrackList
             selectedPlaylistId={detailPlaylist.id}
             list={filteredDetailSongs}
-            editable={!detailPlaylist.rules && !trackQuery.trim()}
+            editable={!detailPlaylist.rules}
+            reorderable={!detailPlaylist.rules && !trackQuery.trim()}
             currentId={currentId}
             isPlaying={isPlaying}
             draggedSongId={draggedSongId}

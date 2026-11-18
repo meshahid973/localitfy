@@ -247,8 +247,7 @@
   transition: border-color 120ms ease, background-color 120ms ease !important;
 }
 
-/* Flat, neutral list feedback. Legacy global ::before/::after hover washes
-   must not override this view; drag-target markers stay available. */
+/* Single row surface; drag-target markers stay available. */
 .app .libraryPage .songRow:not(.songDragging):not(.songDropTarget) {
   background: transparent !important;
 }
@@ -258,13 +257,8 @@
 .app .libraryPage .songRow.active:not(.songDragging):not(.songDropTarget) {
   background: var(--lt-fill-selected) !important;
   border-color: color-mix(in srgb, var(--lt-accent) 18%, transparent) !important;
-  box-shadow: inset 2px 0 0 var(--lt-accent) !important;
-}
-.app[data-library-row-style="listOnly"] .libraryPage .songRow.active {
-  box-shadow: none !important;
-}
-
-.libraryPage .songButton {
+  border-inline-start-color: var(--lt-accent) !important;
+}.libraryPage .songButton {
   min-width: 0 !important;
   padding: 0 !important;
   display: grid !important;
@@ -390,11 +384,11 @@
 .libraryPage .libraryTrackSurface.libraryFullListV025 { scrollbar-color: color-mix(in oklab,var(--lt-accent) 28%,transparent) transparent; }
 .libraryPage .songRow :is(.iconAction,.songButton):focus-visible {
   outline: 2px solid var(--lt-accent);
-  outline-offset: 1px;
+  outline-offset: -2px;
 }
 .libraryPage .librarySearch:focus-visible,
 .libraryPage .libraryAction:focus-visible {
-  outline: 1px solid var(--lt-accent);
+  outline: 2px solid var(--lt-accent);
   outline-offset: 2px;
 }
 

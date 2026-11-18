@@ -25,6 +25,7 @@ function getPlaylistDropSide(event: DragEvent<HTMLElement>): LibraryDropSide {
 export type VirtualPlaylistTrackListProps = {
   selectedPlaylistId: string;
   editable?: boolean;
+  reorderable?: boolean;
   list: Song[];
   currentId: string;
   isPlaying: boolean;
@@ -41,6 +42,7 @@ export type VirtualPlaylistTrackListProps = {
 export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
   selectedPlaylistId,
   editable = true,
+  reorderable = editable,
   list,
   currentId,
   isPlaying,
@@ -68,23 +70,23 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
 
   const handleEmptyDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
     const songId = readPlaylistDraggedSongId(event, draggedSongId);
-    if (!editable || !selectedPlaylistId || !songId) return;
+    if (!reorderable || !selectedPlaylistId || !songId) return;
 
     event.preventDefault();
     event.stopPropagation();
     event.dataTransfer.dropEffect = "copy";
-  }, [draggedSongId, selectedPlaylistId, editable]);
+  }, [draggedSongId, selectedPlaylistId, reorderable]);
 
   const handleEmptyDrop = useCallback((event: DragEvent<HTMLDivElement>) => {
     const songId = readPlaylistDraggedSongId(event, draggedSongId);
-    if (!editable || !selectedPlaylistId || !songId) return;
+    if (!reorderable || !selectedPlaylistId || !songId) return;
 
     event.preventDefault();
     event.stopPropagation();
     onAppendSong(selectedPlaylistId, songId);
     clearLocalDropTarget();
     onDragEnd();
-  }, [clearLocalDropTarget, draggedSongId, onAppendSong, onDragEnd, selectedPlaylistId, editable]);
+  }, [clearLocalDropTarget, draggedSongId, onAppendSong, onDragEnd, selectedPlaylistId, reorderable]);
 
   if (!selectedPlaylistId || !list.length) {
     return (
@@ -124,11 +126,11 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
                 "--playlist-row-y": `${virtualRow.start - scrollMargin}px`,
                 "--playlist-stagger": Math.min(virtualRow.index, 12)
               } as CSSProperties}
-              draggable={editable}
+              draggable={reorderable}
               onDragStart={(event) => onStartSongDrag(event, song.id)}
               onDragOver={(event) => {
                 const incomingSongId = readPlaylistDraggedSongId(event, draggedSongId);
-                if (!editable || !incomingSongId || incomingSongId === song.id) return;
+                if (!reorderable || !incomingSongId || incomingSongId === song.id) return;
 
                 event.preventDefault();
                 event.stopPropagation();
@@ -148,7 +150,7 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
               }}
               onDrop={(event) => {
                 const incomingSongId = readPlaylistDraggedSongId(event, draggedSongId);
-                if (!editable || !incomingSongId || incomingSongId === song.id) return;
+                if (!reorderable || !incomingSongId || incomingSongId === song.id) return;
 
                 event.preventDefault();
                 event.stopPropagation();
@@ -163,7 +165,7 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
               }}
               onContextMenu={(event) => onOpenContextMenu(event, song)}
             >
-              <span className="playlistTrackGrip">{editable ? <GripVertical size={14} strokeWidth={2.25} /> : null}</span>
+              <span className="playlistTrackGrip">{reorderable ? <GripVertical size={14} strokeWidth={2.25} /> : null}</span>
               <button className="playlistTrackMain" type="button" disabled={song.fileExists === false} aria-current={active ? "true" : undefined} onClick={() => onSelectSong(song.id)}>
                 <span className="playlistTrackIndex">{active && isPlaying ? <PlayingBarsIcon /> : virtualRow.index + 1}</span>
                 <Cover song={song} className="playlistTrackCover" preferThumbnail />

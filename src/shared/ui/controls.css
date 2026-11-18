@@ -100,10 +100,10 @@
 }
 
 .app :is(.mainAction, .softButton, .iconAction, .closeModalButton, .settingsActionButton, .settingsTinyButton) {
-  transition: background-color var(--lt-control-motion) ease, border-color var(--lt-control-motion) ease, transform var(--lt-control-motion) var(--lt-ease-out) !important;
+  transition: background-color var(--lt-control-motion) ease, border-color var(--lt-control-motion) ease, color var(--lt-control-motion) ease !important;
 }
-.app :is(.mainAction, .softButton, .iconAction, .closeModalButton, .settingsActionButton, .settingsTinyButton):active:not(:disabled) {
-  transform: translateY(1px) !important;
+.app :is(.softButton, .iconAction, .closeModalButton, .settingsActionButton, .settingsTinyButton):not(.primary):not(.danger):active:not(:disabled) {
+  background: var(--lt-fill-selected) !important;
 }
 .app :is(input, textarea) { caret-color: var(--lt-accent); }
 .app ::selection { background: var(--lt-accent); color: var(--accent-contrast, #06100b); }

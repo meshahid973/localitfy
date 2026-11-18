@@ -451,7 +451,6 @@ button:disabled{
 }
 
 .dangerButton:hover{
-  transform: translateY(-1px);
   background: var(--danger);
 }
 
@@ -654,7 +653,7 @@ button:disabled{
   font-weight: 900;
 }
 
-.songRow.active .songMeta strong::after{
+.songRow.playing .songMeta strong::after{
   content: "  playing";
   color: var(--accent);
   font-size: 10px;
@@ -687,17 +686,6 @@ button:disabled{
 .iconAction{
   transition-duration: 120ms;
 }
-
-.navItem:hover,
-.heroGhost:hover,
-.softButton:hover,
-.mainAction:hover,
-.heroMain:hover,
-.circleButton:hover:not(.playerBar *),
-.iconAction:hover{
-  transform: translate3d(0, -1px, 0);
-}
-
 .editorModal{
   background: var(--lt-bg-elevated);
   border-color: var(--lt-border);
