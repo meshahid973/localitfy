@@ -1354,7 +1354,7 @@ function MainModeApp() {
     [volumeDraft]
   );
   const ambientSource = useMemo(() => getSongAmbientSource(currentSong), [currentSong]);
-  const coverAverageStyle = useCoverAverageStyle(ambientSource, effectiveAmbient, !isAppBackgrounded);
+  const coverAverageStyle = useCoverAverageStyle(ambientSource, effectiveCoverColorSyncMode !== "off", !isAppBackgrounded);
   const ambientStyle = useMemo(() => {
     const sourceStyle = getAmbientStyle(ambientSource) ?? {};
     return { ...sourceStyle, ...coverAverageStyle } as CSSProperties;

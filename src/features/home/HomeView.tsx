@@ -3,7 +3,6 @@ import { Fragment, lazy, Suspense, useCallback, useMemo, useState, type CSSPrope
 import { Maximize2, Minimize2, Play, Shuffle, SlidersHorizontal, Smartphone } from "lucide-react";
 import { isAndroidApp } from "../../app/platform";
 import { Cover } from "../covers/Cover";
-import { ArtworkBackdrop } from "../covers/ArtworkBackdrop";
 import { MascotStateArt } from "../../shared/ui/LocaltifyViewUi";
 import { prettyMeta, prettyTitle } from "../search/search.utils";
 import type { Song } from "../library/song.types";
@@ -18,8 +17,6 @@ import { pickLikedSongs, pickMostPlayedSongs, pickNotPlayedYet, pickRecentlyPlay
 
 export type HomeViewProps = {
   ambientStyle: CSSProperties;
-  artworkAmbient?: boolean;
-  bannerType?: Settings["homeBannerType"];
   currentId: string | null;
   currentSong: Song | null;
   heroDisplayArtist: string;
@@ -50,8 +47,6 @@ export type HomeViewProps = {
 export default function HomeView(props: HomeViewProps) {
   const {
     ambientStyle,
-    artworkAmbient = true,
-    bannerType = "dynamic",
     currentId,
     currentSong,
     heroDisplayArtist,
@@ -82,7 +77,6 @@ export default function HomeView(props: HomeViewProps) {
   const day = useHomeDay();
   const android = isAndroidApp();
   const needsPhoneSync = android && songs.length === 0;
-  const showAtmosphere = artworkAmbient && Boolean(currentSong) && (bannerType === "dynamic" || bannerType === "albumCover");
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const closeCustomize = useCallback(() => setCustomizeOpen(false), []);
 
@@ -188,7 +182,6 @@ export default function HomeView(props: HomeViewProps) {
 
   return (
     <div className="homePage" style={ambientStyle}>
-      {showAtmosphere ? <div className="homeAtmosphere" aria-hidden="true"><ArtworkBackdrop song={currentSong} /></div> : null}
       <header className="homeTopBar">
         <h1>Home</h1>
         <button

@@ -52,18 +52,6 @@
   min-width: 0;
 }
 
-.homePage > .homeAtmosphere {
-  position: absolute;
-  inset: 0 0 auto;
-  grid-column: auto;
-  height: min(680px, 85vh);
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-  isolation: isolate;
-  mask-image: linear-gradient(transparent 0, #000 64px, #000 22%, transparent 100%);
-}
-
 .homeTopBar {
   min-height: 40px;
   display: flex;
