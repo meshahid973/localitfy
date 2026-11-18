@@ -24,6 +24,6 @@
   transition: background-color var(--lt-duration-fast) ease, color var(--lt-duration-fast) ease;
 }
 
-.titleHistoryNav button:hover:not(:disabled) { color: var(--lt-text); background: color-mix(in srgb, var(--lt-text) 10%, var(--lt-surface-raised)); }
+.titleHistoryNav button:hover:not(:disabled) { color: var(--lt-text); background: var(--lt-fill-hover); }
 .titleHistoryNav button:disabled { cursor: default; opacity: .35; }
 .titleHistoryNav button:focus-visible { outline: 2px solid rgba(var(--lt-accent-rgb), .62); outline-offset: 1px; }

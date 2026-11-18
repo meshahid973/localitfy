@@ -121,8 +121,8 @@
 }
 
 .app[data-card-background="glassy"]{
-  --v321-panel-bg: color-mix(in srgb, var(--lt-surface) 68%, transparent);
-  --v321-card-bg: color-mix(in srgb, var(--lt-surface) 62%, transparent);
+  --v321-panel-bg: var(--lt-fill);
+  --v321-card-bg: var(--lt-fill-subtle);
   --v321-card-border: var(--lt-border);
   --v321-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.052), 0 18px 42px rgba(0, 0, 0, 0.22);
   --v321-list-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
@@ -136,20 +136,20 @@
   --v321-list-card-shadow: none;
 }
 
-.app :where(.panel, .coverTargetPanelCleanOnly){
+.app :where(.panel){
   background: var(--v321-panel-bg) !important;
   border-color: var(--v321-panel-border) !important;
   box-shadow: var(--v321-card-shadow) !important;
   transition: background-color var(--v321-fast), border-color var(--v321-fast), box-shadow var(--v321-fast), transform var(--v321-fast) !important;
 }
 
-.app[data-card-background="glassy"] :where(.panel, .coverTargetPanelCleanOnly){
+.app[data-card-background="glassy"] :where(.panel){
   backdrop-filter: blur(16px) saturate(1.08) !important;
   -webkit-backdrop-filter: blur(16px) saturate(1.08) !important;
 }
 
-.app[data-card-background="solid"] :where(.panel, .coverTargetPanelCleanOnly),
-.app[data-card-background="oledFlat"] :where(.panel, .coverTargetPanelCleanOnly){
+.app[data-card-background="solid"] :where(.panel),
+.app[data-card-background="oledFlat"] :where(.panel){
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
@@ -352,296 +352,6 @@
   display: none !important;
 }
 
-/* keep audio smooth by sleeping expensive paint while the renderer is busy. */
-.app.localtifyInteractionBusy :is(.coverAura, .songArt, .playerBar)::before{
-  opacity: 0 !important;
-  filter: none !important;
-  animation: none !important;
-  transition: none !important;
-}
-
-.app.localtifyInteractionBusy :is(.nowPlayingCopySwap, .songRow, .playlistSongRow){
-  animation: none !important;
-  transition-duration: 0ms !important;
-}
-
-/* Disable old pulse/scale/sidebar hover effects. */
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar *,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar *{
-  animation-name: none !important;
-  filter: none !important;
-}
-
-/* Nav layout: icons stay visible in closed rail. */
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .nav,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .nav{
-  width: 100% !important;
-  min-width: 0 !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItem,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItem{
-  width: 100% !important;
-  min-width: 0 !important;
-  height: 40px !important;
-  margin-inline: 0 !important;
-  padding: 0 !important;
-  display: grid !important;
-  grid-template-columns: 1fr !important;
-  align-items: center !important;
-  justify-content: stretch !important;
-  gap: 0 !important;
-  border-radius: 15px !important;
-  overflow: hidden !important;
-  color: var(--lt-muted) !important;
-  background: transparent !important;
-  border: 1px solid transparent !important;
-  box-shadow: none !important;
-  transform: translate3d(0,0,0) !important;
-  transition:
-    color 150ms ease,
-    background-color 150ms ease,
-    border-color 150ms ease !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItem:hover,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItem:hover{
-  color: var(--lt-text) !important;
-  background: var(--lt-surface-soft) !important;
-  border-color: transparent !important;
-  transform: translate3d(0,0,0) !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItem.active,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItem.active{
-  color: var(--lt-text) !important;
-  background:
-    linear-gradient(180deg, rgba(var(--accent-rgb), .14), rgba(var(--accent-rgb), .055)),
-    rgba(255,255,255,.018) !important;
-  border-color: rgba(var(--accent-rgb), .22) !important;
-  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), .05) !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navIcon,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navIcon{
-  width: 28px !important;
-  height: 28px !important;
-  min-width: 28px !important;
-  display: grid !important;
-  place-items: center !important;
-  margin: 0 !important;
-  color: currentColor !important;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navIcon svg,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navIcon svg,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navLucideIcon,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navLucideIcon{
-  width: 22px !important;
-  height: 22px !important;
-  color: currentColor !important;
-  stroke: currentColor !important;
-  filter: none !important;
-  transform: none !important;
-}
-
-/* Closed: text is completely invisible; no half-cut labels while closed/opening. */
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navText,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText{
-  opacity: 0 !important;
-  visibility: hidden !important;
-  transform: translate3d(-8px,0,0) !important;
-  pointer-events: none !important;
-  transition:
-    opacity 90ms ease,
-    transform 180ms var(--lt-sidebar-fast),
-    visibility 0ms linear 95ms !important;
-}
-
-/* Expanded hover mode restores the labeled two-column row without changing the grid track. */
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:is(:hover, :focus-within) .navItem {
-  grid-template-columns: 28px minmax(0, 1fr) !important;
-  justify-items: stretch !important;
-  gap: 9px !important;
-  padding-inline: 9px !important;
-}
-
-/* Open: reveal labels after the rail has expanded enough. */
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .navText,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .navText{
-  display: grid !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  transform: translate3d(0,0,0) !important;
-  pointer-events: auto !important;
-
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navText,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText{
-  display: none !important;
-  min-width: 0 !important;
-  max-width: 154px !important;
-  overflow: hidden !important;
-  white-space: nowrap !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navText strong,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navText small,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText strong,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText small{
-  display: block !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-}
-
-/* Import button: icon-only closed, full button opened. */
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .sidebarBottom,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .sidebarBottom{
-  display: grid !important;
-  place-items: center !important;
-  padding-inline: 0 !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .importMainAction,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .importMainAction{
-  width: 48px !important;
-  min-width: 48px !important;
-  max-width: 48px !important;
-  height: 46px !important;
-  padding: 0 !important;
-  margin-inline: auto !important;
-  display: inline-grid !important;
-  place-items: center !important;
-  gap: 0 !important;
-  font-size: 0 !important;
-  line-height: 0 !important;
-  color: transparent !important;
-  overflow: hidden !important;
-  white-space: nowrap !important;
-  border-radius: 15px !important;
-  transition:
-    width 310ms var(--lt-sidebar-ease),
-    max-width 310ms var(--lt-sidebar-ease),
-    padding 270ms var(--lt-sidebar-ease),
-    color 90ms ease,
-    font-size 90ms ease,
-    background-color 150ms ease,
-    box-shadow 150ms ease !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .importMainAction .buttonInlineIcon,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .importMainAction .buttonInlineIcon{
-  width: 18px !important;
-  height: 18px !important;
-  margin: 0 !important;
-  color: var(--lt-text) !important;
-  opacity: 1 !important;
-  flex: 0 0 auto !important;
-}
-
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .importMainAction,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .importMainAction{
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-  height: 46px !important;
-  padding: 0 14px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  font-size: 13px !important;
-  line-height: 1 !important;
-  color: rgba(5, 3, 8, .92) !important;
-}
-
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .sidebarResizeHandle,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .sidebarResizeHandle{
-  display: none !important;
-}
-
-
-@media (max-width: 900px){
-  main.app.app[data-sidebar-behavior="hover"] > .appShell,
-main.app.app[data-sidebar-behavior="slim"] > .appShell{
-    grid-template-columns: var(--lt-sidebar-closed) minmax(0, 1fr) !important;
-  }
-
-  main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar{
-    width: var(--lt-sidebar-closed) !important;
-    min-width: var(--lt-sidebar-closed) !important;
-    max-width: var(--lt-sidebar-closed) !important;
-  }
-}
-
-@media (prefers-reduced-motion: reduce){
-  main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar *,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar *{
-    transition: none !important;
-  }
-}
-
-/* smoother sidebar hover-out.
-   Keep the nice open animation, but make closing feel clean instead of abrupt. */
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar{
-  transition:
-    width 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    min-width 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    max-width 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 180ms ease,
-    border-color 180ms ease,
-    background-color 180ms ease !important;
-}
-
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText{
-  transition:
-    opacity 140ms ease 80ms,
-    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
-    visibility 0ms linear 220ms !important;
-}
-
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .navText,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .navText{
-  transition:
-    opacity 180ms ease 130ms,
-    transform 240ms cubic-bezier(0.16, 1, 0.3, 1) 110ms,
-    visibility 0ms linear 0ms !important;
-}
-
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .importMainAction{
-  transition:
-    width 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    max-width 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    padding 280ms cubic-bezier(0.22, 1, 0.36, 1),
-    color 120ms ease 70ms,
-    font-size 0ms linear 70ms,
-    background-color 150ms ease,
-    box-shadow 150ms ease !important;
-}
-
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .importMainAction,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .importMainAction{
-  transition:
-    width 320ms cubic-bezier(0.16, 1, 0.3, 1),
-    max-width 320ms cubic-bezier(0.16, 1, 0.3, 1),
-    padding 280ms cubic-bezier(0.16, 1, 0.3, 1),
-    color 120ms ease 120ms,
-    font-size 0ms linear 120ms,
-    background-color 150ms ease,
-    box-shadow 150ms ease !important;
-}
-
 /* structural performance pass.
    Permanent composite targets + worker-backed reductions.
    Important: this does NOT remove image blur, cover tint, hero blur, or player blur. */
@@ -693,72 +403,6 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within 
 .app.isScrolling :is(.songRow, .playlistSongRow){
   transition-property: background-color, border-color, opacity, transform !important;
   transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1) !important;
-}
-
-/* DISCORD PILL ONLY + REAL ICON MOTION START
-   Active nav no longer uses a rectangle highlight.
-   It uses a Discord-style white pill on the far-left + actual icon motion. */
-
-/* kill the rectangle highlight from older App/effects/home rules */
-main.app.app > .appShell > .sidebar .navItemAnimatedV468,
-main.app.app > .appShell > .sidebar .navItemAnimatedV468:hover,
-main.app.app > .appShell > .sidebar .navItemAnimatedV468:focus-visible,
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.active,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItemAnimatedV468,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItemAnimatedV468:hover,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItemAnimatedV468.active,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItemAnimatedV468,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItemAnimatedV468:hover,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItemAnimatedV468.active{
-  position: relative !important;
-  overflow: visible !important;
-  isolation: isolate !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468:hover,
-main.app.app > .appShell > .sidebar .navItemAnimatedV468:focus-visible,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItemAnimatedV468:hover,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItemAnimatedV468:hover{
-  background: color-mix(in srgb, var(--lt-text) 6%, transparent) !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.active,
-main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItemAnimatedV468.active,
-main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItemAnimatedV468.active{
-  background: color-mix(in srgb, var(--lt-text) 10%, transparent) !important;
-}
-
-/* do not allow old pseudo indicators/circles to show */
-main.app.app > .appShell > .sidebar .navItemAnimatedV468::before,
-main.app.app > .appShell > .sidebar .navItemAnimatedV468::after{
-  content: none !important;
-  display: none !important;
-}
-
-/* One restrained nav state; no per-icon motion or permanent compositor hints. */
-main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navDiscordPillV468{
-  display: none !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navIcon,
-main.app.app > .appShell > .sidebar .navItemAnimatedV468.active .navText strong{
-  color: var(--lt-text) !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIcon{
-  color: currentColor !important;
-}
-
-main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIconMotionV468{
-  display: grid !important;
-  place-items: center !important;
-  will-change: auto !important;
 }
 
 /* Linux desktop polish.
@@ -1085,9 +729,3 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIconMotionV468{
   font-family: inherit;
 }
 
-/* Preserve keyboard focus visibility without the old rectangular nav background. */
-main.app.app > .appShell > .sidebar .navItemAnimatedV468:focus-visible .navIcon {
-  outline: 2px solid var(--lt-accent) !important;
-  outline-offset: 3px !important;
-  border-radius: 9px !important;
-}
