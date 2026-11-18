@@ -383,16 +383,16 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .nav{
 
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItem,
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItem{
-  width: calc(var(--lt-sidebar-open) - 24px) !important;
+  width: 100% !important;
   min-width: 0 !important;
-  height: 46px !important;
+  height: 40px !important;
   margin-inline: 0 !important;
-  padding: 0 11px !important;
+  padding: 0 !important;
   display: grid !important;
-  grid-template-columns: 42px minmax(0, 1fr) !important;
+  grid-template-columns: 1fr !important;
   align-items: center !important;
   justify-content: stretch !important;
-  gap: 9px !important;
+  gap: 0 !important;
   border-radius: 15px !important;
   overflow: hidden !important;
   color: var(--lt-muted) !important;
@@ -426,9 +426,9 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navItem.acti
 
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navIcon,
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navIcon{
-  width: 42px !important;
-  height: 42px !important;
-  min-width: 42px !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
   display: grid !important;
   place-items: center !important;
   margin: 0 !important;
@@ -464,9 +464,18 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText{
     visibility 0ms linear 95ms !important;
 }
 
+/* Expanded hover mode restores the labeled two-column row without changing the grid track. */
+main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:is(:hover, :focus-within) .navItem {
+  grid-template-columns: 28px minmax(0, 1fr) !important;
+  justify-items: stretch !important;
+  gap: 9px !important;
+  padding-inline: 9px !important;
+}
+
 /* Open: reveal labels after the rail has expanded enough. */
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:hover .navText,
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within .navText{
+  display: grid !important;
   opacity: 1 !important;
   visibility: visible !important;
   transform: translate3d(0,0,0) !important;
@@ -476,7 +485,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within 
 
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navText,
 main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar .navText{
-  display: block !important;
+  display: none !important;
   min-width: 0 !important;
   max-width: 154px !important;
   overflow: hidden !important;

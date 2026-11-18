@@ -96,6 +96,13 @@ server.listen(5173,async()=>{
           mode:app.dataset.sidebarBehavior,
           width:rect(sidebar).width,
           title:style(app.querySelector('.titleBar')).backgroundColor,
+          titleImage:style(app.querySelector('.titleBar')).backgroundImage,
+          titleControls:[...app.querySelectorAll('.titleBar .titleHistoryNav,.titleBar .windowButtons')].map(e=>style(e).backgroundColor),
+          sameGroupGaps:[...scroll.querySelectorAll('.navGroupedV467')].flatMap(group=>{
+            const rows=[...group.querySelectorAll('.navItem')];
+            return rows.slice(1).map((row,i)=>rect(row).top-rect(rows[i]).bottom);
+          }),
+          groupGap:(()=>{const groups=[...scroll.querySelectorAll('.sidebarNavGroupV467')];return groups.length>1?rect(groups[1]).top-rect(groups[0]).bottom:0})(),
           player:style(app.querySelector('.playerBar')).backgroundColor,
           clipped:buttons.some(el=>rect(el).left<rect(sidebar).left-1||rect(el).right>rect(sidebar).right+1)
         };
@@ -115,6 +122,10 @@ server.listen(5173,async()=>{
       assert.deepEqual(chrome.playIcon,ink,"playback glyph contrasts with its button");
       if(chrome.homePlay)assert.deepEqual(chrome.homePlay,fill,"Home primary button follows the theme");
       assert.equal(chrome.title,"rgba(0, 0, 0, 0)","title bar must be transparent");
+      assert.equal(chrome.titleImage,"none","title bar must not paint a gradient");
+      assert.ok(chrome.titleControls.every(color=>color==="rgba(0, 0, 0, 0)"),"title controls must not have filled containers");
+      assert.ok(chrome.sameGroupGaps.every(gap=>gap>=-1&&gap<=12),"navigation rows must not stretch apart: "+JSON.stringify(chrome));
+      assert.ok(chrome.groupGap>=-1&&chrome.groupGap<=12,"navigation groups must not stretch apart: "+JSON.stringify(chrome));
       assert.equal(chrome.player,"rgba(0, 0, 0, 0)","ambient player bar must be transparent");
     }
     await assertShellChrome();

@@ -80,10 +80,8 @@ button:disabled{
   display: flex;
   align-items: center;
   flex: 0 0 auto;
-  padding: 2px;
   margin-inline-end: var(--lt-space-3);
-  background: var(--lt-surface-soft);
-  border-radius: var(--lt-radius-sm);
+  background: transparent;
   -webkit-app-region: no-drag;
 }
 

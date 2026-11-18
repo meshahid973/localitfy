@@ -134,7 +134,10 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
   width: 100%;
   flex: 1 1 0;
   min-height: 0;
-  padding: var(--lt-space-3) var(--lt-space-3) var(--lt-space-2) !important;
+  display: grid;
+  align-content: start;
+  grid-auto-rows: max-content;
+  padding: var(--lt-space-2) var(--lt-space-2) var(--lt-space-2) !important;
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-width: none;
@@ -154,8 +157,8 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within{
 }
 
 .sidebarNavGroupsV467::-webkit-scrollbar { display: none; }
-.sidebarNavGroupV467 { min-width: 0; }
-.sidebarPinnedNav { flex: 0 0 auto; min-width: 0; padding-inline: 4px; }
+.sidebarNavGroupV467 { min-width: 0; align-content: start; grid-auto-rows: max-content; }
+.sidebarPinnedNav { flex: 0 0 auto; min-width: 0; padding-inline: var(--lt-space-2); }
 
 .sidebarGroupLabelV467 {
   display: block !important;
@@ -538,15 +541,18 @@ main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar {
   will-change: auto !important;
 }
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .sidebarNavGroupsV467 {
-  padding-inline: 4px !important;
+  padding: 4px !important;
+}
+main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .sidebarPinnedNav {
+  padding-inline: 4px;
 }
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .sidebarNavGroupsV467::before {
   content: none;
 }
 main.app.app[data-sidebar-behavior="slim"] > .appShell > .sidebar .navItem {
   width: 100% !important;
-  height: 36px !important;
-  min-height: 36px !important;
+  height: 40px !important;
+  min-height: 40px !important;
   padding: 0 !important;
   grid-template-columns: 1fr !important;
   justify-items: center !important;

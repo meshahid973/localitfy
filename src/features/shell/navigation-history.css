@@ -6,9 +6,7 @@
   gap: 0;
   flex: 0 0 auto;
   margin-inline: var(--lt-space-2);
-  padding: 2px;
-  border-radius: var(--lt-radius-sm);
-  background: var(--lt-surface-soft);
+  background: transparent;
   -webkit-app-region: no-drag;
 }
 

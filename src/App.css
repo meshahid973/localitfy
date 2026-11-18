@@ -1602,12 +1602,6 @@ body.localitfyThemePainting .app *{
   margin-bottom: 18px !important;
 }
 
-.sidebarBottom::before{
-  content: "";
-  display: block;
-  margin-bottom: 16px;
-}
-
 .mainAction.importMainAction{
   border: 0;
   background: linear-gradient(135deg, var(--lt-accent), color-mix(in srgb, var(--lt-accent) 58%, #ffffff 42%));
@@ -4503,7 +4497,7 @@ body.isResizingPlayer .app *{
 }
 
 .app .sidebarNavGroupV467 + .sidebarNavGroupV467{
-  margin-top: 8px !important;
+  margin-top: 0 !important;
 }
 
 .app .sidebarGroupLabelV467{
@@ -4608,8 +4602,8 @@ body.isResizingPlayer .app *{
 .app .sidebarNavGroupV467 .navDivider{
   width: calc(100% - 34px) !important;
   height: 1px !important;
-  margin: 8px 17px 10px !important;
-  background: rgba(255,255,255,.055) !important;
+  margin: 4px 17px !important;
+  background: rgba(var(--lt-accent-rgb), .12) !important;
   opacity: .58 !important;
   -webkit-mask-image: none !important;
   mask-image: none !important;
@@ -4632,8 +4626,8 @@ body.isResizingPlayer .app *{
 }
 
 .app .sidebarBottom{
-  border-top-color: rgba(255,255,255,.055) !important;
-  gap: 10px !important;
+  border-top-color: var(--lt-border) !important;
+  gap: 0 !important;
 }
 
 .app .mainAction.importMainAction.iconTextButton{
