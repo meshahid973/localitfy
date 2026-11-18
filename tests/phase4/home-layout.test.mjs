@@ -161,5 +161,5 @@ test("Home 3.1 keeps Listen Now on the workspace atmosphere and generated mixes 
   assert.match(artwork, /new PaletteCache<ArtworkPalette>\(96\)/);
   assert.match(artwork, /IntersectionObserver/);
   assert.match(artwork, /controller.abort\(\)/);
-  assert.match(css, /\.homeMixArtwork \{[^}]*radial-gradient/);
+  assert.match(css, /\.homeReleaseCoverWrap\.homeMixArtwork \{[^}]*radial-gradient/);
 });

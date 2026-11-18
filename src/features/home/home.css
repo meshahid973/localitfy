@@ -415,9 +415,9 @@
 .homeReleaseRail:focus-visible { outline: 2px solid var(--lt-accent); outline-offset: -2px; }
 .homeMixRail { grid-auto-columns: clamp(150px, 18cqi, 232px); }
 .homeMixRail .homeReleaseCard { align-content: start; }
-.homeMixArtwork {
+.homeReleaseCoverWrap.homeMixArtwork {
   background: radial-gradient(ellipse at 87% 16%, var(--mix-c), transparent 70%),
-    radial-gradient(ellipse at 20% 80%, var(--mix-b), transparent 65%), var(--mix-a) !important;
+    radial-gradient(ellipse at 20% 80%, var(--mix-b), transparent 65%), var(--mix-a);
   color: #fff;
 }
 .homeMixArtworkNumber {
