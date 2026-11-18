@@ -6,6 +6,7 @@ const { randomUUID } = require("node:crypto");
 const { createLastfmClient } = require("../discover/lastfm.cjs");
 const { discover, withoutOwned } = require("../discover/recommend.cjs");
 const { catalogArtwork, createArtworkLookup } = require("../discover/artwork.cjs");
+const { rankCatalog, searchTerms } = require("../discover/catalog.cjs");
 
 const RESULT_TTL_MS = 12 * 60 * 60 * 1000;
 // Biographies rarely change. Old ones are still shown while offline or when Last.fm fails.
@@ -20,7 +21,7 @@ function normalizeCatalog(kind, items) {
   const endpoint = kind;
   const seen = new Set();
   const result = [];
-  for (const item of Array.isArray(items) ? items.slice(0, 25) : []) {
+  for (const item of Array.isArray(items) ? items.slice(0, 100) : []) {
     if (!item || typeof item.id !== "string" || !MBID.test(item.id) || seen.has(item.id.toLowerCase())) continue;
     const title = cleanText(kind === "artist" ? item.name : item.title);
     if (!title) continue;
@@ -36,7 +37,7 @@ function normalizeCatalog(kind, items) {
 }
 
 /** Public catalog needs only opt-in; Last.fm personalized results require a valid key. */
-function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile, fetch, musicBrainzClient, now = Date.now }) {
+function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile, fetch, musicBrainzClient, searchStore, now = Date.now }) {
   let saved = null;
   let running = null;
   let catalogRunning = null;
@@ -75,8 +76,23 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
       if (catalogRunning && catalogRunning.key !== key)
         return { status: "error", error: "Another catalog search is in progress. Try again when it finishes." };
       if (!catalogRunning) {
-        const promise = Promise.resolve().then(() => getSettings().discoverEnabled === true ? musicBrainzClient.searchCatalog(kind, term) : [])
-          .then(items => normalizeCatalog(kind, items))
+        const promise = Promise.resolve().then(async () => {
+          if (getSettings().discoverEnabled !== true) return [];
+          // Artist searches retain the structured catalog; song searches combine
+          // exact-title MusicBrainz matches, store metadata and listening popularity.
+          if (kind !== "recording" || !searchStore) return normalizeCatalog(kind, await musicBrainzClient.searchCatalog(kind, term));
+          const terms = searchTerms(term);
+          const title = terms.at(-1);
+          const settings = getSettings();
+          const apiKey = apiKeyFor(settings);
+          const lastfm = /^[0-9a-f]{32}$/i.test(apiKey) ? createLastfmClient({ apiKey, cacheFile, fetch, now }) : null;
+          const jobs = [musicBrainzClient.searchCatalog(kind, title), searchStore(terms[0]), lastfm ? lastfm.searchTracks(title).finally(()=>lastfm.flush()) : Promise.resolve([])];
+          if (terms.length > 1) jobs.push(searchStore(title));
+          const settled = await Promise.allSettled(jobs);
+          if (settled.slice(0,2).every(result=>result.status==="rejected") && settled.slice(2).every(result=>result.status==="rejected"||!result.value?.length)) throw Error("Catalog unavailable");
+          const items = index => settled[index]?.status === "fulfilled" ? settled[index].value : [];
+          return rankCatalog(term, normalizeCatalog(kind, items(0)), [...items(1), ...items(3)], items(2));
+        })
           .finally(() => { if (catalogRunning?.promise === promise) catalogRunning = null; });
         catalogRunning = { key, promise };
       }
@@ -85,7 +101,7 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
         return getSettings().discoverEnabled === true ? { status: "catalog", kind, items } : { status: "off" };
       } catch {
         return getSettings().discoverEnabled === true
-          ? { status: "error", error: "Could not search MusicBrainz. Check your connection and try again." }
+          ? { status: "error", error: "Could not search the music catalog. Check your connection and try again." }
           : { status: "off" };
       }
     }

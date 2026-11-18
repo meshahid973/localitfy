@@ -127,6 +127,16 @@ function createLastfmClient({ apiKey, cacheFile, fetch = globalThis.fetch, now =
       return list(body?.toptracks?.track).map((item) => ({ title: String(item?.name || "").trim(), artist: artistName(item) || artist, url: item?.url || "" }))
         .filter((item) => item.title).slice(0, limit);
     },
+    async searchTracks(title, limit = 35) {
+      const body = await call("track.search", { track: title, limit: String(limit), autocorrect:"0" });
+      return list(body?.results?.trackmatches?.track).flatMap(item => {
+        const title=String(item?.name||"").trim(), artist=artistName(item);
+        let url; try { url=new URL(item.url); } catch { return []; }
+        if(!title||!artist||!["www.last.fm","last.fm"].includes(url.hostname)||!["http:","https:"].includes(url.protocol)) return [];
+        url.protocol="https:";
+        return [{id:"lastfm:"+encodeURIComponent(artist)+":"+encodeURIComponent(title),title,artist,subtitle:artist,url:url.href,listeners:Number(item.listeners)||0}];
+      }).slice(0,limit);
+    },
     async trackInfo(title, artist) {
       return (await call("track.getinfo", { track: title, artist, autocorrect: "0" }))?.track || null;
     },

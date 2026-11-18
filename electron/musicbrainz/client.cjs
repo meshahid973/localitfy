@@ -91,8 +91,8 @@ function createMusicBrainzClient({ userAgent, fetchImpl = fetch, minIntervalMs =
       const field = Object.hasOwn(fields, kind) ? fields[kind] : null;
       if (!field) throw new Error("Unsupported catalog search.");
       const endpoint = kind === "album" ? "release-group" : kind;
-      const query = kind === "artist" ? "artist:" + phrase(text) : "(" + field + ":" + phrase(text) + " OR artist:" + phrase(text) + ")";
-      return request(endpoint, { query, limit: "25" }).then(body => {
+      const query = kind === "artist" ? "artist:" + phrase(text) : field + ":" + phrase(text);
+      return request(endpoint, { query, limit: kind === "recording" ? "100" : "25" }).then(body => {
         const items = body[endpoint + "s"];
         return Array.isArray(items) ? items : [];
       });

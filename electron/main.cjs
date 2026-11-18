@@ -2435,7 +2435,7 @@ app.whenReady().then(async () => {
     importFiles: (files) => importNewAudioFiles(files), getWindow: () => (mainWindow && !mainWindow.isDestroyed() ? mainWindow : null) });
   scrobbler = startScrobbling(ipcRouter, { file: path.join(app.getPath("userData"), "scrobbles.json"), getSong: databaseRepositories.songs.get, listPlays: databaseRepositories.listening.list, safeStorage, shell });
   const musicBrainzClient = require("./musicbrainz/client.cjs").createMusicBrainzClient({ userAgent: `localtify/${app.getVersion()} ( https://github.com/meshahid973/localitfy )` });
-  registerDiscoverIpc(ipcRouter, { musicBrainzClient, getSongs, getSettings, cacheFile: path.join(app.getPath("userData"), "discover-cache.json"), bioFile: path.join(app.getPath("userData"), "artist-bios.json") });
+  registerDiscoverIpc(ipcRouter, { musicBrainzClient, searchStore: require("./discover/catalog.cjs").createStoreSearch(), getSongs, getSettings, cacheFile: path.join(app.getPath("userData"), "discover-cache.json"), bioFile: path.join(app.getPath("userData"), "artist-bios.json") });
   registerMovedSongRepairIpc(ipcRouter, {
     dialog, BrowserWindow, getWindow: () => mainWindow,
     getSongs, fileExists, isAudioFile, readMetadata: readLocalAudioMetadata,

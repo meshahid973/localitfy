@@ -116,7 +116,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
   const needsSetup = !settings.discoverEnabled;
   const setup = phone ? <div className="discoverSetup"><p>Turn on Discover and manage its optional Last.fm connection in localtify on your {computerName()}, then sync this phone.</p></div> : (
     <div className="discoverSetup">
-      <p>Search the public MusicBrainz catalog without an account or key. Only your search text is sent for catalog searches. If you add an optional Last.fm key, Localtify also requests personalized suggestions using artist and song names from your library and looks up suggested tracks in MusicBrainz for artwork. Cover images come from matching Last.fm track metadata or the Cover Art Archive.</p>
+      <p>Search music and the iTunes music catalog without an account or key. Explicit search text is sent to these providers. If you add an optional Last.fm key, Localtify also requests personalized suggestions using artist and song names from your library and looks up suggested tracks in MusicBrainz for artwork. Cover images come from matching Last.fm track metadata or the Cover Art Archive.</p>
       <details className="discoverOptional" open={Boolean(keyDraft) || undefined}>
       <summary>Optional Last.fm recommendations</summary>
       <label className="discoverKey">
@@ -172,15 +172,15 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
         <input type="search" aria-label="Search public music catalog" placeholder="Search MusicBrainz" value={catalogTerm} maxLength={160} disabled={catalogLoading} onChange={event => { setCatalogTerm(event.currentTarget.value); setCatalog(null); }} />
         <button className="heroMain" type="submit" disabled={catalogLoading || catalogTerm.trim().length < 2}><Search size={15} /><span>{catalogLoading ? "Searching…" : "Search"}</span></button>
       </form>
-      <p className="discoverBecause" role="status">{catalogLoading ? "Searching public catalog…" : "MusicBrainz catalog · Local playback only"}</p>
+      <p className="discoverBecause" role="status">{catalogLoading ? "Searching public catalog…" : "Music catalog · Local playback only"}</p>
       {catalog?.status === "error" ? <p role="alert">{catalog.error}</p> : null}
-      {catalog?.status === "catalog" ? catalog.items.length ? <ul className="discoverSongList" aria-label="Search results">
+      {catalog?.status === "catalog" ? catalog.items.length ? <><h3 className="discoverHeading">Best matches</h3><ul className="discoverSongList" aria-label="Search results">
         {catalog.items.map(item => <li key={item.id}>
           <DiscoverCover title={item.title} artist={item.artist} artwork={item} lookup={catalog.kind === "recording"} person={catalog.kind === "artist"} />
           <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => openLink(item.url)} title={item.title}>{item.title}</button><small title={item.subtitle}>{item.subtitle}</small></span>
           {catalog.kind === "recording" ? <><span className="discoverDuration">{duration(item.durationMs)}</span>{pickButton(item)}</> : null}
         </li>)}
-      </ul> : <p role="status">No matching music found.</p> : null}
+      </ul></> : <p role="status">No matching music found.</p> : null}
     </section> : null}
     {result?.status === "needs-key" && settings.discoverEnabled && !phone ? <p className="discoverBecause">Personalized Last.fm suggestions are optional. Add a key in Settings if you want them.</p> : null}
     {phone && !needsSetup ? <p className="discoverHint">Catalog searches and suggestions use your paired {computerName()}. Manage recommendations there.</p> : null}
