@@ -328,7 +328,6 @@ button:disabled{
 }
 
 .iconAction:hover{
-  transform: translateY(-1px);
   color: var(--lt-text);
   background: var(--surface-3);
 }
