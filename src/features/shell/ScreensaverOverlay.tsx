@@ -1,4 +1,5 @@
 import { AnimatePresence, motion as Motion } from "motion/react";
+import "./screensaver.css";
 
 type Props = { screensaverVisible: boolean; screensaverVisualSource: string; reducedMotion: boolean;
   dismissScreensaverFromActivity: () => unknown; setScreensaverVisible: (visible: boolean) => void };

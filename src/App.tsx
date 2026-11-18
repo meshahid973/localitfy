@@ -42,6 +42,7 @@ import { useDownloadsRuntime } from "./features/downloads/useDownloadsRuntime";
 import { getDownloadPageState } from "./features/downloads/downloadState";
 import { downloadAudioOptions, downloadStatusLabel, spotifyTrackStatusLabel } from "./features/downloads/download.selectors";
 import "./App.css";
+import "./features/feedback/feedback-prompt.css";
 
 import AppShell from "./features/shell/AppShell";
 import type { AppShellProps } from "./features/shell/appShell.contract";
@@ -1182,7 +1183,6 @@ function MainModeApp() {
     return activePlaylist.songIds.includes(currentSong.id) ? activePlaylist : null;
   }, [activePlaylist, currentSong?.id]);
 
-  const currentNowPlayingLabel = currentPlaybackPlaylist ? `now playing ${currentPlaybackPlaylist.name}` : "now playing";
 
   const selectedPlaylist = useMemo(
     () => playlists.find((playlist) => playlist.id === selectedPlaylistId) ?? playlists[0] ?? null,
@@ -7186,7 +7186,7 @@ function MainModeApp() {
 
     return (
       <div
-          className="feedbackPromptOverlayV331"
+          className="feedbackPromptOverlayV331" data-reduced-motion={settings.reducedMotion ? "on" : "off"}
           role="dialog"
           aria-modal="true"
           aria-labelledby="feedbackPromptTitleV329"
@@ -7533,18 +7533,6 @@ function MainModeApp() {
       secretToast,
       appToast,
       importAnimation
-    },
-    onboarding: {
-      open: onboardingOpen,
-      songsCount: songs.length,
-      currentTheme: normalizeThemeId(settings.theme),
-      discordEnabled: settings.discordEnabled,
-      onChooseTheme: handleOnboardingTheme,
-      onSetDiscordEnabled: handleOnboardingDiscord,
-      onImportMusic: handleOnboardingImportMusic,
-      onOpenDownloads: handleOnboardingDownloads,
-      onStartListening: handleOnboardingStartListening,
-      onSkip: skipOnboarding
     },
     navigation: {
       view,

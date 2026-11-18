@@ -1,4 +1,4 @@
-import type { CSSProperties, PointerEvent as ReactPointerEvent, RefObject } from "react";
+import type { PointerEvent as ReactPointerEvent, RefObject } from "react";
 import type { HomeViewProps } from "../home/HomeView";
 import type { LibraryViewProps } from "../library/LibraryView";
 import type { ArtistsViewProps } from "../artists/ArtistsView";
@@ -13,7 +13,6 @@ import type { PlayerBarProps } from "../player/components/PlayerBar";
 import type { QueuePanelProps } from "../player/components/QueuePanel";
 import type { LyricsViewProps } from "../lyrics/LyricsView";
 import type { PlaybackAudioElementProps } from "../player/components/PlaybackAudioElement";
-import type { OnboardingProps } from "../../Onboarding";
 import type { SongContextMenuProps } from "../library/components/SongContextMenu";
 import type { SimilarSongsDialogProps } from "../analysis/SimilarSongsDialog";
 import type { SongEditorModalProps } from "../library/components/SongEditorModal";
@@ -58,8 +57,6 @@ export type ShellEffectsContract = {
   appToast: AppToastState; importAnimation: ImportAnimationState;
 };
 
-export type ShellOnboardingContract = Omit<OnboardingProps, "appVersion"> & { open: boolean };
-
 export type ShellNavigationContract = {
   view: View;
   changeView: (view: View, source?: string) => unknown; importSongs: () => unknown;
@@ -84,7 +81,7 @@ export type ShellModalContract = {
 
 export type AppShellProps = {
   frame: ShellFrameContract; updates: ShellUpdateContract; screensaver: ShellScreensaverContract;
-  effects: ShellEffectsContract; onboarding: ShellOnboardingContract; navigation: ShellNavigationContract;
+  effects: ShellEffectsContract; navigation: ShellNavigationContract;
   home: HomeViewProps; library: LibraryViewProps; artists: ArtistsViewProps; genres: GenresViewProps; playlists: PlaylistsViewProps;
   covers: CoversViewProps; analytics: AnalyticsViewProps; discover: DiscoverViewProps; settingsView: SettingsViewProps;
   downloads: DownloadsViewProps; playerBar: PlayerBarProps; modals: ShellModalContract;
