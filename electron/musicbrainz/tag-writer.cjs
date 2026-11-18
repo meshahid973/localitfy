@@ -117,6 +117,7 @@ async function writeMusicBrainzTags({ filePath, tags, ids, cover = "", ffmpegPat
   const backup = path.join(dir, `.${stem}.localtify-original-${nonce}${ext}`);
   let preserveRecoveryFiles = false;
   try {
+    const original = fs.statSync(filePath);
     const before = await parseFile(filePath, { duration: true, skipCovers: true });
     const previous = before.common?.musicbrainz_recordingid;
     const clearStale = Boolean(previous && previous !== ids.recordingId);
@@ -127,6 +128,8 @@ async function writeMusicBrainzTags({ filePath, tags, ids, cover = "", ffmpegPat
     if (Math.abs(Number(after.format?.duration || 0) - Number(before.format?.duration || 0)) > 1) throw new Error("audio length changed while tagging");
 
     // Keep the original in the same directory until the verified replacement occupies its path.
+    const current = fs.statSync(filePath);
+    if (current.size !== original.size || current.mtimeMs !== original.mtimeMs || current.ino !== original.ino) throw new Error("Original audio changed during tagging; retry after reviewing the new file");
     renameFile(filePath, backup);
     try {
       renameFile(temp, filePath);

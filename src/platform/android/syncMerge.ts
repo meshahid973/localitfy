@@ -56,7 +56,7 @@ export function mergeSongIds(base: string[], mac: string[], phone: string[]) {
   const phoneSet = new Set(phone);
   const baseSet = new Set(base);
   const removed = new Set(base.filter((id) => !phoneSet.has(id)));
-  const result = mac.filter((id) => !removed.has(id));
+  const result = [...new Set(mac.filter((id) => !removed.has(id)))];
   const present = new Set(result);
   phone.forEach((id, index) => {
     if (baseSet.has(id) || present.has(id)) return;

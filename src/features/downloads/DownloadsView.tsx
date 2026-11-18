@@ -403,7 +403,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
                               </div>
 
                               {!done || downloadedNotImported ? (
-                                <div className="downloadQueueTrack"><i style={{ width: `${clamp(item.progress, 0, 100)}%` }} /></div>
+                                <div className="downloadQueueTrack" role="progressbar" aria-label={`Download progress: ${item.title || "track"}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={clamp(item.progress, 0, 100)}><i style={{ width: `${clamp(item.progress, 0, 100)}%` }} /></div>
                               ) : null}
 
                               <div className="downloadQueueMeta">
@@ -454,7 +454,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
                           <strong>{convertProgress}%</strong>
                         </div>
 
-                        <div className="converterTrack">
+                        <div className="converterTrack" role="progressbar" aria-label="Conversion progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={clamp(convertProgress, 0, 100)}>
                           <i style={{ width: `${convertProgress}%` }} />
                         </div>
                       </div>

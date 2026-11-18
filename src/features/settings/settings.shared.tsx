@@ -71,7 +71,7 @@ export function RangeRow({ label, value, min, max, step, suffix, onChange }: {
           if (!editing) commit(nextValue);
         }}
         onPointerUp={(event) => commit(Number(event.currentTarget.value))}
-        onPointerCancel={(event) => commit(Number(event.currentTarget.value))}
+        onPointerCancel={() => { setDraftValue(value); setEditing(false); }}
         onKeyUp={(event) => commit(Number(event.currentTarget.value))}
         onBlur={(event) => commit(Number(event.currentTarget.value))}
       />

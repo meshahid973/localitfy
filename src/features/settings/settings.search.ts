@@ -2,13 +2,13 @@ import type { SettingsCategory } from "./settings.types";
 import { settingsCategoryTabs } from "./settings.constants";
 
 export function normalizeSettingsSearch(value: string) {
-  return value.trim().toLowerCase().replace(/\s+/g, " ");
+  return value.normalize("NFKD").replace(/\p{M}/gu, "").trim().toLowerCase().replace(/\s+/g, " ");
 }
 
 export function settingsTabMatchesSearch(tab: (typeof settingsCategoryTabs)[number], value: string) {
   const query = normalizeSettingsSearch(value);
   if (!query) return true;
-  const haystack = `${tab.id} ${tab.label} ${tab.description} ${tab.keywords}`.toLowerCase();
+  const haystack = normalizeSettingsSearch(`${tab.id} ${tab.label} ${tab.description} ${tab.keywords}`);
   return query.split(" ").every((part) => haystack.includes(part));
 }
 

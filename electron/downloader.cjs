@@ -12,6 +12,14 @@ let _ffmpegPath = ffmpegStatic || null;
 let _ytDlpBinaryPath = null;
 const activeDownloadProcesses = new Set();
 let activeDownloadCancelled = false;
+let activeBatch = false;
+
+async function runDownloadBatch(work) {
+  if (activeBatch) throw new Error("A download or conversion is already running");
+  activeBatch = true;
+  activeDownloadCancelled = false;
+  try { return await work(); } finally { activeBatch = false; }
+}
 
 const MEDIA_EXTENSIONS = new Set([
   ".mp3", ".wav", ".ogg", ".flac", ".m4a", ".aac", ".opus", ".aiff", ".aif",
@@ -209,18 +217,18 @@ function formatSize(raw) {
 }
 
 function buildProgressPayload(job, p) {
-  const percent = Math.min(100, Math.max(0, Math.floor(p?.percent ?? 0)));
+  const percent = Math.min(99, Math.max(0, Math.floor(p?.percent ?? 0)));
   const speed = formatSpeed(p?.currentSpeed);
   const size = formatSize(p?.totalSize);
   const eta = p?.eta ?? null;
   let message = "Downloading audio...";
-  if (percent >= 88) message = job.keepOriginal ? "Saving original audio..." : `Converting to ${String(job.format || "mp3").toUpperCase()}...`;
+  if (percent >= 99) message = job.keepOriginal ? "Saving original audio..." : `Converting to ${String(job.format || "mp3").toUpperCase()}...`;
   if (speed) message += `  •  ${speed}`;
   if (eta && eta !== "00:00") message += `  •  ETA ${eta}`;
 
   return {
     type: "download",
-    status: percent >= 88 ? "converting" : "downloading",
+    status: percent >= 99 ? "converting" : "downloading",
     id: job.id,
     url: job.url,
     spotifyTrackId: job.spotifyTrackId,
@@ -256,7 +264,7 @@ function parseYtDlpProgressLine(line) {
 
 function runYtDlp(ytDlp, args, onProgress, job) {
   return new Promise((resolve, reject) => {
-    activeDownloadCancelled = false;
+    if (activeDownloadCancelled) return reject(new Error("Download cancelled"));
     const proc = spawnYtDlp(ytDlp, args);
     activeDownloadProcesses.add(proc);
     let outputBuffer = "";
@@ -287,12 +295,14 @@ function runYtDlp(ytDlp, args, onProgress, job) {
 }
 
 async function downloadYouTube(url, destinationDirectory, onProgress, options = {}, job = {}) {
+  let tempId;
   try {
+    if (activeDownloadCancelled) throw new Error("Download cancelled");
     fs.mkdirSync(destinationDirectory, { recursive: true });
 
     const ytDlp = await getYtDlp();
     const format = safeDownloadFormat(options.format);
-    const tempId = crypto.randomUUID().slice(0, 8);
+    tempId = crypto.randomUUID();
     const outputTemplate = path.join(destinationDirectory, `ytdl_${tempId}_%(title)s.%(ext)s`);
 
     onProgress?.({
@@ -332,9 +342,9 @@ async function downloadYouTube(url, destinationDirectory, onProgress, options = 
     const allFiles = fs.readdirSync(destinationDirectory);
     const downloaded =
       allFiles.find((f) => f.startsWith(`ytdl_${tempId}_`) && f.endsWith(`.${format}`)) ??
-      allFiles.find((f) => f.startsWith(`ytdl_${tempId}_`));
+      allFiles.find((f) => f.startsWith(`ytdl_${tempId}_`) && isSupportedMediaPath(f) && !/\.part\b/i.test(f));
 
-    if (!downloaded) throw new Error("yt-dlp finished but output file not found");
+    if (!downloaded || !fs.statSync(path.join(destinationDirectory, downloaded)).size) throw new Error("yt-dlp finished but usable output file not found");
 
     const rawTitle = downloaded.replace(`ytdl_${tempId}_`, "").replace(/\.[^.]+$/, "");
     const safeTitle = options.cleanTitle === false ? sanitizeFilename(rawTitle) : cleanDownloadedTitle(rawTitle);
@@ -363,6 +373,12 @@ async function downloadYouTube(url, destinationDirectory, onProgress, options = 
   } catch (error) {
     const message = error?.message || "YouTube download failed";
     return { ok: false, url, error: message };
+  } finally {
+    if (tempId) {
+      try { for (const name of fs.readdirSync(destinationDirectory)) {
+        if (name.startsWith(`ytdl_${tempId}_`)) fs.rmSync(path.join(destinationDirectory, name), { force: true });
+      } } catch (error) { console.warn("[localtify] download cleanup:", error?.message || error); }
+    }
   }
 }
 
@@ -438,13 +454,13 @@ function convertOneToMp3(inputPath, outputDirectory, bitrate = 192, onProgress, 
 }
 
 function normalizeSpotifyMatchText(value = "") {
-  return String(value || "")
+  return String(value || "").normalize("NFKC")
     .toLowerCase()
     .replace(/[‘’'`´]/g, "")
     .replace(/&/g, " and ")
     .replace(/\b(feat|ft|featuring)\.?\b/g, " ")
     .replace(/[()\[\]{}]/g, " ")
-    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -550,7 +566,7 @@ function getCandidateUrl(candidate = {}) {
 
 function runYtDlpJson(ytDlp, args) {
   return new Promise((resolve, reject) => {
-    activeDownloadCancelled = false;
+    if (activeDownloadCancelled) return reject(new Error("Download cancelled"));
     const proc = spawnYtDlp(ytDlp, args);
     activeDownloadProcesses.add(proc);
 
@@ -901,6 +917,7 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
   const total = tracks.length;
 
   for (let index = 0; index < total; index++) {
+    if (activeDownloadCancelled) break;
     const track = tracks[index] || {};
     const title = String(track.title || track.name || "unknown").trim() || "unknown";
     const artist = String(track.artist || track.artists || "").trim();
@@ -1056,10 +1073,11 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
 }
 
 async function downloadAudioUrls(input, destinationDirectory, onProgress, options = {}) {
-  const urls = parseUrls(input);
+  const urls = [...new Set(parseUrls(input).map(url => normalizeYouTubeUrl(url) || url))];
   const results = [];
 
   for (let index = 0; index < urls.length; index += 1) {
+    if (activeDownloadCancelled) break;
     const url = urls[index];
     const id = `${Date.now()}-${index}`;
     const job = { id, url, index, total: urls.length };
@@ -1093,13 +1111,14 @@ function cancelActiveDownloads() {
       try { proc.kill(); killed = true; } catch { }
     }
   }
-  return killed;
+  return killed || activeBatch;
 }
 
 async function convertLocalMediaFiles(filePaths, destinationDirectory, options = {}, onProgress) {
   const bitrate = Number(options.bitrate || 192);
   const results = [];
   for (const file of filePaths) {
+    if (activeDownloadCancelled) break;
     results.push(await convertOneToMp3(file, destinationDirectory, bitrate, onProgress));
   }
   return { downloadFolder: destinationDirectory, conversions: results };
@@ -1108,9 +1127,9 @@ async function convertLocalMediaFiles(filePaths, destinationDirectory, options =
 module.exports = {
   normalizeYouTubeUrl,
   initDownloader,
-  downloadAudioUrls,
-  downloadSpotifyBatch,
-  convertLocalMediaFiles,
+  downloadAudioUrls: (...args) => runDownloadBatch(() => downloadAudioUrls(...args)),
+  downloadSpotifyBatch: (...args) => runDownloadBatch(() => downloadSpotifyBatch(...args)),
+  convertLocalMediaFiles: (...args) => runDownloadBatch(() => convertLocalMediaFiles(...args)),
   convertOneToMp3,
   isSupportedMediaPath,
   _test: { getBaseArgs, buildStrategies, AUDIO_FORMAT_SELECTOR, ORIGINAL_AUDIO_FORMAT_SELECTOR },

@@ -189,7 +189,7 @@ async function syncFiles() {
   // Covers follow the Mac's: a new or changed cover is copied, one the Mac no longer has is removed.
   const wanted = songs.filter((song) => phoneLibrary.files[song.id]?.audio !== fileKey(song.file) ||
     (song.cover ? phoneLibrary.files[song.id]?.cover !== fileKey(song.cover) : Boolean(phoneLibrary.files[song.id]?.cover)));
-  const bytesTotal = wanted.reduce((sum, song) => sum + (phoneLibrary.files[song.id]?.audio === fileKey(song.file) ? 0 : song.file.size), 0);
+  const bytesTotal = wanted.reduce((sum, song) => sum + (phoneLibrary.files[song.id]?.audio === fileKey(song.file) ? 0 : song.file.size) + (song.cover && phoneLibrary.files[song.id]?.cover !== fileKey(song.cover) ? song.cover.size : 0), 0);
   let bytesDone = 0;
   let done = 0;
   const inFlight = new Map<string, number>();
@@ -202,7 +202,7 @@ async function syncFiles() {
   };
   const progressListener = await LocaltifyNative.addListener("downloadProgress", ({ id, received }) => {
     if (!inFlight.has(id)) return;
-    inFlight.set(id, received);
+    inFlight.set(id, Math.max(0, received));
     reportBytes();
   });
 
@@ -218,9 +218,14 @@ async function syncFiles() {
       if (local.audioExt && local.audioExt !== song.file.ext) await LocaltifyNative.deleteFile({ path: phoneLibrary.audioPath(song.id, local.audioExt) }).catch(() => undefined);
       Object.assign(local, { audio: fileKey(song.file), audioExt: song.file.ext });
       bytesDone += song.file.size;
+      phoneLibrary.files[song.id] = { ...local }; // Do not retransfer audio if the cover fails.
     }
     if (song.cover && local.cover !== fileKey(song.cover)) {
-      await LocaltifyNative.downloadFile({ id: `${song.id}:cover`, url: `${base}/v1/cover/${encodeURIComponent(song.id)}`, path: phoneLibrary.coverPath(song.id, song.cover.ext), headers });
+      const coverId = `${song.id}:cover`;
+      inFlight.set(coverId, 0);
+      try { await LocaltifyNative.downloadFile({ id: coverId, url: `${base}/v1/cover/${encodeURIComponent(song.id)}`, path: phoneLibrary.coverPath(song.id, song.cover.ext), headers }); }
+      finally { inFlight.delete(coverId); }
+      bytesDone += song.cover.size;
       if (local.coverExt && local.coverExt !== song.cover.ext) await LocaltifyNative.deleteFile({ path: phoneLibrary.coverPath(song.id, local.coverExt) }).catch(() => undefined);
       Object.assign(local, { cover: fileKey(song.cover), coverExt: song.cover.ext });
     } else if (!song.cover && local.cover) {

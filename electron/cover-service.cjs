@@ -90,7 +90,7 @@ function findFolderCover(inputPath) {
   }
 
   const named = files.find((filePath) => /(^|[\s_.-])(cover|folder|front|artwork|album)([\s_.-]|$)/i.test(path.parse(filePath).name));
-  return named || files[0] || "";
+  return named || (files.length === 1 ? files[0] : "");
 }
 
 function copyCoverToAppStorage(sourcePath, options = {}) {
@@ -99,14 +99,12 @@ function copyCoverToAppStorage(sourcePath, options = {}) {
 
     const stat = fs.statSync(sourcePath);
     const ext = path.extname(sourcePath).toLowerCase() || ".jpg";
-    const source = String(options.source || "cover");
+    const source = /^[a-z]+$/i.test(String(options.source || "")) ? String(options.source) : "cover";
     const seed = [
       source,
       sourcePath,
       String(stat.mtimeMs || ""),
-      String(stat.size || ""),
-      String(options.filePath || ""),
-      String(options.songId || "")
+      String(stat.size || "")
     ].join("::");
 
     const hash = crypto.createHash("sha1").update(seed).digest("hex");
@@ -115,7 +113,9 @@ function copyCoverToAppStorage(sourcePath, options = {}) {
 
     const targetPath = path.join(dir, `${source}-${hash}${ext}`);
     if (!fs.existsSync(targetPath)) {
-      fs.copyFileSync(sourcePath, targetPath);
+      const temp = targetPath + "." + crypto.randomUUID() + ".tmp";
+      try { fs.copyFileSync(sourcePath, temp); fs.renameSync(temp, targetPath); }
+      finally { try { fs.rmSync(temp, { force: true }); } catch {} }
     }
 
     return targetPath;
@@ -152,6 +152,10 @@ async function resolveSongCover(input = {}) {
     return { coverPath: song.coverPath, coverSource: "custom", coverUpdatedAt: song.coverUpdatedAt || now };
   }
 
+  if (metadata.embeddedCoverPath && fileExists(metadata.embeddedCoverPath) && isImageFile(metadata.embeddedCoverPath)) {
+    return { coverPath: metadata.embeddedCoverPath, coverSource: "embedded", coverUpdatedAt: now };
+  }
+
   if (folderCover) {
     const cached = copyCoverToAppStorage(folderCover, {
       source: "folder",
@@ -162,9 +166,6 @@ async function resolveSongCover(input = {}) {
     return { coverPath: cached, coverSource: "folder", coverUpdatedAt: now };
   }
 
-  if (metadata.embeddedCoverPath && fileExists(metadata.embeddedCoverPath) && isImageFile(metadata.embeddedCoverPath)) {
-    return { coverPath: metadata.embeddedCoverPath, coverSource: "embedded", coverUpdatedAt: now };
-  }
 
   const albumEmbeddedCoverPath = input.albumEmbeddedCoverPath || input.albumCoverPath || "";
   if (albumEmbeddedCoverPath && fileExists(albumEmbeddedCoverPath) && isImageFile(albumEmbeddedCoverPath)) {
@@ -185,6 +186,7 @@ async function resolveSongCover(input = {}) {
     return { coverPath: input.fallbackCoverPath, coverSource: "fallback", coverUpdatedAt: now };
   }
 
+  if (existingCoverIsUsable(song)) return { coverPath: song.coverPath, coverSource: song.coverSource || "fallback", coverUpdatedAt: song.coverUpdatedAt || now };
   return { coverPath: "", coverSource: "none", coverUpdatedAt: now };
 }
 

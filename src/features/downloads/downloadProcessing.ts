@@ -2,10 +2,7 @@ import type { Song } from "../library/song.types";
 import type { DownloadQueueItem, DownloadResult } from "./download.types";
 
 export function parseDownloadUrls(text: string) {
-  return text
-    .split(/\r?\n|,/)
-    .map((url) => url.trim())
-    .filter(Boolean);
+  return [...new Set(text.split(/\r?\n|,/).map(url => url.trim()).filter(Boolean))];
 }
 
 export function makeQueuedDownloads(urls: string[]): DownloadQueueItem[] {
@@ -94,10 +91,9 @@ export function findDownloadedSongMatch(result: DownloadResult, librarySongs: So
   }
 
   if (filename) {
-    return librarySongs.find((song) => {
-      const songPath = String(song.filePath || "").trim().toLowerCase();
-      return songPath.endsWith(filename);
-    }) || null;
+    if (filePath) return null; // An explicit path must not be confused with an unrelated file.
+    const matches = librarySongs.filter(song => String(song.filePath || "").trim().toLowerCase().split(/[\\/]/).pop() === filename);
+    return matches.length === 1 ? matches[0] : null;
   }
 
   return null;
