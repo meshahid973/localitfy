@@ -22,14 +22,14 @@
   --cover-muted: var(--lt-muted);
   width: 100%; min-width: 0;
   display: grid; align-content: start;
-  gap: 13px;
+  gap: var(--lt-page-gap);
   padding: 0 0 var(--lt-space-5);
   color: var(--cover-text);
 }
 .coverStudioLayout *, .coverStudioLayout *::before, .coverStudioLayout *::after { box-sizing: border-box; }
-.coverStudioLayout .panel { min-width: 0; background: var(--cover-surface) !important; border: 1px solid var(--cover-edge) !important; border-radius: 12px; box-shadow: none !important; }
+.coverStudioLayout .panel { min-width: 0; background: var(--cover-surface) !important; border: 1px solid var(--cover-edge) !important; border-radius: var(--lt-radius-panel); box-shadow: none !important; }
 .coverStudioLayout .eyebrow { margin: 0 0 8px; color: var(--lt-muted); font-size: var(--lt-text-sm); font-weight: 500; }
-.coverStudioLayout h3 { margin: 0; color: var(--cover-text); font-size: clamp(17px,1.6vw,24px); font-weight: 650; letter-spacing: -.03em; }
+.coverStudioLayout h3 { margin: 0; color: var(--cover-text); font-size: var(--lt-text-heading); font-weight: 650; letter-spacing: -.03em; }
 .coverStudioLayout button { cursor: pointer; }
 .coverStudioLayout button:disabled { opacity: .45; cursor: not-allowed; }
 .coverStudioLayout :is(button,input):focus-visible { outline: 2px solid var(--lt-accent); outline-offset: 2px; }
@@ -48,21 +48,21 @@
 }
 .coverStudioEmptyNotice {
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
-  padding: 13px 17px; border: 1px solid var(--lt-border); border-radius: 10px;
+  padding: 13px 17px; border: 1px solid var(--lt-border); border-radius: var(--lt-radius-sm);
   color: var(--lt-muted); background: var(--lt-surface); font-size: 13px;
 }
 .coverStudioEmptyNotice button { min-height: 35px; padding: 7px 13px; border: 1px solid var(--lt-border); border-radius: 8px; background: var(--lt-surface-raised); color: var(--lt-text); cursor: pointer; }
-.coverApplyToast { min-width: 0; padding: 10px 13px; border: 1px solid rgba(var(--lt-accent-rgb),.28); border-radius: 9px; background: rgba(var(--lt-accent-rgb),.08); color: var(--cover-text); font-size: 12px; }
+.coverApplyToast { min-width: 0; padding: 10px 13px; border: 1px solid rgba(var(--lt-accent-rgb),.28); border-radius: var(--lt-radius-item); background: rgba(var(--lt-accent-rgb),.08); color: var(--cover-text); font-size: 12px; }
 .coverMoodTabs { min-width: 0; display: flex; flex-wrap: wrap; gap: 5px; }
 .coverStudioLayout .coverMoodTabs button { display: inline-flex; align-items: center; gap: 10px; padding: 7px 13px; }
 .coverStudioLayout .coverMoodTabs button strong { font-size: 10px; color: var(--cover-muted); }
 .coverStudioLayout .coverMoodTabs button.active,.coverStudioLayout .coverSongTools button.active { border-color: rgba(var(--lt-accent-rgb),.48); background: rgba(var(--lt-accent-rgb),.13); color: var(--cover-text); }
 .coverStudioBody { min-width: 0; display: grid; grid-template-columns: minmax(300px, 360px) minmax(0,1fr); align-items: start; gap: 16px; }
-.coverSelectedSongsPanel,.coverGalleryPanel { min-width: 0; padding: 16px; display: grid; align-content: start; gap: 12px; }
+.coverSelectedSongsPanel,.coverGalleryPanel { min-width: 0; padding: var(--lt-surface-padding); display: grid; align-content: start; gap: var(--lt-section-gap); }
 .coverPanelHeadClean,.coverGalleryHeaderClean { min-width: 0; display: flex; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
 .coverStudioLayout :is(.coverPanelHeadClean,.coverGalleryHeaderClean) > span { color: var(--cover-muted); font-size: 11px; }
 .coverSongSearchWrap,.coverGalleryToolbarClean { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.coverStudioSearchInput { flex: 1 1 auto; min-width: 0; width: 100%; min-height: 39px; padding: 8px 12px; border: 1px solid color-mix(in oklab, var(--lt-accent) 24%,var(--cover-edge)); border-radius: 9px; background: var(--lt-surface-soft); color: var(--cover-text); font: inherit; font-size: 13px; outline: none; }
+.coverStudioSearchInput { flex: 1 1 auto; min-width: 0; width: 100%; min-height: var(--lt-control-height); padding: var(--lt-space-2) var(--lt-space-3); border: 1px solid var(--cover-edge); border-radius: var(--lt-radius-item); background: var(--lt-surface-soft); color: var(--cover-text); font: inherit; font-size: 13px; outline: none; }
 .coverStudioSearchInput::placeholder { color: var(--cover-muted); }
 .coverSongTools { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 .coverStudioLayout .coverSongTools button { min-height: 32px; padding: 6px 9px; font-size: 11px; }
@@ -75,7 +75,7 @@
   border-bottom-color: var(--cover-edge); border-radius: 7px;
   background: transparent; text-align: left; color: var(--cover-text); font: inherit;
   overflow: hidden; transform: none !important;
-  transition: border-color 130ms ease, background-color 130ms ease !important;
+  transition: border-color var(--lt-control-motion) ease, background-color var(--lt-control-motion) ease !important;
 }
 .coverStudioLayout .coverSongPickVirtual:hover { border-color: var(--cover-edge); background: var(--cover-raised); }
 .coverStudioLayout .coverSongPickVirtual.active { border-color: rgba(var(--lt-accent-rgb),.3); background: rgba(var(--lt-accent-rgb),.09); }
@@ -85,7 +85,7 @@
 .coverSongPickVirtual strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; font-weight: 700; color: var(--cover-text); }
 .coverSongPickVirtual small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; color: var(--cover-muted); }
 .coverSongPickVirtual em { color: var(--lt-accent); text-align: center; font-size: 15px; font-weight: 700; font-style: normal; }
-.coverQuickApplyBar { min-width: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 15px; padding: 13px 15px; border: 1px solid var(--cover-edge); border-radius: 10px; background: var(--cover-raised); }
+.coverQuickApplyBar { min-width: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 15px; padding: 13px 15px; border: 1px solid var(--cover-edge); border-radius: var(--lt-radius-sm); background: var(--cover-raised); }
 .coverQuickPreview { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
 .coverStudioMiniSongArt,.coverStudioMiniSongArt img { width: 47px; height: 47px; border-radius: 7px; object-fit: cover; }
 .coverQuickPreview > span[aria-hidden="true"] { color: var(--cover-muted); }
@@ -102,7 +102,7 @@
   position: absolute; left: 0; top: 0; width: 100%; height: 228px;
   display: grid; align-items: start; gap: 9px; padding: 3px 2px; min-width: 0;
 }
-.coverGalleryCardCleanOnly { min-width: 0; height: 218px; display: grid; grid-template-rows: 124px minmax(0,1fr) auto; gap: 6px; padding: 8px; border: 1px solid var(--cover-edge); border-radius: 11px; background: var(--cover-raised); overflow: hidden; transition: border-color 130ms ease, background-color 130ms ease !important; }
+.coverGalleryCardCleanOnly { min-width: 0; height: 218px; display: grid; grid-template-rows: 124px minmax(0,1fr) auto; gap: 6px; padding: 8px; border: 1px solid var(--cover-edge); border-radius: var(--lt-radius-sm); background: var(--cover-raised); overflow: hidden; transition: border-color 130ms ease, background-color 130ms ease !important; }
 .coverGalleryCardCleanOnly:hover { border-color: color-mix(in oklab,var(--lt-accent) 30%,transparent); background: color-mix(in oklab,var(--lt-accent) 10%,var(--cover-raised)); }
 .coverGalleryCardCleanOnly.excluded { opacity: .55; }
 .coverStudioLayout .coverGalleryImageButtonCleanOnly { min-width: 0; width: 100%; height: 124px; display: block; padding: 0; border: 0; border-radius: 6px; overflow: hidden; background: var(--cover-surface); cursor: pointer; }
@@ -156,8 +156,8 @@
 .coverStudioLayout .coverStudioHeroActions .coverMaintenanceMenu {
   position: absolute; z-index: 20; right: 0; top: calc(100% + 7px);
   min-width: 155px; padding: 6px; display: grid; gap: 4px;
-  border: 1px solid var(--cover-edge); border-radius: 10px; background: var(--cover-surface);
-  box-shadow: 0 12px 30px rgba(0,0,0,.35);
+  border: 1px solid var(--cover-edge); border-radius: var(--lt-radius-sm); background: var(--cover-surface);
+  box-shadow: var(--lt-shadow-menu);
 }
 .coverStudioLayout .coverStudioHeroActions .coverMaintenanceMenu button { width: 100%; text-align: left; }
 

@@ -1,3 +1,4 @@
+import { PageHeader } from "../../shared/ui/PageHeader";
 import "./settings.css";
 import "./settings-premium.css";
 import type { ReactNode } from "react";
@@ -16,16 +17,7 @@ export default function SettingsView({
 }: SettingsViewProps) {
   return (
     <section data-page-section="settings" className="settingsPage settingsPageV027">
-      <header className="settingsPageIntro">
-        <div className="settingsIntroIdentity">
-          <div className="settingsIntroTitle">
-            <h1>Settings</h1>
-          </div>
-        </div>
-        <span className="settingsIntroCurrent" aria-label="Current settings section">
-          {settingsRail.tabs.find((tab) => tab.id === settingsCategory)?.label ?? "Settings"}
-        </span>
-      </header>
+      <PageHeader title="Settings" description={settingsRail.tabs.find((tab) => tab.id === settingsCategory)?.label ?? "Settings"} />
       <div className="settingsLayout settingsPageLayoutV027">
         <SettingsRail {...settingsRail} />
         <div className="settingsCategoryContent settingsCategoryContentV027">

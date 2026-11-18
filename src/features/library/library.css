@@ -22,7 +22,7 @@
   padding: 0 0 var(--lt-space-5);
   display: grid;
   align-content: start;
-  gap: clamp(18px, 1.8vw, 28px);
+  gap: var(--lt-page-gap);
   color: var(--library-text);
   background: transparent;
 }
@@ -33,8 +33,8 @@
 
 .libraryAction,
 .libraryMissingActions button {
-  min-height: 42px;
-  padding: 0 14px;
+  min-height: var(--lt-control-height);
+  padding: 0 var(--lt-space-3);
   border: 1px solid var(--library-border);
   border-radius: var(--lt-radius-item);
   color: var(--lt-text);
@@ -43,7 +43,7 @@
   font-size: var(--lt-text-base);
   font-weight: 550;
   cursor: pointer;
-  transition: color 130ms ease, border-color 130ms ease, background-color 130ms ease;
+  transition: color var(--lt-control-motion) ease, border-color var(--lt-control-motion) ease, background-color var(--lt-control-motion) ease;
 }
 
 .libraryAction:hover:not(:disabled),

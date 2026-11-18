@@ -18,15 +18,15 @@
   display: grid;
   grid-template-columns: 46px minmax(0, 1fr);
   align-items: center;
-  gap: 14px;
-  padding: 18px;
+  gap: var(--lt-section-gap);
+  padding: var(--lt-surface-padding);
   border: 1px solid rgba(var(--state-rgb), 0.18);
-  border-radius: var(--lt-radius-md);
+  border-radius: var(--lt-radius-panel);
   color: var(--lt-text);
   background:
     linear-gradient(180deg, rgba(var(--state-rgb), 0.055), transparent 85%),
     var(--lt-surface);
-  box-shadow: var(--lt-shadow-low);
+  box-shadow: none;
   text-align: left;
   overflow: hidden;
 }

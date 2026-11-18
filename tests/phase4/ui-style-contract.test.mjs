@@ -84,8 +84,8 @@ test("theme controls and library layout follow their owners", () => {
   assert.match(themes, /\.app\[data-theme="light"\][\s\S]*?color-scheme: light/);
   assert.match(read("src/features/settings/settings.css"), /\.settingsPage select \{ cursor: pointer; color-scheme: inherit/);
   assert.match(read("src/features/library/library.css"), /padding: 0 0 var\(--lt-space-5\)/);
-  assert.match(read("src/features/settings/settings.css"), /padding: 26px 0 100px/);
-  assert.match(read("src/features/settings/settings-premium.css"), /padding: var\(--lt-space-5\) 0/);
+  assert.match(read("src/features/settings/settings.css"), /padding: 0 0 var\(--lt-space-5\)/);
+  assert.match(read("src/features/settings/settings-premium.css"), /padding: 0 0 var\(--lt-space-5\)/);
 });
 
 test("sidebar navigation retains keyboard focus and theme contrast", () => {

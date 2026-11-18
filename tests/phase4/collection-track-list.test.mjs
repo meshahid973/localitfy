@@ -88,7 +88,7 @@ test('decorative artwork uses low-resolution source without changing eager loadi
  assert.match(source,/const useFullCover = isImmediateCover && !preferThumbnail/);
  assert.match(source,/const directCover = useFullCover \? getFullCoverUrl\(song\) : getCardCoverUrl\(song\)/);
  assert.match(backdrop,/const source = getSongAmbientSource\(song\)/);
- assert.match(backdrop,/decodeArtwork\(source, controller.signal\)/);
+ assert.match(backdrop,/decodeArtwork\(candidate, controller.signal\)/);
  assert.match(ambient,/return getRendererSafeImageUrl\(song.coverThumbUrl\)\|\|getRendererSafeImageUrl\(song.coverThumbnailUrl\)/);
  assert.match(source,/preferThumbnail \? getFullCoverUrl\(song\) : ""/);
 });

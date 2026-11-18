@@ -46,8 +46,8 @@ main.app.app > .appShell > .sidebar {
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
-  padding: 6px 4px !important;
-  gap: 4px !important;
+  padding: var(--lt-space-2) var(--lt-space-1) !important;
+  gap: var(--lt-space-1) !important;
   border-right: 0 !important;
   border-radius: var(--lt-radius-sm) !important;
   background: var(--workspace-sidebar) !important;
@@ -67,7 +67,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar {
   --rail-align: center;
   --rail-row-pad: 0px;
   --rail-row-gap: 0px;
-  --rail-import-size: 40px;
+  --rail-import-size: var(--lt-nav-height);
   width: var(--lt-sidebar-closed) !important;
 }
 @media (min-width: 781px) {
@@ -80,7 +80,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar {
     --rail-row-gap: 8px;
     --rail-import-size: 100%;
     width: var(--lt-sidebar-open) !important;
-    background: var(--lt-surface) !important;
+    background: var(--lt-glass-background) !important;
     box-shadow: var(--lt-shadow-menu) !important;
   }
 }
@@ -92,7 +92,7 @@ main.app.app > .appShell > .sidebar .sidebarNavGroupsV467 {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 4px !important;
+  gap: var(--lt-space-1) !important;
   padding: 4px !important;
   overflow-x: hidden;
   overflow-y: auto;
@@ -104,7 +104,7 @@ main.app.app > .appShell > .sidebar .sidebarNavGroupV467 {
   flex-direction: column;
   flex: 0 0 auto;
   min-width: 0;
-  gap: 4px !important;
+  gap: var(--lt-space-1) !important;
   margin-top: 0 !important;
 }
 .sidebarPinnedNav { flex: 0 0 auto; min-width: 0; padding-inline: 4px; }
@@ -125,7 +125,7 @@ main.app.app > .appShell > .sidebar .nav {
   flex: 0 0 auto !important;
   min-width: 0 !important;
   width: 100% !important;
-  gap: 4px !important;
+  gap: var(--lt-space-1) !important;
   padding: 0 !important;
   margin: 0 !important;
 }
@@ -137,8 +137,8 @@ main.app.app > .appShell > .sidebar .navItem {
   justify-items: var(--rail-align) !important;
   width: 100% !important;
   max-width: 100% !important;
-  height: 40px !important;
-  min-height: 40px !important;
+  height: var(--lt-nav-height) !important;
+  min-height: var(--lt-nav-height) !important;
   min-width: 0 !important;
   margin: 0 !important;
   padding: 0 var(--rail-row-pad) !important;
@@ -149,7 +149,7 @@ main.app.app > .appShell > .sidebar .navItem {
   background: transparent !important;
   box-shadow: none !important;
   transform: none !important;
-  transition: color 140ms ease, background-color 140ms ease !important;
+  transition: color var(--lt-control-motion) ease, background-color var(--lt-control-motion) ease !important;
 }
 main.app.app > .appShell > .sidebar .navItem:hover,
 main.app.app > .appShell > .sidebar .navItem:focus-visible {
@@ -245,13 +245,13 @@ main.app.app > .appShell > .sidebar .importMainAction {
   width: var(--rail-import-size) !important;
   min-width: 0 !important;
   max-width: 100% !important;
-  min-height: 40px !important;
-  height: 40px !important;
+  min-height: var(--lt-nav-height) !important;
+  height: var(--lt-nav-height) !important;
   padding: 0 !important;
   gap: 6px !important;
   color: var(--lt-text) !important;
   background: var(--lt-fill) !important;
-  border: 1px solid var(--lt-border) !important;
+  border: 1px solid transparent !important;
   border-radius: var(--lt-radius-item) !important;
   box-shadow: none !important;
   transform: none !important;

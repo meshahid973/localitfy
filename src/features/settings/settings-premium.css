@@ -1,28 +1,14 @@
 /* Settings layout refinements. Base control styles live in settings.css. */
 .settingsPage.settingsPageV027 {
-  width: min(100%, 1120px);
-  margin: 0 auto;
-  gap: 18px;
-  padding: var(--lt-space-5) 0;
+  width: 100%;
+  margin: 0;
+  gap: var(--lt-page-gap);
+  padding: 0 0 var(--lt-space-5);
   color: var(--settings-text);
 }
-.settingsPage.settingsPageV027 .settingsPageIntro {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 58px;
-  gap: 14px;
-  padding: 0 0 16px;
-  border-bottom: 0;
-}
-.settingsPageV027 .settingsIntroIdentity { display: flex; align-items: center; gap: 10px; min-width: 0; }
-
-.settingsPageV027 .settingsIntroTitle h1 { margin: 0; font-size: 26px; line-height: 1.2; letter-spacing: -.035em; color: var(--settings-text); }
-.settingsPageV027 .settingsIntroTitle p { margin: 2px 0 0; color: var(--settings-muted); font-size: 13px; }
-.settingsPageV027 .settingsIntroCurrent { font-size: 12px; color: var(--settings-muted); }
 .settingsPage.settingsPageV027 .settingsLayout {
   grid-template-columns: 226px minmax(0, 1fr);
-  gap: 24px;
+  gap: var(--lt-space-5);
   align-items: start;
 }
 .settingsPage.settingsPageV027 .settingsCategoryRail {
@@ -55,16 +41,16 @@
 .settingsPage.settingsPageV027 .settingsCategoryRail nav { display: grid; gap: 5px; min-width: 0; }
 .settingsPage.settingsPageV027 .settingsCategoryButton {
   display: flex; align-items: center; gap: 11px;
-  width: 100%; min-height: 45px; padding: 9px 10px;
-  border: 1px solid transparent; border-radius: 7px;
+  width: 100%; min-height: var(--lt-control-height); padding: var(--lt-space-2) var(--lt-space-3);
+  border: 1px solid transparent; border-radius: var(--lt-radius-item);
   background: transparent; color: var(--settings-muted);
-  transition: background-color .14s ease, color .14s ease;
+  transition: background-color var(--lt-control-motion) ease, color var(--lt-control-motion) ease;
 }
 .settingsPage.settingsPageV027 .settingsCategoryButton:hover { color: var(--settings-text); background: var(--settings-elevated); }
 .settingsPage.settingsPageV027 .settingsCategoryButton[aria-current="page"] {
   color: var(--settings-text);
   border-color: transparent;
-  background: var(--settings-elevated);
+  background: var(--lt-fill-selected);
 }
 .settingsPage.settingsPageV027 .settingsCategoryIcon { display: grid; place-items: center; width: 21px; color: var(--settings-muted); }
 .settingsPage.settingsPageV027 .settingsCategoryButton[aria-current="page"] .settingsCategoryIcon { color: var(--settings-accent); }
@@ -77,14 +63,14 @@
   border-bottom: 1px solid var(--settings-edge);
 }
 .settingsPage.settingsPageV027 .settingsCategoryHeader h4,
-.settingsPage.settingsPageV027 .settingsContentBlock h2 { margin: 2px 0 0; font-size: 25px; font-weight: 720; color: var(--settings-text); line-height: 1.2; }
+.settingsPage.settingsPageV027 .settingsContentBlock h2 { margin: 2px 0 0; font-size: var(--lt-text-title); font-weight: 650; color: var(--settings-text); line-height: 1.2; }
 .settingsPage.settingsPageV027 .settingsCategoryHeader .eyebrow { margin: 0; color: var(--settings-accent); font-size: 12px; letter-spacing: .08em; }
 .settingsPage.settingsPageV027 .settingsCategoryHeader > span { color: var(--settings-muted); font-size: 12px; }
 .settingsPage.settingsPageV027 .settingsPanelCard,
 .settingsPage.settingsPageV027 .settingGroup,
 .settingsPage.settingsPageV027 .settingsCardStack {
-  gap: 14px; padding: 18px 20px;
-  border-radius: var(--lt-radius-sm); border: 0;
+  gap: var(--lt-section-gap); padding: var(--lt-surface-padding);
+  border-radius: var(--lt-radius-panel); border: 1px solid var(--lt-border);
   background: var(--settings-surface);
   box-shadow: none;
 }
@@ -122,7 +108,7 @@
 .settingsPageV027 .toggleRow input[type="checkbox"]:checked::before { background: var(--lt-bg); transform: translateX(18px); }
 .settingsPage.settingsPageV027 .rangeRow input[type="range"] { width: clamp(180px, 18vw, 300px); accent-color: var(--settings-accent); }
 .settingsPage.settingsPageV027 :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="search"]),select,textarea) {
-  min-height: 44px; padding: 9px 12px; border-radius: 9px;
+  min-height: 44px; padding: 9px 12px; border-radius: var(--lt-radius-item);
   border-color: var(--settings-edge); background: var(--lt-bg);
   color: var(--settings-text); font-size: 14px;
 }
@@ -230,7 +216,7 @@
 
 }
 @media (max-width: 670px) {
-  .settingsPage.settingsPageV027 { padding: 14px 0 86px; }
+  .settingsPage.settingsPageV027 { padding: 0 0 var(--lt-space-5); }
 .settingsPage.settingsPageV027 .settingsTwoColumn { grid-template-columns: minmax(0,1fr); }
   .settingsPage.settingsPageV027 .settingsLayoutControls .settingsMiniGrid { grid-template-columns: minmax(0, 1fr); }
   .settingsPage.settingsPageV027 .settingsCategoryHeader { align-items: start; }
@@ -238,7 +224,6 @@
   .settingsPage.settingsPageV027 .rangeRow input[type="range"] { width: 100%; }
 }
 @media (max-width: 480px) {
-  .settingsPageV027 .settingsIntroCurrent { display: none; }
   .settingsPage.settingsPageV027 .settingsChoiceRowV491 { grid-template-columns: repeat(2,minmax(0,1fr)); }
 
   .settingsPage.settingsPageV027 .metadataCleanerPreviewItemV425 { grid-template-columns: minmax(0,1fr); }
@@ -315,7 +300,7 @@
   width: 36px;
   height: 36px;
   place-items: center;
-  border-radius: 9px;
+  border-radius: var(--lt-radius-item);
   background: var(--settings-elevated);
   color: var(--settings-accent);
 }
@@ -346,7 +331,7 @@
   gap: 4px;
   padding: 11px 13px;
   border: 1px solid var(--settings-edge);
-  border-radius: 9px;
+  border-radius: var(--lt-radius-item);
   background: var(--settings-elevated);
   overflow-wrap: anywhere;
 }
@@ -372,7 +357,7 @@
   gap: 12px;
   padding: 10px 13px;
   border: 1px solid var(--settings-edge);
-  border-radius: 9px;
+  border-radius: var(--lt-radius-item);
   background: var(--settings-elevated);
   color: var(--settings-text);
   text-align: left;
