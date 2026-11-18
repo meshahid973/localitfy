@@ -18,7 +18,7 @@ export type CollectionContextMenuProps = {
   findSimilar: (target: CollectionTarget) => unknown;
 };
 
-/** Right-click menu for an album, artist, genre, playlist or mix; the same look and layer as the song menu. */
+/** Right-click menu for an artist, genre, playlist or mix; shares the song menu layer. */
 export default function CollectionContextMenu({ state, onClose, open, play, queue, findSimilar }: CollectionContextMenuProps) {
   if (!state) return null;
   const { target } = state;

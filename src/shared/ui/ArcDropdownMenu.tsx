@@ -87,7 +87,7 @@ export function ArcDropdownMenu<T extends string>({
       for (const key of THEME_VARS) copied[key] = computed.getPropertyValue(key).trim();
       setThemeStyle(copied as CSSProperties);
     }
-    optionRefs.current[activeIndex]?.focus();
+    optionRefs.current[activeIndex]?.focus({ preventScroll: true });
   }, [open, placeMenu]);
 
   useEffect(() => {
@@ -114,7 +114,7 @@ export function ArcDropdownMenu<T extends string>({
 
   const close = (restoreFocus = false) => {
     setOpen(false);
-    if (restoreFocus) triggerRef.current?.focus();
+    if (restoreFocus) triggerRef.current?.focus({ preventScroll: true });
   };
   const start = (fromEnd = false) => {
     if (disabled || firstEnabled < 0) return;
@@ -135,7 +135,7 @@ export function ArcDropdownMenu<T extends string>({
     }
   };
   const onMenuKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "Escape") { event.preventDefault(); close(true); }
+    if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(true); }
     else if (event.key === "Tab") close(true);
     else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();

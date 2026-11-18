@@ -58,7 +58,14 @@ export default function SidebarTabsSettings({ settings, updateSetting }: Sidebar
                       type="button"
                       className="sidebarTabsButton"
                       disabled={isHidden || !canMoveSidebarItem(order, hidden, itemId, -1)}
-                      onClick={() => void updateSetting("sidebarNavOrder", moveSidebarItem(order, hidden, itemId, -1))}
+                      onClick={(event) => {
+                        const button = event.currentTarget;
+                        void updateSetting("sidebarNavOrder", moveSidebarItem(order, hidden, itemId, -1));
+                        requestAnimationFrame(() => {
+                          if (button.disabled && (document.activeElement === button || document.activeElement === document.body))
+                            (button.nextElementSibling as HTMLButtonElement | null)?.focus({ preventScroll: true });
+                        });
+                      }}
                       aria-label={`move ${item.label} up`}
                       title="move up"
                     >
@@ -68,7 +75,14 @@ export default function SidebarTabsSettings({ settings, updateSetting }: Sidebar
                       type="button"
                       className="sidebarTabsButton"
                       disabled={isHidden || !canMoveSidebarItem(order, hidden, itemId, 1)}
-                      onClick={() => void updateSetting("sidebarNavOrder", moveSidebarItem(order, hidden, itemId, 1))}
+                      onClick={(event) => {
+                        const button = event.currentTarget;
+                        void updateSetting("sidebarNavOrder", moveSidebarItem(order, hidden, itemId, 1));
+                        requestAnimationFrame(() => {
+                          if (button.disabled && (document.activeElement === button || document.activeElement === document.body))
+                            (button.previousElementSibling as HTMLButtonElement | null)?.focus({ preventScroll: true });
+                        });
+                      }}
                       aria-label={`move ${item.label} down`}
                       title="move down"
                     >

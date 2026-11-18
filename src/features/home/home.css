@@ -507,12 +507,6 @@
   contain: layout paint style;
 }
 
-.app .homeAlbumCard {
-  content-visibility: auto;
-  contain-intrinsic-size: 120px 150px;
-  contain: layout paint style;
-}
-
 /* Phones use a compact starting point; the persistent mini player owns playback. */
 html.platformAndroid .homePage {
   min-height: 0;
