@@ -87,7 +87,7 @@ test("Home shelves size against available content width and deduplicate mix artw
   assert.match(css, /@container \(max-width: 460px\)/);
   assert.match(css, /\.homeMixRail \{ grid-auto-columns:/);
   assert.match(source, /<HomeMixArtwork id=\{mix.id\}/);
-  assert.match(read("src/features/covers/CollectionArtwork.tsx"), /pickHomeMixArtwork\(songs\)/);
+  assert.match(read("src/features/covers/MixCoverArtwork.tsx"), /pickHomeMixArtwork\(songs\)/);
   assert.doesNotMatch(css, /homeMixCollage/);
   assert.match(source, /className="homeReleaseCover" preferThumbnail/);
 });
@@ -154,14 +154,14 @@ test("Home most-listened work is memoized, bounded, and hidden when unused", () 
   assert.doesNotMatch(css, /\.homeSectionHead > h3 \{ margin:0; \}/);
 });
 
-test("Home 3.1 keeps Listen Now on the workspace atmosphere and generated mixes in the shared card rail", () => {
+test("Home 3.1 keeps Listen Now on the workspace atmosphere and real mix covers in the shared card rail", () => {
   const css = read("src/features/home/home.css");
   const artwork = read("src/features/covers/CollectionArtwork.tsx");
   assert.match(css, /\.homeListenGrid \{[^}]*background: transparent/);
   assert.match(artwork, /new PaletteCache<ArtworkPalette>\(96\)/);
   assert.match(artwork, /IntersectionObserver/);
   assert.match(artwork, /controller.abort\(\)/);
-  assert.match(read("src/features/covers/collection-artwork.css"), /\.generatedCollectionArtwork \{[^}]*radial-gradient/);
+  assert.match(read("src/features/covers/MixCoverArtwork.tsx"), /<PlaylistCoverCollage/);
 });
 
 test("workspace artwork follows playback independently of the open route", () => {

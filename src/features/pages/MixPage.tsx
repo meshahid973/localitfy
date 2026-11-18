@@ -5,7 +5,7 @@ import { CollectionLoading } from "../../shared/ui/CollectionLoading";
 import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
 import { formatTime } from "../../shared/utils/format";
 import { prettyMeta } from "../search/search.utils";
-import { CollectionArtwork } from "../covers/CollectionArtwork";
+import { MixCoverArtwork } from "../covers/MixCoverArtwork";
 import { useHomeDailyMixes } from "../home/useHomeDailyMixes";
 import { useHomeDay } from "../home/useHomeDay";
 import { mixTarget, playableIds, useAppActions } from "../shell/appActions";
@@ -62,7 +62,7 @@ export default function MixPage({ mixId, songs, currentId, isPlaying, toggleLike
       <CollectionHero
         typeLabel="daily mix"
         title={mix.name}
-        cover={<CollectionArtwork id={mix.id} name={mix.name} songs={members} className="collectionHeroCover" />}
+        cover={<MixCoverArtwork songs={members} className="collectionHeroCover" />}
         coverSong={target.coverSong}
         byline={<span>{artists.slice(0, 3).join(", ")}{artists.length > 3 ? " and more" : ""}</span>}
         stats={`${members.length} track${members.length === 1 ? "" : "s"} · ${formatTime(duration)}`}
