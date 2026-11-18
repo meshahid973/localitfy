@@ -73,10 +73,10 @@ test("Home uses sharp cover art with optional ambient rendering", () => {
   const source = read("src/features/home/HomeView.tsx");
   const css = read("src/features/home/home.css");
   const shell = read("src/features/shell/AppShell.tsx");
-  assert.match(source, /showAtmosphere \? <div className="homeAtmosphere"[^>]*><ArtworkBackdrop song=\{currentSong\}/);
+  assert.doesNotMatch(source, /homeAtmosphere|<ArtworkBackdrop/);
   assert.match(source, /className="homeFeatureCover" priority="high" preferThumbnail=/);
-  assert.match(shell, /artworkAmbient=\{effectiveAmbient && !isAppBackgrounded\}/);
-  assert.match(css, /\.homePage > \.homeAtmosphere/);
+  assert.match(shell, /useWorkspacePalette\(home.ambientStyle, artworkEnabled/);
+  assert.doesNotMatch(css, /\.homePage > \.homeAtmosphere/);
   assert.doesNotMatch(css, /min-height: clamp\(230px|repeat\(10,minmax/);
 });
 test("Home shelves size against available content width and deduplicate mix artwork", () => {
@@ -106,7 +106,7 @@ test("shared artwork palette follows the existing ambient preference and backgro
   assert.match(backdrop, /enabled && source \? <CrossfadeArtwork/);
   assert.match(workspace, /--workspace-cover-color/);
   assert.match(player, /\.playerBar\[data-ambient\] \{\s*background: transparent !important/);
-  assert.match(workspace, /--workspace-sidebar: color-mix\(in srgb, var\(--lt-text\) 5%, transparent\)/);
+  assert.match(workspace, /--workspace-sidebar: var\(--lt-fill-subtle\)/);
   assert.match(player, /\.playerBar\[data-ambient\]:hover::before \{\s*display: none !important/);
   for (const file of ["SongGroupPage", "MixPage"]) assert.match(read("src/features/pages/" + file + ".tsx"), /<ArtworkBackdrop song=/);
 });
@@ -126,7 +126,7 @@ test("artwork rails retain geometry and scrolling without visible scrollbars", (
   const css = read("src/features/home/home.css");
   assert.match(css, /scrollbar-width: none/);
   assert.match(css, /\.homeReleaseRail::-webkit-scrollbar \{ display: none/);
-  assert.match(css, /\.homePage > \.homeAtmosphere \{[^}]*grid-column: auto/);
+  assert.doesNotMatch(css, /\.homePage > \.homeAtmosphere/);
   assert.match(read("src/features/home/HomeShelves.tsx"), /className="homeReleaseRail" tabIndex=\{0\}/);
 });
 test("ambience transitions are bounded and respect reduced motion", () => {

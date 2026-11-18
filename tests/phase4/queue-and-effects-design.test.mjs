@@ -6,7 +6,7 @@ const read = (f) => fs.readFileSync(f, "utf8");
 test("busy-paint suppression targets valid CSS pseudo-element selectors", () => {
   const css = read("src/features/shell/effects.css");
   assert.doesNotMatch(css, /:is\([^)]*::(?:before|after)/);
-  assert.match(css, /\.app\.localtifyInteractionBusy :is\(\.coverAura, \.songArt, \.playerBar\)::before/);
+  assert.doesNotMatch(css, /\.localtifyInteractionBusy|\.coverTargetPanelCleanOnly/);
   assert.doesNotMatch(css, /\.heroAmbiencePulse\b/);
 });
 
@@ -16,10 +16,10 @@ test("queue and history controls use Localtify theme tokens and keyboard focus",
   assert.match(queue, /border-radius: var\(--lt-radius-md\)/);
   assert.doesNotMatch(queue, /backdrop-filter: blur\(22px\)/);
   assert.match(queue, /\.queuePanelIconButton:focus-visible,[\s\S]*?outline: 2px solid var\(--lt-accent\)/);
-  assert.match(history, /background: var\(--lt-surface-soft\)/);
+  assert.match(history, /\.titleHistoryNav \{[^}]*background: transparent/);
   assert.match(history, /\.titleHistoryNav button:focus-visible/);
   assert.match(history, /-webkit-app-region: no-drag/);
-  assert.match(history, /color-mix\(in srgb, var\(--lt-text\) 10%, var\(--lt-surface-raised\)\)/);
+  assert.match(history, /background: var\(--lt-fill-hover\)/);
 });
 
 
@@ -28,7 +28,7 @@ test("shell interactions are calm, theme-aware and retain the existing native co
   const view = read("src/styles/view-shell.css");
   const nav = read("src/features/shell/SidebarNav.tsx");
   assert.doesNotMatch(effects, /@keyframes localtifyNav(?:StrokeDraw|Home|Library|Disc|Playlist|Heart|Covers|Analytics|Download|Settings)V468/);
-  assert.match(effects, /\.navItemAnimatedV468\.active\{[\s\S]*?background: color-mix\(in srgb, var\(--lt-text\) 10%, transparent\)/);
+  assert.match(view, /\.sidebar \.navItem\.active \{[^}]*background: var\(--lt-fill-selected\)/);
   assert.match(view, /\.navText strong \{[\s\S]*?font-size: var\(--lt-text-base\)/);
   assert.match(nav, /title=\{item\.label\}/);
   assert.match(nav, /aria-current=\{view === item\.id \? "page" : undefined\}/);

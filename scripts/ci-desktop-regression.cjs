@@ -152,13 +152,13 @@ server.listen(5173,async()=>{
     assert.equal(await win.webContents.executeJavaScript("document.querySelector(\".app\")?.dataset.appVersion"), version, "renderer version matches package");
     const playing=await metrics("desktop playback");
     await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=home]').click()");
-    await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.homeFeatureCover') && !!document.querySelector('.homeAtmosphere .artworkBackdropLayer[data-visible=true]')").catch(()=>false),"artwork-led Home");
+    await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.homeFeatureCover') && document.querySelector('.app').dataset.workspaceArtwork==='on'").catch(()=>false),"artwork-led Home");
     async function homeGeometry(width,height) {
       win.setSize(width,height);
       await until(()=>win.getSize()[0]===width && win.webContents.executeJavaScript("window.innerWidth").then(actual=>actual===width),"requested viewport "+width,5000);
       const state=await win.webContents.executeJavaScript(`(()=>{
         const page=document.querySelector('.homePage');
-        const atmosphere=page.querySelector('.homeAtmosphere');
+        const atmosphere=document.querySelector('.app');
         const artist=page.querySelector('.homeReleaseRail .mediaCardCover');
         const rail=page.querySelector('.homeReleaseRail');
         artist?.scrollIntoView({block:'center'});
@@ -168,7 +168,7 @@ server.listen(5173,async()=>{
       })()`);
       assert.equal(state.viewport,width,"actual renderer viewport");
       assert.ok(state.artist&&state.artist.width>=64&&Math.abs(state.artist.width-state.artist.height)<=3,"song artwork collapsed at "+width+": "+JSON.stringify(state));
-      assert.ok(state.atmosphere&&Math.abs(state.page.x-state.atmosphere.x)<=3&&Math.abs(state.page.right-state.atmosphere.right)<=3,"ambient image should reach Home boundaries: "+JSON.stringify(state));
+      assert.ok(state.atmosphere&&state.atmosphere.x<=state.page.x&&state.atmosphere.right>=state.page.right-3,"ambient image should reach Home boundaries: "+JSON.stringify(state));
       assert.ok(state.hidden,"artwork shelves should not expose scrollbars");
       if(state.rail&&state.rail.scrollWidth>state.rail.width+10){
         const moved=await win.webContents.executeJavaScript("(()=>{const rail=document.querySelector('.homeReleaseRail');rail.scrollTo({left:Math.min(rail.scrollWidth-rail.clientWidth,180),behavior:'instant'});return rail.scrollLeft>0})()");
@@ -185,12 +185,12 @@ server.listen(5173,async()=>{
     await win.webContents.executeJavaScript("document.querySelector('.playerBar button[aria-label=\\\"next song\\\"]').click()");
     await until(()=>win.webContents.executeJavaScript("document.querySelector('.homeFeatureCover')?.dataset.coverTitle").then(title=>title&&title!==previous).catch(()=>false),"next track");
     const samples=[];
-    for(let index=0;index<8;index++){samples.push(await win.webContents.executeJavaScript("document.querySelectorAll('.homeAtmosphere .artworkBackdropLayer').length"));await sleep(100);}
-    assert.ok(samples.every(n=>n>=1&&n<=2),"ambient transition must keep at most two artwork layers");
-    await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.homeAtmosphere .artworkBackdropLayer').length===1 && !!document.querySelector('.homeAtmosphere .artworkBackdropLayer[data-visible=true]')").catch(()=>false),"settled artwork transition",5000);
+    for(let index=0;index<8;index++){samples.push(await win.webContents.executeJavaScript("document.querySelectorAll('.artworkBackdropLayer').length"));await sleep(100);}
+    assert.ok(samples.every(n=>n<=2),"ambient transition must keep at most two artwork layers");
+    await until(()=>win.webContents.executeJavaScript("document.querySelector('.app').dataset.workspaceArtwork==='on' && getComputedStyle(document.querySelector('.app')).backgroundImage.includes('radial-gradient')").catch(()=>false),"settled artwork transition",5000);
     await screenshot(win,"home-next-track");
     await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=settings]').click()");
-    await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.settingsModeButton').length===2").catch(()=>false),"two appearance modes");
+    await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.settingsModeButton').length===2 && document.querySelector('.app').dataset.workspaceArtwork==='off'").catch(()=>false),"two appearance modes");
     for(const mode of ["light","dark"]){
       await win.webContents.executeJavaScript(`document.querySelector('.settingsModeButton:has([data-preview-mode="${mode}"])').click()`);
       // Compare the actual resolved color, not the spelling of a minified CSS token
