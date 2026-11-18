@@ -728,4 +728,3 @@
 .app[data-platform="linux"] :is(input, textarea, button, select){
   font-family: inherit;
 }
-
