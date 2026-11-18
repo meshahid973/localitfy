@@ -7,7 +7,7 @@ test("title matches beat artist-only noise and popularity breaks ties",()=>{
   const correct={id:"a",title:"KICK BACK",artist:"Kenshi Yonezu",album:"KICK BACK",storeRank:1,listeners:1200000};
   const result=rankCatalog("kick back",[{id:"b",title:"Come On",artist:"Kick Back"},{id:"c",title:"Kick Back",artist:"Other"}],[correct]);
   assert.equal(result[0].artist,"Kenshi Yonezu");
-  assert.ok(!result.some(x=>x.title==="Come On") || result.at(-1).title==="Come On");
+  assert.ok(!result.some(x=>x.title==="Come On"));
   assert.equal(rankCatalog("kick back chainsaw man opening",[],[correct])[0].artist,"Kenshi Yonezu");
   assert.deepEqual(searchTerms("kick back chainsaw man opening"),["kick back chainsaw man opening","kick back"]);
 });

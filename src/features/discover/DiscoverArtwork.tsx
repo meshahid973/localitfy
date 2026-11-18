@@ -58,7 +58,7 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
   const imageReady = Boolean(src && loaded?.key === key && loaded.url === src);
   useEffect(() => {
     if (!near || !src || imageReady) return;
-    const timer = window.setTimeout(() => setFailure(current => ({key,urls:[...(current.key === key ? current.urls : []),src]})), 12000);
+    const timer = window.setTimeout(() => setFailure(current => ({key,urls:[...new Set([...(current.key === key ? current.urls : []),src])]})), 12000);
     return () => window.clearTimeout(timer);
   }, [src, key, imageReady, near]);
   useEffect(() => {

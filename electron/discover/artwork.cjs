@@ -39,9 +39,9 @@ function createArtworkLookup(client,now=Date.now,trackInfo,lookupAudioDb) {
       const primary = lastfmArtwork(track,title,artist);
       const verified = norm(track?.name)===norm(title)&&norm(track?.artist?.name)===norm(artist);
       const release = verified && validId(track?.album?.mbid) ? url("release",track.album.mbid) : undefined;
-      if (primary.coverUrl && !lookupAudioDb) return release ? {...primary,fallbackCoverUrl:release} : primary;
+      if (primary.coverUrl) return release ? {...primary,fallbackCoverUrl:release} : primary;
       const alternate = lookupAudioDb ? await lookupAudioDb(title,artist).catch(()=>({})) : {};
-      const known = [primary.coverUrl,alternate.coverUrl,release].filter(Boolean);
+      const known = [alternate.coverUrl,release].filter(Boolean);
       if (known.length) return {coverUrl:known[0],fallbackCoverUrl:known[1],coverAlternatives:known};
       if (!client?.searchRecordings) return {};
       const items=await client.searchRecordings(title,artist,{background:true});

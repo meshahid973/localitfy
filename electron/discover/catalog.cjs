@@ -47,8 +47,8 @@ function rankCatalog(query, musicbrainz, store=[], popular=[]) {
     if(!normalize(item.title)||!normalize(item.artist))return;
     const old=entries.get(key);
     if(!old){entries.set(key,item);return;}
-    const preferMb=old.id?.match(/^[0-9a-f-]{36}$/i);
-    const base=preferMb?old:item;
+    const isMb = candidate => /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(candidate.id || "");
+    const base=isMb(old)?old:isMb(item)?item:old.storeRank?old:item;
     entries.set(key,{...base,album:old.album||item.album,storeRank:Math.min(old.storeRank||999,item.storeRank||999),listeners:Math.max(old.listeners||0,item.listeners||0),coverUrl:old.coverUrl||item.coverUrl,fallbackCoverUrl:old.fallbackCoverUrl||item.fallbackCoverUrl,coverAlternatives:[...new Set([...(old.coverAlternatives||[]),...(item.coverAlternatives||[])])].slice(0,6)});
   };
   [...musicbrainz,...store,...popular].forEach(merge);
@@ -61,8 +61,9 @@ function rankCatalog(query, musicbrainz, store=[], popular=[]) {
     const albumHint=words.filter(word=>!title.split(" ").includes(word)&&context.split(" ").includes(word)).length;
     const score=(exact?300:pref?245:starts?150:phrase?140:0)+titleHits*12+contextual*4+albumHint*10+
       (item.storeRank?Math.max(0,55-item.storeRank):0)+Math.min(65,Math.log10(1+(Number(item.listeners)||0))*10);
-    return {item,score,relevant:Boolean(exact||pref||starts||phrase||titleHits||artist===q)};
+    return {item,score,hasTitleMatch:Boolean(exact||pref||starts||phrase||titleHits),relevant:Boolean(exact||pref||starts||phrase||titleHits||artist===q)};
   }).filter(entry=>entry.relevant).sort((a,b)=>b.score-a.score);
-  return ranked.slice(0,25).map(({item})=>item);
+  const hasTitleMatches=ranked.some(entry=>entry.hasTitleMatch);
+  return ranked.filter(entry=>!hasTitleMatches||entry.hasTitleMatch).slice(0,25).map(({item})=>item);
 }
 module.exports={createStoreSearch,appleItems,rankCatalog,searchTerms};
