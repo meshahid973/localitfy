@@ -8,6 +8,7 @@ import type { SpotifyTrack } from "../downloads/download.types";
 import type { Settings } from "../settings/settings.types";
 import type { CatalogKind, DiscoverResult, DiscoverTrack } from "./discover.types";
 import { DiscoverCover } from "./DiscoverArtwork";
+import { buildDiscoverShelves } from "./discoverShelves";
 import { ArcDropdownMenu } from "../../shared/ui/ArcDropdownMenu";
 import "./discover.css";
 
@@ -115,7 +116,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
   const needsSetup = !settings.discoverEnabled;
   const setup = phone ? <div className="discoverSetup"><p>Turn on Discover and manage its optional Last.fm connection in localtify on your {computerName()}, then sync this phone.</p></div> : (
     <div className="discoverSetup">
-      <p>Search the public MusicBrainz catalog without an account or key. Only your search text is sent for catalog searches. If you add an optional Last.fm key, Localtify also requests personalized suggestions using artist and song names from your library and looks up suggested tracks in MusicBrainz for artwork. Cover images are loaded from the Cover Art Archive.</p>
+      <p>Search the public MusicBrainz catalog without an account or key. Only your search text is sent for catalog searches. If you add an optional Last.fm key, Localtify also requests personalized suggestions using artist and song names from your library and looks up suggested tracks in MusicBrainz for artwork. Cover images come from matching Last.fm track metadata or the Cover Art Archive.</p>
       <details className="discoverOptional" open={Boolean(keyDraft) || undefined}>
       <summary>Optional Last.fm recommendations</summary>
       <label className="discoverKey">
@@ -151,14 +152,8 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
     </button>;
   };
 
-  const recommendedTracks = useMemo(() => {
-    const seen = new Set<string>();
-    return (ready?.artists.flatMap(artist => artist.topTracks) ?? []).filter(track => {
-      const id = trackId(track);
-      if (seen.has(id)) return false;
-      seen.add(id); return true;
-    });
-  }, [ready]);
+  const { recommended: recommendedTracks, popular: popularTracks } = useMemo(
+    () => buildDiscoverShelves(ready?.artists ?? [], ready?.tracks ?? []), [ready]);
   const duration = (ms?: number) => ms ? Math.floor(ms / 60000) + ":" + String(Math.floor(ms / 1000) % 60).padStart(2, "0") : "";
 
   return <section className="discoverPage" aria-busy={loading}>
@@ -204,10 +199,10 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       </ul>
     </section> : null}
 
-    {ready?.tracks.length ? <section className="discoverSection" aria-labelledby="discover-popular">
+    {popularTracks.length ? <section className="discoverSection" aria-labelledby="discover-popular">
       <h2 id="discover-popular" className="discoverHeading">Popular songs you don't have yet</h2>
       <ul className="discoverShelf" tabIndex={0} aria-label="Popular songs">
-        {ready.tracks.map(track => <li key={trackId(track)}>
+        {popularTracks.map(track => <li key={trackId(track)}>
           <div className="discoverShelfArt">
             <button type="button" className="discoverArtLink" onClick={() => openLink(track.url)} aria-label={`Open ${track.title} on Last.fm`}>
               <DiscoverCover title={track.title} artist={track.artist} artwork={track} lookup />

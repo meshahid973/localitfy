@@ -112,6 +112,8 @@
 :is(.collectionPlayButton, .collectionIconButton, .collectionTextButton, .trackLink, .trackRowIndex):focus-visible { outline: 2px solid rgba(var(--lt-accent-rgb), .62); outline-offset: 2px; }
 
 .collectionSection { min-width: 0; display: grid; gap: 10px; }
+.collectionSectionHead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--lt-space-3); }
+.collectionSectionHead .pageHeaderSearch { flex: 0 1 260px; min-width: min(100%, 160px); }
 .collectionSection h2 { margin: 0; color: var(--lt-text); font-size: 19px; font-weight: 650; letter-spacing: -.02em; }
 
 .artistAboutText { max-width: 72ch; display: grid; gap: 10px; color: var(--lt-muted); font-size: 13.5px; line-height: 1.6; }

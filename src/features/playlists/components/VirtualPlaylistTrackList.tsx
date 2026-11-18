@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import type { CSSProperties, DragEvent, MouseEvent as ReactMouseEvent } from "react";
 import { usePageVirtualizer } from "../../../shared/hooks/usePageVirtualizer";
 import { GripVertical, X } from "lucide-react";
@@ -51,6 +51,7 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
   onOpenContextMenu,
   onRemoveSong
 }: VirtualPlaylistTrackListProps) {
+  const songIds = useMemo(() => new Set(list.map(song => song.id)), [list]);
   const [dropTarget, setDropTarget] = useState<{ songId: string; side: LibraryDropSide } | null>(null);
   const { listRef, virtualizer: rowVirtualizer, scrollMargin } = usePageVirtualizer<HTMLDivElement>({
     count: list.length,
@@ -129,7 +130,7 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
 
                 event.preventDefault();
                 event.stopPropagation();
-                event.dataTransfer.dropEffect = list.some((item) => item.id === incomingSongId) ? "move" : "copy";
+                event.dataTransfer.dropEffect = songIds.has(incomingSongId) ? "move" : "copy";
 
                 const side = getPlaylistDropSide(event);
                 setDropTarget((current) => (
@@ -161,9 +162,9 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
               onContextMenu={(event) => onOpenContextMenu(event, song)}
             >
               <span className="playlistTrackGrip"><GripVertical size={14} strokeWidth={2.25} /></span>
-              <button className="playlistTrackMain" type="button" onClick={() => onSelectSong(song.id)}>
+              <button className="playlistTrackMain" type="button" disabled={song.fileExists === false} aria-current={active ? "true" : undefined} onClick={() => onSelectSong(song.id)}>
                 <span className="playlistTrackIndex">{active && isPlaying ? <PlayingBarsIcon /> : virtualRow.index + 1}</span>
-                <Cover song={song} className="playlistTrackCover" />
+                <Cover song={song} className="playlistTrackCover" preferThumbnail />
                 <span className="playlistTrackText">
                   <strong>{displaySongTitleV444(song, 7)}</strong>
                   <small>{displaySongArtistV444(song)}</small>

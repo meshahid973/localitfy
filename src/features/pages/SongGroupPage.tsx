@@ -40,13 +40,13 @@ function collect(songs: Song[], id: string, credits: (song: Song) => string[]) {
 
 export function ArtistPage(props: SongGroupPageProps) {
   const group = useMemo(() => collect(props.songs, props.id, (song) => splitArtistCredits(song.artist)), [props.songs, props.id]);
-  return <SongGroupBody {...props} kind="artist" name={group.name} members={group.members} loading={false} />;
+  return <SongGroupBody key={props.id} {...props} kind="artist" name={group.name} members={group.members} loading={false} />;
 }
 
 export function GenrePage(props: SongGroupPageProps) {
   const tagged = useGenreTaggedSongs(props.songs);
   const group = useMemo(() => collect(tagged.songs, props.id, (song) => splitGenreCredits(song.genre)), [tagged.songs, props.id]);
-  return <SongGroupBody {...props} kind="genre" name={group.name} members={group.members} loading={tagged.loading} />;
+  return <SongGroupBody key={props.id} {...props} kind="genre" name={group.name} members={group.members} loading={tagged.loading} />;
 }
 
 function SongGroupBody({ kind, name, members, loading, currentId, isPlaying, toggleLike, openPlaylistPicker, openSimilar }: SongGroupPageProps & { kind: "artist" | "genre"; name: string; members: Song[]; loading: boolean }) {
