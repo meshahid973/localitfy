@@ -187,3 +187,11 @@ test("server: paired phones can use the Mac's features, only the listed ones, an
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("playlist artwork changes merge without losing independent name or track changes", () => {
+  const base = [{...playlist("p",["1"]),coverArtwork:"old"}];
+  const mac = [{...base[0],name:"mac edit"}];
+  const phone = [{...base[0],coverArtwork:"new",songIds:["1","2"]}];
+  assert.deepEqual(plain(merge.phonePlaylistChanges(base,mac,phone)).put,[{...mac[0],coverArtwork:"new",songIds:["1","2"]}]);
+  assert.equal(plain(merge.phonePlaylistChanges(base,mac,[playlist("p",["1"])])).put[0].coverArtwork,undefined);
+});

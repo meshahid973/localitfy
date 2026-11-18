@@ -2,6 +2,7 @@ import "./pages.css";
 import { useEffect, useMemo, useState } from "react";
 import { Radio } from "lucide-react";
 import { Cover } from "../covers/Cover";
+import { CollectionArtwork } from "../covers/CollectionArtwork";
 import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
 import { formatTime } from "../../shared/utils/format";
 import { splitArtistCredits } from "../artists/artistCredits";
@@ -39,22 +40,27 @@ function collect(songs: Song[], id: string, credits: (song: Song) => string[]) {
 
 export function ArtistPage(props: SongGroupPageProps) {
   const group = useMemo(() => collect(props.songs, props.id, (song) => splitArtistCredits(song.artist)), [props.songs, props.id]);
-  return <SongGroupBody {...props} kind="artist" name={group.name} members={group.members} loading={false} />;
+  return <SongGroupBody key={props.id} {...props} kind="artist" name={group.name} members={group.members} loading={false} />;
 }
 
 export function GenrePage(props: SongGroupPageProps) {
   const tagged = useGenreTaggedSongs(props.songs);
   const group = useMemo(() => collect(tagged.songs, props.id, (song) => splitGenreCredits(song.genre)), [tagged.songs, props.id]);
-  return <SongGroupBody {...props} kind="genre" name={group.name} members={group.members} loading={tagged.loading} />;
+  return <SongGroupBody key={props.id} {...props} kind="genre" name={group.name} members={group.members} loading={tagged.loading} />;
 }
 
 function SongGroupBody({ kind, name, members, loading, currentId, isPlaying, toggleLike, openPlaylistPicker, openSimilar }: SongGroupPageProps & { kind: "artist" | "genre"; name: string; members: Song[]; loading: boolean }) {
   const actions = useAppActions();
   const [showAll, setShowAll] = useState(false);
+  const [query, setQuery] = useState("");
   // Most played first once there is history; otherwise library order.
   const popular = useMemo(() => (members.some((song) => song.playCount > 0)
     ? [...members].sort((a, b) => (b.playCount || 0) - (a.playCount || 0)) : members), [members]);
 
+  const filtered = useMemo(() => {
+    const needle = query.trim().toLocaleLowerCase();
+    return needle ? popular.filter(song => [song.title, song.artist, song.album].some(value => (value || "").toLocaleLowerCase().includes(needle))) : popular;
+  }, [popular, query]);
   if (!name) {
     return (
       <section data-page-section={kind} className="collectionPage">
@@ -68,7 +74,7 @@ function SongGroupBody({ kind, name, members, loading, currentId, isPlaying, tog
   const target = kind === "artist" ? artistTarget(name, members) : genreTarget(name, members);
   const playable = playableIds(members);
   const duration = members.reduce((total, song) => total + Math.max(0, Number(song.duration) || 0), 0);
-  const shown = showAll ? popular : popular.slice(0, TOP_SONGS);
+  const shown = showAll || query.trim() ? filtered : filtered.slice(0, TOP_SONGS);
 
   return (
     <section data-page-section={kind} className="collectionPage songGroupPage" aria-label={`${name} ${kind}`}>
@@ -77,7 +83,7 @@ function SongGroupBody({ kind, name, members, loading, currentId, isPlaying, tog
         typeLabel={kind}
         title={name}
         round={kind === "artist"}
-        cover={<Cover song={target.coverSong} className="collectionHeroCover" priority="high" />}
+        cover={kind === "genre" ? <CollectionArtwork id={`genre:${target.id}`} name={name} songs={members} className="collectionHeroCover" /> : <Cover song={target.coverSong} className="collectionHeroCover" priority="high" />}
         coverSong={target.coverSong}
         stats={[`${members.length} track${members.length === 1 ? "" : "s"}`, formatTime(duration)].join(" · ")}
         playable={playable.length}
@@ -93,11 +99,16 @@ function SongGroupBody({ kind, name, members, loading, currentId, isPlaying, tog
       </CollectionHero>
 
       <section className="collectionSection" aria-label="songs">
-        <h2>{members.some((song) => song.playCount > 0) ? "Popular" : "Songs"}</h2>
+        <div className="collectionSectionHead">
+          <h2>{members.some((song) => song.playCount > 0) ? "Popular" : "Songs"}</h2>
+          <input className="pageHeaderSearch" type="search" aria-label="Search collection tracks" placeholder="Search tracks"
+            value={query} onChange={event => setQuery(event.currentTarget.value)} />
+        </div>
+        {!shown.length ? <p role="status">No matching tracks.</p> : null}
         <TrackList songs={shown} currentId={currentId} isPlaying={isPlaying} hideArtist={kind === "artist" ? name : undefined}
           playFrom={(songId) => actions.playCollection({ ...target, songs: popular }, { startId: songId })}
           toggleLike={toggleLike} openPlaylistPicker={openPlaylistPicker} />
-        {popular.length > TOP_SONGS ? (
+        {!query.trim() && popular.length > TOP_SONGS ? (
           <button className="collectionTextButton collectionShowAll" type="button" onClick={() => setShowAll((value) => !value)}>
             {showAll ? "show less" : `show all ${popular.length} songs`}
           </button>

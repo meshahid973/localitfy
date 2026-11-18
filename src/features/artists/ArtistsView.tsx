@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Cover } from "../covers/Cover";
 import type { Song } from "../library/song.types";
 import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
 import { MediaCard } from "../../shared/ui/MediaCard";
 import { PageHeader } from "../../shared/ui/PageHeader";
+import { ArcDropdownMenu } from "../../shared/ui/ArcDropdownMenu";
 import { prettyMeta } from "../search/search.utils";
 import { artistTarget, useAppActions } from "../shell/appActions";
 import { splitArtistCredits } from "./artistCredits";
@@ -15,6 +16,7 @@ type ArtistEntry = {
   name: string;
   songs: Song[];
   albumCount: number;
+  playCount: number;
   coverSong: Song;
 };
 
@@ -38,7 +40,12 @@ function buildArtists(songs: Song[]): ArtistEntry[] {
       name: group.name,
       songs: group.songs,
       albumCount: group.albums.size,
-      coverSong: group.songs.find((song) => Boolean(song.coverUrl || song.coverPath || song.coverThumbnailUrl)) || group.songs[0]
+      playCount: group.songs.reduce((sum, song) => sum + Math.max(0, Number(song.playCount) || 0), 0),
+      coverSong: group.songs.reduce((best, song) => {
+        const hasCover = (s: Song) => Boolean(s.coverUrl || s.coverPath || s.coverThumbnailUrl || s.coverThumbUrl || s.coverFullUrl);
+        if (!hasCover(song)) return best;
+        return !hasCover(best) || (Number(song.playCount) || 0) > (Number(best.playCount) || 0) ? song : best;
+      }, group.songs[0])
     }))
     .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
 }
@@ -52,22 +59,24 @@ export default function ArtistsView({ songs }: ArtistsViewProps) {
   const actions = useAppActions();
   const [query, setQuery] = useState("");
   const [artistLimit, setArtistLimit] = useState(150);
+  const [sort, setSort] = useState<"name" | "tracks" | "plays">("name");
+  const deferredQuery = useDeferredValue(query);
   const artists = useMemo(() => buildArtists(songs), [songs]);
   const visibleArtists = useMemo(() => {
-    const needle = query.trim().toLocaleLowerCase();
-    if (!needle) return artists;
-    const exactMatches = artists.filter((artist) => artist.name.toLocaleLowerCase() === needle);
+    const needle = deferredQuery.trim().toLocaleLowerCase();
+    const matches = needle ? artists.filter(artist => artist.name.toLocaleLowerCase().includes(needle)) : artists;
+    const exactMatches = needle ? matches.filter(artist => artist.name.toLocaleLowerCase() === needle) : [];
     if (exactMatches.length) return exactMatches;
-    return artists.filter((artist) => artist.name.toLocaleLowerCase().includes(needle));
-  }, [artists, query]);
+    return sort === "name" ? matches : [...matches].sort((a,b) => (sort === "tracks" ? b.songs.length-a.songs.length : b.playCount-a.playCount) || a.name.localeCompare(b.name));
+  }, [artists, deferredQuery, sort]);
 
-  useEffect(() => setArtistLimit(150), [query]);
+  useEffect(() => setArtistLimit(150), [deferredQuery, sort]);
 
   return (
     <section data-page-section="artists" className="collectionBrowsePage artistsPage" aria-label="artists">
       <PageHeader
         title="Artists"
-        description="Every artist in your song tags. Semicolon and “feat.” credits are listed individually."
+        description="Artists in your library"
       >
         <input
           className="pageHeaderSearch"
@@ -76,6 +85,8 @@ export default function ArtistsView({ songs }: ArtistsViewProps) {
           placeholder="search artists"
           aria-label="search artists"
         />
+        <ArcDropdownMenu<"name" | "tracks" | "plays"> ariaLabel="Sort artists" value={sort}
+          items={[{value:"name",label:"name A–Z"},{value:"tracks",label:"most tracks"},{value:"plays",label:"most played"}]} onValueChange={setSort} />
         <span className="pageHeaderCount"><strong>{visibleArtists.length}</strong> artist{visibleArtists.length === 1 ? "" : "s"}</span>
       </PageHeader>
 
@@ -94,7 +105,7 @@ export default function ArtistsView({ songs }: ArtistsViewProps) {
                 onOpen={() => actions.openCollection(target)}
                 onPlay={() => actions.playCollection(target)}
                 onContextMenu={(event) => actions.openCollectionMenu(event, target)}
-                cover={<Cover song={artist.coverSong} className="collectionBrowseCardCover artistCardCover" />}
+                cover={<Cover song={artist.coverSong} className="collectionBrowseCardCover artistCardCover" preferThumbnail />}
               >
                 <span>
                   <strong title={artist.name}>{prettyMeta(artist.name)}</strong>
@@ -114,7 +125,7 @@ export default function ArtistsView({ songs }: ArtistsViewProps) {
           tone="info"
           eyebrow="artists"
           title={songs.length ? "No artists found" : "No artists yet"}
-          message={songs.length ? "Try a different artist or album name." : "Import songs and Localitfy will build your artist shelf from their metadata."}
+          message={songs.length ? "Try a different artist name." : "Import songs and Localitfy will build your artist shelf from their metadata."}
           actions={query ? <button type="button" className="softButton" onClick={() => setQuery("")}>clear search</button> : undefined}
         />
       )}

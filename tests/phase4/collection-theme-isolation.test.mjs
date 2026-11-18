@@ -23,7 +23,7 @@ test("detail collection surfaces adapt to light themes and touch devices", () =>
   const css = read("src/features/pages/pages.css");
   assert.match(css, /\.collectionHero\s*\{[^}]*background: transparent;/);
   assert.match(css, /\.collectionPage > \.artworkBackdrop/);
-  assert.match(css, /\.trackList \{[^}]*background: var\(--lt-surface-soft\)/);
+  assert.match(css, /\.trackList \{[^}]*background: transparent/);
   assert.match(read("src/features/covers/artwork-backdrop.css"), /color-mix\(in srgb, var\(--lt-surface\)/);
   assert.match(css, /color: var\(--accent-contrast, var\(--lt-bg\)\)/);
   assert.match(css, /\.collectionIconButton:hover:not\(:disabled\)[^{}]*\{[^}]*var\(--lt-border-strong\)/);

@@ -6,6 +6,7 @@ export type Playlist = {
   name: string;
   songIds: string[];
   createdAt: number;
+  coverArtwork?: string;
   /** Smart playlists fill `songIds` from these rules instead of by hand. */
   rules?: SmartRules;
 };

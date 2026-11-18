@@ -58,7 +58,7 @@ function mixState(state) {
   '../../shared/ui/LocaltifyViewUi':{LocaltifyStateCard:card},
   '../../shared/utils/format':{},
   '../search/search.utils':{},
-  '../playlists/components/PlaylistCoverCollage':{},
+  '../covers/MixCoverArtwork':{},
   '../home/useHomeDay':{useHomeDay:()=> '2026-11-18'},
   '../home/useHomeDailyMixes':{useHomeDailyMixes:day=>{assert.equal(day,'2026-11-18');return state;}},
   '../shell/appActions':{useAppActions:()=>({nav:{go(){}}})},

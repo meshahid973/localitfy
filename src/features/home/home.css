@@ -415,33 +415,6 @@
 .homeReleaseRail:focus-visible { outline: 2px solid var(--lt-accent); outline-offset: -2px; }
 .homeMixRail { grid-auto-columns: clamp(150px, 18cqi, 232px); }
 .homeMixRail .homeReleaseCard { align-content: start; }
-.homeReleaseCoverWrap.homeMixArtwork {
-  background: radial-gradient(ellipse at 87% 16%, var(--mix-c), transparent 70%),
-    radial-gradient(ellipse at 20% 80%, var(--mix-b), transparent 65%), var(--mix-a);
-  color: #fff;
-}
-.homeMixArtworkNumber {
-  position: absolute;
-  top: 10%;
-  left: 9%;
-  font-size: clamp(12px, 1.3cqi, 18px);
-  font-weight: 650;
-  font-variant-numeric: tabular-nums;
-}
-.homeMixArtworkName {
-  position: absolute;
-  inset-inline: 9%;
-  bottom: 12%;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  overflow: hidden;
-  overflow-wrap: anywhere;
-  font-size: clamp(19px, 2cqi, 29px);
-  font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -.035em;
-}
 .homeReleaseCard { display:grid; gap:8px; text-align:left; }
 .homeReleaseCoverWrap {
   position:relative;

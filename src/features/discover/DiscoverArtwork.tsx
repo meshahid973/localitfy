@@ -32,19 +32,35 @@ function cachedArtwork(key: string) {
   cache.set(key, hit);
   return hit.value;
 }
-const safeCover = (value?: string) => value && (/^https:\/\/coverartarchive\.org\/(release|release-group)\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/front-250$/i.test(value) || (/^https:\/\/(?:lastfm\.freetls\.fastly\.net|lastfm-img2\.akamaized\.net)\/i\/u\/(?:[0-9]+x[0-9]+|[0-9]+s)\/[a-f0-9]{32}\.(?:png|jpe?g|webp)$/i.test(value) && !/2a96cbd8b46e442fc41c2b86b821562f|4128a6eb29f94943c9d206c08e625904/i.test(value))) ? value : undefined;
+const audioDbCover = /^https:\/\/(?:www\.|r2\.)?theaudiodb\.com\/images\/media\/album\/thumb\/[a-z0-9_-]+\.(?:jpg|jpeg|png)(?:\/(?:small|medium))?$/i;
+const safeCover = (value?: string) => value && (audioDbCover.test(value) || /^https:\/\/coverartarchive\.org\/(release|release-group)\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/front-250$/i.test(value) || (/^https:\/\/(?:lastfm\.freetls\.fastly\.net|lastfm-img2\.akamaized\.net)\/i\/u\/(?:[0-9]+x[0-9]+|[0-9]+s)\/[a-f0-9]{32}\.(?:png|jpe?g|webp)$/i.test(value) && !/2a96cbd8b46e442fc41c2b86b821562f|4128a6eb29f94943c9d206c08e625904/i.test(value))) ? value : undefined;
 export function DiscoverCover({ title, artist, artwork, lookup = false, person = false }: {
   title: string; artist: string; artwork?: DiscoverArtwork; lookup?: boolean; person?: boolean;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    if (!ref.current) return;
+    if (typeof IntersectionObserver === "undefined") { setNear(true); return; }
+    const observer = new IntersectionObserver(entries => { if(entries.some(entry=>entry.isIntersecting)){setNear(true);observer.disconnect();} },{rootMargin:"160px"});
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
   const key = JSON.stringify([title, artist]);
   const [resolved, setResolved] = useState<{ key: string; value: DiscoverArtwork }>();
+  const [loaded, setLoaded] = useState<{key:string; url:string}>();
   const [failure, setFailure] = useState<{key:string; urls:string[]}>({key:"",urls:[]});
   const cover = resolved?.key === key ? resolved.value : undefined;
   const failed = failure.key === key ? failure.urls : [];
   const directUrls = [artwork?.coverUrl, artwork?.fallbackCoverUrl, ...(artwork?.coverAlternatives ?? []).slice(0,6)].map(safeCover).filter(Boolean);
   const src = [...directUrls, safeCover(cover?.coverUrl), safeCover(cover?.fallbackCoverUrl), ...(cover?.coverAlternatives ?? []).slice(0,6).map(safeCover)].find(url => url && !failed.includes(url));
   const needsLookup = lookup && !directUrls.some(url => url && !failed.includes(url));
+  const imageReady = Boolean(src && loaded?.key === key && loaded.url === src);
+  useEffect(() => {
+    if (!near || !src || imageReady) return;
+    const timer = window.setTimeout(() => setFailure(current => ({key,urls:[...new Set([...(current.key === key ? current.urls : []),src])]})), 12000);
+    return () => window.clearTimeout(timer);
+  }, [src, key, imageReady, near]);
   useEffect(() => {
     if (!needsLookup || !artist || !title || !ref.current) return;
     let live = true, requested = false;
@@ -87,7 +103,9 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
     return () => { live = false; observer.disconnect(); stop(); };
   }, [key, title, artist, needsLookup]);
   return <span ref={ref} className="discoverCover" aria-hidden="true">
-    {src ? <img key={src} src={src} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer"
-      onError={() => setFailure(current => ({key,urls:[...(current.key === key ? current.urls : []),src]}))} /> : person ? <UserRound size={24} /> : <Disc3 size={24} />}
+    {!imageReady ? (person ? <UserRound size={24} /> : <Disc3 size={24} />) : null}
+    {near && src ? <img key={src} src={src} alt="" loading="eager" decoding="async" referrerPolicy="no-referrer" data-ready={imageReady}
+      onLoad={() => setLoaded({key,url:src})}
+      onError={() => setFailure(current => ({key,urls:[...(current.key === key ? current.urls : []),src]}))} /> : null}
   </span>;
 }

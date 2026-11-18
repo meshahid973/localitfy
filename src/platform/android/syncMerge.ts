@@ -24,7 +24,7 @@ export type SyncSongFields = {
 /** likedAt: when the like was tapped, on the Mac's clock, so the newest tap on either device wins. */
 export type SongChange = Partial<Pick<SyncSongFields, EditableField>> & { playCountDelta?: number; lastPlayed?: string; likedAt?: number };
 
-export type SyncPlaylist = { id: string; name: string; songIds: string[]; createdAt: number; rules?: unknown };
+export type SyncPlaylist = { id: string; name: string; songIds: string[]; createdAt: number; rules?: unknown; coverArtwork?: string };
 
 const time = (value?: string | null) => (value ? Date.parse(value) || 0 : 0);
 
@@ -47,7 +47,7 @@ export function phoneSongChanges(base: Map<string, SyncSongFields>, phone: Itera
 }
 
 function samePlaylist(a: SyncPlaylist, b: SyncPlaylist) {
-  return a.name === b.name && JSON.stringify(a.rules ?? null) === JSON.stringify(b.rules ?? null) &&
+  return a.name === b.name && (a.coverArtwork || "") === (b.coverArtwork || "") && JSON.stringify(a.rules ?? null) === JSON.stringify(b.rules ?? null) &&
     a.songIds.length === b.songIds.length && a.songIds.every((id, index) => id === b.songIds[index]);
 }
 
@@ -99,6 +99,7 @@ export function phonePlaylistChanges(base: SyncPlaylist[], mac: SyncPlaylist[], 
       ...m,
       name: p.name !== b.name ? p.name : m.name,
       ...(rulesChanged ? { rules: p.rules } : {}),
+      ...((p.coverArtwork || "") !== (b.coverArtwork || "") ? { coverArtwork: p.coverArtwork } : {}),
       songIds: mergeSongIds(b.songIds, m.songIds, p.songIds)
     });
   }

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import type { Song } from "../library/song.types";
 import type { DailyMix, DailyMixesResult } from "./analysis.types";
-import PlaylistCoverCollage from "../playlists/components/PlaylistCoverCollage";
+import { MixCoverArtwork } from "../covers/MixCoverArtwork";
 import { CollectionLoading } from "../../shared/ui/CollectionLoading";
 import { MediaCard } from "../../shared/ui/MediaCard";
 import { MetaDividerDot } from "../../shared/ui/LocaltifyViewUi";
@@ -81,7 +81,7 @@ function MixCard({ mix, songsById }: { mix: DailyMix; songsById: Map<string, Son
     <MediaCard className="playlistShelfCard dailyMixCard" coverClassName="mediaCardPlayCentered" openLabel={`open ${mix.name}`} playLabel={`play ${mix.name}`}
       onOpen={() => actions.openCollection(target)} onPlay={() => actions.playCollection(target)}
       onContextMenu={(event) => actions.openCollectionMenu(event, target)}
-      cover={<PlaylistCoverCollage songs={songs} />}>
+      cover={<MixCoverArtwork songs={songs} />}>
       <span className="playlistShelfMeta">
         <strong>{mix.name}</strong>
         <span className="dailyMixArtists">{artists.slice(0, ARTISTS_SHOWN).join(", ") || "your analyzed music"}{artists.length > ARTISTS_SHOWN ? " and more" : ""}</span>

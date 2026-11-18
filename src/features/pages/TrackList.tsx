@@ -43,7 +43,7 @@ export default function TrackList({ songs, currentId, isPlaying, playFrom, toggl
     const credits = splitArtistCredits(song.artist);
     const shown = hidden && credits.length > 1 ? credits.filter((name) => name.toLocaleLowerCase() !== hidden) : credits;
     return (
-      <div key={song.id} role="listitem" aria-posinset={index + 1} aria-setsize={songs.length} className={`trackRow ${active ? "active" : ""} ${active && isPlaying ? "playing" : ""} ${missing ? "missing" : ""}`}
+      <div key={song.id} role="listitem" aria-posinset={index + 1} aria-setsize={songs.length} aria-current={active ? "true" : undefined} className={`trackRow ${active ? "active" : ""} ${active && isPlaying ? "playing" : ""} ${missing ? "missing" : ""}`}
         title={missing ? "Local audio file missing" : undefined}
         onClick={() => { if (!missing) void playFrom(song.id); }}
         onContextMenu={(event) => void openSongMenu(event, song)}>
@@ -52,7 +52,7 @@ export default function TrackList({ songs, currentId, isPlaying, playFrom, toggl
           <span className="trackRowNumber">{active && isPlaying ? <PlayingBarsIcon /> : index + 1}</span>
           <Play className="trackRowPlayIcon" size={13} fill="currentColor" aria-hidden="true" />
         </button>
-        {showCover ? <Cover song={song} className="trackRowCover" /> : null}
+        {showCover ? <Cover song={song} className="trackRowCover" preferThumbnail /> : null}
         <span className="trackRowTitle">
           <strong title={song.title}>{prettyTitle(song.title, 10)}</strong>
           <small>

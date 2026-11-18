@@ -160,7 +160,7 @@ export class PhoneLibrary {
   }
 
   savePlaylists(playlists: SyncPlaylist[]) {
-    this.playlists = playlists.map(({ id, name, songIds, createdAt, rules }) => ({ id, name, songIds: [...songIds], createdAt, ...(rules ? { rules } : {}) }));
+    this.playlists = playlists.map(({ id, name, songIds, createdAt, rules, coverArtwork }) => ({ id, name, songIds: [...songIds], createdAt, ...(rules ? { rules } : {}), ...(coverArtwork ? { coverArtwork } : {}) }));
     this.revision += 1;
     void this.save(["playlists"]);
     return this.playlists;

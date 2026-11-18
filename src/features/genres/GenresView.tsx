@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Cover } from "../covers/Cover";
+import { CollectionArtwork } from "../covers/CollectionArtwork";
 import type { Song } from "../library/song.types";
 import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
 import { MediaCard } from "../../shared/ui/MediaCard";
@@ -71,7 +71,7 @@ export default function GenresView({ songs }: GenresViewProps) {
                 <MediaCard key={genre.id} className="collectionBrowseCard genreCard" openLabel={`open ${genre.name}`} playLabel={`play ${genre.name}`}
                   onOpen={() => actions.openCollection(target)} onPlay={() => actions.playCollection(target)}
                   onContextMenu={(event) => actions.openCollectionMenu(event, target)}
-                  cover={<Cover song={genre.coverSong} className="collectionBrowseCardCover genreCardCover" />}>
+                  cover={<CollectionArtwork id={`genre:${genre.id}`} name={genre.name} songs={genre.songs} className="collectionBrowseCardCover genreCardCover" />}>
                   <span>
                     <strong title={genre.name}>{prettyMeta(genre.name)}</strong>
                     <small>{genre.songs.length} track{genre.songs.length === 1 ? "" : "s"} · {genre.artistCount} artist{genre.artistCount === 1 ? "" : "s"}{sortMode === "plays" ? ` · ${genre.playCount} play${genre.playCount === 1 ? "" : "s"}` : ""}</small>

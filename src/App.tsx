@@ -623,6 +623,7 @@ function MainModeApp() {
     startRenamePlaylist,
     cancelRenamePlaylist,
     savePlaylistRename,
+    setPlaylistArtwork,
     duplicatePlaylist,
     openPlaylistPicker: openPlaylistPickerCore,
     addSongToPlaylist,
@@ -7386,6 +7387,7 @@ function MainModeApp() {
       renamingPlaylistName,
 
       savePlaylistRename,
+      setPlaylistArtwork,
       selectPlaylistSongAction,
       selectedPlaylist,
       selectedPlaylistDuration,
@@ -7425,7 +7427,7 @@ function MainModeApp() {
       randomizeMissingCovers: randomizeMissingCoversAction
     },
     discover: {
-      settings, updateSetting, notForMe,
+      settings, updateSetting, notForMe, songs, selectLocalSong: (id: string) => void selectSong(id, true),
       sendToDownloads: (tracks: SpotifyTrack[]) => {
         setSpotifyTracks((current) => [...tracks, ...current.filter((track) => !tracks.some((next) => next.id === track.id))]);
         setSpotifySelectedIds(new Set(tracks.map((track) => track.id)));
