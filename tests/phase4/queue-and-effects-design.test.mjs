@@ -46,7 +46,7 @@ test("queue uses live player height and keeps desktop and Android trigger semant
     assert.match(source, /aria-expanded=\{queuePanelOpen\}/);
     assert.match(source, /aria-controls=\{queuePanelOpen \? "localtify-play-queue" : undefined\}/);
   }
-  assert.match(queue, /id="localtify-play-queue" className="queuePanel"/);
+  assert.match(queue, /id="localtify-play-queue" className="queuePanel ltOverlaySurface"/);
   assert.match(queue, /target\.closest\("\[data-queue-trigger\]/);
   assert.match(queue, /openerRef\.current\?\.isConnected/);
   assert.match(css, /bottom: calc\(var\(--player-size-live, var\(--player-size, 108px\)\) \+ 14px\)/);
