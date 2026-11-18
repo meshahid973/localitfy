@@ -41,14 +41,14 @@ export function useNavigationHistory(view: View, changeView: (view: View, source
   }, [contentRef]);
 
   const go = useCallback((nextView: View, source: "nav" | "unknown" = "nav") => {
-    const destination = nextView === "albums" ? "library" : nextView;
+    const destination = String(nextView) === "albums" ? "library" : nextView;
     push(destination, null);
     changeView(destination, source);
   }, [push, changeView]);
 
   const open = useCallback((detail: PageDetail) => {
     if (!detail.id) return;
-    if (detail.kind === "album") { go("library", "unknown"); return; }
+    if (String(detail.kind) === "album") { go("library", "unknown"); return; }
     push(DETAIL_VIEWS[detail.kind], detail);
     changeView(DETAIL_VIEWS[detail.kind], "unknown");
   }, [push, changeView, go]);

@@ -507,8 +507,8 @@ function MainModeApp() {
 
   function changeView(nextView: View, source: "nav" | "onboarding" | "settings" | "unknown" = "nav") {
     setLyricsOpen(false);
-    // Compatibility for stale links from older versions; Albums no longer has a route.
-    if (nextView === "albums") nextView = "library";
+    // Old runtime callers may still provide the retired album destination.
+    if (String(nextView) === "albums") nextView = "library";
     if (view === nextView) return;
 
     if (viewSwitchTimerRef.current !== null) {

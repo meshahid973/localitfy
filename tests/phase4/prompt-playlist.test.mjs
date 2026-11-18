@@ -166,7 +166,7 @@ test("playlist prompt audio actions are passed from the player, not DailyMixesSh
   assert.match(view, /playSongs=\{props\.playSongs\}/);
   assert.match(view, /selectSong=\{props\.selectSong\}/);
   assert.doesNotMatch(view, /props\.dailyMixes\.(?:playSongs|selectSong)/);
-  assert.match(app, /playSongs: \(ids: string\[\], label: string\) => playAlbumSongs\(ids, label\)/);
+  assert.match(app, /playSongs: \(ids: string\[\], label: string\) => playCollectionSongs\(ids, label\)/);
 });
 
 

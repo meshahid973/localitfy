@@ -20,25 +20,25 @@ const plain = (value) => JSON.parse(JSON.stringify(value));
 test("history pushes pages, drops forward entries and remembers where each page was scrolled", () => {
   const { pushHistory, stepHistory } = loadHistory();
   let state = { entries: [{ view: "home", detail: null, scrollTop: 0 }], index: 0 };
-  state = pushHistory(state, "albums", null, 120);
-  state = pushHistory(state, "albums", { kind: "album", id: "a1" }, 640);
+  state = pushHistory(state, "genres", null, 120);
+  state = pushHistory(state, "genres", { kind: "genre", id: "ambient" }, 640);
   assert.deepEqual(plain(state.entries.map((entry) => entry.scrollTop)), [120, 640, 0]);
-  assert.equal(pushHistory(state, "albums", { kind: "album", id: "a1" }, 0), state, "opening the page you are on adds nothing");
+  assert.equal(pushHistory(state, "genres", { kind: "genre", id: "ambient" }, 0), state, "opening the page you are on adds nothing");
 
   state = stepHistory(state, -1, 300);
   assert.equal(state.index, 1);
   assert.equal(state.entries[1].scrollTop, 640, "back returns to the grid where it was left");
-  assert.equal(state.entries[2].scrollTop, 300, "and the album page keeps its own spot for forward");
+  assert.equal(state.entries[2].scrollTop, 300, "and the genre page keeps its own spot for forward");
   assert.equal(stepHistory(stepHistory(state, -1, 0), -1, 0).index, 0, "back stops at the first entry");
 
   state = pushHistory(state, "artists", { kind: "artist", id: "brakence" }, 640);
-  assert.deepEqual(plain(state.entries.map((entry) => entry.detail?.id ?? entry.view)), ["home", "albums", "brakence"], "a new page replaces forward history");
+  assert.deepEqual(plain(state.entries.map((entry) => entry.detail?.id ?? entry.view)), ["home", "genres", "brakence"], "a new page replaces forward history");
   assert.equal(stepHistory(state, 1, 0), state, "nothing to go forward to");
 });
 
 test("detail pages live inside their section and artist ids ignore case", () => {
   const { DETAIL_VIEWS, artistDetailId } = loadHistory();
-  assert.deepEqual(plain(DETAIL_VIEWS), { album: "albums", artist: "artists", genre: "genres", playlist: "playlists", mix: "playlists" });
+  assert.deepEqual(plain(DETAIL_VIEWS), { artist: "artists", genre: "genres", playlist: "playlists", mix: "playlists" });
   assert.equal(artistDetailId("  Brakence "), "brakence");
 });
 

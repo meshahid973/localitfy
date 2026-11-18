@@ -320,15 +320,15 @@ test("public catalog search requires opt-in but never a Last.fm key", async () =
   assert.equal(calls.length, 0);
   settings.discoverEnabled = true;
   assert.equal((await search("invalid", "Track")).status, "error");
-  assert.equal((await search("album", "a")).status, "error");
+  assert.equal((await search("album", "Track")).status, "error");
   assert.equal((await search("artist", "x".repeat(161))).status, "error");
-  for (const [kind, endpoint] of [["recording", "recording"], ["artist", "artist"], ["album", "release-group"]]) {
+  for (const [kind, endpoint] of [["recording", "recording"], ["artist", "artist"]]) {
     const result = await search(kind, " Track ");
     assert.equal(result.status, "catalog");
     assert.equal(result.items.length, 1);
     assert.equal(result.items[0].url, "https://musicbrainz.org/" + endpoint + "/" + id);
   }
-  assert.deepEqual(calls, [["recording", "Track"], ["artist", "Track"], ["album", "Track"]]);
+  assert.deepEqual(calls, [["recording", "Track"], ["artist", "Track"]]);
 });
 test("catalog searches share an in-flight request and drop responses after opt-out", async () => {
   const handlers = new Map();

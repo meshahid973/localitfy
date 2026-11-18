@@ -93,7 +93,7 @@ test("now-playing context prefers the playlist, then the started source, then th
   assert.ok(playlistAt > 0 && playlistAt < sourceAt && sourceAt < libraryAt);
 });
 
-test("repeat-all loops the album/artist/genre a queue was started from", () => {
+test("repeat-all loops the artist/genre a queue was started from", () => {
   const helpers = read("src/features/player/playbackSource.ts");
   const loop = helpers.slice(helpers.indexOf("export function getSourceLoopRestart"), helpers.indexOf("export function getSourcePreviousStep"));
   assert.match(loop, /repeatMode !== "all" \|\| !source \|\| inPlaylist/);
@@ -106,7 +106,7 @@ test("repeat-all loops the album/artist/genre a queue was started from", () => {
   assert.match(app, /target\.kind === "source-loop"\) \{\s*setPlayQueue\(target\.rest\);/);
   const shell = read("src/features/shell/useCollectionActions.ts");
   assert.match(shell, /target\.kind === "artist" \|\| target\.kind === "genre" \? playbackSourceRef\(target\.kind, target\.title\)/);
-  assert.match(app, /collections: \{ playSongs: playAlbumSongs,/);
+  assert.match(app, /collections: \{ playSongs: playCollectionSongs,/);
   // Leaving the context through a normal song pick stops the loop.
   assert.match(app, /else if \(!playbackContext\?\.keepSource && !playbackContext\?\.keepPlaylistContext\) \{\s*setPlaybackSource\(null\);/);
 });

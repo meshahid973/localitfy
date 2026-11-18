@@ -6,7 +6,7 @@ import { artistDetailId } from "./useNavigationHistory";
 
 /** Anything that opens as a page and plays as a whole: an album, artist, genre, playlist or daily mix. */
 export type CollectionTarget = {
-  kind: Exclude<PageDetail["kind"], "album">;
+  kind: PageDetail["kind"];
   id: string;
   title: string;
   subtitle: string;
