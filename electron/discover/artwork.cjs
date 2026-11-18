@@ -23,7 +23,7 @@ function lastfmArtwork(track,title,artist) {
   const coverUrl = images.slice().reverse().map(i=>i?.["#text"]).find(value=>typeof value==="string" && /^https:\/\/(?:lastfm\.freetls\.fastly\.net|lastfm-img2\.akamaized\.net)\/i\/u\/(?:[0-9]+x[0-9]+|[0-9]+s)\/[a-f0-9]{32}\.(?:png|jpe?g|webp)$/i.test(value) && !/2a96cbd8b46e442fc41c2b86b821562f|4128a6eb29f94943c9d206c08e625904/i.test(value));
   return coverUrl ? {coverUrl} : {};
 }
-function createArtworkLookup(client,now=Date.now,trackInfo) {
+function createArtworkLookup(client,now=Date.now,trackInfo,lookupAudioDb) {
   const cache=new Map(), pending=new Map();
   return async (title,artist) => {
     const key=JSON.stringify([norm(title),norm(artist)]), hit=cache.get(key);
@@ -37,7 +37,12 @@ function createArtworkLookup(client,now=Date.now,trackInfo) {
     const task=Promise.resolve().then(async()=>{
       const track = trackInfo ? await trackInfo(title,artist).catch(()=>null) : null;
       const primary = lastfmArtwork(track,title,artist);
-      if (primary.coverUrl) return primary;
+      const verified = norm(track?.name)===norm(title)&&norm(track?.artist?.name)===norm(artist);
+      const release = verified && validId(track?.album?.mbid) ? url("release",track.album.mbid) : undefined;
+      if (primary.coverUrl && !lookupAudioDb) return release ? {...primary,fallbackCoverUrl:release} : primary;
+      const alternate = lookupAudioDb ? await lookupAudioDb(title,artist).catch(()=>({})) : {};
+      const known = [primary.coverUrl,alternate.coverUrl,release].filter(Boolean);
+      if (known.length) return {coverUrl:known[0],fallbackCoverUrl:known[1],coverAlternatives:known};
       if (!client?.searchRecordings) return {};
       const items=await client.searchRecordings(title,artist,{background:true});
       const exact=(Array.isArray(items)?items:[]).filter(item=>norm(item?.title)===norm(title)&&norm(credit(item))===norm(artist));

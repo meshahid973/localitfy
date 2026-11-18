@@ -93,7 +93,9 @@
 .discoverSongList li { display:flex; align-items:center; gap:10px; min-width:0; padding:7px 8px; border-radius:var(--lt-radius-item); }
 .discoverSongList li:hover, .discoverSongList li:focus-within { background:var(--lt-fill-hover); }
 .discoverCover { display:grid; place-items:center; flex:0 0 48px; width:48px; aspect-ratio:1; overflow:hidden; border-radius:var(--lt-radius-item); background:var(--lt-surface-soft); color:var(--lt-faint); }
-.discoverCover img { display:block; width:100%; height:100%; object-fit:cover; }
+.discoverCover img { grid-area:1/1; display:block; width:100%; height:100%; object-fit:cover; }
+.discoverCover > svg { grid-area:1/1; }
+.discoverCover img[data-ready="false"] { visibility:hidden; }
 .discoverSongText { flex:1; min-width:0; display:grid; gap:3px; }
 .discoverSongText :is(strong,small) { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .discoverSongText strong { font-size:14px; font-weight:550; }

@@ -37,7 +37,7 @@ function normalizeCatalog(kind, items) {
 }
 
 /** Public catalog needs only opt-in; Last.fm personalized results require a valid key. */
-function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile, fetch, musicBrainzClient, searchStore, now = Date.now }) {
+function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile, fetch, musicBrainzClient, searchStore, lookupAudioDb, now = Date.now }) {
   let saved = null;
   let running = null;
   let catalogRunning = null;
@@ -52,7 +52,7 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
     }
     const client = artworkClient;
     try { return await client.trackInfo(title, artist); } finally { client.flush(); }
-  });
+  }, lookupAudioDb ? (title, artist) => getSettings().discoverEnabled === true ? lookupAudioDb(title, artist) : Promise.resolve({}) : undefined);
   router.handle("discover:get", async (_event, payload = {}) => {
     const settings = getSettings();
     if (settings.discoverEnabled !== true) return { status: "off" };
