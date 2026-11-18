@@ -1,6 +1,6 @@
 /** `time` is in seconds; plain (unsynced) lines use -1. */
 export type LyricsWord = { time: number; text: string };
-export type LyricsLine = { time: number; text: string; words?: LyricsWord[] };
+export type LyricsLine = { time: number; text: string; words?: LyricsWord[]; romanization?: string; translation?: string };
 
 export type LyricsResult = {
   status: "synced" | "plain" | "instrumental" | "missing" | "offline" | "disabled" | "error";

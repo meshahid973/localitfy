@@ -182,6 +182,25 @@ function createLyricsService({
     } catch { inventory = null; /* cache is best effort */ }
   }
 
+  async function attachCompanions(filePath, result) {
+    if (!filePath || result.status !== "synced") return result;
+    const base = filePath.slice(0, filePath.length - path.extname(filePath).length);
+    const lines = result.lines.map(line => ({ ...line }));
+    for (const [suffix, field] of [[".romanized.lrc", "romanization"], [".translation.lrc", "translation"]]) {
+      try {
+        const file = base + suffix;
+        if ((await fs.stat(file)).size > 512 * 1024) continue;
+        const companion = parseLrc(await fs.readFile(file, "utf8"));
+        const times = new Map(companion.filter(line => line.text).map(line => [Math.round(line.time * 1000), line.text]));
+        for (const line of lines) {
+          const value = times.get(Math.round(line.time * 1000));
+          if (line.text && value && value !== line.text) line[field] = value;
+        }
+      } catch { /* optional local companion */ }
+    }
+    return { ...result, lines };
+  }
+
   async function readSidecar(filePath) {
     if (!filePath) return null;
     const base = filePath.slice(0, filePath.length - path.extname(filePath).length);
@@ -287,10 +306,10 @@ function createLyricsService({
   async function get(song, { online = true, refresh = false, signal } = {}) {
     if (!song) return { status: "missing", source: "none", lines: [] };
     const sidecar = await readSidecar(song.filePath);
-    if (sidecar) return sidecar;
+    if (sidecar) return attachCompanions(song.filePath, sidecar);
     signal?.throwIfAborted();
     const embedded = await waitFor(Promise.resolve(readEmbedded(song.filePath)), signal);
-    if (embedded?.lines?.length) return embedded;
+    if (embedded?.lines?.length) return attachCompanions(song.filePath, embedded);
     // v2 invalidates earlier false misses caused by strict search/duration filtering.
     const key = crypto.createHash("sha1")
       .update(["v3", cleanTitle(song.title), primaryArtist(song.artist), cleanTitle(song.album), Math.round(Number(song.duration) || 0)].join("\u0000").toLowerCase())
@@ -299,7 +318,7 @@ function createLyricsService({
     await cacheTail;
     if ((!refresh || !online) && generation === cacheGeneration) {
       const cached = await readCache(key);
-      if (cached && generation === cacheGeneration && (online || cached.status !== "missing")) return cached;
+      if (cached && generation === cacheGeneration && (online || cached.status !== "missing")) return attachCompanions(song.filePath, cached);
     }
     if (!online) return { status: "offline", source: "none", lines: [] };
     signal?.throwIfAborted();
@@ -316,7 +335,7 @@ function createLyricsService({
       entry = next;
     }
     entry.consumers++;
-    try { return await waitFor(entry.work, signal); }
+    try { return await attachCompanions(song.filePath, await waitFor(entry.work, signal)); }
     finally {
       entry.consumers--;
       if (!entry.consumers && pending.get(pendingKey) === entry) entry.controller.abort();
