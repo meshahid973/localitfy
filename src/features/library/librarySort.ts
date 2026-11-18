@@ -1,11 +1,20 @@
 import type { Song } from "./song.types";
 
-export type LibrarySortMode = "library" | "artist";
+export type LibrarySortMode = "library" | "artist" | "title" | "recent" | "plays";
 
 const librarySortCollator = new Intl.Collator(undefined, { sensitivity: "base", numeric: true });
 
 // Sorting is a view over the saved library order; it never rewrites that order.
-export function sortLibrarySongs<T extends Pick<Song, "artist" | "album" | "title">>(list: T[], mode: LibrarySortMode): T[] {
+export function sortLibrarySongs<T extends Pick<Song, "artist" | "album" | "title"> & Partial<Pick<Song, "dateAdded" | "playCount">>>(list: T[], mode: LibrarySortMode): T[] {
+  if (mode === "library") return list;
+  const title = (a: T, b: T) => librarySortCollator.compare(a.title || "", b.title || "");
+  if (mode === "title") return [...list].sort(title);
+  if (mode === "plays") return [...list].sort((a,b) => (Number(b.playCount) || 0) - (Number(a.playCount) || 0) || title(a,b));
+  if (mode === "recent") {
+    // Parse dates once, not once per comparison on a large collection.
+    return list.map(song => ({song, at: Date.parse(song.dateAdded || "") || 0}))
+      .sort((a,b) => b.at-a.at || title(a.song,b.song)).map(entry => entry.song);
+  }
   if (mode !== "artist") return list;
   return [...list].sort((a, b) =>
     librarySortCollator.compare(String(a.artist || "unknown artist"), String(b.artist || "unknown artist"))

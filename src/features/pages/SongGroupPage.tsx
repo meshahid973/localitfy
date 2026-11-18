@@ -52,10 +52,15 @@ export function GenrePage(props: SongGroupPageProps) {
 function SongGroupBody({ kind, name, members, loading, currentId, isPlaying, toggleLike, openPlaylistPicker, openSimilar }: SongGroupPageProps & { kind: "artist" | "genre"; name: string; members: Song[]; loading: boolean }) {
   const actions = useAppActions();
   const [showAll, setShowAll] = useState(false);
+  const [query, setQuery] = useState("");
   // Most played first once there is history; otherwise library order.
   const popular = useMemo(() => (members.some((song) => song.playCount > 0)
     ? [...members].sort((a, b) => (b.playCount || 0) - (a.playCount || 0)) : members), [members]);
 
+  const filtered = useMemo(() => {
+    const needle = query.trim().toLocaleLowerCase();
+    return needle ? popular.filter(song => [song.title, song.artist, song.album].some(value => (value || "").toLocaleLowerCase().includes(needle))) : popular;
+  }, [popular, query]);
   if (!name) {
     return (
       <section data-page-section={kind} className="collectionPage">
@@ -69,7 +74,7 @@ function SongGroupBody({ kind, name, members, loading, currentId, isPlaying, tog
   const target = kind === "artist" ? artistTarget(name, members) : genreTarget(name, members);
   const playable = playableIds(members);
   const duration = members.reduce((total, song) => total + Math.max(0, Number(song.duration) || 0), 0);
-  const shown = showAll ? popular : popular.slice(0, TOP_SONGS);
+  const shown = showAll || query.trim() ? filtered : filtered.slice(0, TOP_SONGS);
 
   return (
     <section data-page-section={kind} className="collectionPage songGroupPage" aria-label={`${name} ${kind}`}>
@@ -94,11 +99,16 @@ function SongGroupBody({ kind, name, members, loading, currentId, isPlaying, tog
       </CollectionHero>
 
       <section className="collectionSection" aria-label="songs">
-        <h2>{members.some((song) => song.playCount > 0) ? "Popular" : "Songs"}</h2>
+        <div className="collectionSectionHead">
+          <h2>{members.some((song) => song.playCount > 0) ? "Popular" : "Songs"}</h2>
+          <input className="pageHeaderSearch" type="search" aria-label="Search collection tracks" placeholder="Search tracks"
+            value={query} onChange={event => setQuery(event.currentTarget.value)} />
+        </div>
+        {!shown.length ? <p role="status">No matching tracks.</p> : null}
         <TrackList songs={shown} currentId={currentId} isPlaying={isPlaying} hideArtist={kind === "artist" ? name : undefined}
           playFrom={(songId) => actions.playCollection({ ...target, songs: popular }, { startId: songId })}
           toggleLike={toggleLike} openPlaylistPicker={openPlaylistPicker} />
-        {popular.length > TOP_SONGS ? (
+        {!query.trim() && popular.length > TOP_SONGS ? (
           <button className="collectionTextButton collectionShowAll" type="button" onClick={() => setShowAll((value) => !value)}>
             {showAll ? "show less" : `show all ${popular.length} songs`}
           </button>

@@ -59,3 +59,13 @@ test("top played songs match full stable sorting without changing the library", 
   assert.deepEqual(Array.from(exports.topPlayedSongs(songs, 0)), []);
   assert.deepEqual(Array.from(exports.topPlayedSongs(songs.slice(0, 3), 6), (song) => song.id), ["2", "1", "0"]);
 });
+
+test("collection sorts remain stable, preserve storage order and handle missing metadata", () => {
+ const sort=loadSortLibrarySongs();
+ const songs=[{id:"a",title:"Z",dateAdded:"2026-01-01",playCount:1},{id:"b",title:"A",dateAdded:"2026-03-01",playCount:9},{id:"c",title:"B",dateAdded:"invalid"}];
+ const ids=list=>Array.from(list,s=>s.id);
+ assert.deepEqual(ids(sort(songs,"title")),["b","c","a"]);
+ assert.deepEqual(ids(sort(songs,"recent")),["b","a","c"]);
+ assert.deepEqual(ids(sort(songs,"plays")),["b","a","c"]);
+ assert.deepEqual(ids(songs),["a","b","c"]);
+});

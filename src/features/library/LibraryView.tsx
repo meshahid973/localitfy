@@ -1,6 +1,6 @@
 import { isAndroidApp, computerName } from "../../app/platform";
 import "./library.css";
-import { lazy, Suspense, useState, type DragEventHandler } from "react";
+import { lazy, Suspense, useMemo, useState, type DragEventHandler } from "react";
 import { VirtualLibrarySongCards, VirtualSongRows, type VirtualSongRowsProps } from "./components/SongRows";
 import { Copy, FileWarning, FolderInput, ListMusic, Radio, Shuffle, Trash2, Grid2X2, List, Heart, Users } from "lucide-react";
 import type { SimilarSeedRequest } from "../analysis/similarSeed";
@@ -72,6 +72,7 @@ export default function LibraryView(props: LibraryViewProps) {
   } = props;
   const [duplicatesOpen, setDuplicatesOpen] = useState(false);
 
+  const likedCount = useMemo(() => songs.reduce((count, song) => count + Number(Boolean(song.liked)), 0), [songs]);
   const isLiked = view === "liked";
   const grid = settings.libraryRowStyle === "coverCards";
   const shownLabel = showingMissingFiles ? "missing files" : isLiked ? "tracks" : "all tracks";
@@ -93,7 +94,7 @@ export default function LibraryView(props: LibraryViewProps) {
           className="librarySort"
           ariaLabel="Sort songs"
           value={librarySortMode}
-          items={[{ value: "library", label: "library order" }, { value: "artist", label: "artist A–Z" }]}
+          items={[{ value: "library", label: "library order" }, { value: "artist", label: "artist A–Z" }, { value: "title", label: "title A–Z" }, { value: "recent", label: "recently added" }, { value: "plays", label: "most played" }]}
           onValueChange={setLibrarySortMode}
         />
         <div className="libraryViewMode" role="group" aria-label="Library layout">
@@ -111,7 +112,7 @@ export default function LibraryView(props: LibraryViewProps) {
           </>
         ) : (
           <button className="libraryAction" type="button" onClick={() => props.openSimilarSongs({ kind: "liked" })}
-            disabled={!songs.some((song) => song.liked)} title="Find songs in your library that sound like your liked songs">
+            disabled={!likedCount} title="Find songs in your library that sound like your liked songs">
             <ActionLabel icon={Radio}>more like these</ActionLabel>
           </button>
         )}
@@ -119,7 +120,7 @@ export default function LibraryView(props: LibraryViewProps) {
 
       {!isLiked && !query.trim() && !showingMissingFiles ? (
         <nav className="libraryCollectionShortcuts" aria-label="Your collections">
-          <button type="button" onClick={() => changeView("liked", "library-collection")}><span className="libraryCollectionArtwork" data-kind="liked"><Heart size={36} fill="currentColor" /></span><strong>Liked songs</strong><small>{songs.filter(song => song.liked).length} songs</small></button>
+          <button type="button" onClick={() => changeView("liked", "library-collection")}><span className="libraryCollectionArtwork" data-kind="liked"><Heart size={36} fill="currentColor" /></span><strong>Liked songs</strong><small>{likedCount} songs</small></button>
           <button type="button" onClick={() => changeView("artists", "library-collection")}><span className="libraryCollectionArtwork" data-kind="artists"><Users size={36}/></span><strong>Artists</strong><small>{libraryArtistCount} artists</small></button>
         </nav>
       ) : null}
