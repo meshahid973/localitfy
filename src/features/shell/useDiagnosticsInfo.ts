@@ -39,7 +39,7 @@ export function useDiagnosticsInfo({
   setDiagnosticsCopied
 }: DiagnosticsInfoOptions) {
   const diagnosticsInfo = useMemo(() => {
-    const themeLabel = settings.customThemeEnabled ? `${currentThemeName} + custom colors` : currentThemeName;
+    const themeLabel = currentThemeName;
     const discordStatus = settings.discordEnabled ? "enabled" : "disabled";
     const startupStatus = platformInfo.startupSettingSupported
       ? (settings.startWithWindows ? "enabled" : "disabled")
@@ -116,7 +116,6 @@ export function useDiagnosticsInfo({
     platformInfo.releaseLabel,
     platformInfo.startupSettingSupported,
     playlistCount,
-    settings.customThemeEnabled,
     settings.discordEnabled,
     settings.downloadFolder,
     settings.startWithWindows,

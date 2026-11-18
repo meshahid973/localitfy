@@ -36,15 +36,18 @@ export function Cover({ song, className, priority = "auto", preferThumbnail = fa
   const directCover = useFullCover ? getFullCoverUrl(song) : getCardCoverUrl(song);
   const savedCover = String(song?.coverPath || "").trim();
   const savedCoverSrc = getRendererSafeImageUrl(savedCover);
-  const fallbackAsset = song ? pixelArtForSong(song) : null;
-  const backupFallbackAsset = song ? nextPixelArtForSong(song) : null;
-  const fallbackSrc = runtimePixelArtImageUrl(fallbackAsset);
-  const backupFallbackSrc = runtimePixelArtImageUrl(backupFallbackAsset);
-
-  const sourceCandidates = [directCover, preferThumbnail ? getFullCoverUrl(song) : "", savedCoverSrc, fallbackSrc, backupFallbackSrc]
-    .map((source) => source.trim())
-    .filter(Boolean);
-  const coverSrc = sourceCandidates.find((source) => !failedSources[source]) || "";
+  const sourceCandidates = [directCover, preferThumbnail ? getFullCoverUrl(song) : "", savedCoverSrc];
+  let coverSrc = sourceCandidates.find(source => source && !failedSources[source]) || "";
+  // Most tracks have real art; avoid hashing metadata and resolving fallback
+  // assets unless the real cover is unavailable.
+  if (!coverSrc && song) {
+    const fallbackSrc = runtimePixelArtImageUrl(pixelArtForSong(song));
+    if (fallbackSrc && !failedSources[fallbackSrc]) coverSrc = fallbackSrc;
+    else {
+      const backup = runtimePixelArtImageUrl(nextPixelArtForSong(song));
+      if (backup && !failedSources[backup]) coverSrc = backup;
+    }
+  }
   const hasCover = Boolean(coverSrc);
   const imageReady = hasCover && loadedSrc === coverSrc;
   const fallback = song ? prettyTitle(song.title, 1).slice(0, 1) || "?" : "?";

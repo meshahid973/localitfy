@@ -19,6 +19,7 @@ function createAnalysisService({ root, ffmpegPath, repositories, powerMonitor, m
   let scanning = false;
   let generation = 0;
   let queue = [];
+  let queueHead = 0;
   let current = null;
   let completed = 0;
   let failed = 0;
@@ -36,6 +37,7 @@ function createAnalysisService({ root, ffmpegPath, repositories, powerMonitor, m
     clearTimeout(jobTimer);
     generation += 1;
     queue = [];
+    queueHead = 0;
     current = null;
     running = false;
     const previous = worker;
@@ -60,7 +62,7 @@ function createAnalysisService({ root, ffmpegPath, repositories, powerMonitor, m
     const currentRecords = records.filter((record) => record.modelId === MODEL.id && record.analyzerVersion === ANALYZER_VERSION);
     return { supported, enabled: enabled(), historyEnabled: repositories.settings.get().listeningHistoryEnabled !== false, allowOnBattery: allowOnBattery(),
       model: manager.metadata, download: manager.status(), promptModel: { ...textManager.metadata, download: textManager.status() }, paused, running, scanning,
-      queued: queue.length, currentSongId: current?.songId || null, completed, failed,
+      queued: queue.length - queueHead, currentSongId: current?.songId || null, completed, failed,
       analyzed: currentRecords.filter((record) => record.status === "ready").length,
       failures: currentRecords.filter((record) => record.status === "failed").length,
       onBattery: onBattery(), error };
@@ -68,8 +70,10 @@ function createAnalysisService({ root, ffmpegPath, repositories, powerMonitor, m
 
   function next() {
     if (paused || disposed || !enabled() || (onBattery() && !allowOnBattery()) || current || !worker) return;
-    const job = queue.shift();
+    const job = queue[queueHead];
     if (!job) {
+      queue = [];
+      queueHead = 0;
       running = false;
       const finished = worker;
       worker = null;
@@ -77,6 +81,9 @@ function createAnalysisService({ root, ffmpegPath, repositories, powerMonitor, m
       void closeWorker(finished);
       return;
     }
+    // Release consumed entries without shifting the remaining library on
+    // every track. A queue of N tracks now has linear dequeue cost.
+    queue[queueHead++] = null;
     current = job;
     running = true;
     jobTimer = setTimeout(() => {

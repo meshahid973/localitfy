@@ -28,7 +28,7 @@ test("Library uses a neutral hover without disabling drag indicators", () => {
   assert.match(library, /\.songRow:not\(\.songDropTarget\)::before/);
   assert.match(library, /color-mix\(in srgb, var\(--lt-text\) 4%, transparent\)/);
   assert.match(view, /<PageHeader title=\{isLiked/);
-  assert.match(library, /\.libraryStats \{\s*display: flex;\s*flex-wrap: wrap/);
+  assert.match(library, /\.libraryCollectionShortcuts\s*\{[\s\S]*?display: grid/);
   assert.match(view, /missingFileCount > 0 \?/);
   assert.doesNotMatch(view, /drag to reorder · right-click for more/);
 });

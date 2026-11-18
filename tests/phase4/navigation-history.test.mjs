@@ -20,25 +20,25 @@ const plain = (value) => JSON.parse(JSON.stringify(value));
 test("history pushes pages, drops forward entries and remembers where each page was scrolled", () => {
   const { pushHistory, stepHistory } = loadHistory();
   let state = { entries: [{ view: "home", detail: null, scrollTop: 0 }], index: 0 };
-  state = pushHistory(state, "albums", null, 120);
-  state = pushHistory(state, "albums", { kind: "album", id: "a1" }, 640);
+  state = pushHistory(state, "genres", null, 120);
+  state = pushHistory(state, "genres", { kind: "genre", id: "ambient" }, 640);
   assert.deepEqual(plain(state.entries.map((entry) => entry.scrollTop)), [120, 640, 0]);
-  assert.equal(pushHistory(state, "albums", { kind: "album", id: "a1" }, 0), state, "opening the page you are on adds nothing");
+  assert.equal(pushHistory(state, "genres", { kind: "genre", id: "ambient" }, 0), state, "opening the page you are on adds nothing");
 
   state = stepHistory(state, -1, 300);
   assert.equal(state.index, 1);
   assert.equal(state.entries[1].scrollTop, 640, "back returns to the grid where it was left");
-  assert.equal(state.entries[2].scrollTop, 300, "and the album page keeps its own spot for forward");
+  assert.equal(state.entries[2].scrollTop, 300, "and the genre page keeps its own spot for forward");
   assert.equal(stepHistory(stepHistory(state, -1, 0), -1, 0).index, 0, "back stops at the first entry");
 
   state = pushHistory(state, "artists", { kind: "artist", id: "brakence" }, 640);
-  assert.deepEqual(plain(state.entries.map((entry) => entry.detail?.id ?? entry.view)), ["home", "albums", "brakence"], "a new page replaces forward history");
+  assert.deepEqual(plain(state.entries.map((entry) => entry.detail?.id ?? entry.view)), ["home", "genres", "brakence"], "a new page replaces forward history");
   assert.equal(stepHistory(state, 1, 0), state, "nothing to go forward to");
 });
 
 test("detail pages live inside their section and artist ids ignore case", () => {
   const { DETAIL_VIEWS, artistDetailId } = loadHistory();
-  assert.deepEqual(plain(DETAIL_VIEWS), { album: "albums", artist: "artists", genre: "genres", playlist: "playlists", mix: "playlists" });
+  assert.deepEqual(plain(DETAIL_VIEWS), { artist: "artists", genre: "genres", playlist: "playlists", mix: "playlists" });
   assert.equal(artistDetailId("  Brakence "), "brakence");
 });
 
@@ -56,13 +56,12 @@ test("back and forward work from the title bar, mouse buttons, keyboard and the 
 
 test("collections open as pages in their section instead of drawers", () => {
   const shell = read("src/features/shell/AppShell.tsx");
-  assert.match(shell, /detail\?\.kind === "album"\s*\? <AlbumPage key=\{detail\.id\}/);
   assert.match(shell, /detail\?\.kind === "artist"\s*\? <ArtistPage/);
   assert.match(shell, /detail\?\.kind === "genre"\s*\? <GenrePage/);
   assert.match(shell, /detail\?\.kind === "mix"\s*\? <MixPage/);
   assert.match(shell, /detailPlaylistId=\{detail\?\.kind === "playlist" \? detail\.id : null\}/);
   assert.match(shell, /changeView=\{nav\.go\}/, "the sidebar goes through history too");
-  for (const file of ["src/features/albums/AlbumsView.tsx", "src/features/artists/ArtistsView.tsx", "src/features/genres/GenresView.tsx"]) {
+  for (const file of ["src/features/artists/ArtistsView.tsx", "src/features/genres/GenresView.tsx"]) {
     assert.doesNotMatch(read(file), /role="dialog"/, file);
   }
 });
@@ -70,9 +69,11 @@ test("collections open as pages in their section instead of drawers", () => {
 test("every collection card opens on click, plays from its button and has the shared menu", () => {
   const card = read("src/shared/ui/MediaCard.tsx");
   assert.match(card, /onClick=\{\(\) => void onOpen\(\)\}/);
+  assert.match(card, /<button className="mediaCardOpen" type="button" aria-label=\{openLabel\}/);
+  assert.doesNotMatch(card, /role="button"/);
   assert.match(card, /event\.stopPropagation\(\); void onPlay\(\);/, "the play button does not also open the page");
-  for (const file of ["src/features/albums/AlbumsView.tsx", "src/features/artists/ArtistsView.tsx", "src/features/genres/GenresView.tsx",
-    "src/features/home/HomeShelves.tsx", "src/features/home/HomeView.tsx", "src/features/playlists/PlaylistsView.tsx", "src/features/pages/AlbumShelf.tsx"]) {
+  for (const file of ["src/features/artists/ArtistsView.tsx", "src/features/genres/GenresView.tsx",
+    "src/features/home/HomeShelves.tsx", "src/features/playlists/PlaylistsView.tsx"]) {
     const source = read(file);
     assert.match(source, /<MediaCard/, file);
     assert.match(source, /actions\.openCollectionMenu\(event,/, file);
@@ -87,14 +88,12 @@ test("songs play on click and open the song menu on right-click everywhere", () 
   assert.match(list, /onClick=\{\(\) => \{ if \(!missing\) void playFrom\(song\.id\); \}\}/);
   assert.match(list, /onContextMenu=\{\(event\) => void openSongMenu\(event, song\)\}/);
   assert.match(list, /nav\.openArtistPage\(name\)/);
-  assert.match(list, /nav\.openAlbumPage\(albumId\)/);
 });
 
 test("playing a song on a page plays the rest of that page after it", () => {
   const app = read("src/App.tsx");
   assert.match(app, /const start = Math\.max\(0, order\.indexOf\(startId!\)\);/);
   assert.match(app, /setPlayQueue\(order\.slice\(start \+ 1\)\);/);
-  assert.match(read("src/features/pages/AlbumPage.tsx"), /actions\.playCollection\(target, \{ startId: songId \}\)/);
 });
 
 test("a two-finger swipe steps once; vertical scrolls, pinches and sideways-scrolling shelves do not", () => {

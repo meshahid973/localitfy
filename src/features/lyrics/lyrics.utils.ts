@@ -12,3 +12,10 @@ export function activeLyricIndex(lines: LyricsLine[], time: number): number {
   }
   return found;
 }
+
+/** Resync at least four times per second, but wake precisely near a lyric transition. */
+export function nextLyricCheckDelay(lines: readonly LyricsLine[], index: number, time: number, rate: number): number {
+  const next = lines[index + 1]?.time;
+  if (next === undefined || !Number.isFinite(time) || !Number.isFinite(rate) || rate <= 0) return 250;
+  return Math.max(16, Math.min(250, Math.ceil((next - time) * 1000 / rate)));
+}

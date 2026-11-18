@@ -1,9 +1,8 @@
-import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode, RefObject } from "react";
+import type { PointerEvent as ReactPointerEvent, RefObject } from "react";
 import type { HomeViewProps } from "../home/HomeView";
 import type { LibraryViewProps } from "../library/LibraryView";
 import type { ArtistsViewProps } from "../artists/ArtistsView";
 import type { GenresViewProps } from "../genres/GenresView";
-import type { AlbumsViewProps } from "../albums/AlbumsView";
 import type { PlaylistsViewProps } from "../playlists/PlaylistsView";
 import type { CoversViewProps } from "../covers/CoversView";
 import type { AnalyticsViewProps } from "../analytics/AnalyticsView";
@@ -14,7 +13,6 @@ import type { PlayerBarProps } from "../player/components/PlayerBar";
 import type { QueuePanelProps } from "../player/components/QueuePanel";
 import type { LyricsViewProps } from "../lyrics/LyricsView";
 import type { PlaybackAudioElementProps } from "../player/components/PlaybackAudioElement";
-import type { OnboardingProps } from "../../Onboarding";
 import type { SongContextMenuProps } from "../library/components/SongContextMenu";
 import type { SimilarSongsDialogProps } from "../analysis/SimilarSongsDialog";
 import type { SongEditorModalProps } from "../library/components/SongEditorModal";
@@ -40,9 +38,8 @@ export type ShellFrameContract = {
   themeMotionReady: boolean; showTopUpdateRibbon: boolean; isViewSwitching: boolean;
   heroMotion: "idle" | "expanding" | "compacting"; heroMotionAppClass: string; homeEntranceSettledClass: string;
   isAppBackgrounded: boolean; scrollBusyRef: RefObject<boolean>; themeSettling: boolean;
-  themePresetStyle: CSSProperties; animatedThemeVisualStyle: CSSProperties; customThemeStyle: CSSProperties;
   effectiveTheme: string; effectiveAmbient: boolean; effectiveCoverColorSyncMode: CoverColorSyncMode;
-  effectiveNotes: boolean; statusText: string; draggedSongTitle: string; showStarBackdrop: boolean;
+  effectiveNotes: boolean; statusText: string; draggedSongTitle: string;
 };
 
 export type ShellUpdateContract = {
@@ -56,14 +53,12 @@ export type ShellScreensaverContract = {
 };
 
 export type ShellEffectsContract = {
-  secretMode: SecretMode; secretBurst: number; secretToast: string; starParticleStyles: CSSProperties[];
+  secretMode: SecretMode; secretBurst: number; secretToast: string;
   appToast: AppToastState; importAnimation: ImportAnimationState;
 };
 
-export type ShellOnboardingContract = Omit<OnboardingProps, "appVersion"> & { open: boolean };
-
 export type ShellNavigationContract = {
-  effectiveSimpleMode: boolean; simpleModeView: ReactNode; view: View;
+  view: View;
   changeView: (view: View, source?: string) => unknown; importSongs: () => unknown;
   startSidebarResize: (event: ReactPointerEvent<HTMLButtonElement>) => unknown;
   contentRef: RefObject<HTMLElement | null>;
@@ -86,8 +81,8 @@ export type ShellModalContract = {
 
 export type AppShellProps = {
   frame: ShellFrameContract; updates: ShellUpdateContract; screensaver: ShellScreensaverContract;
-  effects: ShellEffectsContract; onboarding: ShellOnboardingContract; navigation: ShellNavigationContract;
-  home: HomeViewProps; library: LibraryViewProps; artists: ArtistsViewProps; genres: GenresViewProps; albums: AlbumsViewProps; playlists: PlaylistsViewProps;
+  effects: ShellEffectsContract; navigation: ShellNavigationContract;
+  home: HomeViewProps; library: LibraryViewProps; artists: ArtistsViewProps; genres: GenresViewProps; playlists: PlaylistsViewProps;
   covers: CoversViewProps; analytics: AnalyticsViewProps; discover: DiscoverViewProps; settingsView: SettingsViewProps;
   downloads: DownloadsViewProps; playerBar: PlayerBarProps; modals: ShellModalContract;
   playbackAudio: PlaybackAudioElementProps; collections: ShellCollectionsContract;

@@ -122,6 +122,14 @@ if (fs.existsSync(sharedUi) && /export\s+function\s+PlayerPlayPauseMorphIcon\b/.
 }
 
 const srcFiles = walk(path.join(root, "src")).filter((file) => [".ts", ".tsx", ".js", ".jsx"].includes(path.extname(file)));
+const modulePaths = new Map();
+for (const file of srcFiles) {
+  const relative = repoPath(file);
+  const key = relative.replace(/\.(?:tsx?|jsx?)$/, "").toLowerCase();
+  const previous = modulePaths.get(key);
+  if (previous) violations.push(`ambiguous case-insensitive module path: ${previous} | ${relative}`);
+  else modulePaths.set(key, relative);
+}
 for (const file of srcFiles) {
   const source = fs.readFileSync(file, "utf8");
   const relative = repoPath(file);

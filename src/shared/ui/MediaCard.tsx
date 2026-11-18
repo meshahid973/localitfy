@@ -1,9 +1,9 @@
-import type { HTMLAttributes, KeyboardEvent, ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import { Play } from "lucide-react";
 import "./media-card.css";
 
 export type MediaCardProps = Omit<HTMLAttributes<HTMLDivElement>, "onClick" | "children"> & {
-  /** Opens the album, artist, genre, playlist or mix page. */
+  /** Opens the artist, genre, playlist or mix page. */
   onOpen: () => unknown;
   /** Plays the whole collection without opening it. */
   onPlay?: () => unknown;
@@ -21,16 +21,12 @@ export type MediaCardProps = Omit<HTMLAttributes<HTMLDivElement>, "onClick" | "c
  * opens its menu. Each page keeps its own card look through className.
  */
 export function MediaCard({ onOpen, onPlay, openLabel, playLabel, cover, coverClassName = "", active = false, className = "", children, ...rest }: MediaCardProps) {
-  const openWithKeys = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.target !== event.currentTarget || (event.key !== "Enter" && event.key !== " ")) return;
-    event.preventDefault();
-    void onOpen();
-  };
   return (
-    <div {...rest} className={`mediaCard ${active ? "active" : ""} ${className}`} role="button" tabIndex={0} aria-label={openLabel}
-      onClick={() => void onOpen()} onKeyDown={openWithKeys}>
+    <div {...rest} className={`mediaCard ${active ? "active" : ""} ${className}`} onClick={() => void onOpen()}>
       <span className={`mediaCardCover ${coverClassName}`}>
         {cover}
+        <button className="mediaCardOpen" type="button" aria-label={openLabel}
+          onClick={(event) => { event.stopPropagation(); void onOpen(); }} />
         {onPlay ? (
           <button className="mediaCardPlay" type="button" aria-label={playLabel || "play"} title={playLabel || "play"}
             onClick={(event) => { event.stopPropagation(); void onPlay(); }}>

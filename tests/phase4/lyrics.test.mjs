@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import ts from "typescript";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
@@ -232,7 +233,8 @@ test("cache misses expire sooner, and the renderer never pins them for the whole
   assert.equal((await service.get(song)).status, "missing");
   assert.ok(calls > baseline, "recheck after miss TTL");
   const view = fs.readFileSync(path.join(root, "src/features/lyrics/LyricsView.tsx"), "utf8");
-  assert.match(view, /next.status === "synced" \|\| next.status === "plain" \|\| next.status === "instrumental"/);
+  assert.doesNotMatch(view, /sessionCache/);
+  assert.match(view, /requestGeneration.current === generation/);
 });
 
 test("skip invalid durations in exact metadata queries", async () => {
@@ -263,4 +265,40 @@ test("exact artist takes priority over a wrong-artist fallback with synced lyric
   ], { track: "Mayonaka No Door Stay With Me", artist: "Miki Matsubara", duration: 300 });
   assert.equal(result.status, "plain");
   assert.equal(result.lines[0].text, "Correct artist's lyrics");
+});
+
+test("lyrics schedule wakes at line boundaries, bounds clock drift and handles speed changes", () => {
+  const code = fs.readFileSync(path.join(root, "src/features/lyrics/lyrics.utils.ts"), "utf8");
+  const compiled = ts.transpileModule(code, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
+  const functions = {};
+  new Function("exports", compiled)(functions);
+  const lines = [{ time: 1, text: "one" }, { time: 3, text: "two" }, {time: 3, text: "duplicate"}];
+  assert.equal(functions.activeLyricIndex(lines, 0), -1);
+  assert.equal(functions.nextLyricCheckDelay(lines, -1, 0, 1), 250);
+  assert.equal(functions.nextLyricCheckDelay(lines, 0, 2.8, 2), 101);
+  assert.equal(functions.nextLyricCheckDelay(lines, 0, 2.999, 1), 16);
+  assert.equal(functions.activeLyricIndex(lines, 3), 2);
+  assert.equal(functions.nextLyricCheckDelay(lines, 2, 3, 1), 250);
+});
+
+test("disk lyrics cache is bounded and an in-flight lookup cannot resurrect a cleared cache", async () => {
+  const dir = tempDir();
+  try {
+    const { fetchImpl, calls } = fakeFetch({get:{duration:200,syncedLyrics:SYNCED}});
+    const service = createLyricsService({cacheDir:dir,userAgent:"test",fetchImpl,requestSpacingMs:0,maxCacheEntries:2});
+    for (const title of ["First", "Second", "Third"]) await service.get({...song,title});
+    assert.equal(fs.readdirSync(dir).filter(name=>name.endsWith(".json")).length,2);
+    await service.get({...song,title:"Third"});
+    assert.equal(calls.length,3);
+    let begin, finish;
+    const started = new Promise(resolve=>{begin=resolve});
+    const response = new Promise(resolve=>{finish=resolve});
+    const delayed = createLyricsService({cacheDir:path.join(dir,"delayed"),userAgent:"test",requestSpacingMs:0,fetchImpl:async()=>{begin();return response}});
+    const result = delayed.get(song);
+    await started;
+    await delayed.clearCache();
+    finish({ok:true,status:200,json:async()=>({duration:200,syncedLyrics:SYNCED})});
+    assert.equal((await result).status,"synced");
+    assert.equal(fs.existsSync(path.join(dir,"delayed")),false);
+  } finally { fs.rmSync(dir,{recursive:true,force:true}); }
 });

@@ -34,7 +34,8 @@ test("hardening is enforced locally and in permanent CI", () => {
   const workflow = read(".github/workflows/quality.yml");
   assert.match(workflow, /ubuntu-latest/); assert.match(workflow, /windows-latest/); assert.match(workflow, /npm run release:check/); assert.match(workflow, /ci-electron-smoke\.cjs/); assert.match(workflow, /discord-activity/);
   const pkg = JSON.parse(read("package.json"));
-  assert.match(pkg.scripts.check, /bridge:check/); assert.match(pkg.scripts.check, /boundaries:check/); assert.match(pkg.scripts.check, /css:dedup:check/);
-  assert.match(pkg.scripts.check, /typecheck/); assert.match(pkg.scripts.check, /db:recovery-test/); assert.match(pkg.scripts["hardening:check"], /performance:check/);
+  assert.match(pkg.scripts.check, /npm run check:quick/);
+  assert.match(pkg.scripts["check:quick"], /bridge:check/); assert.match(pkg.scripts["check:quick"], /boundaries:check/); assert.match(pkg.scripts.check, /css:dedup:check/);
+  assert.match(pkg.scripts["check:quick"], /typecheck/); assert.match(pkg.scripts.check, /db:recovery-test/); assert.match(pkg.scripts["hardening:check"], /performance:check/);
   assert.match(pkg.scripts["release:check"], /hardening:check/); assert.match(pkg.scripts["release:check"], /assets:compress:dry/);
 });

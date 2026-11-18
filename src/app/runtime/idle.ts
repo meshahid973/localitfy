@@ -4,9 +4,11 @@ export function runLocaltifyIdleTask(task: () => void, timeout = 1400) {
   }).requestIdleCallback;
 
   if (typeof requestIdleCallback === "function") {
-    requestIdleCallback(task, { timeout });
-    return;
+    let cancelled = false;
+    const id = window.requestIdleCallback(() => { if (!cancelled) task(); }, { timeout });
+    return () => { cancelled = true; window.cancelIdleCallback?.(id); };
   }
 
-  window.setTimeout(task, 0);
+  const timer = window.setTimeout(task, 0);
+  return () => window.clearTimeout(timer);
 }

@@ -5,7 +5,7 @@ import { Cover } from "../covers/Cover";
 import { prettyMeta, prettyTitle } from "../search/search.utils";
 import type { Song } from "../library/song.types";
 import type { LyricsResult } from "./lyrics.types";
-import { activeLyricIndex } from "./lyrics.utils";
+import { activeLyricIndex, nextLyricCheckDelay } from "./lyrics.utils";
 import LyricsMatchPanel from "./LyricsMatchPanel";
 import "./lyrics.css";
 
@@ -14,8 +14,11 @@ export type LyricsViewProps = {
   onClose: () => unknown;
   song: Song | null;
   isPlaying: boolean;
-  /** Current playback position in seconds, read every frame while open. */
+  /** Current playback position in seconds. */
   getTime: () => number;
+  getPlaybackRate?: () => number;
+  /** Local media events wake the clock immediately after seeks/rate changes. */
+  subscribeClock?: (listener: () => void) => () => void;
   seekTo: (seconds: number) => unknown;
   openSettings: () => unknown;
   /** The main content area the view covers. */
@@ -27,9 +30,8 @@ export type LyricsViewProps = {
 const LEAD_SECONDS = 0.2;
 const MANUAL_SCROLL_HOLD_MS = 3500;
 const VIEW_GAP = 12;
-const sessionCache = new Map<string, LyricsResult>();
 
-export default function LyricsView({ open, onClose, song, isPlaying, getTime, seekTo, openSettings, anchorRef, embedded = false }: LyricsViewProps) {
+export default function LyricsView({ open, onClose, song, isPlaying, getTime, getPlaybackRate, subscribeClock, seekTo, openSettings, anchorRef, embedded = false }: LyricsViewProps) {
   const viewRef = useRef<HTMLElement | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const lineRefs = useRef<Array<HTMLElement | null>>([]);
@@ -40,29 +42,36 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
   const [activeIndex, setActiveIndex] = useState(-1);
   const [box, setBox] = useState<CSSProperties>({ top: 0, left: 0 });
   const songId = song?.id || "";
+  const songRevision = JSON.stringify([songId, song?.filePath, song?.title, song?.artist, song?.album]);
   const currentSongId = useRef(songId);
+  const currentRevision = useRef(songRevision);
+  const requestGeneration = useRef(0);
+  const openRef = useRef(open);
   currentSongId.current = songId;
+  currentRevision.current = songRevision;
+  openRef.current = open;
   useEffect(() => { setMatcherOpen(false); }, [songId]);
 
   const load = useCallback((refresh: boolean) => {
-    if (!songId) { setResult(null); return () => undefined; }
-    let cancelled = false;
-    const cached = refresh ? null : sessionCache.get(songId);
-    setResult(cached || null);
+    const generation = ++requestGeneration.current;
+    setResult(null);
     setActiveIndex(-1);
-    if (cached) return () => undefined;
+    if (!songId) return;
+    const isCurrent = () => openRef.current && currentRevision.current === songRevision && requestGeneration.current === generation;
+    // The backend owns the disk/offline cache and its invalidation.
     window.localitfy.getLyrics({ id: songId, refresh })
-      .then((next) => { if (next.status === "synced" || next.status === "plain" || next.status === "instrumental") sessionCache.set(songId, next); else sessionCache.delete(songId); if (!cancelled) setResult(next); })
-      .catch(() => { if (!cancelled) setResult({ status: "error", source: "none", lines: [], error: "lyrics lookup failed" }); });
-    return () => { cancelled = true; };
-  }, [songId]);
+      .then((next) => { if (isCurrent()) setResult(next); })
+      .catch(() => { if (isCurrent()) setResult({ status: "error", source: "none", lines: [], error: "lyrics lookup failed" }); });
+  }, [songId, songRevision]);
 
-  useEffect(() => (open ? load(false) : undefined), [open, load]);
+  useEffect(() => {
+    if (open) load(false);
+    return () => { requestGeneration.current++; };
+  }, [open, load]);
 
   const adoptLyrics = (expectedId: string, next: LyricsResult) => {
-    if (next.status === "synced" || next.status === "plain" || next.status === "instrumental") sessionCache.set(expectedId, next);
-    else sessionCache.delete(expectedId);
-    if (currentSongId.current !== expectedId) return;
+    if (!openRef.current || currentSongId.current !== expectedId) return;
+    requestGeneration.current++;
     setResult(next);
     setMatcherOpen(false);
     setActiveIndex(-1);
@@ -71,24 +80,25 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
   const clearMatch = async () => {
     if (!songId) return;
     const expected = songId;
+    const generation = ++requestGeneration.current;
     try {
       const next = await window.localitfy.clearLyricsMatch({ id: expected });
-      adoptLyrics(expected, next);
+      if (requestGeneration.current === generation && currentRevision.current === songRevision) adoptLyrics(expected, next);
     } catch (error) { console.warn("[localtify lyrics reset]", error); }
   };
 
   const shiftLyrics = async (deltaMs: number) => {
     if (!songId || offsetSaving) return;
     const expected = songId;
+    const generation = requestGeneration.current;
     const offsetMs = Math.max(-30000, Math.min(30000, (result?.offsetMs || 0) + deltaMs));
     setOffsetSaving(true);
     try {
       const saved = await window.localitfy.setLyricsOffset({ id: expected, offsetMs });
-      if (currentSongId.current === expected) {
+      if (openRef.current && currentRevision.current === songRevision && requestGeneration.current === generation) {
         setResult(previous => {
           if (!previous) return previous;
           const next = { ...previous, offsetMs: saved.offsetMs };
-          sessionCache.set(expected, next);
           return next;
         });
       }
@@ -138,19 +148,33 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
 
   const synced = result?.status === "synced" ? result.lines : null;
 
-  // Track the playing line. Re-renders only when the line changes.
+  // Wake near a line boundary, not on every display refresh. A bounded
+  // resync interval also handles buffering and remote/Android clock drift.
   useEffect(() => {
-    if (!open || !synced) return;
-    let frame = 0;
+    if (!open || !synced || matcherOpen) return;
+    let timer = 0;
     const tick = () => {
-      setActiveIndex(activeLyricIndex(synced, getTime() + LEAD_SECONDS - (result?.offsetMs || 0) / 1000));
-      if (isPlaying) frame = window.requestAnimationFrame(tick);
+      window.clearTimeout(timer);
+      if (document.hidden) return;
+      const time = getTime() + LEAD_SECONDS - (result?.offsetMs || 0) / 1000;
+      const index = activeLyricIndex(synced, time);
+      setActiveIndex(previous => previous === index ? previous : index);
+      if (isPlaying || !subscribeClock) {
+        const delay = isPlaying
+          ? nextLyricCheckDelay(synced, index, time, getPlaybackRate?.() || 1)
+          : 250;
+        timer = window.setTimeout(tick, delay);
+      }
     };
+    const unsubscribe = subscribeClock?.(tick);
+    document.addEventListener("visibilitychange", tick);
     tick();
-    // Paused: still pick up seeks from the player bar without spinning every frame.
-    const idle = isPlaying ? 0 : window.setInterval(tick, 250);
-    return () => { window.cancelAnimationFrame(frame); window.clearInterval(idle); };
-  }, [open, synced, isPlaying, getTime, result?.offsetMs]);
+    return () => {
+      window.clearTimeout(timer);
+      unsubscribe?.();
+      document.removeEventListener("visibilitychange", tick);
+    };
+  }, [open, synced, isPlaying, getTime, getPlaybackRate, subscribeClock, matcherOpen, result?.offsetMs]);
 
   useEffect(() => {
     if (activeIndex < 0 || Date.now() < manualScrollUntilRef.current) return;

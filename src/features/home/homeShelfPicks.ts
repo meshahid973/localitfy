@@ -1,5 +1,4 @@
 import type { Song } from "../library/song.types";
-import type { LocalAlbumEntry } from "../albums/album.types";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 export const REDISCOVER_AFTER_DAYS = 30;
@@ -61,6 +60,11 @@ function takeBest<T>(
   return best.map((entry) => entry.value);
 }
 
+/** Bounded top-K import selection, preserving stable order on equal dates. */
+export function pickRecentlyAdded(songs: readonly Song[], limit = 12): Song[] {
+  return takeBest(songs, limit, song => ({ value: song, primary: time(song.dateAdded), secondary: 0 }));
+}
+
 export function pickRecentlyPlayed(songs: readonly Song[], limit = 10): Song[] {
   return takeBest(songs, limit, (song) => {
     if (!playable(song)) return null;
@@ -69,10 +73,13 @@ export function pickRecentlyPlayed(songs: readonly Song[], limit = 10): Song[] {
   });
 }
 
-export function pickNewAlbums(albums: readonly LocalAlbumEntry[], limit = 10): LocalAlbumEntry[] {
-  return takeBest(albums, limit, (album) => album.songs.some(playable)
-    ? { value: album, primary: album.latestAdded || 0, secondary: 0 }
-    : null);
+export function pickMostPlayedSongs(songs: readonly Song[], limit = 12): Song[] {
+  return takeBest(songs, limit, (song) => {
+    const plays = Number(song.playCount);
+    return playable(song) && Number.isFinite(plays) && plays > 0
+      ? { value: song, primary: plays, secondary: time(song.lastPlayed) }
+      : null;
+  });
 }
 
 export function pickLikedSongs(songs: readonly Song[], limit = 10): Song[] {
@@ -97,4 +104,21 @@ export function pickNotPlayedYet(songs: readonly Song[], now: Date, limit = 10):
   return takeBest(songs, limit, (song) => playable(song) && !(song.playCount || 0)
     ? { value: song, primary: -hash(`${day}:${song.id}`), secondary: 0 }
     : null);
+}
+
+/** Keep one image per distinct cover, in mix order, without changing its songs. */
+export function pickHomeMixArtwork(songs: readonly Song[]): Song[] {
+  const seen = new Set<string>();
+  const artwork: Song[] = [];
+  const fallback: Song[] = [];
+  for (const song of songs) {
+    const source = song.coverThumbUrl || song.coverThumbnailUrl || song.thumbnailUrl || song.coverUrl || song.coverPath || song.coverFullUrl;
+    const key = source ? "cover:" + source : "song:" + song.id;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    if (source) artwork.push(song);
+    else if (fallback.length < 4) fallback.push(song);
+    if (artwork.length === 4) break;
+  }
+  return [...artwork, ...fallback.slice(0, 4 - artwork.length)];
 }

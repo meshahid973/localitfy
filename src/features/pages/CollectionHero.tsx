@@ -1,6 +1,5 @@
 import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import { ListEnd, MoreHorizontal, Play, Shuffle } from "lucide-react";
-import { ArtworkBackdrop } from "../covers/ArtworkBackdrop";
 import type { Song } from "../library/song.types";
 
 export type CollectionHeroProps = {
@@ -22,10 +21,9 @@ export type CollectionHeroProps = {
 };
 
 /** Top of every album, artist, genre, playlist and mix page: artwork, title, then play · shuffle · queue · more. */
-export default function CollectionHero({ typeLabel, title, cover, coverSong, round = false, byline, stats, playable, onPlay, onShuffle, onQueue, onMore, children }: CollectionHeroProps) {
+export default function CollectionHero({ typeLabel, title, cover, round = false, byline, stats, playable, onPlay, onShuffle, onQueue, onMore, children }: CollectionHeroProps) {
   return (
     <header className={`collectionHero ${round ? "isRound" : ""}`}>
-      <ArtworkBackdrop song={coverSong} />
       <div className="collectionHeroArt">{cover}</div>
       <div className="collectionHeroCopy">
         <h1 title={title}>{title}</h1>
@@ -34,7 +32,8 @@ export default function CollectionHero({ typeLabel, title, cover, coverSong, rou
       </div>
       <div className="collectionHeroActions">
         <button className="collectionPlayButton" type="button" onClick={() => void onPlay()} disabled={!playable} aria-label={`play ${title}`} title="Play">
-          <Play size={20} fill="currentColor" strokeWidth={2} aria-hidden="true" />
+          <Play size={16} fill="currentColor" strokeWidth={2} aria-hidden="true" />
+          <span>Play all</span>
         </button>
         <button className="collectionIconButton" type="button" onClick={() => void onShuffle()} disabled={playable < 2} aria-label={`shuffle ${title}`} title="Shuffle">
           <Shuffle size={17} strokeWidth={2.2} aria-hidden="true" />

@@ -162,7 +162,7 @@
   min-height: var(--player-control-size) !important;
   position: relative !important;
 
-  color: rgba(255,255,255,0.92) !important;
+  color: var(--lt-text) !important;
 
   cursor: pointer !important;
   -webkit-app-region: no-drag !important;
@@ -177,7 +177,7 @@
 .playerBar .volumeIconButton:hover,
 .playerBar .repeatButton:hover{
   transform: translate3d(0, -1px, 0) scale(1.06) !important;
-  color: #fff !important;
+  color: var(--lt-text) !important;
 
   opacity: 1 !important;
 }
@@ -214,8 +214,8 @@
 .playerBar .circleButton.main svg{
   width: 22px !important;
   height: 22px !important;
-  color: #ffffff !important;
-  stroke: #ffffff !important;
+  color: var(--button-text-on-accent) !important;
+  stroke: var(--button-text-on-accent) !important;
 }
 
 .playButtonBurst{
@@ -242,7 +242,7 @@
   display: inline-grid !important;
   place-items: center !important;
   border-radius: 999px !important;
-  color: #ffffff !important;
+  color: var(--lt-text) !important;
   background: rgba(var(--accent-rgb), 0.18) !important;
   font-size: 8px !important;
   font-weight: 900 !important;
@@ -269,7 +269,7 @@
 }
 
 .progressRow span{
-  color: rgba(255,255,255,0.47) !important;
+  color: var(--lt-muted) !important;
   font-size: 11px !important;
   font-weight: 720 !important;
   line-height: 1 !important;
@@ -387,7 +387,7 @@
   grid-template-columns: 38px minmax(0, 1fr) !important;
   align-items: center !important;
   gap: 9px !important;
-  color: rgba(255,255,255,0.55) !important;
+  color: var(--lt-muted) !important;
   font-size: 12px !important;
 }
 
@@ -424,8 +424,8 @@
   padding: 7px 12px !important;
   border: 1px solid rgba(var(--accent-rgb),0.38) !important;
   border-radius: 999px !important;
-  color: #fff !important;
-  background: rgba(0,0,0,0.72) !important;
+  color: var(--lt-text) !important;
+  background: var(--lt-bg-elevated) !important;
   box-shadow:
     0 16px 36px rgba(0,0,0,0.35),
     0 0 28px rgba(var(--accent-rgb),0.15) !important;
@@ -518,18 +518,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   transition: none !important;
 }
 
-[data-theme="oled"] .playerBar,
-.app[data-theme="oled"] .playerBar{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.032), rgba(255,255,255,0.012)),
-    rgba(0, 0, 0, 0.92) !important;
-}
-
-[data-theme="oled"] .playerBar::before,
-.app[data-theme="oled"] .playerBar::before{
-  opacity: 0.16 !important;
-  filter: blur(32px) saturate(1.15) brightness(0.68) !important;
-}
 
 .app.viewSwitching .playerBar::before,
 .app.viewSwitching .playerBar::after{
@@ -717,7 +705,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   background: transparent !important;
   background-image: none !important;
   box-shadow: none !important;
-  color: rgba(255,255,255,0.74) !important;
+  color: var(--lt-muted) !important;
   opacity: 1 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -743,7 +731,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .volumeIconButton:hover,
 .playerBar .repeatButton:hover,
 .playerBar .playerControlButton:hover {
-  color: #ffffff !important;
+  color: var(--lt-text) !important;
   background: transparent !important;
   background-image: none !important;
   border: 0 !important;
@@ -775,7 +763,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   border-radius: 999px !important;
   background: rgb(var(--accent-rgb)) !important;
   background-image: none !important;
-  color: #ffffff !important;
+  color: var(--button-text-on-accent) !important;
   box-shadow:
     0 8px 22px rgba(var(--accent-rgb),0.20),
     0 0 0 1px rgba(255,255,255,0.13) inset,
@@ -786,7 +774,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .circleButton.main:hover,
 .playerBar .playPauseButton:hover {
   background: color-mix(in oklab, rgb(var(--accent-rgb)) 88%, white 12%) !important;
-  color: #ffffff !important;
+  color: var(--button-text-on-accent) !important;
   box-shadow:
     0 10px 28px rgba(var(--accent-rgb),0.28),
     0 0 0 1px rgba(255,255,255,0.16) inset,
@@ -829,9 +817,9 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .playPauseButton svg * {
   width: 19px !important;
   height: 19px !important;
-  color: #ffffff !important;
-  stroke: #ffffff !important;
-  fill: #ffffff !important;
+  color: var(--button-text-on-accent) !important;
+  stroke: var(--button-text-on-accent) !important;
+  fill: var(--button-text-on-accent) !important;
   fill-opacity: 1 !important;
 }
 
@@ -986,9 +974,9 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .circleButton.main svg *,
 .playerBar .playPauseButton svg,
 .playerBar .playPauseButton svg * {
-  color: #fff !important;
-  stroke: #fff !important;
-  fill: #fff !important;
+  color: var(--button-text-on-accent) !important;
+  stroke: var(--button-text-on-accent) !important;
+  fill: var(--button-text-on-accent) !important;
   fill-opacity: 1 !important;
 }
 
@@ -1016,7 +1004,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .app[data-cover-sync="off"] .playerBar,
 .playerBar[data-cover-sync="off"]{
   --player-progress-fallback-opacity: 0.50;
-  --player-track-base: rgba(255, 255, 255, 0.16) !important;
+  --player-track-base: var(--lt-border-strong) !important;
   background:
     radial-gradient(circle at 50% -38%, rgba(var(--progress-rgb, var(--accent-rgb)), 0.22), transparent 45%),
     radial-gradient(circle at 18% 48%, rgba(var(--progress-rgb, var(--accent-rgb)), 0.16), transparent 34%),
@@ -1189,8 +1177,8 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar :where(.playButton,.primary) svg *,
 .playerBar :where(.playButton,.primary) .playIcon,
 .playerBar :where(.playButton,.primary) .icon{
-  color: #fff !important;
-  stroke: #fff !important;
+  color: var(--button-text-on-accent) !important;
+  stroke: currentColor !important;
   fill: currentColor !important;
 }
 
@@ -1498,10 +1486,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 
 }
 
-.app[data-theme="stars"] .playerBar{
-  border-top-color: rgba(215, 213, 255, 0.18) !important;
-
-}
 
 @media (max-width: 900px){
   .playerBar{
@@ -1535,20 +1519,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22px, #000 72%, transparent 100%) !important;
 }
 
-.app[data-theme="stars"] .playerBar{
-  background:
-    linear-gradient(180deg, rgba(215, 213, 255, 0.024), rgba(143, 220, 255, 0.010)),
-    rgba(2, 2, 10, 0.94) !important;
-}
-
-.app[data-theme="stars"] .playerBar::before{
-  opacity: .16 !important;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(215, 213, 255, 0.12), transparent 54%),
-    radial-gradient(circle at 20% 48%, rgba(var(--cover-rgb, var(--accent-rgb)), 0.12), transparent 36%),
-    radial-gradient(circle at 76% 32%, rgba(143, 220, 255, 0.09), transparent 44%),
-    var(--cover-url, var(--cover-art-url, none)) center / cover no-repeat !important;
-}
 
 @media (max-width: 900px){
   .appShell{
@@ -1619,7 +1589,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 .playerBar{
-  --player-track-base: rgba(255,255,255,0.18);
+  --player-track-base: var(--lt-border-strong);
   border-top: 1px solid rgba(255,255,255,0.105) !important;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.050), rgba(255,255,255,0.012) 34%, rgba(255,255,255,0.004)),
@@ -1677,16 +1647,12 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 .volumeWrap input[type="range"] {
-  background: rgba(255,255,255,0.13) !important;
+  background: var(--lt-border-strong) !important;
 }
 
 .app[data-player-background="coverBlur"] .playerBar{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.030), rgba(255,255,255,0.010)),
-    rgba(0,0,0,0.82) !important;
-  border-top-color: rgba(255,255,255,0.088) !important;
-  backdrop-filter: blur(18px) saturate(126%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(126%) !important;
+  background: transparent !important;
+  border-top-color: var(--lt-border) !important;
 }
 
 .app[data-player-background="coverBlur"] .playerBar::before{
@@ -1727,7 +1693,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 .app[data-player-background="flat"] .playerBar{
-  background: rgba(5,5,9,0.95) !important;
+  background: var(--lt-bg-elevated) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
@@ -1749,7 +1715,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   background-image: none !important;
   box-shadow: none !important;
   border: 0 !important;
-  outline: 0 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
@@ -1789,12 +1754,11 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
    Fixes the visible player outline, removes the volume icon bubble,
    and makes accent buttons readable on light/dark custom colors. */
 .playerBar{
-  --player-main-readable: var(--player-main-button-text, var(--accent-contrast, #06100b));
+  --player-main-readable: var(--button-text-on-accent);
   --player-progress-fill: rgb(var(--accent-rgb)) !important;
   border-top-color: transparent !important;
   outline: 0 !important;
-  box-shadow:
-    0 -14px 42px rgba(0, 0, 0, 0.50) !important;
+  box-shadow: none !important;
 }
 
 .playerBar:focus,
@@ -1823,7 +1787,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   color: currentColor !important;
   stroke: currentColor !important;
   fill: currentColor !important;
-  fill-opacity: 0.08 !important;
+  fill-opacity: 1 !important;
 }
 
 /* The volume icon should be just an icon, not a second pill/bubble. */
@@ -1842,7 +1806,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   background-color: transparent !important;
   background-image: none !important;
   border: 0 !important;
-  outline: 0 !important;
   box-shadow: none !important;
   filter: none !important;
 }
@@ -1899,9 +1862,8 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 .playerBar .circleButton.main .playerMorphIcon,
-.playerBar .playPauseButton .playerMorphIcon,
-.simpleControls .circleButton.main .playerMorphIcon{
-  color: #ffffff !important;
+.playerBar .playPauseButton .playerMorphIcon{
+  color: var(--button-text-on-accent) !important;
 }
 
 .playerBar .circleButton.main .playerMorphIcon{
@@ -1909,13 +1871,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   height: 25px !important;
 }
 
-.simpleControls .circleButton.main .playerMorphIcon{
-  width: 19px !important;
-  height: 19px !important;
-}
-
-.playerBar .circleButton.main:active .playerMorphIcon,
-.simpleControls .circleButton.main:active .playerMorphIcon{
+.playerBar .circleButton.main:active .playerMorphIcon{
   transform: scale(0.94) translateZ(0) !important;
 }
 
@@ -1967,23 +1923,12 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   padding: 0 4px !important;
   border-radius: var(--player-radius-xs, 12px) !important;
   background: rgb(var(--accent-rgb)) !important;
-  color: #fff !important;
+  color: var(--button-text-on-accent) !important;
   font-size: 8px !important;
   font-weight: 950 !important;
   box-shadow:
     0 0 0 2px rgba(0,0,0,0.42),
     0 0 12px rgba(var(--accent-rgb),0.34) !important;
-}
-
-.heroGhost.danger.confirmArmed{
-  color: #fff !important;
-  border-color: rgba(255, 92, 137, 0.52) !important;
-  background:
-    radial-gradient(circle at 20% 50%, rgba(255, 92, 137, 0.24), transparent 44%),
-    rgba(255, 92, 137, 0.12) !important;
-  box-shadow:
-    0 0 0 1px rgba(255, 92, 137, 0.14) inset,
-    0 12px 30px rgba(255, 92, 137, 0.10) !important;
 }
 
 /* Pause expensive player decoration during interaction. */
@@ -1993,8 +1938,8 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   --player-perf-hover-opacity: 0.42;
   --player-perf-saturate: 1.42;
   --player-perf-brightness: 1.00;
-  backdrop-filter: blur(14px) saturate(1.08) !important;
-  -webkit-backdrop-filter: blur(14px) saturate(1.08) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .app .playerBar::before{
@@ -2091,7 +2036,7 @@ body.localtifyWindowBackgrounded .app .playerBar:hover::before,
 
 .playerBar .playerMetaLink:hover,
 .playerBar .playerMetaLink:focus-visible{
-  color: #fff;
+  color: var(--lt-text);
   text-decoration: underline;
   text-underline-offset: 2px;
   outline: 0;
@@ -2169,4 +2114,32 @@ body.localtifyWindowBackgrounded .app .playerBar:hover::before,
   font-weight: 900;
   line-height: 16px;
   text-align: center;
+}
+
+/* The persistent bar shares the listening palette without its own blurred image. */
+.app[data-player-background="coverBlur"] .playerBar[data-ambient] {
+  background: transparent !important;
+  border-top-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.app[data-player-background="coverBlur"] .playerBar[data-ambient]::before,
+.app[data-player-background="coverBlur"] .playerBar[data-ambient]:hover::before {
+  display: none !important;
+  background: none !important;
+  filter: none !important;
+  animation: none !important;
+  transition: none !important;
+}
+.app[data-player-background="coverBlur"] .playerBar[data-ambient]::after {
+  display: none !important;
+}
+.app[data-player-background="flat"] .playerBar[data-ambient] {
+  background: var(--lt-bg-elevated) !important;
+  box-shadow: none !important;
+}
+.app[data-player-background="oledBlack"] .playerBar[data-ambient] {
+  background: #000 !important;
+  box-shadow: none !important;
 }

@@ -1,7 +1,7 @@
 /* Downloads shares the active app theme. Input and task status are separate surfaces. */
 .downloadsLayoutV031 {
   --downloads-edge: var(--lt-border);
-  --downloads-surface: var(--lt-surface);
+  --downloads-surface: var(--lt-surface-soft);
   --downloads-raised: var(--lt-surface-raised);
   --downloads-text: var(--lt-text);
   --downloads-muted: var(--lt-muted);
@@ -9,7 +9,7 @@
   min-width: 0; width: 100%;
   display: grid; grid-template-columns: minmax(0,1fr);
   gap: 18px;
-  padding: 0 0 100px;
+  padding: 0 0 var(--lt-space-5);
   color: var(--downloads-text);
 }
 .downloadsLayoutV031 *, .downloadsLayoutV031 *::before, .downloadsLayoutV031 *::after { box-sizing: border-box; }
@@ -17,7 +17,7 @@
   display: grid; align-content: start; gap: 21px; min-width: 0; padding: 0;
   border: 0 !important; background: transparent !important; box-shadow: none !important;
 }
-.downloadsLayoutV031 .eyebrow { margin: 0 0 8px; color: var(--downloads-accent); font-size: 11px; font-weight: 800; letter-spacing: .11em; }
+.downloadsLayoutV031 .eyebrow { margin: 0 0 8px; color: var(--downloads-accent); font-size: var(--lt-text-sm); font-weight: 500; }
 .downloadsLayoutV031 .panelHead {
   min-width: 0; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
   gap: 20px; padding-bottom: 17px; border-bottom: 1px solid var(--downloads-edge);
@@ -41,7 +41,7 @@
 .downloadsLayoutV031 .spotifyTabDot { width: 8px; height: 8px; border-radius: 50%; background: #72bf9a; }
 .downloadsLayoutV031 .downloadTextarea {
   width: 100%; min-height: 136px; display: block; resize: vertical; padding: 17px 18px;
-  border: 1px solid color-mix(in oklab,var(--downloads-accent) 32%,transparent); border-radius: 12px;
+  border: 1px solid var(--downloads-edge); border-radius: var(--lt-control-radius);
   color: var(--downloads-text); background: var(--lt-bg); font: inherit; font-size: 13px;
   line-height: 1.6; outline: none;
 }
@@ -129,7 +129,6 @@
 .downloadsLayoutV031 .downloadResult > div { min-width: 0; }
 .downloadsLayoutV031 .downloadResult strong { font-size: 13px; }
 .downloadsLayoutV031 .downloadResult p { margin: 6px 0; color: var(--downloads-muted); font-size: 11px; overflow-wrap: anywhere; }
-.app:has(.downloadsLayoutV031) .content { background: var(--lt-bg) !important; }
 .downloadsLayoutV031 .downloadsInputCard {
   display: grid; align-content: start; justify-items: start; gap: 15px;
   padding: 22px; border: 1px solid var(--downloads-edge);

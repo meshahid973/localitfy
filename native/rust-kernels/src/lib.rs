@@ -144,14 +144,16 @@ pub fn pcm_decode_into(bytes: &[u8], mut output: Float32Array) -> Result<f64> {
         return Err(invalid("Invalid PCM output dimensions"));
     }
     let decode = |chunk: &[u8]| f32::from_le_bytes([chunk[0], chunk[1], chunk[2], chunk[3]]);
+    // Validate before mutation, preserving the public kernel contract. The
+    // aligned caller uses pcm_sum_squares and never converts these bytes.
     if !bytes.chunks_exact(4).all(|chunk| decode(chunk).is_finite()) {
         return Err(invalid("Invalid PCM sample"));
     }
     let destination = unsafe { output.as_mut() };
     let mut total = 0.0_f64;
-    for (i, chunk) in bytes.chunks_exact(4).enumerate() {
+    for (target, chunk) in destination.iter_mut().zip(bytes.chunks_exact(4)) {
         let sample = decode(chunk);
-        destination[i] = sample;
+        *target = sample;
         let value = sample as f64;
         total += value * value;
     }

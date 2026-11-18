@@ -4,6 +4,25 @@ import type { CoverColorSyncMode, ThemeId } from "./theme.types";
 export type SettingsCategory = "appearance" | "playback" | "discord" | "library" | "downloads" | "covers" | "updates" | "about" | "advanced" | "metadata" | "experimental";
 export type AudioEffectMode = "normal" | "nightcore" | "daycore";
 
+/** Old settings are readable at the migration boundary, not part of the active renderer API. */
+export type LegacyThemeSettings = {
+  themePanelCollapsed?: boolean;
+  customThemeEnabled?: boolean;
+  customThemeColor?: string;
+  customThemeColor2?: string;
+  customThemeBackground?: string;
+  customThemeSurface?: string;
+  customThemeText?: string;
+  customThemeHighlight?: string;
+  customThemeProgress?: string;
+  simpleMode?: boolean;
+  starsIntensity?: string;
+  blurEffects?: string;
+  homeExpanded?: boolean;
+  quickLibraryMoreBlur?: boolean;
+  showRightColumn?: boolean;
+};
+
 export type Settings = {
   experimentalMusicAnalysis: boolean;
   analysisOnBattery: boolean;
@@ -13,15 +32,6 @@ export type Settings = {
   musicbrainzTagging: boolean;
   musicbrainzWriteFiles: boolean;
   theme: ThemeId;
-  themePanelCollapsed: boolean;
-  customThemeEnabled: boolean;
-  customThemeColor: string;
-  customThemeColor2: string;
-  customThemeBackground: string;
-  customThemeSurface: string;
-  customThemeText: string;
-  customThemeHighlight: string;
-  customThemeProgress: string;
   volume: number;
   playerSize: number;
   sidebarWidth: number;
@@ -43,7 +53,6 @@ export type Settings = {
   catBuddyEnabled: boolean;
   idleScreensaverEnabled: boolean;
   showHeroBadge: boolean;
-  simpleMode: boolean;
   lastSongId: string;
   homeBannerType: "dynamic" | "albumCover" | "cleanBlack" | "none";
   mediaCardBackground: "solid" | "glassy" | "oledFlat";
@@ -59,8 +68,6 @@ export type Settings = {
   playerBackgroundStyle: "flat" | "coverBlur" | "oledBlack";
   /** Present in the persisted runtime defaults even though the old monolith type omitted it. */
   homeHeroCoverBrightness: number;
-  starsIntensity: "off";
-  blurEffects: "normal";
   discordEnabled: boolean;
   discordShowPausedIdle: boolean;
   discordPrivacyMode: boolean;
@@ -104,11 +111,8 @@ export type Settings = {
   watchedFolders: string[];
 };
 
-export type CustomThemeColorKey =
-  | "customThemeColor" | "customThemeColor2" | "customThemeBackground" | "customThemeSurface"
-  | "customThemeText" | "customThemeHighlight" | "customThemeProgress";
-
-export type CustomThemeColorPatch = Pick<Settings, CustomThemeColorKey>;
+export type CustomThemeColorKey = Exclude<keyof LegacyThemeSettings, "themePanelCollapsed" | "customThemeEnabled" | "simpleMode" | "starsIntensity" | "blurEffects" | "homeExpanded" | "quickLibraryMoreBlur" | "showRightColumn">;
+export type CustomThemeColorPatch = Required<Pick<LegacyThemeSettings, CustomThemeColorKey>>;
 export type CustomThemePreset = {
   id: string;
   name: string;

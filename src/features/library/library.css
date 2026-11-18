@@ -2,7 +2,7 @@
 
 .app:has(.libraryPage) .content {
   overflow-x: hidden !important;
-  background: var(--lt-bg) !important;
+  background: transparent !important;
 }
 
 .app:has(.libraryPage) .pageTransition {
@@ -14,18 +14,17 @@
 }
 
 .libraryPage {
-  --library-border: rgba(var(--lt-accent-rgb), .09);
+  --library-border: var(--lt-border);
   --library-text: var(--lt-text);
   width: 100%;
   min-width: 0;
   min-height: 100%;
-  padding: 0 0 105px;
+  padding: 0 0 var(--lt-space-5);
   display: grid;
   align-content: start;
   gap: clamp(18px, 1.8vw, 28px);
   color: var(--library-text);
-  background:
-    var(--lt-bg);
+  background: transparent;
 }
 
 .libraryPage .pageHeaderTools { flex: 1 1 480px; }
@@ -37,12 +36,12 @@
   min-height: 42px;
   padding: 0 14px;
   border: 1px solid var(--library-border);
-  border-radius: 999px;
-  color: var(--lt-muted);
-  background: rgba(var(--lt-accent-rgb), .045);
+  border-radius: var(--lt-radius-item);
+  color: var(--lt-text);
+  background: var(--lt-surface-soft);
   font: inherit;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--lt-text-base);
+  font-weight: 550;
   cursor: pointer;
   transition: color 130ms ease, border-color 130ms ease, background-color 130ms ease;
 }
@@ -63,43 +62,49 @@
   outline-offset: 2px;
 }
 
-.libraryStats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--lt-space-5);
+.libraryPage .pageHeader { align-items: center; }
+.libraryPage .pageHeaderHeading { flex-basis: 100%; }
+.libraryPage .pageHeaderTools { justify-content: flex-start; }
+.libraryNavigation, .libraryViewMode {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--lt-space-2);
 }
-
-
-.libraryStat {
-  min-width: 0;
-  min-height: 0;
-  padding: 0;
-  display: grid;
-  align-content: center;
-  gap: 5px;
-  border: 0;
-  background: transparent;
+.libraryNavigation { margin-inline-end: auto; }
+.libraryNavigation button, .libraryViewMode button {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: var(--lt-menu-item-height); padding: 0 var(--lt-space-3);
+  border: 0; border-radius: var(--lt-radius-item);
+  background: var(--lt-surface-soft); color: var(--lt-muted); font: inherit; cursor: pointer;
 }
-
-.libraryStat strong {
-  overflow: hidden;
-  color: var(--lt-text);
-  font-size: 18px;
-  font-weight: 650;
-  line-height: 1;
-  letter-spacing: -.04em;
-  text-overflow: ellipsis;
+.libraryNavigation button[aria-current="page"], .libraryViewMode button[aria-pressed="true"] {
+  background: var(--lt-text); color: var(--lt-bg);
 }
-
-.libraryStat span {
-  color: var(--lt-muted);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .06em;
-  text-transform: uppercase;
+.libraryNavigation button:hover:not([aria-current="page"]), .libraryViewMode button:hover:not([aria-pressed="true"]) {
+  background: var(--lt-surface-raised); color: var(--lt-text);
 }
-
-.libraryStat.warning strong { color: #bb9572; }
+.libraryNavigation button:focus-visible, .libraryViewMode button:focus-visible, .libraryCollectionShortcuts button:focus-visible {
+  outline: 2px solid var(--lt-accent); outline-offset: 2px;
+}
+.libraryCollectionShortcuts {
+  display: grid; grid-template-columns: repeat(3,minmax(0,180px)); gap: var(--lt-space-4);
+}
+.libraryCollectionShortcuts button {
+  display: grid; min-width: 0; gap: var(--lt-space-1); text-align: left; font: inherit;
+  padding: 0; border: 0; background: transparent; color: var(--lt-text); cursor: pointer;
+}
+.libraryCollectionArtwork {
+  display: grid; place-items: center; width: 100%; aspect-ratio: 1.25;
+  border-radius: var(--lt-radius-sm); margin-bottom: var(--lt-space-1);
+  color: var(--lt-text); background: radial-gradient(ellipse at 75% 25%, color-mix(in srgb,var(--collection-hue) 38%,var(--lt-bg)),var(--lt-surface) 85%);
+}
+.libraryCollectionArtwork[data-kind="liked"] { --collection-hue: #a28bea; }
+.libraryCollectionArtwork[data-kind="albums"] { --collection-hue: #7696ff; }
+.libraryCollectionArtwork[data-kind="artists"] { --collection-hue: #58a699; }
+.libraryCollectionShortcuts strong { font-size: 14px; font-weight: 550; }
+.libraryCollectionShortcuts small { font-size: var(--lt-text-base); color: var(--lt-muted); }
+@media (max-width: 560px) {
+  .libraryCollectionShortcuts { gap: var(--lt-space-2); }
+  .libraryCollectionArtwork svg { width: 27px; height: 27px; }
+}
 
 .libraryMissingBanner {
   min-width: 0;
@@ -127,9 +132,9 @@
 
 .libraryMissingCopy strong {
   overflow: hidden;
-  color: #b6a08b;
+  color: var(--lt-muted);
   font-size: 10px;
-  font-weight: 750;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -281,7 +286,7 @@
 .libraryPage .songIndex {
   color: var(--lt-faint) !important;
   font-size: 11px !important;
-  font-weight: 700 !important;
+  font-weight: 500 !important;
   text-align: center !important;
 }
 
@@ -311,14 +316,14 @@
 
 .libraryPage .songMeta strong {
   color: var(--lt-text) !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
+  font-size: 14px !important;
+  font-weight: 550 !important;
 }
 
 .libraryPage .songMeta small {
-  color: var(--lt-text) !important;
-  font-size: 11px !important;
-  font-weight: 550 !important;
+  color: var(--lt-muted) !important;
+  font-size: var(--lt-text-base) !important;
+  font-weight: 500 !important;
 }
 
 .libraryPage .songInfo {
@@ -388,8 +393,6 @@
   box-shadow: none !important;
 }
 
-/* Cohesive Library and Liked controls; never tint the full list with an accent alpha. */
-.libraryPage .libraryStat strong { color: var(--lt-text); }
 .libraryPage .libraryTrackSurface.libraryFullListV025 { scrollbar-color: color-mix(in oklab,var(--lt-accent) 28%,transparent) transparent; }
 .libraryPage .songRow :is(.iconAction,.songButton):focus-visible {
   outline: 1px solid var(--lt-accent);

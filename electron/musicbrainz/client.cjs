@@ -18,17 +18,50 @@ const phrase = (value) => `"${String(value || "").replace(/[\\"]/g, "\\$&")}"`;
  * MusicBrainz asks clients to identify themselves and stay at one request per second.
  * Requests are queued, so concurrent callers share the limit.
  */
-function createMusicBrainzClient({ userAgent, fetchImpl = fetch, minIntervalMs = 1100, timeoutMs = 15000, maxCacheEntries = 256, sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)) }) {
-  let queue = Promise.resolve();
+function createMusicBrainzClient({ userAgent, fetchImpl = fetch, minIntervalMs = 1100, timeoutMs = 15000, maxCacheEntries = 256, cacheTtlMs = 24 * 60 * 60 * 1000, sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)) }) {
+  let active = false;
   let lastAt = 0;
+  let foregroundStreak = 0;
   const cache = new Map();
+  const inFlight = new Map();
+  const waiting = [];
 
-  function request(pathname, params = {}) {
+  function pump() {
+    if (active || !waiting.length) return;
+    const preferred = waiting.findIndex(job => !job.background);
+    const background = waiting.findIndex(job => job.background);
+    const index = foregroundStreak >= 8 && background >= 0 ? background : Math.max(0, preferred);
+    const [job] = waiting.splice(index, 1);
+    foregroundStreak = job.background ? 0 : foregroundStreak + 1;
+    active = true;
+    void job.run().then(job.resolve, job.reject).finally(() => {
+      active = false;
+      pump();
+    });
+  }
+
+  function request(pathname, params = {}, { background = false } = {}) {
     const url = new URL(pathname, API);
     for (const [key, value] of Object.entries({ ...params, fmt: "json" })) url.searchParams.set(key, value);
     const key = url.href;
-    if (cache.has(key)) return cache.get(key);
-    const run = queue.then(async () => {
+    const hit = cache.get(key);
+    if (hit && hit.expiresAt > Date.now()) {
+      cache.delete(key);
+      cache.set(key, hit);
+      return hit.promise;
+    }
+    cache.delete(key);
+    const existing = inFlight.get(key);
+    if (existing) {
+      if (!background) existing.background = false;
+      return existing.promise;
+    }
+    if (waiting.length >= 128 || (background && waiting.filter(job => job.background).length >= 16)) {
+      return Promise.reject(new Error("MusicBrainz request queue is busy. Try again shortly."));
+    }
+    let resolve, reject;
+    const promise = new Promise((yes, no) => { resolve = yes; reject = no; });
+    const run = async () => {
       for (let attempt = 0; ; attempt += 1) {
         const wait = lastAt + minIntervalMs - Date.now();
         if (wait > 0) await sleep(wait);
@@ -39,16 +72,32 @@ function createMusicBrainzClient({ userAgent, fetchImpl = fetch, minIntervalMs =
         if (!response.ok) throw response.status >= 500 ? unreachable(new Error(String(response.status))) : new Error(`MusicBrainz request failed (${response.status})`);
         return response.json();
       }
-    });
-    queue = run.catch(() => undefined);
-    cache.set(key, run);
-    while (cache.size > Math.max(1, maxCacheEntries)) cache.delete(cache.keys().next().value);
-    run.catch(() => { if (cache.get(key) === run) cache.delete(key); });
-    return run;
+    };
+    const entry = { promise, run, resolve, reject, background };
+    inFlight.set(key, entry);
+    promise.then(() => {
+      inFlight.delete(key);
+      cache.set(key, { promise, expiresAt: Date.now() + Math.max(0, cacheTtlMs) });
+      while (cache.size > Math.max(1, maxCacheEntries)) cache.delete(cache.keys().next().value);
+    }, () => { inFlight.delete(key); });
+    waiting.push(entry);
+    pump();
+    return promise;
   }
 
   return {
-    searchRecordings: (title, artist) => request("recording", { query: `recording:${phrase(title)}${artist ? ` AND artist:${phrase(artist)}` : ""}`, limit: "25" }).then((body) => body.recordings || []),
+    searchCatalog: (kind, text) => {
+      const fields = { recording: "recording", artist: "artist", album: "releasegroup" };
+      const field = Object.hasOwn(fields, kind) ? fields[kind] : null;
+      if (!field) throw new Error("Unsupported catalog search.");
+      const endpoint = kind === "album" ? "release-group" : kind;
+      const query = kind === "artist" ? "artist:" + phrase(text) : "(" + field + ":" + phrase(text) + " OR artist:" + phrase(text) + ")";
+      return request(endpoint, { query, limit: "25" }).then(body => {
+        const items = body[endpoint + "s"];
+        return Array.isArray(items) ? items : [];
+      });
+    },
+    searchRecordings: (title, artist, options) => request("recording", { query: `recording:${phrase(title)}${artist ? ` AND artist:${phrase(artist)}` : ""}`, limit: "25" }, options).then((body) => body.recordings || []),
     searchReleases: (album, artist) => request("release", { query: `release:${phrase(album)}${artist ? ` AND artist:${phrase(artist)}` : ""}`, limit: "15" }).then((body) => body.releases || []),
     // Every edition of an album (standard, deluxe, regional…), with track counts.
     getReleaseGroupReleases: (id) => request("release", { "release-group": id, inc: "media", limit: "50" }).then((body) => body.releases || []),

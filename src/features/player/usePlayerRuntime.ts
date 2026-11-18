@@ -46,7 +46,6 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
   const fadeIntervalRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const progressLoopTimeoutRef = useRef<number | null>(null);
-  const backgroundAudioRepairTimerRef = useRef<number | null>(null);
   const playerResizeFrameRef = useRef<number | null>(null);
   const pendingPlayRef = useRef(false);
   const countPlayRef = useRef(false);
@@ -107,7 +106,6 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
   const progressTimeLabelRefs = useRef<Array<HTMLSpanElement | null>>([]);
   const progressDurationLabelRefs = useRef<Array<HTMLSpanElement | null>>([]);
   const lastProgressUiPaintRef = useRef(0);
-  const lastProgressStatePaintRef = useRef(0);
   const [statusText, setStatusText] = useState("ready to play");
   const [playerError, setPlayerError] = useState("");
   const [crossfadePreviewSongId, setCrossfadePreviewSongId] = useState("");
@@ -172,7 +170,7 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
     listeningHistoryRef, audioRef, playerEngineRef, playerControllerRef, playbackTransitionRef,
     crossfadeIntervalRef, crossfadeAutoStartedRef, crossfadeAutoTargetRef, crossfadeMainPauseGuardRef,
     crossfadeLastStartAtRef, crossfadeHandoffClearTimerRef, crossfadeHandoffRef,
-    fadeIntervalRef, animationFrameRef, progressLoopTimeoutRef, backgroundAudioRepairTimerRef,
+    fadeIntervalRef, animationFrameRef, progressLoopTimeoutRef,
     playerResizeFrameRef, pendingPlayRef, countPlayRef, playCountSongIdRef, playCountListenedRef,
     playCountLastTimeRef, sleepTimerRef, positionSaveRef, nextAudioRef, playbackUrlCacheRef,
     playbackUrlPendingRef, lastQueueHistoryRef, songRef, timeRef, durationRef, playingRef,
@@ -184,7 +182,7 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
     repeatMode, setRepeatMode, currentTime, setCurrentTime, currentDuration, setCurrentDuration,
     isSeeking, setIsSeeking, seekDraftPercent, setSeekDraftPercent, seekDraftPercentRef,
     isSeekingRef, seekDraftFrameRef, progressInputRefs, progressTimeLabelRefs,
-    progressDurationLabelRefs, lastProgressUiPaintRef, lastProgressStatePaintRef,
+    progressDurationLabelRefs, lastProgressUiPaintRef,
     statusText, setStatusText, playerError, setPlayerError,
     crossfadePreviewSongId, setCrossfadePreviewSongId,
     nowPlayingTransitionKey, setNowPlayingTransitionKey,

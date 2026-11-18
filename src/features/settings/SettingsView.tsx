@@ -1,6 +1,5 @@
 import "./settings.css";
 import "./settings-premium.css";
-import { SlidersHorizontal } from "lucide-react";
 import type { ReactNode } from "react";
 import SettingsRail from "./SettingsRail";
 import type { SettingsRailProps } from "./SettingsRail";
@@ -19,10 +18,8 @@ export default function SettingsView({
     <section data-page-section="settings" className="settingsPage settingsPageV027">
       <header className="settingsPageIntro">
         <div className="settingsIntroIdentity">
-          <span className="settingsIntroMark" aria-hidden="true"><SlidersHorizontal size={18} strokeWidth={1.9} /></span>
           <div className="settingsIntroTitle">
             <h1>Settings</h1>
-            <p>Make your music player feel like yours.</p>
           </div>
         </div>
         <span className="settingsIntroCurrent" aria-label="Current settings section">

@@ -1,5 +1,5 @@
 /* Shared control skin; feature owners retain layout and sizing exceptions. */
-.app :is(.mainAction, .heroMain, .simpleAction, .updatePrimaryButton, .settingsActionButton.primary){
+.app :is(.mainAction, .heroMain, .updatePrimaryButton, .settingsActionButton.primary){
   min-height: var(--lt-control-height) !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -7,17 +7,17 @@
   gap: 9px !important;
   padding: 0 16px !important;
   border-radius: var(--lt-control-radius) !important;
-  border: 1px solid color-mix(in srgb, var(--accent) 52%, rgba(255,255,255,.12)) !important;
+  border: 1px solid transparent !important;
   background: var(--lt-accent) !important;
   color: var(--accent-contrast, #06100b) !important;
-  font-weight: 700 !important;
+  font-weight: 600 !important;
   letter-spacing: -.01em !important;
   text-decoration: none !important;
   box-shadow: none !important;
   cursor: pointer;
 }
 
-.app :is(.softButton, .heroGhost, .simpleGhost, .settingsActionButton, .settingsTinyButton):not(.primary):not(.danger):not(.main){
+.app :is(.softButton, .heroGhost, .settingsActionButton, .settingsTinyButton):not(.primary):not(.danger):not(.main){
   min-height: var(--lt-control-height) !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -25,30 +25,30 @@
   gap: 8px !important;
   padding: 0 14px !important;
   border-radius: var(--lt-control-radius) !important;
-  border: 1px solid var(--lt-border) !important;
-  background: color-mix(in srgb, var(--lt-text) 5%, transparent) !important;
+  border: 1px solid transparent !important;
+  background: var(--lt-surface-soft) !important;
   color: var(--lt-text) !important;
-  font-weight: 650 !important;
+  font-weight: 550 !important;
   text-decoration: none !important;
   box-shadow: none !important;
   cursor: pointer;
 }
 
-.app :is(.mainAction, .heroMain, .simpleAction, .updatePrimaryButton, .settingsActionButton.primary):hover:not(:disabled){
-  border-color: color-mix(in srgb, var(--accent) 66%, rgba(255,255,255,.18)) !important;
+.app :is(.mainAction, .heroMain, .updatePrimaryButton, .settingsActionButton.primary):hover:not(:disabled){
+  border-color: transparent !important;
   box-shadow: none !important;
   filter: none !important;
 }
 
-.app :is(.softButton, .heroGhost, .simpleGhost, .settingsActionButton, .settingsTinyButton):not(.primary):not(.danger):not(.main):hover:not(:disabled){
-  border-color: color-mix(in srgb, var(--accent) 32%, rgba(255,255,255,.14)) !important;
+.app :is(.softButton, .heroGhost, .settingsActionButton, .settingsTinyButton):not(.primary):not(.danger):not(.main):hover:not(:disabled){
+  border-color: transparent !important;
   background: color-mix(in srgb, var(--lt-text) 9%, transparent) !important;
   color: var(--lt-text) !important;
   box-shadow: none !important;
   filter: none !important;
 }
 
-.app :is(.dangerButton, .danger, .resetButton){
+.app :is(.dangerButton, .danger){
   min-height: var(--lt-control-height) !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -63,7 +63,7 @@
   box-shadow: none !important;
 }
 
-.app :is(.dangerButton, .danger, .resetButton):hover:not(:disabled){
+.app :is(.dangerButton, .danger):hover:not(:disabled){
   border-color: var(--lt-danger) !important;
   background: color-mix(in srgb, var(--lt-danger) 12%, transparent) !important;
   color: var(--lt-danger) !important;
@@ -80,15 +80,15 @@
   display: inline-grid !important;
   place-items: center !important;
   border-radius: var(--lt-control-radius) !important;
-  border: 1px solid var(--lt-border) !important;
-  background: color-mix(in srgb, var(--lt-text) 5%, transparent) !important;
+  border: 1px solid transparent !important;
+  background: var(--lt-surface-soft) !important;
   color: var(--lt-text) !important;
   box-shadow: none !important;
 }
 
 .app :is(.iconAction, .songMenuButton, .closeModalButton, .updateToastClose):hover:not(:disabled),
 .app :is(.circleButton):not(.playerBar *):hover:not(:disabled){
-  border-color: color-mix(in srgb, var(--accent) 30%, rgba(255,255,255,.12)) !important;
+  border-color: transparent !important;
   background: color-mix(in srgb, var(--lt-text) 9%, transparent) !important;
   color: var(--lt-text) !important;
   box-shadow: none !important;
@@ -111,11 +111,11 @@
 .app :is(input:not(:where([type="checkbox"], [type="radio"], [type="range"])), textarea){
   color: var(--lt-text) !important;
   border-color: var(--lt-border) !important;
-  background-color: var(--lt-surface) !important;
+  background-color: var(--lt-surface-soft) !important;
 }
 
 .app :is(input, textarea)::placeholder{
-  color: color-mix(in srgb, var(--lt-text) 70%, var(--lt-bg)) !important;
+  color: var(--lt-muted) !important;
 }
 
 input[type="range"]{
@@ -137,5 +137,5 @@ input[type="range"]::-webkit-slider-thumb{
 .app :is(button, input, textarea, select):disabled{
   opacity: .56 !important;
   cursor: not-allowed !important;
-  filter: saturate(.78) !important;
+  filter: none !important;
 }

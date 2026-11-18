@@ -1,0 +1,27 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import test from "node:test";
+import ts from "typescript";
+import { runInNewContext } from "node:vm";
+test("collection menu only notifies subscribers when its snapshot changes", () => {
+  const source = fs.readFileSync("src/features/shell/collectionMenuStore.ts", "utf8");
+  const {outputText} = ts.transpileModule(source, {compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}});
+  const exports = {};
+  runInNewContext(outputText, {exports});
+  const menu = exports.createCollectionMenuStore();
+  const another = exports.createCollectionMenuStore();
+  let notices = 0;
+  const remove = menu.subscribe(() => notices++);
+  const state = {target:{kind:"artist",id:"one"},x:1,y:2};
+  menu.open(state);
+  assert.equal(menu.getSnapshot(), state);
+  assert.equal(another.getSnapshot(), null);
+  menu.open(state);
+  assert.equal(notices, 1);
+  menu.close();
+  menu.close();
+  assert.equal(notices, 2);
+  remove();
+  menu.open(state);
+  assert.equal(notices, 2);
+});

@@ -17,7 +17,7 @@ function loadCommonJs(relative) {
 
 const layout = loadCommonJs("src/features/home/homeLayout.ts");
 const plain = (value) => JSON.parse(JSON.stringify(value));
-const defaults = ["jumpBack", "listenNow", "dailyMixes", "recentlyPlayed", "mostListened", "newAlbums", "newReleases", "likedSongs", "rediscover", "notPlayedYet"];
+const defaults = ["jumpBack", "listenNow", "dailyMixes", "recentlyPlayed", "mostListened", "newReleases", "likedSongs", "rediscover", "notPlayedYet"];
 const defaultHidden = ["likedSongs", "rediscover", "notPlayedYet"];
 const defaultVisible = defaults.filter((id) => !defaultHidden.includes(id));
 
@@ -31,7 +31,7 @@ test("Home shows the default sections in order until customized", () => {
 });
 
 test("saved order wins, unknown ids are dropped and new sections are appended", () => {
-  assert.deepEqual(plain(layout.resolveHomeSectionOrder(["newReleases", "bogus", "listenNow", "newReleases"])), ["newReleases", "listenNow", "jumpBack", "dailyMixes", "recentlyPlayed", "mostListened", "newAlbums", "likedSongs", "rediscover", "notPlayedYet"]);
+  assert.deepEqual(plain(layout.resolveHomeSectionOrder(["newReleases", "newAlbums", "bogus", "listenNow", "newReleases"])), ["newReleases", "listenNow", "jumpBack", "dailyMixes", "recentlyPlayed", "mostListened", "likedSongs", "rediscover", "notPlayedYet"]);
   assert.deepEqual(plain(layout.normalizeHomeHidden("listenNow")), []);
   assert.deepEqual(plain(layout.normalizeHomeHidden(["listenNow", "bogus", "listenNow"])), ["listenNow"]);
 });
@@ -57,7 +57,9 @@ test("Customize Home edits the layout instead of opening Covers", () => {
   const home = read("src/features/home/HomeView.tsx");
   assert.match(home, /<HomeCustomizePanel/);
   assert.doesNotMatch(home, /className="homeCustomizeButton" type="button" onClick=\{openCoversViewWithCurrentSong\}/);
-  assert.match(read("src/App.tsx"), /updateHomeLayout: \(patch\) => void updateSettingsPatch\(patch\)/);
+  const app = read("src/App.tsx");
+  assert.match(app, /updateHomeLayout: homeUpdateLayout/);
+  assert.match(app, /homeUpdateLayout = useStableCallback\([^\n]*updateSettingsPatch\(patch\)/);
   assert.match(read("src/features/settings/settings.constants.ts"), /homeSectionOrder:\[\],homeHiddenSections:\["likedSongs","rediscover","notPlayedYet"\]/);
   assert.match(read("src/features/home/HomeCustomizePanel.tsx"), /homeHiddenSections: \[\.\.\.defaultHiddenHomeSections\]/);
 });
@@ -73,11 +75,6 @@ test("Recently played lists played songs newest first and skips missing files", 
   assert.deepEqual(ids(picks.pickRecentlyPlayed(songs)), ["new", "old"]);
 });
 
-test("New albums puts the newest additions first", () => {
-  const album = (id, latestAdded, songs = [song(id)]) => ({ id, title: id, artist: "a", songs, trackCount: songs.length, latestAdded });
-  const albums = [album("older", 10), album("newest", 30), album("missing", 50, [song("x", { fileExists: false })]), album("middle", 20)];
-  assert.deepEqual(ids(picks.pickNewAlbums(albums)), ["newest", "middle", "older"]);
-});
 
 test("Liked, Rediscover and Not played yet pick the right songs", () => {
   const songs = [
@@ -137,3 +134,34 @@ test("Customize Home restores focus and moves away from disabled arrows", () => 
   assert.match(css, /max-height: min\(520px, calc\(100dvh - 120px\)\)/);
 });
 
+
+test("Daily mix artwork is distinct, ordered, and limited to four covers", () => {
+  const tracks = [
+    song("first", { coverThumbUrl: "/shared.webp" }),
+    song("second", { coverThumbUrl: "/shared.webp" }),
+    song("fallback"),
+    song("third", { coverUrl: "/third.png" }),
+    song("fourth", { coverPath: "/fourth.png" }),
+    song("fifth", { coverUrl: "/fifth.png" })
+  ];
+  assert.deepEqual(ids(picks.pickHomeMixArtwork(tracks)), ["first", "third", "fourth", "fifth"]);
+  assert.deepEqual(ids(picks.pickHomeMixArtwork([])), []);
+  assert.deepEqual(ids(picks.pickHomeMixArtwork([tracks[0], tracks[1]])), ["first"]);
+  assert.deepEqual(ids(picks.pickHomeMixArtwork(tracks.slice(0, 3))), ["first", "fallback"]);
+  assert.equal(tracks.length, 6);
+});
+
+
+test("Most played shelves rank real listening history and exclude unplayed or missing tracks", () => {
+  const source = [song("new"), song("two", { playCount: 2 }), song("old", { playCount: 10, lastPlayed: daysAgo(30) }), song("recent", { playCount: 10, lastPlayed: daysAgo(1) }), song("missing", { playCount: 100, fileExists: false })];
+  assert.deepEqual(ids(picks.pickMostPlayedSongs(source)), ["recent", "old", "two"]);
+  assert.deepEqual(ids(picks.pickMostPlayedSongs(source, 1)), ["recent"]);
+  assert.deepEqual(ids(picks.pickMostPlayedSongs(source, 0)), []);
+});
+
+test("recently added uses bounded stable newest-first selection", () => {
+  const tracks = [song("old", {dateAdded: "2024-01-01"}), song("new", {dateAdded: "2026-01-01"}), song("tie", {dateAdded: "2026-01-01"}), song("invalid", {dateAdded: ""})];
+  assert.deepEqual(ids(picks.pickRecentlyAdded(tracks, 2)), ["new", "tie"]);
+  assert.deepEqual(ids(picks.pickRecentlyAdded(tracks, 4)), ["new", "tie", "old", "invalid"]);
+  assert.deepEqual(ids(picks.pickRecentlyAdded(tracks, 0)), []);
+});

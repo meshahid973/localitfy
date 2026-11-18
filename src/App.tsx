@@ -1,15 +1,5 @@
 import { lazy, startTransition, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
-import {
-  FolderPlus,
-  SkipBack,
-  SkipForward,
-  Repeat2,
-  X,
-  Send
-} from "lucide-react";
-import { useProximityMotion } from "./features/shell/useProximityMotion";
 import { HtmlAudioEngine } from "./features/player/engine/htmlAudioEngine";
 import { createPlayerController } from "./features/player/engine/playerController";
 import { useNativeMediaSession } from "./features/player/useNativeMediaSession";
@@ -19,27 +9,6 @@ import { useSongRadio } from "./features/player/useSongRadio";
 import { useNotForMe } from "./features/analysis/notForMe";
 import { devPerfStart, devPerfEnd, measureDevTime } from "./shared/perf/devPerf";
 import type { PlayerEngineSource } from "./features/player/engine/PlayerEngine";
-import {
-  initLocalitfyAnalytics,
-  trackAcquisitionSource,
-  trackAppActive,
-  trackAppBackgrounded,
-  trackAppForegrounded,
-  trackAppLaunched,
-  trackAppSessionEnded,
-  trackAppView,
-  trackSettingsOpened,
-  trackThemeChanged,
-  trackSongsImported,
-  trackImportFailed,
-  trackLibrarySnapshot,
-  trackLibraryViewChanged,
-  trackDownloadsOpened,
-  trackDiscordToggled,
-  trackOnboardingCompleted,
-  trackOnboardingSkipped,
-  trackError
-} from "./analytics";
 import { useAnalyticsRuntime } from "./features/analytics/useAnalyticsRuntime";
 import {
   enrichDownloadResultsWithLibraryMatches,
@@ -59,38 +28,33 @@ import { useScreensaverController } from "./features/shell/useScreensaverControl
 import { useDiagnosticsInfo } from "./features/shell/useDiagnosticsInfo";
 import { useFeedbackController } from "./features/feedback";
 import { usePlaylistsController } from "./features/playlists";
-import { useAlbumsController } from "./features/albums/useAlbumsController";
 import { useAppMenuCommands } from "./features/shell/useAppMenuCommands";
 import { updateStatusLabel, useUpdatesController } from "./features/updates";
 import { useSettingsController } from "./features/settings";
-import { Cover } from "./features/covers/Cover";
 import { useCoversController } from "./features/covers";
-import { VirtualHomeSongCards, VirtualSongRows } from "./features/library/components/SongRows";
+import type { VirtualSongRowsProps } from "./features/library/components/SongRows";
 import { useLibraryController } from "./features/library";
 import { subscribeWatchedFoldersChange } from "./features/library/watchedFolderBridge";
 import { reconcileLibraryIndex, patchLibrarySong, replaceLibrarySong } from "./features/search/incrementalLibraryIndex";
+import { pickRecentlyAdded } from "./features/home/homeShelfPicks";
 import { createMetadataCleanPreview } from "./features/library/metadataCleanPreview";
 import {
-  buildAlbumIdBySongId, getPlayableUniqueSongIds, getRepeatPreview, getSourceLoopRestart, getSourcePreviousStep, playbackSourceRef,
+  getPlayableUniqueSongIds, getRepeatPreview, getSourceLoopRestart, getSourcePreviousStep,
   repeatButtonTitleFor, resolveNowPlayingContext
 } from "./features/player/playbackSource";
 import type { PlaybackSource, PlaybackSourceRef } from "./features/player/playbackSource";
 import { makeShuffledPlayableSongs } from "./features/player/shuffleSongs";
 import { useNavigationHistory } from "./features/shell/useNavigationHistory";
 import { revealSidebarSettingsPanel } from "./features/shell/sidebarLayout";
-import Onboarding from "./Onboarding";
 import CatBuddy from "./CatBuddy";
-import { PlayerPlayPauseMorphIcon } from "./features/player/PlayerPlayPauseMorphIcon";
 import { runLocaltifyIdleTask } from "./app/runtime/idle";
 import { useBodyRuntimeClasses } from "./app/runtime/useBodyRuntimeClasses";
 import { useAppLifecycleRuntime } from "./app/runtime/useAppLifecycleRuntime";
 import { formatAnalyticsDuration, localtifyAnalyticsNumber, localtifyAnalyticsString } from "./features/analytics/formatters";
-import { applyVisualCustomizationDefaults, VISUAL_CUSTOMIZATION_DEFAULTS } from "./features/settings/visualCustomization";
+import { applyVisualCustomizationDefaults, migrateVisualSettings, VISUAL_CUSTOMIZATION_DEFAULTS } from "./features/settings/visualCustomization";
 import { getLocaltifyPlatformInfo } from "./app/platform";
 import {
-  FEEDBACK_CATEGORY_OPTIONS,
   FEEDBACK_MESSAGE_MAX_LENGTH,
-  FEEDBACK_PROMPT_COPY,
   shouldOpenFeedbackPromptFromGlobalSearch,
   shouldOpenFeedbackPromptFromSettingsSearch
 } from "./features/feedback/feedbackPrompt";
@@ -100,19 +64,10 @@ import {
   shouldOpenOnboardingForThisRelease
 } from "./features/onboarding/onboardingRelease";
 import {
-  restoreCustomThemeAfterUpdate,
-  writeCustomThemeBackupPatch
-} from "./features/settings/customThemePersistence";
-import {
-  BOOT_MIN_VISIBLE_MS,
-  BOOT_STEPS,
-  CUSTOM_THEME_COMMIT_DELAY_MS,
   INITIAL_LIBRARY_RENDER_LIMIT,
   LIBRARY_RENDER_BATCH_SIZE,
   START_WITH_WINDOWS_DEFAULT_KEY,
   V013_DEFAULTS_KEY,
-  loadingScreenGif,
-  localtifyLogo,
   screensaverImage
 } from "./core/app.constants";
 import {
@@ -125,8 +80,7 @@ import {
   defaultSettings,
   settingsCategoryTabs
 } from "./features/settings/settings.constants";
-import { THEME_SWATCH_COLORS, themes } from "./features/settings/theme.constants";
-import { BUILT_IN_CUSTOM_THEME_PRESETS } from "./features/settings/customTheme";
+import { themes } from "./features/settings/theme.constants";
 import { APP_VERSION } from "./features/updates/update.constants";
 import {
   DISCORD_ASSET_KEYS,
@@ -139,7 +93,7 @@ import {
   discordStyleOptions
 } from "./features/discord/discord.constants";
 import { PLAYLIST_STORAGE_KEY } from "./features/playlists/playlist.constants";
-import { clamp, collapseSpaces, formatTime } from "./shared/utils/format";
+import { clamp, formatTime } from "./shared/utils/format";
 import { useStableCallback } from "./shared/hooks/useStableCallback";
 import { makeLocalId, readLocalJson } from "./shared/storage/localStorage";
 import {
@@ -173,17 +127,8 @@ import {
   useCoverAverageStyle
 } from "./features/covers";
 import {
-  accentTextColor,
-  buildAnimatedThemeVisualStyle,
-  getCustomThemeColorPatch,
-  hexToRgbString,
-  hexToRgbaString,
-  makeCustomThemeColors,
-  makeThemePresetStyle,
   normalizeCoverColorSyncMode,
-  normalizeHexColor,
-  normalizeThemeId,
-  writeSavedCustomThemePresets
+  normalizeThemeId
 } from "./features/settings";
 import { buildDiscordPreview, buildDiscordSongSearchUrl } from "./features/discord";
 import { cleanPlaylistList } from "./features/playlists";
@@ -196,7 +141,7 @@ import type {
 } from "./features/library/song.types";
 import { getLibraryDropSideInfoForElement, getLibraryDropSideForElement, getLibraryDropSide, getLibraryDropElement } from "./features/library/dragGeometry";
 import type { DownloadQueueItem, DownloadResult, SpotifyTrack } from "./features/downloads/download.types";
-import type { Settings, SettingsCategory, CustomThemeColorKey, CustomThemePreset } from "./features/settings/settings.types";
+import type { Settings, SettingsCategory } from "./features/settings/settings.types";
 import type { CoverColorSyncMode, SecretMode, SecretTriggerMode, ThemeId } from "./features/settings/theme.types";
 import type { DiscordArtMode } from "./features/discord/discord.types";
 import type { Playlist, PlaylistSummary } from "./features/playlists/playlist.types";
@@ -207,6 +152,8 @@ import type { View } from "./features/shell/view.types";
 import { usePlaybackConnect } from "./features/connect/usePlaybackConnect";
 import { useDevToolsShortcut } from "./features/shell/useDevToolsShortcut";
 
+const Onboarding = lazy(() => import("./Onboarding"));
+const FeedbackPrompt = lazy(() => import("./features/feedback/FeedbackPromptModal"));
 const SettingsCategoryContent = lazy(() => import("./features/settings/SettingsCategoryContent"));
 
 
@@ -218,7 +165,7 @@ function MainModeApp() {
     listeningHistoryRef, audioRef, playerEngineRef, playerControllerRef, playbackTransitionRef,
     crossfadeIntervalRef, crossfadeAutoStartedRef, crossfadeAutoTargetRef, crossfadeMainPauseGuardRef,
     crossfadeLastStartAtRef, crossfadeHandoffClearTimerRef, crossfadeHandoffRef, fadeIntervalRef,
-    animationFrameRef, progressLoopTimeoutRef, backgroundAudioRepairTimerRef, playerResizeFrameRef,
+    animationFrameRef, progressLoopTimeoutRef, playerResizeFrameRef,
     pendingPlayRef, countPlayRef, playCountSongIdRef, playCountListenedRef, playCountLastTimeRef,
     sleepTimerRef, positionSaveRef, nextAudioRef, playbackUrlCacheRef, playbackUrlPendingRef,
     lastQueueHistoryRef, songRef, timeRef, durationRef, playingRef, volumeRef, effectiveVolumeRef, lastNonZeroVolumeRef,
@@ -230,7 +177,7 @@ function MainModeApp() {
     currentTime, setCurrentTime, currentDuration, setCurrentDuration, isSeeking, setIsSeeking,
     seekDraftPercent, setSeekDraftPercent, seekDraftPercentRef, isSeekingRef, seekDraftFrameRef,
     progressInputRefs, progressTimeLabelRefs, progressDurationLabelRefs, lastProgressUiPaintRef,
-    lastProgressStatePaintRef, statusText, setStatusText, playerError, setPlayerError,
+    statusText, setStatusText, playerError, setPlayerError,
     crossfadePreviewSongId, setCrossfadePreviewSongId, nowPlayingTransitionKey, setNowPlayingTransitionKey,
     playQueue, setPlayQueue, setQueueHistory, repeatPlaylist,
     queueDropHot, setQueueDropHot, queueDropHotRef
@@ -258,9 +205,9 @@ function MainModeApp() {
   const heroReflowTimerRef = useRef<number | null>(null);
   const heroCoverMotionTimerRef = useRef<number | null>(null);
   const appRootRef = useRef<HTMLElement | null>(null);
-  const analyticsViewRef = useRef<View>("home");
-  const librarySnapshotSignatureRef = useRef("");
+  const activeViewRef = useRef<View>("home");
   const libraryOrderSaveTimerRef = useRef<number | null>(null);
+  const lastSavedOrderRef = useRef<string[]>([]);
   const rememberCurrentSongTimerRef = useRef<number | null>(null);
   const latestRememberedSongIdRef = useRef("");
   const selectSongBurstTimerRef = useRef<number | null>(null);
@@ -272,27 +219,16 @@ function MainModeApp() {
   const [bootError, setBootError] = useState<string | null>(null);
   const [bootLogCopied, setBootLogCopied] = useState(false);
   const [bootRetryKey, setBootRetryKey] = useState(0);
-  const [bootStepIndex, setBootStepIndex] = useState(0);
-  const [bootStage, setBootStage] = useState("starting localtify...");
   const [songs, setSongs] = useState<Song[]>([]);
   const {
     settings, setSettings, settingsRef,
     settingsCategory, setSettingsCategory,
     settingsSearch, setSettingsSearch, deferredSettingsSearch,
-    customThemeName, setCustomThemeName,
-    setCustomThemeHexDrafts,
-    savedCustomThemes, setSavedCustomThemes,
     themeSettling,
     themeMotionReady, setThemeMotionReady,
     saveSettingsTimerRef,
     themeSettlingTimerRef,
-    customThemeCommitTimerRef,
-    customThemeQuietCommitTimerRef,
-    customThemeQuietPatchRef,
-    customThemePreviewFrameRef,
     themePaintIdleTimerRef,
-    customThemeLivePatchRef,
-    pendingCustomThemePreviewPatchRef,
     themeSettlingRef
   } = useSettingsController({
     initialSettings: () => applyVisualCustomizationDefaults(defaultSettings as Settings)
@@ -360,7 +296,6 @@ function MainModeApp() {
   } = useUpdatesController({
     ready,
     autoUpdateEnabled: settings.autoUpdateEnabled,
-    analyticsViewRef,
     setStatusText,
     showAppToast
   });
@@ -413,7 +348,6 @@ function MainModeApp() {
   const nav = useNavigationHistory(view, changeView, contentRef);
   const [queuePanelOpen, setQueuePanelOpen] = useState(false);
   const [lyricsOpen, setLyricsOpen] = useState(false);
-  const arcadeGhostUnlocked = false;
 
 
   useBodyRuntimeClasses({
@@ -428,50 +362,35 @@ function MainModeApp() {
 
   function repairPlaybackAfterAppReturns(reason: "focus" | "visibility" | "background-tick") {
     const audio = audioRef.current;
-    if (!audio) return;
+    const song = songRef.current;
+    if (!audio || !song || !playingRef.current) return;
 
+    // Focus is not a transport command. Never reapply gain, pitch or graph
+    // parameters, reload a source or interfere with a healthy crossfade.
     resumeAudioContextSafely();
+    const state = playbackTransitionRef.current.snapshot();
+    if (!audio.paused || audio.ended || audio.error || audio.seeking || pendingPlayRef.current ||
+        state.phase !== "playing" || state.sourceId !== song.id || state.targetId ||
+        crossfadeHandoffRef.current || crossfadeMainPauseGuardRef.current) return;
+    if (reason === "background-tick" && !document.hidden) return;
 
-    if (!playingRef.current && !pendingPlayRef.current) return;
-    if (!songRef.current) return;
-
-    applyPlaybackRateSettings(audio);
-    const repairedVolume = getTargetAudioVolume(songRef.current);
-    setAudioElementVolume(audio, repairedVolume);
-    effectiveVolumeRef.current = repairedVolume;
-    syncAudioEffectGraph(audio);
-
-    if (!audio.paused) return;
-
-    const canRepair = reason !== "background-tick" || document.hidden;
-    if (!canRepair) return;
-
-    const repairGeneration = playbackTransitionRef.current.snapshot().generation;
+    pendingPlayRef.current = true;
+    const repairGeneration = state.generation;
     void audio.play()
       .then(() => {
-        if (playbackTransitionRef.current.snapshot().generation !== repairGeneration) {
-          if (playbackTransitionRef.current.snapshot().phase === "paused") audio.pause();
+        if (audioRef.current !== audio || !playbackTransitionRef.current.isCurrent(repairGeneration, song.id)) {
+          if (audioRef.current === audio && playbackTransitionRef.current.snapshot().phase === "paused") audio.pause();
           return;
         }
         pendingPlayRef.current = false;
-        if (!playingRef.current) setIsPlaying(true);
       })
-      .catch(() => undefined);
+      .catch(() => {
+        if (audioRef.current === audio && playbackTransitionRef.current.isCurrent(repairGeneration, song.id)) pendingPlayRef.current = false;
+      });
   }
 
   useAppLifecycleRuntime({
-    appVersion: APP_VERSION,
-    analytics: {
-      init: initLocalitfyAnalytics,
-      appLaunched: trackAppLaunched,
-      appSessionEnded: trackAppSessionEnded,
-      appActive: trackAppActive,
-      appBackgrounded: trackAppBackgrounded,
-      appForegrounded: trackAppForegrounded,
-      acquisitionSource: trackAcquisitionSource,
-      error: trackError
-    },
-    analyticsViewRef,
+    isPlaying,
     appRootRef,
     playingRef,
     setIsAppBackgrounded,
@@ -515,7 +434,6 @@ function MainModeApp() {
   }
 
   function openSettingsPanel(category: SettingsCategory = "appearance") {
-    trackSettingsOpened();
     setSettingsCategory(category);
     setEditorSong(null);
     setDeleteTarget(null);
@@ -527,8 +445,10 @@ function MainModeApp() {
     revealSidebarSettingsPanel(settings.reducedMotion);
   }
 
-  function changeView(nextView: View, source: "nav" | "onboarding" | "settings" | "unknown" = "nav") {
+  function changeView(nextView: View, _source: "nav" | "onboarding" | "settings" | "unknown" = "nav") {
     setLyricsOpen(false);
+    // Old runtime callers may still provide the retired album destination.
+    if (String(nextView) === "albums") nextView = "library";
     if (view === nextView) return;
 
     if (viewSwitchTimerRef.current !== null) {
@@ -541,24 +461,6 @@ function MainModeApp() {
     // every page feel like it was loading. Keep the page change low-priority,
     // but do not add the extra visual shutdown state.
     setIsViewSwitching(false);
-
-    trackAppView(nextView, source, {
-      previous_view: view,
-      song_count: songs.length,
-      liked_count: likedSongs.length
-    });
-
-    if (nextView === "library" || nextView === "artists" || nextView === "genres" || nextView === "liked" || view === "library" || view === "artists" || view === "genres" || view === "liked") {
-      trackLibraryViewChanged({
-        previous_view: view,
-        library_view: nextView,
-        source
-      });
-    }
-
-    if (nextView === "downloads") {
-      trackDownloadsOpened({ source, previous_view: view });
-    }
 
     startTransition(() => {
       setView(nextView);
@@ -574,7 +476,7 @@ function MainModeApp() {
   }, [view, deferredQuery, settings.denseList]);
 
   useEffect(() => {
-    analyticsViewRef.current = view;
+    activeViewRef.current = view;
   }, [view]);
 
   useEffect(() => {
@@ -744,26 +646,23 @@ function MainModeApp() {
   }, [visualCurrentSong?.id, visualCurrentSong?.filePath, visualCurrentSong?.title, visualCurrentSong?.artist, visualCurrentSong?.coverUrl]);
 
   useEffect(() => {
-    if (!ready || !songs.length) return undefined;
-
-    if (libraryOrderSaveTimerRef.current !== null) {
-      window.clearTimeout(libraryOrderSaveTimerRef.current);
-    }
-
+    if (!ready) return;
+    const lastOrder = lastSavedOrderRef.current;
+    if (lastOrder.length === songs.length && songs.every((song, i) => song.id === lastOrder[i])) return;
+    let cancelIdle: (() => void) | undefined;
     libraryOrderSaveTimerRef.current = window.setTimeout(() => {
       libraryOrderSaveTimerRef.current = null;
-      const snapshot = songs;
-
-      runLocaltifyIdleTask(() => {
-        saveLibraryOrder(snapshot);
+      cancelIdle = runLocaltifyIdleTask(() => {
+        saveLibraryOrder(songs);
+        lastSavedOrderRef.current = songs.map(song => song.id);
       }, 1600);
     }, 520);
-
     return () => {
       if (libraryOrderSaveTimerRef.current !== null) {
         window.clearTimeout(libraryOrderSaveTimerRef.current);
         libraryOrderSaveTimerRef.current = null;
       }
+      cancelIdle?.();
     };
   }, [ready, songs]);
 
@@ -790,7 +689,7 @@ function MainModeApp() {
       appRootRef.current?.classList.add("isScrolling");
 
       const nearBottom = node.scrollTop + node.clientHeight >= node.scrollHeight - 680;
-      const activeView = analyticsViewRef.current;
+      const activeView = activeViewRef.current;
       const shouldLoadMore = nearBottom && (activeView === "library" || activeView === "liked" || activeView === "home");
 
       if (shouldLoadMore && libraryRenderLimitRef.current < libraryListLengthRef.current) {
@@ -859,25 +758,6 @@ function MainModeApp() {
         window.clearTimeout(themeSettlingTimerRef.current);
       }
 
-      if (customThemeCommitTimerRef.current !== null) {
-        window.clearTimeout(customThemeCommitTimerRef.current);
-        customThemeCommitTimerRef.current = null;
-      }
-
-      if (customThemeQuietCommitTimerRef.current !== null) {
-        window.clearTimeout(customThemeQuietCommitTimerRef.current);
-        customThemeQuietCommitTimerRef.current = null;
-      }
-      customThemeQuietPatchRef.current = {};
-
-      if (customThemePreviewFrameRef.current !== null) {
-        window.cancelAnimationFrame(customThemePreviewFrameRef.current);
-        customThemePreviewFrameRef.current = null;
-      }
-
-      customThemeLivePatchRef.current = {};
-      pendingCustomThemePreviewPatchRef.current = {};
-
       if (themePaintIdleTimerRef.current !== null) {
         window.clearTimeout(themePaintIdleTimerRef.current);
         themePaintIdleTimerRef.current = null;
@@ -931,62 +811,9 @@ function MainModeApp() {
     };
   }, []);
 
-  const effectiveSimpleMode = false;
-  const selectedThemeId = settings.theme as string;
-  const safeTheme: ThemeId = selectedThemeId === "arcadeGhost" && !arcadeGhostUnlocked
-    ? "mint"
-    : normalizeThemeId(selectedThemeId);
-  const effectiveTheme: ThemeId = safeTheme;
-  const visibleThemes = themes;
-  const currentTheme = themes.find((theme) => theme.id === effectiveTheme) ?? themes.find((theme) => theme.id === "mint") ?? themes[0];
-  const animatedThemeSeedRef = useRef(`localtify-theme-motion-${Date.now()}-${Math.random().toString(16).slice(2)}`);
-  const themePresetStyle = useMemo<CSSProperties>(() => makeThemePresetStyle(effectiveTheme), [effectiveTheme]);
-  const animatedThemeVisualStyle = useMemo<CSSProperties>(
-    () => buildAnimatedThemeVisualStyle(effectiveTheme, animatedThemeSeedRef.current),
-    [effectiveTheme]
-  );
-  const showStarBackdrop = false;
-
-  useEffect(() => {
-    setThemeMotionReady(false);
-
-    if (settings.reducedMotion || effectiveTheme !== "stars") {
-      setThemeMotionReady(true);
-      return;
-    }
-
-    let firstFrame = 0;
-    let secondFrame = 0;
-    let warmupTimer = 0;
-
-    firstFrame = window.requestAnimationFrame(() => {
-      secondFrame = window.requestAnimationFrame(() => {
-        warmupTimer = window.setTimeout(() => setThemeMotionReady(true), 260);
-      });
-    });
-
-    return () => {
-      window.cancelAnimationFrame(firstFrame);
-      window.cancelAnimationFrame(secondFrame);
-      window.clearTimeout(warmupTimer);
-    };
-  }, [effectiveTheme, settings.reducedMotion]);
-
-  const shouldSuspendProximityMotion = false;
-
-  useProximityMotion({
-    rootRef: appRootRef,
-    disabled: settings.reducedMotion,
-    suspended:
-      isAppBackgrounded ||
-      !themeMotionReady ||
-      shouldSuspendProximityMotion ||
-      isSeeking ||
-      isVolumeDragging ||
-      Boolean(draggedSongId) ||
-      isViewSwitching,
-    resetKey: `${effectiveTheme}:${view}:${settingsCategory}:${themeMotionReady ? "ready" : "boot"}:${isPlaying ? "playing" : "idle"}`
-  });
+  const effectiveTheme = normalizeThemeId(settings.theme);
+  const currentTheme = themes.find(theme => theme.id === effectiveTheme) ?? themes[1];
+  useEffect(() => { setThemeMotionReady(true); }, [setThemeMotionReady]);
 
   const platformInfo = useMemo(() => getLocaltifyPlatformInfo(), []);
 
@@ -995,7 +822,7 @@ function MainModeApp() {
 
     let cancelled = false;
 
-    runLocaltifyIdleTask(() => {
+    const cancelIdle = runLocaltifyIdleTask(() => {
       window.localitfy
         .getPerformanceStatus?.()
         .then((status: any) => {
@@ -1006,6 +833,7 @@ function MainModeApp() {
 
     return () => {
       cancelled = true;
+      cancelIdle();
     };
   }, [ready]);
 
@@ -1014,7 +842,7 @@ function MainModeApp() {
 
     let cancelled = false;
 
-    runLocaltifyIdleTask(() => {
+    const cancelIdle = runLocaltifyIdleTask(() => {
       window.localitfy
         .getFeedbackStatus?.()
         .then((status: any) => {
@@ -1036,6 +864,7 @@ function MainModeApp() {
 
     return () => {
       cancelled = true;
+      cancelIdle();
     };
   }, [ready]);
 
@@ -1059,151 +888,7 @@ function MainModeApp() {
   const effectiveCoverColorSyncMode: CoverColorSyncMode = selectedCoverColorSyncMode;
   const effectiveAmbient = !isViewSwitching && effectiveCoverColorSyncMode !== "off";
   const effectiveNotes = !isViewSwitching && (settings.showFloatingNotes || isThreeAm);
-  const customThemeColor = normalizeHexColor(settings.customThemeColor, "#8dffce");
-  const customThemeColor2 = normalizeHexColor(settings.customThemeColor2, customThemeColor);
-  const customThemeBackground = normalizeHexColor(settings.customThemeBackground, "#050517");
-  const customThemeSurface = normalizeHexColor(settings.customThemeSurface, "#151528");
-  const customThemeText = normalizeHexColor(settings.customThemeText, "#f5f3ff");
-  const customThemeHighlight = normalizeHexColor(settings.customThemeHighlight, "#c084fc");
-  const customThemeProgress = normalizeHexColor(settings.customThemeProgress, customThemeColor);
-  const customThemeStyle = useMemo<CSSProperties>(() => {
-    if (!settings.customThemeEnabled) return {};
-
-    return {
-      "--bg": customThemeBackground,
-      "--bg-2": customThemeBackground,
-      "--bg-3": customThemeSurface,
-      "--panel": hexToRgbaString(customThemeSurface, "#151528", 0.42),
-      "--surface": hexToRgbaString(customThemeSurface, "#151528", 0.22),
-      "--surface-2": hexToRgbaString(customThemeSurface, "#151528", 0.32),
-      "--surface-3": hexToRgbaString(customThemeSurface, "#151528", 0.48),
-      "--text": customThemeText,
-      "--text-2": hexToRgbaString(customThemeText, "#f5f3ff", 0.78),
-      "--muted": hexToRgbaString(customThemeText, "#f5f3ff", 0.70),
-      "--accent": customThemeColor,
-      "--button-text-on-accent": accentTextColor(customThemeColor),
-      "--accent-2": customThemeColor2,
-      "--highlight": customThemeHighlight,
-      "--progress": customThemeProgress,
-      "--accent-rgb": hexToRgbString(customThemeColor, "#8dffce"),
-      "--accent-2-rgb": hexToRgbString(customThemeColor2, "#8ecbff"),
-      "--highlight-rgb": hexToRgbString(customThemeHighlight, "#c084fc"),
-      "--progress-rgb": hexToRgbString(customThemeProgress, "#8dffce"),
-      "--accent-soft": hexToRgbaString(customThemeColor, "#8dffce", 0.14),
-      "--accent-line": hexToRgbaString(customThemeColor, "#8dffce", 0.34),
-      "--theme-accent": customThemeColor,
-      "--theme-accent-2": customThemeColor2,
-      "--theme-highlight": customThemeHighlight,
-      "--theme-progress": customThemeProgress,
-      "--theme-card-glass": hexToRgbaString(customThemeColor, "#8dffce", 0.045),
-      "--theme-card-border": hexToRgbaString(customThemeColor, "#8dffce", 0.16),
-      "--theme-hover-glass": hexToRgbaString(customThemeColor, "#8dffce", 0.09),
-      "--theme-hover-border": hexToRgbaString(customThemeColor, "#8dffce", 0.32),
-      "--card-rgb": hexToRgbString(customThemeColor, "#8dffce")
-    } as CSSProperties;
-  }, [
-    settings.customThemeEnabled,
-    customThemeBackground,
-    customThemeSurface,
-    customThemeText,
-    customThemeColor,
-    customThemeColor2,
-    customThemeHighlight,
-    customThemeProgress
-  ]);
-
-
-  const customThemeTokens = useMemo(
-    () =>
-      [
-        { label: "App background", key: "customThemeBackground", value: customThemeBackground, help: "main app color" },
-        { label: "Card color", key: "customThemeSurface", value: customThemeSurface, help: "boxes and panels" },
-        { label: "Button color", key: "customThemeColor", value: customThemeColor, help: "buttons and glow" },
-        { label: "Text color", key: "customThemeText", value: customThemeText, help: "words and labels" }
-      ] as Array<{ label: string; key: CustomThemeColorKey; value: string; help: string }>,
-    [
-      customThemeBackground,
-      customThemeSurface,
-      customThemeColor,
-      customThemeText
-    ]
-  );
-
-  function clearPendingCustomThemeCommit() {
-    if (customThemeCommitTimerRef.current !== null) {
-      window.clearTimeout(customThemeCommitTimerRef.current);
-      customThemeCommitTimerRef.current = null;
-    }
-
-    if (customThemeQuietCommitTimerRef.current !== null) {
-      window.clearTimeout(customThemeQuietCommitTimerRef.current);
-      customThemeQuietCommitTimerRef.current = null;
-    }
-
-    customThemeQuietPatchRef.current = {};
-  }
-
-  function markCustomThemePaintBusy(duration = 520) {
-    document.body.classList.add("localitfyThemePainting");
-
-    if (themePaintIdleTimerRef.current !== null) {
-      window.clearTimeout(themePaintIdleTimerRef.current);
-    }
-
-    themePaintIdleTimerRef.current = window.setTimeout(() => {
-      document.body.classList.remove("localitfyThemePainting");
-      themePaintIdleTimerRef.current = null;
-    }, duration);
-  }
-
-  function clearCustomThemePreviewStyles() {
-    if (customThemePreviewFrameRef.current !== null) {
-      window.cancelAnimationFrame(customThemePreviewFrameRef.current);
-      customThemePreviewFrameRef.current = null;
-    }
-
-    pendingCustomThemePreviewPatchRef.current = {};
-
-    const target = appRootRef.current;
-    if (!target) return;
-
-    [
-      "--bg",
-      "--bg-2",
-      "--bg-3",
-      "--panel",
-      "--surface",
-      "--surface-2",
-      "--surface-3",
-      "--text",
-      "--text-2",
-      "--muted",
-      "--accent",
-      "--accent-2",
-      "--highlight",
-      "--progress",
-      "--accent-rgb",
-      "--accent-2-rgb",
-      "--highlight-rgb",
-      "--progress-rgb",
-      "--accent-soft",
-      "--accent-line",
-      "--theme-accent",
-      "--theme-accent-2",
-      "--theme-highlight",
-      "--theme-progress",
-      "--theme-card-glass",
-      "--theme-card-border",
-      "--theme-hover-glass",
-      "--theme-hover-border",
-      "--card-rgb"
-    ].forEach((name) => target.style.removeProperty(name));
-  }
-
-  function beginFastThemePaint(previewColor?: string) {
-    if (previewColor) {
-      commitCustomThemePreview(previewColor, 0);
-    }
+  function beginFastThemePaint() {
 
     document.body.classList.add("localitfyThemePainting");
 
@@ -1231,270 +916,6 @@ function MainModeApp() {
       themeSettlingRef.current = false;
       themeSettlingTimerRef.current = null;
     }, 180);
-  }
-
-  function applyCustomThemePreviewPatch(patch: Partial<Settings>) {
-    const target = appRootRef.current;
-    if (!target) return;
-
-    const livePatch = {
-      ...customThemeLivePatchRef.current,
-      ...patch
-    };
-
-    const previewColor = normalizeHexColor(String(livePatch.customThemeColor ?? settings.customThemeColor), "#8dffce");
-    const previewColor2 = normalizeHexColor(String(livePatch.customThemeColor2 ?? settings.customThemeColor2), previewColor);
-    const previewBackground = normalizeHexColor(String(livePatch.customThemeBackground ?? settings.customThemeBackground), "#050517");
-    const previewSurface = normalizeHexColor(String(livePatch.customThemeSurface ?? settings.customThemeSurface), "#151528");
-    const previewText = normalizeHexColor(String(livePatch.customThemeText ?? settings.customThemeText), "#f5f3ff");
-    const previewHighlight = normalizeHexColor(String(livePatch.customThemeHighlight ?? settings.customThemeHighlight), "#c084fc");
-    const previewProgress = normalizeHexColor(String(livePatch.customThemeProgress ?? settings.customThemeProgress), previewColor);
-
-    const vars: Record<string, string> = {
-      "--bg": previewBackground,
-      "--bg-2": previewBackground,
-      "--bg-3": previewSurface,
-      "--panel": hexToRgbaString(previewSurface, "#151528", 0.42),
-      "--surface": hexToRgbaString(previewSurface, "#151528", 0.22),
-      "--surface-2": hexToRgbaString(previewSurface, "#151528", 0.32),
-      "--surface-3": hexToRgbaString(previewSurface, "#151528", 0.48),
-      "--text": previewText,
-      "--text-2": hexToRgbaString(previewText, "#f5f3ff", 0.78),
-      "--muted": hexToRgbaString(previewText, "#f5f3ff", 0.70),
-      "--accent": previewColor,
-      "--button-text-on-accent": accentTextColor(previewColor),
-      "--accent-2": previewColor2,
-      "--highlight": previewHighlight,
-      "--progress": previewProgress,
-      "--accent-rgb": hexToRgbString(previewColor, "#8dffce"),
-      "--accent-2-rgb": hexToRgbString(previewColor2, "#8ecbff"),
-      "--highlight-rgb": hexToRgbString(previewHighlight, "#c084fc"),
-      "--progress-rgb": hexToRgbString(previewProgress, "#8dffce"),
-      "--accent-soft": hexToRgbaString(previewColor, "#8dffce", 0.14),
-      "--accent-line": hexToRgbaString(previewColor, "#8dffce", 0.34),
-      "--theme-accent": previewColor,
-      "--theme-accent-2": previewColor2,
-      "--theme-highlight": previewHighlight,
-      "--theme-progress": previewProgress,
-      "--theme-card-glass": hexToRgbaString(previewColor, "#8dffce", 0.045),
-      "--theme-card-border": hexToRgbaString(previewColor, "#8dffce", 0.16),
-      "--theme-hover-glass": hexToRgbaString(previewColor, "#8dffce", 0.09),
-      "--theme-hover-border": hexToRgbaString(previewColor, "#8dffce", 0.32),
-      "--card-rgb": hexToRgbString(previewColor, "#8dffce")
-    };
-
-    Object.entries(vars).forEach(([name, value]) => target.style.setProperty(name, value));
-  }
-
-  function queueCustomThemePreviewPatch(patch: Partial<Settings>) {
-    pendingCustomThemePreviewPatchRef.current = {
-      ...pendingCustomThemePreviewPatchRef.current,
-      ...patch
-    };
-
-    if (customThemePreviewFrameRef.current !== null) return;
-
-    customThemePreviewFrameRef.current = window.requestAnimationFrame(() => {
-      const nextPatch = pendingCustomThemePreviewPatchRef.current;
-      pendingCustomThemePreviewPatchRef.current = {};
-      customThemePreviewFrameRef.current = null;
-      applyCustomThemePreviewPatch(nextPatch);
-    });
-  }
-
-  function stageCustomThemePatch(patch: Partial<Settings>, delay = CUSTOM_THEME_COMMIT_DELAY_MS) {
-    customThemeLivePatchRef.current = {
-      ...customThemeLivePatchRef.current,
-      ...patch,
-      customThemeEnabled: true
-    };
-
-    markCustomThemePaintBusy(delay + 520);
-    queueCustomThemePreviewPatch(customThemeLivePatchRef.current);
-    clearPendingCustomThemeCommit();
-
-    customThemeCommitTimerRef.current = window.setTimeout(() => {
-      const commitPatch = {
-        ...customThemeLivePatchRef.current,
-        customThemeEnabled: true
-      };
-
-      customThemeCommitTimerRef.current = null;
-      customThemeLivePatchRef.current = {};
-
-      startTransition(() => {
-        setSettings((old) => {
-          const next: Settings = {
-            ...old,
-            ...commitPatch
-          };
-
-          settingsRef.current = next;
-
-          if (bootedRef.current) {
-            void saveSettingsSafely(next, false);
-          }
-
-          return next;
-        });
-      });
-    }, delay);
-  }
-
-  function queueQuietCustomThemeColorPatch(patch: Partial<Settings>, delay = 620) {
-    const livePatch = {
-      ...customThemeLivePatchRef.current,
-      ...patch,
-      customThemeEnabled: true
-    };
-
-    customThemeQuietPatchRef.current = {
-      ...customThemeQuietPatchRef.current,
-      ...patch,
-      customThemeEnabled: true
-    };
-
-    customThemeLivePatchRef.current = livePatch;
-
-    // Live preview is DOM-only and rAF-throttled. No React state, no settings
-    // remount, no fade replay while the picker is being dragged.
-    queueCustomThemePreviewPatch(livePatch);
-    document.body.classList.add("localitfyThemePainting");
-
-    if (themePaintIdleTimerRef.current !== null) {
-      window.clearTimeout(themePaintIdleTimerRef.current);
-    }
-
-    themePaintIdleTimerRef.current = window.setTimeout(() => {
-      document.body.classList.remove("localitfyThemePainting");
-      themePaintIdleTimerRef.current = null;
-    }, 160);
-
-    if (customThemeQuietCommitTimerRef.current !== null) {
-      window.clearTimeout(customThemeQuietCommitTimerRef.current);
-    }
-
-    customThemeQuietCommitTimerRef.current = window.setTimeout(() => {
-      const commitPatch = {
-        ...customThemeQuietPatchRef.current,
-        customThemeEnabled: true
-      };
-
-      customThemeQuietCommitTimerRef.current = null;
-      customThemeQuietPatchRef.current = {};
-      customThemeLivePatchRef.current = {};
-
-      startTransition(() => {
-        setSettings((old) => {
-          const next: Settings = {
-            ...old,
-            ...commitPatch
-          };
-
-          settingsRef.current = next;
-
-          if (bootedRef.current) {
-            void saveSettingsSafely(next, false);
-          }
-
-          return next;
-        });
-      });
-    }, delay);
-  }
-
-  function getCustomThemeFallbackColor(key: CustomThemeColorKey) {
-    const fallbackByKey: Record<CustomThemeColorKey, string> = {
-      customThemeColor: "#8dffce",
-      customThemeColor2: customThemeColor,
-      customThemeBackground: "#050517",
-      customThemeSurface: "#151528",
-      customThemeText: "#f5f3ff",
-      customThemeHighlight: "#c084fc",
-      customThemeProgress: customThemeColor
-    };
-
-    return fallbackByKey[key];
-  }
-
-  function stageCustomThemeColor(key: CustomThemeColorKey, value: string) {
-    const safeColor = normalizeHexColor(value, getCustomThemeFallbackColor(key));
-    queueQuietCustomThemeColorPatch({ [key]: safeColor } as Partial<Settings>);
-  }
-
-  function commitCustomThemeHexDraft(key: CustomThemeColorKey, value: string, fallback: string) {
-    const safeColor = normalizeHexColor(value, fallback);
-    setCustomThemeHexDrafts((old) => {
-      const next = { ...old };
-      delete next[key];
-      return next;
-    });
-    stageCustomThemeColor(key, safeColor);
-  }
-
-  function commitCustomThemePreview(color: string, delay = CUSTOM_THEME_COMMIT_DELAY_MS) {
-    const safeColor = normalizeHexColor(color, "#8dffce");
-    stageCustomThemePatch(
-      {
-        customThemeColor: safeColor,
-        customThemeColor2: safeColor,
-        customThemeHighlight: safeColor,
-        customThemeProgress: safeColor
-      },
-      delay
-    );
-  }
-
-  function applyCustomThemePreset(preset: CustomThemePreset) {
-    setCustomThemeHexDrafts({});
-    setCustomThemeName(preset.name || "My Custom Theme");
-    stageCustomThemePatch(preset.colors, 0);
-  }
-
-  function resetCustomThemePalette() {
-    clearPendingCustomThemeCommit();
-    clearCustomThemePreviewStyles();
-    setCustomThemeName("My Custom Theme");
-    void updateSettingsPatch(
-      {
-        customThemeEnabled: false,
-        ...makeCustomThemeColors()
-      },
-      false
-    );
-  }
-
-  function saveCurrentCustomThemePreset() {
-    const presetName = collapseSpaces(customThemeName) || "My Custom Theme";
-    const colors = getCustomThemeColorPatch({
-      ...settings,
-      ...customThemeLivePatchRef.current
-    });
-
-    const preset: CustomThemePreset = {
-      id: makeLocalId("theme"),
-      name: presetName.slice(0, 40),
-      note: "saved custom theme",
-      colors,
-      custom: true,
-      createdAt: Date.now()
-    };
-
-    setSavedCustomThemes((old) => {
-      const next = [preset, ...old.filter((item) => item.name.toLowerCase() !== preset.name.toLowerCase())].slice(0, 18);
-      writeSavedCustomThemePresets(next);
-      return next;
-    });
-
-    stageCustomThemePatch(colors, 0);
-  }
-
-  function removeSavedCustomThemePreset(id: string) {
-    setSavedCustomThemes((old) => {
-      const next = old.filter((preset) => preset.id !== id);
-      writeSavedCustomThemePresets(next);
-      return next;
-    });
   }
 
   function clearSongDragPreview() {
@@ -1624,7 +1045,7 @@ function MainModeApp() {
       }
 
       saveSettingsTimerRef.current = window.setTimeout(() => {
-        writeCustomThemeBackupPatch(nextSettings);
+
         window.localitfy.saveSettings(nextSettings).catch(() => undefined);
         saveSettingsTimerRef.current = null;
       }, 360);
@@ -1635,7 +1056,6 @@ function MainModeApp() {
     setHeroExpanded(!settings.heroExpanded);
   }
 
-  const starParticleStyles = useMemo<CSSProperties[]>(() => [], []);
 
   const libraryIndexRef = useRef<ReturnType<typeof reconcileLibraryIndex> | null>(null);
   const libraryIndex = useMemo(() => {
@@ -1708,7 +1128,6 @@ function MainModeApp() {
     return activePlaylist.songIds.includes(currentSong.id) ? activePlaylist : null;
   }, [activePlaylist, currentSong?.id]);
 
-  const currentNowPlayingLabel = currentPlaybackPlaylist ? `now playing ${currentPlaybackPlaylist.name}` : "now playing";
 
   const selectedPlaylist = useMemo(
     () => playlists.find((playlist) => playlist.id === selectedPlaylistId) ?? playlists[0] ?? null,
@@ -1746,7 +1165,7 @@ function MainModeApp() {
   );
 
 
-  const { analyticsAudienceSnapshot, analyticsAudienceSnapshotReady } = useAnalyticsRuntime({
+  const { analyticsAudienceSnapshot } = useAnalyticsRuntime({
     ready,
     view,
     songs,
@@ -1788,11 +1207,6 @@ function MainModeApp() {
   const longestSongDuration = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "longest_song_duration");
   const longestSongTitle = localtifyAnalyticsString(analyticsAudienceSnapshot, "longest_song_title", "");
 
-  const neverPlayedSongs = useMemo(() => {
-    if (neverPlayedCount <= 0) return [] as Song[];
-    return new Array(neverPlayedCount).fill(null) as Song[];
-  }, [neverPlayedCount]);
-
   const listenedTimeLabel = formatAnalyticsDuration(totalListenedSeconds);
   const libraryLengthLabel = formatAnalyticsDuration(totalLibrarySeconds);
 
@@ -1807,36 +1221,34 @@ function MainModeApp() {
     } as Song;
   }, [longestSongTitle, longestSongDuration]);
 
-  const recentlyAdded = useMemo(() => {
-    return [...songs]
-      .sort((a, b) => new Date(b.dateAdded || 0).getTime() - new Date(a.dateAdded || 0).getTime())
-      .slice(0, 12);
-  }, [songs]);
+  const recentlyAdded = useMemo(() => pickRecentlyAdded(songs, 12), [songs]);
 
   const homeListenNowSongs = useMemo(() => {
     const picked: Song[] = [];
     const seen = new Set<string>();
 
-    [currentSong, ...topSongs, ...recentlyAdded, ...songs].forEach((song) => {
-      if (!song || seen.has(song.id)) return;
-      seen.add(song.id);
-      picked.push(song);
-    });
-
-    return picked.slice(0, 6);
+    for (const shelf of [[currentSong], topSongs, recentlyAdded, songs]) {
+      for (const song of shelf) {
+        if (!song || !isPlayableSong(song) || seen.has(song.id)) continue;
+        seen.add(song.id);
+        picked.push(song);
+        if (picked.length === 8) return picked;
+      }
+    }
+    return picked;
   }, [currentSong, topSongs, recentlyAdded, songs]);
 
   const homeFreshShelfSongs = useMemo(() => {
     const picked: Song[] = [];
     const seen = new Set<string>();
 
-    [...recentlyAdded, ...songs].forEach((song) => {
-      if (!song || seen.has(song.id)) return;
+    for (const song of recentlyAdded) {
+      if (!isPlayableSong(song) || seen.has(song.id)) continue;
       seen.add(song.id);
       picked.push(song);
-    });
-
-    return picked.slice(0, 10);
+      if (picked.length === 10) break;
+    }
+    return picked;
   }, [recentlyAdded, songs]);
 
   const libraryHealthLabel = !songs.length
@@ -1922,56 +1334,6 @@ function MainModeApp() {
     effectiveMissingFileCount
   ]);
 
-  useEffect(() => {
-    if (!ready || !analyticsAudienceSnapshotReady) return;
-
-    const signature = [
-      songs.length,
-      likedSongs.length,
-      playedSongCount,
-      totalPlays,
-      libraryAlbumCount,
-      libraryArtistCount,
-      view,
-      settings.theme,
-      settings.customThemeEnabled,
-      settings.discordEnabled
-    ].join(":");
-
-    if (librarySnapshotSignatureRef.current === signature) return;
-    librarySnapshotSignatureRef.current = signature;
-
-    runLocaltifyIdleTask(() => {
-      trackLibrarySnapshot({
-        song_count: songs.length,
-        liked_count: likedSongs.length,
-        played_song_count: playedSongCount,
-        never_played_count: neverPlayedCount,
-        total_plays: totalPlays,
-        album_count: libraryAlbumCount,
-        artist_count: libraryArtistCount,
-        current_view: view,
-        theme_id: settings.theme,
-        custom_theme_enabled: settings.customThemeEnabled,
-        discord_enabled: settings.discordEnabled
-      });
-    }, 2200);
-  }, [
-    ready,
-    analyticsAudienceSnapshotReady,
-    songs.length,
-    likedSongs.length,
-    playedSongCount,
-    neverPlayedCount,
-    totalPlays,
-    libraryAlbumCount,
-    libraryArtistCount,
-    view,
-    settings.theme,
-    settings.customThemeEnabled,
-    settings.discordEnabled
-  ]);
-
   // Keep playback progress hot-path out of React renders as much as possible.
   // The animation loop paints the progress DOM directly; React only uses this snapshot when something else renders.
   const liveCurrentTime = Number.isFinite(timeRef.current) ? timeRef.current : currentTime;
@@ -1992,7 +1354,7 @@ function MainModeApp() {
     [volumeDraft]
   );
   const ambientSource = useMemo(() => getSongAmbientSource(currentSong), [currentSong]);
-  const coverAverageStyle = useCoverAverageStyle(ambientSource, effectiveAmbient);
+  const coverAverageStyle = useCoverAverageStyle(ambientSource, effectiveAmbient, !isAppBackgrounded);
   const ambientStyle = useMemo(() => {
     const sourceStyle = getAmbientStyle(ambientSource) ?? {};
     return { ...sourceStyle, ...coverAverageStyle } as CSSProperties;
@@ -2275,7 +1637,6 @@ function MainModeApp() {
         root.querySelectorAll<HTMLElement>(
           [
             ".playerBar .smallArt",
-            ".simpleHero .simpleHeroArtSwap",
             ".hero.heroPremium .heroArtWrap"
           ].join(",")
         )
@@ -2458,15 +1819,13 @@ function MainModeApp() {
     return true;
   }
   const triggerSecret = useCallback((mode: SecretTriggerMode, message: string) => {
-    const allowedMode: SecretTriggerMode | null = mode === "yukari" ? mode : null;
-    if (!allowedMode) return;
 
     if (secretTimeoutRef.current) {
       window.clearTimeout(secretTimeoutRef.current);
       secretTimeoutRef.current = null;
     }
 
-    setSecretMode(allowedMode);
+    setSecretMode(mode);
     setSecretToast(message);
     setSecretBurst((value) => value + 1);
 
@@ -2476,7 +1835,7 @@ function MainModeApp() {
       setSecretToast("");
       secretTimeoutRef.current = null;
     }, duration);
-  }, [secretMode]);
+  }, []);
 
   function triggerPlayButtonSecret() {
     setPlayButtonBurst((value) => value + 1);
@@ -2684,54 +2043,30 @@ function MainModeApp() {
 
   useEffect(() => {
     let mounted = true;
-    let bootStepTimer: number | null = null;
-    const bootStartedAt = typeof performance !== "undefined" ? performance.now() : Date.now();
-
-    const setBootStep = (index: number, stage?: string) => {
-      if (!mounted) return;
-      setBootStepIndex(Math.max(0, Math.min(index, BOOT_STEPS.length - 1)));
-      if (stage) setBootStage(stage);
-    };
-
-    const waitForMinimumBoot = () => {
-      const now = typeof performance !== "undefined" ? performance.now() : Date.now();
-      // V251: keep the loading screen visible for polish, but do not force a long wait
-      // after the real bootstrap work has already finished.
-      const fastBootMinimumMs = Math.min(BOOT_MIN_VISIBLE_MS, 520);
-      const remaining = Math.max(0, fastBootMinimumMs - (now - bootStartedAt));
-      if (remaining <= 0) return Promise.resolve();
-      return new Promise<void>((resolve) => {
-        window.setTimeout(resolve, remaining);
-      });
-    };
-
     setReady(false);
     setBootError(null);
     setBootLogCopied(false);
-    setBootStepIndex(0);
-    setBootStage("starting localtify...");
 
-    bootStepTimer = window.setInterval(() => {
-      setBootStepIndex((step) => Math.min(step + 1, BOOT_STEPS.length - 1));
-    }, 240);
-
+    let cancelPixelArtLoad: (() => void) | undefined;
     devPerfStart("bootstrap:ipc");
-    window.localitfy.bootstrap().then(async (payload) => {
+    window.localitfy.bootstrap({ includeDiagnostics: false }).then(async (payload) => {
       if (!mounted) return;
       devPerfEnd("bootstrap:ipc", `${payload.songs?.length ?? 0} songs`);
 
-      setBootStep(0, "loading settings and theme...");
 
-      const storedSettings = (payload.settings || {}) as Partial<Settings>;
+      const storedSettings = payload.settings || {};
       const shouldApplyV013Defaults = window.localStorage.getItem(V013_DEFAULTS_KEY) !== "true";
       const shouldApplyStartWithWindowsDefault = platformInfo.startupSettingSupported && typeof storedSettings.startWithWindows === "undefined";
-      const nextSettings: Settings = applyVisualCustomizationDefaults({
+      const { settings: nextSettings, changed: visualSettingsChanged } = migrateVisualSettings(storedSettings, {
         ...defaultSettings,
-        ...storedSettings,
         ...(shouldApplyV013Defaults ? V013_RELEASE_DEFAULTS : {})
-      } as Settings);
+      }, shouldApplyV013Defaults ? V013_RELEASE_DEFAULTS : undefined);
 
-      const didRestoreCustomThemeAfterUpdate = restoreCustomThemeAfterUpdate(nextSettings, storedSettings);
+      // The redesigned desktop opens as an icon rail once. Preserve later explicit
+      // choices, and never modify Android navigation or an existing hover layout.
+      const sidebarMigrationKey = "localitfy.sidebar-rail-v1";
+      const migrateSidebar = platformInfo.id !== "android" && window.localStorage.getItem(sidebarMigrationKey) !== "true";
+      if (migrateSidebar && nextSettings.sidebarBehavior === "fixed") nextSettings.sidebarBehavior = "slim";
 
       if (shouldApplyStartWithWindowsDefault) {
         nextSettings.startWithWindows = true;
@@ -2741,57 +2076,27 @@ function MainModeApp() {
         nextSettings.startWithWindows = false;
       }
 
-      const shouldRepairAnimatedVisualSettings = nextSettings.animatedBackgrounds !== true || nextSettings.animeVisuals !== true;
-      nextSettings.animatedBackgrounds = true;
-      nextSettings.animeVisuals = true;
-
-      nextSettings.coverColorSyncMode = normalizeCoverColorSyncMode(
-        storedSettings.coverColorSyncMode ?? (storedSettings.showAmbientGradient === false ? "off" : nextSettings.coverColorSyncMode)
-      );
-      nextSettings.showAmbientGradient = nextSettings.coverColorSyncMode !== "off";
-
-      // Simple Mode was removed in v0.2.8. Keep old installs from booting into it.
-      nextSettings.simpleMode = false;
-
-      const normalizedBootTheme = normalizeThemeId(nextSettings.theme);
-      const shouldRepairBootTheme = normalizedBootTheme !== nextSettings.theme;
-      nextSettings.theme = normalizedBootTheme;
-
-      const shouldPersistVisualCustomizationDefaults =
-        nextSettings.homeBannerType !== storedSettings.homeBannerType ||
-        nextSettings.blurEffects !== storedSettings.blurEffects ||
-        nextSettings.mediaCardBackground !== storedSettings.mediaCardBackground ||
-        nextSettings.homeLayoutMode !== storedSettings.homeLayoutMode ||
-        nextSettings.libraryRowStyle !== storedSettings.libraryRowStyle ||
-        nextSettings.starsIntensity !== storedSettings.starsIntensity ||
-        nextSettings.sidebarBehavior !== storedSettings.sidebarBehavior ||
-        nextSettings.playerBackgroundStyle !== storedSettings.playerBackgroundStyle;
-
       const shouldPersistBootSettings =
-        shouldApplyV013Defaults ||
-        shouldApplyStartWithWindowsDefault ||
-        shouldRepairAnimatedVisualSettings ||
-        shouldRepairBootTheme ||
-        shouldPersistVisualCustomizationDefaults ||
-        didRestoreCustomThemeAfterUpdate ||
-        (platformInfo.startupSettingSupported && typeof storedSettings.startWithWindows === "undefined");
+        shouldApplyV013Defaults || shouldApplyStartWithWindowsDefault ||
+        visualSettingsChanged || (migrateSidebar && nextSettings.sidebarBehavior !== storedSettings.sidebarBehavior);
 
       if (shouldPersistBootSettings) {
         if (shouldApplyV013Defaults) window.localStorage.setItem(V013_DEFAULTS_KEY, "true");
         if (shouldApplyStartWithWindowsDefault) window.localStorage.setItem(START_WITH_WINDOWS_DEFAULT_KEY, "true");
-        window.localitfy.saveSettings(nextSettings).catch(() => undefined);
+        window.localitfy.saveSettings(nextSettings).then(() => {
+          if (migrateSidebar) window.localStorage.setItem(sidebarMigrationKey, "true");
+        }).catch(() => undefined);
+      } else if (migrateSidebar) {
+        window.localStorage.setItem(sidebarMigrationKey, "true");
       }
 
-      setBootStep(1, "loading your library...");
       const nextSongs = applyLibraryOrder(sanitizeSongList(payload.songs || []));
       const validBootSongIds = new Set(nextSongs.map((song) => song.id));
 
-      setBootStep(2, "loading playlists...");
       const localPlaylists = cleanPlaylistList(readLocalJson<Playlist[]>(PLAYLIST_STORAGE_KEY, []), validBootSongIds);
       const databasePlaylists = cleanPlaylistList(payload.playlists || [], validBootSongIds);
       const initialPlaylists = databasePlaylists.length ? databasePlaylists : localPlaylists;
 
-      setBootStep(3, "preparing covers and visuals...");
       const initialSongId =
         nextSettings.rememberLastSong &&
         nextSettings.lastSongId &&
@@ -2807,16 +2112,7 @@ function MainModeApp() {
           ? { songId: initialSongId, time: savedTime }
           : null;
 
-      setBootStep(4, "warming up the player...");
-      await waitForMinimumBoot();
-      if (!mounted) return;
 
-      if (bootStepTimer) {
-        window.clearInterval(bootStepTimer);
-        bootStepTimer = null;
-      }
-
-      setBootStep(5, "opening localtify...");
       setSongs(nextSongs);
       setPlaylists(initialPlaylists);
       setSettings(nextSettings);
@@ -2827,31 +2123,25 @@ function MainModeApp() {
         window.localitfy.savePlaylists(localPlaylists).catch(() => undefined);
       }
 
-      loadPixelArtAssets(false)
-        .then((assets) => {
-          if (!mounted) return;
-          setPixelArtAssets(assets);
-        })
-        .catch(() => undefined);
+      cancelPixelArtLoad = runLocaltifyIdleTask(() => {
+        if (!mounted) return;
+        void loadPixelArtAssets(false)
+          .then((assets) => { if (mounted) setPixelArtAssets(assets); })
+          .catch(() => undefined);
+      }, 1800);
       bootedRef.current = true;
     }).catch((error) => {
       if (!mounted) return;
-      if (bootStepTimer) {
-        window.clearInterval(bootStepTimer);
-        bootStepTimer = null;
-      }
 
       const message = error instanceof Error ? error.message : String(error || "Unknown startup error");
       console.error("localtify startup failed", error);
       setBootError(message);
       setReady(false);
-      setBootStage("startup failed");
-      trackError("startup_bootstrap_failed", message, { category: "startup" });
     });
 
     return () => {
       mounted = false;
-      if (bootStepTimer) window.clearInterval(bootStepTimer);
+      cancelPixelArtLoad?.();
     };
   }, [loadPixelArtAssets, bootRetryKey]);
   // Heavy automatic late-night secret effects were removed in V215.
@@ -2941,9 +2231,10 @@ function MainModeApp() {
   }
 
   function toggleMuteFromNative() {
-    const currentVolume = clamp(Number(volumeRef.current) || 0, 0, 1);
-    const nextVolume = currentVolume > 0.01 ? 0 : clamp(lastNonZeroVolumeRef.current || defaultSettings.volume, 0.05, 1);
-    updateVolumeFast(nextVolume);
+    const currentVolume = clamp(Number(settingsRef.current.volume) || 0, 0, 1);
+    if (currentVolume > 0) lastNonZeroVolumeRef.current = currentVolume;
+    const nextVolume = currentVolume > 0 ? 0 : clamp(lastNonZeroVolumeRef.current || defaultSettings.volume, 0, 1);
+    void updateSetting("volume", nextVolume, true);
   }
 
   useEffect(() => {
@@ -3038,7 +2329,7 @@ function MainModeApp() {
 
       if (event.code === "KeyM") {
         event.preventDefault();
-        updateVolumeFast(settings.volume > 0 ? 0 : 0.75);
+        toggleMuteFromNative();
       }
     };
 
@@ -3056,10 +2347,6 @@ function MainModeApp() {
         window.clearTimeout(saveSettingsTimerRef.current);
       }
 
-      if (backgroundAudioRepairTimerRef.current !== null) {
-        window.clearTimeout(backgroundAudioRepairTimerRef.current);
-        backgroundAudioRepairTimerRef.current = null;
-      }
 
       if (sleepTimerRef.current !== null) {
         window.clearTimeout(sleepTimerRef.current);
@@ -3318,7 +2605,10 @@ function MainModeApp() {
 
       progressLoopTimeoutRef.current = window.setTimeout(() => {
         progressLoopTimeoutRef.current = null;
-        animationFrameRef.current = window.requestAnimationFrame(tick);
+        // Hidden windows may suspend animation frames. Continue position
+        // checkpoints without painting progress UI.
+        if (document.hidden) tick(performance.now());
+        else animationFrameRef.current = window.requestAnimationFrame(tick);
       }, delayMs);
     };
 
@@ -3341,13 +2631,6 @@ function MainModeApp() {
           syncProgressDom(nextTime, nextDuration);
         }
 
-        // Keep playback progress out of React's hot path. The DOM progress gets
-        // painted directly; React state only changes for actual duration changes,
-        // manual seeks, song switches, or hard resets.
-        if (!isSeekingRef.current && clock - lastProgressStatePaintRef.current > 20000) {
-          lastProgressStatePaintRef.current = clock;
-        }
-
         if (!backgroundMode && Number.isFinite(nextDuration) && nextDuration > 0 && Math.abs(nextDuration - lastPaintedDuration) > 0.5) {
           lastPaintedDuration = nextDuration;
           setCurrentDuration(nextDuration);
@@ -3364,9 +2647,6 @@ function MainModeApp() {
             .catch(() => undefined);
         }
 
-        if (!backgroundMode && !busyUi && settings.gaplessPlayback && nextDuration > 0 && nextDuration - nextTime < 20) {
-          window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 2200), 900);
-        }
       }
 
       scheduleProgressTick(backgroundMode ? 1800 : busyUi ? 520 : 180);
@@ -3683,7 +2963,6 @@ function MainModeApp() {
         setCurrentDuration(currentSong.duration || 0);
         setPlayerError("");
         setStatusText(`playing ${prettyTitle(currentSong.title, 5)}`);
-        window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 1800), 650);
         return;
       }
 
@@ -3703,7 +2982,6 @@ function MainModeApp() {
         setCurrentDuration(currentSong.duration || 0);
         setPlayerError("");
         setStatusText(`loaded ${prettyTitle(currentSong.title, 5)}`);
-        window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 1800), 650);
       }
     });
 
@@ -3753,26 +3031,37 @@ function MainModeApp() {
     return next ?? null;
   }
 
-  function primeNextAudioCache() {
-    if (!settings.gaplessPlayback) return;
+  // One cancellable warmup per playback/queue change, not per progress tick.
+  useEffect(() => {
+    if (!isPlaying || !settings.gaplessPlayback || !currentSong) return;
+    const owner = currentSong.id;
     const nextSong = getNextPlayableSongForCache();
-    if (!nextSong || !getSongPlaybackSourceKey(nextSong)) return;
-
-    void resolvePlaybackUrl(nextSong).then((result) => {
-      if (!result.ok || !result.url || result.fileExists === false) return;
-
-      if (!nextAudioRef.current) {
-        nextAudioRef.current = new Audio();
-        nextAudioRef.current.crossOrigin = "anonymous";
-        nextAudioRef.current.preload = "auto";
-      }
-
-      if (nextAudioRef.current.src !== result.url) {
-        nextAudioRef.current.src = result.url;
-        nextAudioRef.current.load();
-      }
-    });
-  }
+    if (!nextSong || nextSong.id === owner || !getSongPlaybackSourceKey(nextSong)) return;
+    let cancelled = false;
+    let cancelIdle: (() => void) | undefined;
+    const allowed = () => !cancelled && playingRef.current && songRef.current?.id === owner &&
+      settingsRef.current.gaplessPlayback && !crossfadeAutoStartedRef.current &&
+      !crossfadeHandoffRef.current && !crossfadeMainPauseGuardRef.current;
+    const timer = window.setTimeout(() => {
+      cancelIdle = runLocaltifyIdleTask(() => {
+        if (!allowed()) return;
+        void resolvePlaybackUrl(nextSong).then(result => {
+          if (!allowed() || !result.ok || !result.url || result.fileExists === false) return;
+          if (!nextAudioRef.current) {
+            nextAudioRef.current = new Audio();
+            nextAudioRef.current.crossOrigin = "anonymous";
+            nextAudioRef.current.preload = "auto";
+          }
+          const nextAudio = nextAudioRef.current;
+          if (!nextAudio.paused || nextAudio.src === result.url) return;
+          nextAudio.src = result.url;
+          nextAudio.load();
+        }).catch(() => undefined);
+      }, 1800);
+    }, 650);
+    return () => { cancelled = true; window.clearTimeout(timer); cancelIdle?.(); };
+  }, [isPlaying, settings.gaplessPlayback, currentSong?.id, playQueue, repeatMode, repeatPlaylist,
+    activePlaylist, activePlaylistSongs, playableSongs, songsById, isShuffle, playbackSource, resolvePlaybackUrl]);
 
   function getAutoCrossfadeSeconds() {
     return clamp(Math.max(3, Number(settings.crossfadeSeconds || 3)), 3, 6);
@@ -4141,7 +3430,6 @@ function MainModeApp() {
           crossfadeAutoTargetRef.current = "";
 
           void takeOverMainAudioFromCrossfade(target, nextAudio, safeVolume);
-          window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 1800), 650);
         }
       }, 16);
     } catch {
@@ -4375,7 +3663,6 @@ function MainModeApp() {
         clearCrossfadeHandoffSoon(song.id, 650);
       }
 
-      window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 1800), 650);
 
       setIsPlaying(true);
       setPlayerError("");
@@ -4437,6 +3724,7 @@ function MainModeApp() {
 
   function isImmediateSettingsKey(key: string) {
     return [
+      "theme",
       "volume",
       "playbackSpeed",
       "crossfadeSeconds",
@@ -4477,18 +3765,12 @@ function MainModeApp() {
       return;
     }
 
-    writeCustomThemeBackupPatch(next);
     await window.localitfy.saveSettings(next).catch(() => showAppToast("Could not save settings", "error"));
   }
 
   async function persistSettings(next: Settings, debounce = false, priority: "immediate" | "transition" = "transition") {
     const previous = settingsRef.current;
     if (settingsAreSame(previous, next)) return;
-
-    const shouldTrackThemeChange =
-      bootedRef.current &&
-      (previous.theme !== next.theme || previous.customThemeEnabled !== next.customThemeEnabled);
-    const shouldTrackDiscordToggle = bootedRef.current && previous.discordEnabled !== next.discordEnabled;
 
     settingsRef.current = next;
 
@@ -4499,14 +3781,6 @@ function MainModeApp() {
     }
 
     if (!bootedRef.current) return;
-
-    if (shouldTrackThemeChange) {
-      trackThemeChanged(next.customThemeEnabled ? "custom" : next.theme, next.customThemeEnabled);
-    }
-
-    if (shouldTrackDiscordToggle) {
-      trackDiscordToggled(next.discordEnabled);
-    }
 
     await saveSettingsSafely(next, debounce);
   }
@@ -4542,9 +3816,6 @@ function MainModeApp() {
 
     if (key === "theme") {
       next.theme = normalizeThemeId(value);
-      next.customThemeEnabled = false;
-      clearPendingCustomThemeCommit();
-      clearCustomThemePreviewStyles();
       kickThemeSettle();
     }
 
@@ -4560,30 +3831,10 @@ function MainModeApp() {
     }
 
     if (
-      key === "customThemeEnabled" ||
-      key === "customThemeColor" ||
-      key === "customThemeColor2" ||
-      key === "customThemeBackground" ||
-      key === "customThemeSurface" ||
-      key === "customThemeText" ||
-      key === "customThemeHighlight" ||
-      key === "customThemeProgress"
-    ) {
-      if (key === "customThemeEnabled" && value === false) {
-        clearPendingCustomThemeCommit();
-        clearCustomThemePreviewStyles();
-      }
-
-      kickThemeSettle();
-    }
-
-    if (
       key === "homeBannerType" ||
-      key === "blurEffects" ||
       key === "mediaCardBackground" ||
       key === "homeLayoutMode" ||
       key === "libraryRowStyle" ||
-      key === "starsIntensity" ||
       key === "sidebarBehavior" ||
       key === "playerBackgroundStyle" ||
       key === "catBuddyEnabled"
@@ -4596,15 +3847,10 @@ function MainModeApp() {
       next.animeVisuals = true;
     }
 
-    if (key === "simpleMode") {
-      // Simple Mode was removed in v0.2.8. Do not let old UI/state re-enable it.
-      next.simpleMode = false;
-    }
-
     await persistSettings(next, debounce, isImmediateSettingsKey(String(key)) ? "immediate" : "transition");
 
     if (!debounce && bootedRef.current) {
-      if (key === "theme" || key === "customThemeEnabled") {
+      if (key === "theme") {
         showAppToast("Theme changed", "success");
       } else if (String(key).startsWith("discord")) {
         showAppToast("Discord presence updated", "success");
@@ -4630,34 +3876,14 @@ function MainModeApp() {
 
     if (patch.theme) {
       next.theme = normalizeThemeId(patch.theme);
-      next.customThemeEnabled = false;
-      clearPendingCustomThemeCommit();
-      clearCustomThemePreviewStyles();
     }
 
-    if (patch.customThemeEnabled === false) {
-      clearPendingCustomThemeCommit();
-      clearCustomThemePreviewStyles();
-    }
 
     if (Object.prototype.hasOwnProperty.call(patch, "animatedBackgrounds") || Object.prototype.hasOwnProperty.call(patch, "animeVisuals")) {
       next.animatedBackgrounds = true;
       next.animeVisuals = true;
     }
-
-    if (
-      patch.theme ||
-      Object.prototype.hasOwnProperty.call(patch, "customThemeEnabled") ||
-      Object.prototype.hasOwnProperty.call(patch, "customThemeColor") ||
-      Object.prototype.hasOwnProperty.call(patch, "customThemeColor2") ||
-      Object.prototype.hasOwnProperty.call(patch, "customThemeBackground") ||
-      Object.prototype.hasOwnProperty.call(patch, "customThemeSurface") ||
-      Object.prototype.hasOwnProperty.call(patch, "customThemeText") ||
-      Object.prototype.hasOwnProperty.call(patch, "customThemeHighlight") ||
-      Object.prototype.hasOwnProperty.call(patch, "customThemeProgress")
-    ) {
-      kickThemeSettle();
-    }
+    if (patch.theme) kickThemeSettle();
 
     const patchKeys = Object.keys(patch || {});
     const priority = patchKeys.some((key) => isImmediateSettingsKey(key)) ? "immediate" : "transition";
@@ -4682,23 +3908,12 @@ function MainModeApp() {
   function resetAppearanceSettings() {
     void updateSettingsPatch({
       theme: defaultSettings.theme,
-      themePanelCollapsed: defaultSettings.themePanelCollapsed,
-      customThemeEnabled: defaultSettings.customThemeEnabled,
-      customThemeColor: defaultSettings.customThemeColor,
-      customThemeColor2: defaultSettings.customThemeColor2,
-      customThemeBackground: defaultSettings.customThemeBackground,
-      customThemeSurface: defaultSettings.customThemeSurface,
-      customThemeText: defaultSettings.customThemeText,
-      customThemeHighlight: defaultSettings.customThemeHighlight,
-      customThemeProgress: defaultSettings.customThemeProgress,
       showAmbientGradient: defaultSettings.showAmbientGradient,
       coverColorSyncMode: defaultSettings.coverColorSyncMode,
       showFloatingNotes: defaultSettings.showFloatingNotes,
       homeBannerType: VISUAL_CUSTOMIZATION_DEFAULTS.homeBannerType,
-      blurEffects: VISUAL_CUSTOMIZATION_DEFAULTS.blurEffects,
       mediaCardBackground: VISUAL_CUSTOMIZATION_DEFAULTS.mediaCardBackground,
       homeLayoutMode: VISUAL_CUSTOMIZATION_DEFAULTS.homeLayoutMode,
-      starsIntensity: VISUAL_CUSTOMIZATION_DEFAULTS.starsIntensity,
       sidebarBehavior: VISUAL_CUSTOMIZATION_DEFAULTS.sidebarBehavior,
       playerBackgroundStyle: VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle,
       animeVisuals: true,
@@ -4797,7 +4012,7 @@ function MainModeApp() {
       setSettings(nextSettings);
 
       if (bootedRef.current) {
-        writeCustomThemeBackupPatch(nextSettings);
+
         window.localitfy.saveSettings(nextSettings).catch(() => undefined);
       }
 
@@ -5341,7 +4556,6 @@ function MainModeApp() {
       const previewSongs = (importedNewSongs.length ? importedNewSongs : imported.slice(-12)).slice(0, 12);
 
       if (addedCount > 0) {
-        trackSongsImported(addedCount, "import_dialog");
         setImportAnimation(
           createImportAnimationState({
             active: true,
@@ -5387,7 +4601,6 @@ function MainModeApp() {
       }
     } catch (error) {
       console.error("[localitfy import failed]", error);
-      trackImportFailed("import_dialog_failed", "import_dialog");
       setImportAnimation(
         createImportAnimationState({
           active: true,
@@ -5564,7 +4777,6 @@ function MainModeApp() {
       }
 
       if (successCount > 0) {
-        trackSongsImported(result.changedCount || successCount, "downloads");
         const importedCount = enrichedDownloads.filter((item: any) => item.ok && item.importedToLibrary).length;
         const notImportedCount = enrichedDownloads.filter((item: any) => item.ok && !item.importedToLibrary).length;
         setStatusText(
@@ -5582,7 +4794,6 @@ function MainModeApp() {
         );
         if (settings.downloadAutoAdd) changeView("library", "unknown");
       } else {
-        trackImportFailed("download_no_audio", "downloads");
         setStatusText("download failed");
         setPlayerError("no audio files downloaded. check the results below.");
       }
@@ -5592,7 +4803,6 @@ function MainModeApp() {
       }
     } catch (error) {
       console.error("[localitfy download failed]", error);
-      trackImportFailed("download_failed", "downloads");
       const message = friendlyDownloadError((error as Error)?.message || "Download failed.");
       const failedDownloads = urls.map((url) => ({
         ok: false,
@@ -5862,7 +5072,6 @@ function MainModeApp() {
         if (successCount > 0) {
           const importedCount = enrichedDownloads.filter((item: any) => item.ok && item.importedToLibrary).length;
           const notImportedCount = enrichedDownloads.filter((item: any) => item.ok && !item.importedToLibrary).length;
-          trackSongsImported(result.changedCount || importedCount || successCount, "downloads");
           setStatusText(
             failCount > 0
               ? `spotify finished: ${successCount} done, ${failCount} failed`
@@ -5965,7 +5174,6 @@ function MainModeApp() {
       }
 
       if (successCount > 0) {
-        trackSongsImported(result.changedCount || successCount, "conversion");
         setConvertProgress(100);
         setConvertMessage("conversion complete");
         setStatusText(
@@ -5973,13 +5181,11 @@ function MainModeApp() {
         );
         changeView("library", "unknown");
       } else {
-        trackImportFailed("conversion_no_files", "conversion");
         setStatusText("nothing converted");
         setConvertMessage("no files converted");
       }
     } catch (error) {
       console.error("[localitfy convert failed]", error);
-      trackImportFailed("conversion_failed", "conversion");
       setPlayerError("conversion failed. check terminal.");
       setConvertMessage("conversion failed");
       setStatusText("conversion failed");
@@ -6054,19 +5260,23 @@ function MainModeApp() {
   const closeQueuePanel = useCallback(() => setQueuePanelOpen(false), []);
   const closeLyrics = useCallback(() => setLyricsOpen(false), []);
   const getLyricsTime = useCallback(() => audioRef.current?.currentTime ?? timeRef.current, []);
-
-  function goToSongAlbum(song: Song) {
-    nav.goToSongAlbum(song.id, albumIdBySongId, () => setStatusText("no album found for this song"));
-  }
+  const getLyricsRate = useCallback(() => audioRef.current?.playbackRate || 1, []);
+  const subscribeLyricsClock = useCallback((listener: () => void) => {
+    const audio = audioRef.current;
+    if (!audio) return () => undefined;
+    const events = ["seeked", "ratechange", "playing", "pause", "loadedmetadata"] as const;
+    for (const event of events) audio.addEventListener(event, listener);
+    return () => { for (const event of events) audio.removeEventListener(event, listener); };
+  }, []);
 
   function revealNowPlaying() {
     nav.revealNowPlaying(nowPlayingContext);
   }
 
-  function playAlbumSongs(songIds: string[], albumTitle = "album", source: PlaybackSourceRef | null = null, shuffled = false, startId?: string) {
+  function playCollectionSongs(songIds: string[], collectionTitle = "collection", source: PlaybackSourceRef | null = null, shuffled = false, startId?: string) {
     const ids = getPlayableUniqueSongIds(songIds, songsById);
     if (!ids.length) {
-      setStatusText("album has no playable songs");
+      setStatusText("collection has no playable songs");
       return;
     }
 
@@ -6075,23 +5285,23 @@ function MainModeApp() {
     setActivePlaylistId(null);
     setPlayQueue(order.slice(start + 1));
     void selectSong(order[start], true, { playlistId: null, source: source ? { ...source, songIds: order } : null });
-    setStatusText(`${shuffled ? "shuffling" : "playing"} ${albumTitle}`);
+    setStatusText(`${shuffled ? "shuffling" : "playing"} ${collectionTitle}`);
   }
 
-  function queueAlbumSongs(songIds: string[], albumTitle = "album") {
+  function queueCollectionSongs(songIds: string[], collectionTitle = "collection") {
     if (connect.queue(songIds, false)) return;
     const ids = getPlayableUniqueSongIds(songIds, songsById);
     if (!ids.length) {
-      setStatusText("album has no playable songs");
+      setStatusText("collection has no playable songs");
       return;
     }
 
     setPlayQueue((queue) => {
-      const albumIdSet = new Set(ids);
-      const cleanedQueue = queue.filter((songId) => !albumIdSet.has(songId));
+      const collectionIdSet = new Set(ids);
+      const cleanedQueue = queue.filter((songId) => !collectionIdSet.has(songId));
       return [...cleanedQueue, ...ids];
     });
-    setStatusText(`queued ${ids.length} track${ids.length === 1 ? "" : "s"} from ${albumTitle}`);
+    setStatusText(`queued ${ids.length} track${ids.length === 1 ? "" : "s"} from ${collectionTitle}`);
   }
 
   function readDraggedSongId(event: DragEvent<HTMLElement>) {
@@ -6319,7 +5529,7 @@ function MainModeApp() {
     const blockedDragOrigin =
       event.target instanceof HTMLElement
         ? event.target.closest(
-            "button, input, textarea, select, a, [role='button'], .homeAlbumPlayZone, .homeAlbumCoverButton, .homeAlbumActions, .iconAction"
+            "button, input, textarea, select, a, [role='button'], .iconAction"
           )
         : null;
 
@@ -6413,7 +5623,7 @@ function MainModeApp() {
     const blockedDragOrigin =
       event.target instanceof HTMLElement
         ? event.target.closest(
-            "button, input, textarea, select, a, [role='button'], .homeAlbumPlayZone, .homeAlbumCoverButton, .homeAlbumActions, .iconAction"
+            "button, input, textarea, select, a, [role='button'], .iconAction"
           )
         : null;
 
@@ -7078,7 +6288,6 @@ function MainModeApp() {
     else audio.currentTime = nextTime;
     timeRef.current = nextTime;
     lastProgressUiPaintRef.current = 0;
-    lastProgressStatePaintRef.current = 0;
     syncProgressDom(nextTime, duration, true);
     setCurrentTime(nextTime);
     playbackTransitionRef.current.seekFinished();
@@ -7167,8 +6376,9 @@ function MainModeApp() {
   function updateVolumeFast(nextVolume: number) {
     const safeVolume = clamp(Number(nextVolume) || 0, 0, 1);
     const safePercent = Math.round(safeVolume * 100);
-    const nextSettings = { ...settings, volume: safeVolume };
+    const nextSettings = { ...settingsRef.current, volume: safeVolume };
 
+    settingsRef.current = nextSettings;
     volumeRef.current = safeVolume;
     volumeDraftRef.current = safePercent;
     setVolumeDraft(safePercent);
@@ -7266,7 +6476,6 @@ function MainModeApp() {
     setPlayQueue((queue) => remapSongIds(queue, keptFor));
     setQueueHistory((history) => history.map((item) => keptFor.has(item.songId) ? { ...item, songId: keptFor.get(item.songId)! } : item));
     setPlaylists((items) => items.map((item) => ({ ...item, songIds: remapSongIds(item.songIds, keptFor) })));
-    albumsController.remapAlbumSongs(keptFor);
     setSongs(applyLibraryOrder(sanitizeSongList(nextSongs)));
   }
 
@@ -7525,67 +6734,6 @@ function MainModeApp() {
     await chooseCoverFromPc(editorSong);
   }
 
-  function renderSongRows(list: Song[], className = "songList fullList") {
-    return (
-      <VirtualSongRows
-        list={list}
-        className={className}
-        currentId={currentId}
-        isPlaying={isPlaying}
-        draggedSongId={draggedSongId}
-        libraryDragOverSongId={libraryDragOverSongId}
-        libraryDropSide={libraryDropSide}
-        draggedSongTitle={draggedSongTitle}
-        onAreaDragOver={handleLibraryAreaDragOver}
-        onAreaDragLeave={handleLibraryAreaDragLeave}
-        onAreaDrop={handleLibraryAreaDrop}
-        onSelectSong={selectSongCardAction}
-        onTogglePlay={togglePlayCardAction}
-        onToggleLike={toggleLikeCardAction}
-        onOpenEditor={openEditorCardAction}
-        onOpenPlaylistPicker={openPlaylistPickerCardAction}
-        onOpenSongContextMenu={openSongContextMenuCardAction}
-        onStartSongDrag={startSongDragCardAction}
-        onDragOverSong={dragOverSongCardAction}
-        onDragLeaveSong={dragLeaveSongCardAction}
-        onDropSong={dropSongCardAction}
-        onDragEnd={endSongDragCardAction}
-      />
-    );
-  }
-
-
-  function renderHomeSongCards(list: Song[], className: string) {
-    return (
-      <VirtualHomeSongCards
-        list={list}
-        className={className}
-        currentId={currentId}
-        isPlaying={isPlaying}
-        draggedSongId={draggedSongId}
-        libraryDragOverSongId={libraryDragOverSongId}
-        libraryDropSide={libraryDropSide}
-        draggedSongTitle={draggedSongTitle}
-        onAreaDragOver={handleLibraryAreaDragOver}
-        onAreaDragLeave={handleLibraryAreaDragLeave}
-        onAreaDrop={handleLibraryAreaDrop}
-        onSelectSong={selectSongCardAction}
-        onTogglePlay={togglePlayCardAction}
-        onToggleLike={toggleLikeCardAction}
-        onOpenEditor={openEditorCardAction}
-        onOpenPlaylistPicker={openPlaylistPickerCardAction}
-        onOpenSongContextMenu={openSongContextMenuCardAction}
-        onStartSongDrag={startSongDragCardAction}
-        onPointerStartSongDrag={startPointerSongDragCardAction}
-        registerLibrarySongElement={registerLibrarySongElement}
-        onDragOverSong={dragOverSongCardAction}
-        onDragLeaveSong={dragLeaveSongCardAction}
-        onDropSong={dropSongCardAction}
-        onDragEnd={endSongDragCardAction}
-      />
-    );
-  }
-
   function dismissOnboarding() {
     markOnboardingSeenForThisRelease();
 
@@ -7594,7 +6742,6 @@ function MainModeApp() {
   }
 
   function skipOnboarding() {
-    trackOnboardingSkipped(undefined, songs.length);
     dismissOnboarding();
   }
 
@@ -7621,8 +6768,7 @@ function MainModeApp() {
 
     void updateSettingsPatch(
       {
-        theme: nextTheme,
-        customThemeEnabled: false
+        theme: nextTheme
       },
       false
     );
@@ -7637,7 +6783,6 @@ function MainModeApp() {
   }
 
   function handleOnboardingStartListening() {
-    trackOnboardingCompleted(undefined, songs.length);
     dismissOnboarding();
     changeView("home", "onboarding");
     setStatusText(songs.length ? "ready to listen" : "add songs when you are ready");
@@ -7864,129 +7009,6 @@ function MainModeApp() {
         : "nowPlayingSongOdd";
 
 
-  const simpleModeView = (
-    <section className="simpleShell">
-      <header className="simpleTopbar">
-        <div className="simpleBrand">
-          <div className="simpleBrandLogo"><img className="loadingLogoImage" src={localtifyLogo} alt="" aria-hidden="true" /></div>
-          <div>
-            <strong>localtify</strong>
-            <small>simple mode</small>
-          </div>
-        </div>
-
-        <div className="simpleTopActions">
-          <button className="simpleAction iconTextButton" onClick={importSongs}>
-            <FolderPlus className="buttonInlineIcon" size={17} strokeWidth={2.1} aria-hidden="true" />
-            add audio
-          </button>
-
-          <button type="button" className="simpleGhost" onClick={() => openSettingsPanel()}>
-            settings
-          </button>
-        </div>
-      </header>
-
-      <section
-        className={`simpleHero ambientSurface heroLayoutMotion ${settings.heroExpanded ? "simpleHeroExpanded" : "simpleHeroCompact"}`}
-        style={ambientStyle}
-      >
-        <div className="heroAmbiencePulse" aria-hidden="true" />
-        <div
-          className={`simpleHeroArtSwap nowPlayingArtSwap ${nowPlayingSongMotionClass}`}
-          data-song-motion-key={nowPlayingTransitionKey}
-        >
-          <Cover song={currentSong} className="simpleHeroArt" />
-        </div>
-
-        <div className={`simpleHeroText nowPlayingCopySwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
-          <small className={`nowPlayingEyebrowSwap ${nowPlayingSongMotionClass}`} title={currentNowPlayingLabel}>{currentNowPlayingLabel}</small>
-          <h2 className={`nowPlayingTitleSwap ${nowPlayingSongMotionClass}`}>{currentSong ? prettyTitle(currentSong.title, 7) : "nothing playing"}</h2>
-          <p className={`nowPlayingArtistSwap ${nowPlayingSongMotionClass}`}>{currentSong ? prettyMeta(currentSong.artist) : "import a song to begin"}</p>
-
-          <div className="simpleControls">
-            <button className="circleButton" onClick={playPrevious} aria-label="previous song">
-              <SkipBack className="playerControlIcon" size={17} strokeWidth={2.15} aria-hidden="true" />
-            </button>
-            <button className={`circleButton main ${playButtonBurst ? `playButtonBurst playButtonBurst${playButtonBurst % 2}` : ""}`} onClick={togglePlay} aria-label={isPlaying ? "pause" : "play"}>
-              <PlayerPlayPauseMorphIcon playing={isPlaying} />
-            </button>
-            <button className="circleButton" onClick={() => playNext(true)} aria-label="next song">
-              <SkipForward className="playerControlIcon" size={17} strokeWidth={2.15} aria-hidden="true" />
-            </button>
-            <button
-              className={`circleButton repeatButton ${repeatMode !== "off" ? `active repeat-${repeatMode}` : ""}`}
-              onClick={toggleRepeat}
-              type="button"
-              aria-label={repeatButtonAriaLabel}
-              aria-pressed={repeatMode !== "off"}
-              title={repeatButtonTitle}
-              data-repeat-mode={repeatMode}
-            >
-              <Repeat2 className="playerControlIcon" size={16} strokeWidth={2.15} aria-hidden="true" />
-              {repeatButtonStateText ? <span className="repeatStateMark" aria-hidden="true">{repeatButtonStateText}</span> : null}
-            </button>
-          </div>
-
-          <div className="simpleProgress">
-            <span ref={(node) => { progressTimeLabelRefs.current[0] = node; }}>{formatTime(displayedTime)}</span>
-            <input
-              ref={(node) => { progressInputRefs.current[0] = node; }}
-              type="range"
-              min="0"
-              max="100"
-              step="0.1"
-              defaultValue={displayedProgress}
-              style={progressRangeStyle}
-              onPointerDown={(event) => {
-                event.currentTarget.setPointerCapture?.(event.pointerId);
-                startSeekPreview(event.currentTarget.value, event.currentTarget);
-              }}
-              onInput={(event) => previewSeek(event.currentTarget.value, event.currentTarget)}
-              onChange={(event) => previewSeek(event.currentTarget.value, event.currentTarget)}
-              onPointerUp={(event) => {
-                event.currentTarget.releasePointerCapture?.(event.pointerId);
-                commitSeek(event.currentTarget.value);
-              }}
-              onPointerCancel={(event) => commitSeek(event.currentTarget.value)}
-              onKeyUp={(event) => commitSeek(event.currentTarget.value)}
-              onBlur={(event) => isSeeking && commitSeek(event.currentTarget.value)}
-            />
-            <span ref={(node) => { progressDurationLabelRefs.current[0] = node; }}>{formatTime(currentDuration || currentSong?.duration || 0)}</span>
-          </div>
-
-          <div className="heroQuickActions simpleHeroActions">
-            <button className="heroTinyButton" type="button" onClick={toggleHeroExpanded}>
-              {settings.heroExpanded ? "compact player" : "expand player"}
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section className="simpleLibraryPanel">
-        <div className="simpleLibraryHead">
-          <div className="simpleLibraryTitle">
-            <strong>library</strong>
-            <small>{songs.length} song{songs.length === 1 ? "" : "s"}</small>
-          </div>
-
-          <div className="simpleLibraryControls">
-            <input
-              className="simpleSearch"
-              value={query}
-              onChange={(event) => handleSearchInput(event.currentTarget.value)}
-              placeholder="search songs... try /feedback"
-            />
-          </div>
-        </div>
-
-        {renderSongRows(filteredSongs, "songList simpleList")}
-      </section>
-    </section>
-  );
-
-
-
   function renderFeedbackSettingsCard() {
     if (settingsCategory !== "advanced") return null;
 
@@ -8031,129 +7053,6 @@ function MainModeApp() {
   }
 
 
-  function renderFeedbackPrompt() {
-    if (!feedbackPromptOpen) return null;
-
-    const remaining = FEEDBACK_MESSAGE_MAX_LENGTH - feedbackMessage.length;
-    const feedbackReady = feedbackMessage.trim().length >= 4;
-
-    return (
-      <AnimatePresence>
-        <Motion.div
-          className="feedbackPromptOverlayV331"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="feedbackPromptTitleV329"
-        >
-          <Motion.div
-            className={`feedbackPromptCardV331 ${feedbackStatus.kind === "success" ? "feedbackSentV337" : ""} ${feedbackSendBusy ? "feedbackSendingV337" : ""}`}
-            initial={{ opacity: 0, y: 18, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 12, scale: 0.97 }}
-            transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div className="feedbackPromptTopV331">
-              <div className="feedbackPromptBrandV331">
-                <span className="feedbackPromptLogoV331" aria-hidden="true">
-                  <img src={localtifyLogo} alt="" />
-                </span>
-                <span>
-                  <em>localtify feedback</em>
-                  <strong>bug reports + suggestions</strong>
-                </span>
-              </div>
-
-              <button
-                type="button"
-                className="feedbackPromptCloseV331"
-                onClick={() => closeFeedbackPrompt()}
-                aria-label="Close feedback popup"
-              >
-                <X size={18} strokeWidth={2.4} />
-              </button>
-            </div>
-
-            <div className="feedbackPromptCopyV331">
-              <span className="feedbackPromptBadgeV331">quick check-in</span>
-              <h2 id="feedbackPromptTitleV329">{FEEDBACK_PROMPT_COPY.title}</h2>
-              <p>{FEEDBACK_PROMPT_COPY.body}</p>
-              <p>{FEEDBACK_PROMPT_COPY.footer}</p>
-            </div>
-
-            <div className="feedbackCategoryRowV331" role="group" aria-label="Feedback type">
-              {FEEDBACK_CATEGORY_OPTIONS.map((option) => {
-                const active = feedbackCategory === option.id;
-
-                return (
-                  <button
-                    key={option.id}
-                    type="button"
-                    className={`feedbackCategoryButtonV331 ${active ? "active" : ""}`}
-                    onClick={() => {
-                      setFeedbackCategory(option.id);
-                      if (feedbackStatus.kind !== "idle") setFeedbackStatus({ kind: "idle", message: "" });
-                    }}
-                    aria-pressed={active}
-                  >
-                    <span>{option.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <label className={`feedbackTextareaWrapV331 ${feedbackMessage.trim().length > 0 ? "isTyping" : ""} ${feedbackReady ? "isReady" : ""}`}>
-              <span>Your message</span>
-              <textarea
-                value={feedbackMessage}
-                onChange={(event) => {
-                  const next = event.target.value.slice(0, FEEDBACK_MESSAGE_MAX_LENGTH);
-                  setFeedbackMessage(next);
-                  if (feedbackStatus.kind !== "idle") setFeedbackStatus({ kind: "idle", message: "" });
-                }}
-                placeholder="Tell me what broke, what looks weird, or what feature you want..."
-                maxLength={FEEDBACK_MESSAGE_MAX_LENGTH}
-                disabled={feedbackSendBusy}
-              />
-              <small>{remaining} characters left</small>
-            </label>
-
-            {feedbackStatus.message ? (
-              <div className={`feedbackStatusV331 ${feedbackStatus.kind}`} role="status">
-                {feedbackStatus.message}
-              </div>
-            ) : null}
-
-            <div className="feedbackPromptActionsV331">
-              <button
-                type="button"
-                className="feedbackMaybeButtonV331"
-                onClick={() => closeFeedbackPrompt()}
-                disabled={feedbackSendBusy}
-              >
-                Maybe later
-              </button>
-              <button
-                type="button"
-                className={`feedbackSendButtonV331 localtifyProximityTarget ${feedbackReady ? "isReady" : "isLocked"} ${feedbackSendBusy ? "isSending" : ""}`}
-                onClick={submitFeedbackPrompt}
-                disabled={feedbackSendBusy || feedbackStatus.kind === "success" || !feedbackReady}
-              >
-                <span className="feedbackSendTextV334">{feedbackStatus.kind === "success" ? "Sent" : feedbackSendBusy ? "Sending..." : "Send"}</span>
-                <span className="feedbackSendSparkV334" aria-hidden="true"><Send size={14} strokeWidth={2.4} /></span>
-              </button>
-            </div>
-          </Motion.div>
-        </Motion.div>
-      </AnimatePresence>
-    );
-  }
-
-
-
   function renderSettingsCategoryContent() {
     return (
       <>
@@ -8171,23 +7070,8 @@ function MainModeApp() {
           <SettingsCategoryContent
           settingsCategory={settingsCategory}
         setSettingsCategory={(value: string) => setSettingsCategory(value as SettingsCategory)}
-        currentTheme={currentTheme}
         settings={settings}
         updateSetting={updateSetting}
-        visibleThemes={visibleThemes}
-        THEME_SWATCH_COLORS={THEME_SWATCH_COLORS}
-        effectiveTheme={effectiveTheme}
-        resetCustomThemePalette={resetCustomThemePalette}
-        saveCurrentCustomThemePreset={saveCurrentCustomThemePreset}
-        customThemeName={customThemeName}
-        setCustomThemeName={setCustomThemeName}
-        savedCustomThemes={savedCustomThemes}
-        removeSavedCustomThemePreset={removeSavedCustomThemePreset}
-        BUILT_IN_CUSTOM_THEME_PRESETS={BUILT_IN_CUSTOM_THEME_PRESETS}
-        applyCustomThemePreset={applyCustomThemePreset}
-        customThemeTokens={customThemeTokens}
-        commitCustomThemeHexDraft={commitCustomThemeHexDraft}
-        previewCustomThemeColor={stageCustomThemeColor}
         coverColorSyncOptions={coverColorSyncOptions}
         selectedCoverColorSyncMode={selectedCoverColorSyncMode}
         updateCoverColorSyncMode={updateCoverColorSyncMode}
@@ -8248,31 +7132,15 @@ function MainModeApp() {
     updatePrompt.status !== "latest" &&
     updatePrompt.status !== "dev";
 
-  const albumsController = useAlbumsController({
-    view,
-    reducedMotion: settings.reducedMotion,
-    songs,
-    songsById,
-    setSongs,
-    setLibraryScanBusy,
-    setLibraryScanMessage,
-    setStatusText,
-    patchSongLocal
-  });
-
   useAppMenuCommands({
     changeView, nav,
     openSettings: () => openSettingsPanel(),
     importSongs,
-    importAlbumFolder: () => albumsController.scanAlbumFolderImport("single"),
     openFeedback: openFeedbackPrompt,
     checkForUpdates: () => { openSettingsPanel("updates"); return manualUpdateCheck(); }
   });
 
-  const selectedAlbum = albumsController.selectedAlbum;
-  const selectedAlbumSourceRef = selectedAlbum ? playbackSourceRef("album", selectedAlbum.title, selectedAlbum.id) : null;
-  const albumIdBySongId = useMemo(() => buildAlbumIdBySongId(albumsController.localAlbums), [albumsController.localAlbums]);
-  const nowPlayingContext = resolveNowPlayingContext(currentSong, activePlaylist, playbackSource, albumsController.localAlbums, albumIdBySongId);
+  const nowPlayingContext = resolveNowPlayingContext(currentSong, activePlaylist, playbackSource);
   const queuePanelAutoNextSong = queuePanelOpen && !playQueue.length && !isShuffle ? getNextPlayableSongForCache() : null;
   // Repeat and shuffle already decide what plays forever, so radio only fills in when playback would run out.
   const songRadioEnabled = settings.songRadio && settings.experimentalMusicAnalysis && repeatMode === "off" && !repeatPlaylist && !isShuffle;
@@ -8326,6 +7194,65 @@ function MainModeApp() {
     });
   };
 
+  const homeSettings = useMemo(() => ({
+    heroExpanded: settings.heroExpanded,
+    volume: settings.volume,
+    homeSectionOrder: settings.homeSectionOrder,
+    homeHiddenSections: settings.homeHiddenSections
+  }), [settings.heroExpanded, settings.volume, settings.homeSectionOrder, settings.homeHiddenSections]);
+  const homeOpenAnalysis = useStableCallback(() => { setSettingsSearch(""); setSettingsCategory("experimental"); changeView("settings"); });
+  const homeOpenCovers = useStableCallback(openCoversViewWithCurrentSong);
+  const homeOpenMixes = useStableCallback(() => nav.go("playlists"));
+  const homePlaySongs = useStableCallback(playCollectionSongs);
+  const homeSelectSong = useStableCallback(selectSong);
+  const homeShuffle = useStableCallback(shuffleLibrarySongsAction);
+  const homeToggleHero = useStableCallback(toggleHeroExpanded);
+  const homeUpdateLayout = useStableCallback((patch: Parameters<typeof updateSettingsPatch>[0]) => void updateSettingsPatch(patch));
+
+  const playerVolumeSettings = useMemo(() => ({ volume: settings.volume }), [settings.volume]);
+  const playerCommitSeek = useStableCallback(commitSeek);
+  const playerCommitVolume = useStableCallback(commitVolume);
+  const playerDragLeave = useStableCallback(handlePlayerDragLeave);
+  const playerDragOver = useStableCallback(handlePlayerDragOver);
+  const playerDrop = useStableCallback(handlePlayerDrop);
+  const playerOpenMenu = useStableCallback(openSongContextMenu);
+  const playerNext = useStableCallback(playNext);
+  const playerPrevious = useStableCallback(playPrevious);
+  const playerPreviewSeek = useStableCallback(previewSeek);
+  const playerPreviewVolume = useStableCallback(previewVolume);
+  const playerToggleLyrics = useStableCallback(() => setLyricsOpen(open => !open));
+  const playerReveal = useStableCallback(revealNowPlaying);
+  const playerResize = useStableCallback(startPlayerResize);
+  const playerStartSeek = useStableCallback(startSeekPreview);
+  const playerLike = useStableCallback(toggleLike);
+  const playerToggle = useStableCallback(togglePlay);
+  const playerToggleQueue = useStableCallback(() => setQueuePanelOpen(open => !open));
+  const playerRepeat = useStableCallback(toggleRepeat);
+  const playerMute = useStableCallback(toggleMuteFromNative);
+  const playerUpdateVolume = useStableCallback((key: "volume", value: number, persist?: boolean) => updateSetting(key, value, persist));
+  const playerQueueItem = useStableCallback(playQueueItem);
+  const playerLyricsSeek = useStableCallback((seconds: number) => handleSeek((seconds / (durationRef.current || currentDuration || currentSong?.duration || 1)) * 100));
+  const playerLyricsSettings = useStableCallback(() => { setLyricsOpen(false); setSettingsSearch(""); setSettingsCategory("experimental"); changeView("settings"); });
+
+  const libraryAreaDragOver = useStableCallback(handleLibraryAreaDragOver);
+  const libraryAreaDragLeave = useStableCallback(handleLibraryAreaDragLeave);
+  const libraryAreaDrop = useStableCallback(handleLibraryAreaDrop);
+  const libraryRowSettings = useMemo(() => ({libraryRowStyle: settings.libraryRowStyle}), [settings.libraryRowStyle]);
+  const libraryRows = useMemo<Omit<VirtualSongRowsProps, "list" | "className">>(() => ({
+    currentId, isPlaying, draggedSongId, libraryDragOverSongId, libraryDropSide, draggedSongTitle,
+    onAreaDragOver: libraryAreaDragOver, onAreaDragLeave: libraryAreaDragLeave, onAreaDrop: libraryAreaDrop,
+    onSelectSong: selectSongCardAction, onTogglePlay: togglePlayCardAction, onToggleLike: toggleLikeCardAction,
+    onOpenEditor: openEditorCardAction, onOpenPlaylistPicker: openPlaylistPickerCardAction,
+    onOpenSongContextMenu: openSongContextMenuCardAction, onStartSongDrag: startSongDragCardAction,
+    onPointerStartSongDrag: startPointerSongDragCardAction, registerLibrarySongElement,
+    onDragOverSong: dragOverSongCardAction, onDragLeaveSong: dragLeaveSongCardAction,
+    onDropSong: dropSongCardAction, onDragEnd: endSongDragCardAction
+  }), [currentId, isPlaying, draggedSongId, libraryDragOverSongId, libraryDropSide, draggedSongTitle,
+    libraryAreaDragOver, libraryAreaDragLeave, libraryAreaDrop, selectSongCardAction, togglePlayCardAction,
+    toggleLikeCardAction, openEditorCardAction, openPlaylistPickerCardAction, openSongContextMenuCardAction,
+    startSongDragCardAction, startPointerSongDragCardAction, registerLibrarySongElement, dragOverSongCardAction,
+    dragLeaveSongCardAction, dropSongCardAction, endSongDragCardAction]);
+
   const localtifyAppViewProps: AppShellProps = {
     frame: {
       appRootRef,
@@ -8340,16 +7267,12 @@ function MainModeApp() {
       isAppBackgrounded,
       scrollBusyRef,
       themeSettling,
-      themePresetStyle,
-      animatedThemeVisualStyle,
-      customThemeStyle,
       effectiveTheme,
       effectiveAmbient,
       effectiveCoverColorSyncMode,
       effectiveNotes,
       statusText,
-      draggedSongTitle,
-      showStarBackdrop
+      draggedSongTitle
     },
     updates: {
       updatePrompt,
@@ -8370,25 +7293,10 @@ function MainModeApp() {
       secretMode,
       secretBurst,
       secretToast,
-      starParticleStyles,
       appToast,
       importAnimation
     },
-    onboarding: {
-      open: onboardingOpen,
-      songsCount: songs.length,
-      currentTheme: settings.customThemeEnabled ? "custom" : settings.theme,
-      discordEnabled: settings.discordEnabled,
-      onChooseTheme: handleOnboardingTheme,
-      onSetDiscordEnabled: handleOnboardingDiscord,
-      onImportMusic: handleOnboardingImportMusic,
-      onOpenDownloads: handleOnboardingDownloads,
-      onStartListening: handleOnboardingStartListening,
-      onSkip: skipOnboarding
-    },
     navigation: {
-      effectiveSimpleMode,
-      simpleModeView,
       view,
       changeView,
       importSongs,
@@ -8399,7 +7307,6 @@ function MainModeApp() {
       history: nav
     },
     home: {
-      albums: albumsController.localAlbums,
       ambientStyle,
       currentId,
       currentSong: visualCurrentSong,
@@ -8413,26 +7320,26 @@ function MainModeApp() {
       isThreeAm,
       nowPlayingSongMotionClass,
       nowPlayingTransitionKey,
-      openAnalysisSettings: () => { setSettingsSearch(""); setSettingsCategory("experimental"); changeView("settings"); },
-      openCoversViewWithCurrentSong,
-      openDailyMixes: () => nav.go("playlists"),
+      openAnalysisSettings: homeOpenAnalysis,
+      openCoversViewWithCurrentSong: homeOpenCovers,
+      openDailyMixes: homeOpenMixes,
       openSimilarSongs: setSimilarRequest,
       playableSongCount: playableSongs.length,
       playerError,
-      playSongs: playAlbumSongs,
-      selectSong,
+      playSongs: homePlaySongs,
+      selectSong: homeSelectSong,
       songs,
-      settings,
-      shuffleLibrarySongsAction,
-      toggleHeroExpanded,
-      updateHomeLayout: (patch) => void updateSettingsPatch(patch),
+      settings: homeSettings,
+      shuffleLibrarySongsAction: homeShuffle,
+      toggleHeroExpanded: homeToggleHero,
+      updateHomeLayout: homeUpdateLayout,
     },
     library: {
       changeView,
       deleteBusy,
-      handleLibraryAreaDragLeave,
-      handleLibraryAreaDragOver,
-      handleLibraryAreaDrop,
+      handleLibraryAreaDragLeave: libraryAreaDragLeave,
+      handleLibraryAreaDragOver: libraryAreaDragOver,
+      handleLibraryAreaDrop: libraryAreaDrop,
       handleSearchInput,
       importSongs,
       libraryAlbumCount,
@@ -8442,11 +7349,11 @@ function MainModeApp() {
       missingFileCount: effectiveMissingFileCount,
       query,
       removeMissingSongs,
-      renderHomeSongCards,
-      renderSongRows,
+      rows: libraryRows,
       setLibraryFilterMode,
       setLibrarySortMode,
-      settings,
+      setLibraryRowStyle: (style) => void updateSetting("libraryRowStyle", style),
+      settings: libraryRowSettings,
       showingMissingFiles: view === "library" && libraryFilterMode === "missing",
       shuffleLibrarySongsAction,
       openSimilarSongs: setSimilarRequest,
@@ -8460,18 +7367,6 @@ function MainModeApp() {
     },
     genres: {
       songs
-    },
-    albums: {
-      ...albumsController,
-      currentId,
-      currentSong: visualCurrentSong,
-      openPlaylistPicker,
-      playAlbumSongs: (songIds: string[], albumTitle?: string) => playAlbumSongs(songIds, albumTitle, selectedAlbumSourceRef),
-      queueAlbumSongs,
-      selectSong,
-      shuffleAlbumSongs: (songIds: string[], albumTitle?: string) => playAlbumSongs(songIds, albumTitle, selectedAlbumSourceRef, true),
-      songs,
-      toggleLike
     },
     playlists: {
       dailyMixes: { songs, savePlaylist: createPlaylistFromSongs,
@@ -8494,7 +7389,7 @@ function MainModeApp() {
       openPlaylistSongContextMenuAction,
       playPlaylist,
       openSimilarSongs: setSimilarRequest,
-      playSongs: (ids: string[], label: string) => playAlbumSongs(ids, label),
+      playSongs: (ids: string[], label: string) => playCollectionSongs(ids, label),
       selectSong,
       playlistDragOverPlaylistId,
       playlistSummaries,
@@ -8562,7 +7457,7 @@ function MainModeApp() {
       likedPercent,
       longestSong,
       missingFileCount: effectiveMissingFileCount,
-      neverPlayedSongs,
+      neverPlayedCount,
       playedPercent,
       recentImportWeekCount,
       songs
@@ -8626,8 +7521,8 @@ function MainModeApp() {
     },
     playerBar: connect.playerBar({
       ambientStyle,
-      commitSeek,
-      commitVolume,
+      commitSeek: playerCommitSeek,
+      commitVolume: playerCommitVolume,
       currentDuration,
       currentSong: visualCurrentSong,
       displayedProgress,
@@ -8635,9 +7530,9 @@ function MainModeApp() {
       draggedSongId,
       effectiveAmbient,
       effectiveCoverColorSyncMode,
-      handlePlayerDragLeave,
-      handlePlayerDragOver,
-      handlePlayerDrop,
+      handlePlayerDragLeave: playerDragLeave,
+      handlePlayerDragOver: playerDragOver,
+      handlePlayerDrop: playerDrop,
       isPlaying,
       isSeeking,
       isShuffle,
@@ -8646,12 +7541,12 @@ function MainModeApp() {
       nowPlayingSongMotionClass,
       nowPlayingTransitionKey,
       openArtistPage: nav.openArtistPage,
-      openSongContextMenu,
+      openSongContextMenu: playerOpenMenu,
       playButtonBurst,
-      playNext,
-      playPrevious,
-      previewSeek,
-      previewVolume,
+      playNext: playerNext,
+      playPrevious: playerPrevious,
+      previewSeek: playerPreviewSeek,
+      previewVolume: playerPreviewVolume,
       progressDurationLabelRefs,
       progressInputRefs,
       progressRangeStyle,
@@ -8660,22 +7555,23 @@ function MainModeApp() {
       queueDropHot,
       queuePanelOpen,
       lyricsOpen: settings.lyricsEnabled ? lyricsOpen : undefined,
-      toggleLyrics: () => setLyricsOpen((open) => !open),
+      toggleLyrics: playerToggleLyrics,
       repeatButtonAriaLabel,
       repeatButtonStateText,
       repeatButtonTitle,
       repeatMode,
-      revealNowPlaying,
+      revealNowPlaying: playerReveal,
       setIsShuffle,
       setIsVolumeDragging,
-      settings,
-      startPlayerResize,
-      startSeekPreview,
-      toggleLike,
-      togglePlay,
-      toggleQueuePanel: () => setQueuePanelOpen((open) => !open),
-      toggleRepeat,
-      updateSetting,
+      settings: playerVolumeSettings,
+      startPlayerResize: playerResize,
+      startSeekPreview: playerStartSeek,
+      toggleLike: playerLike,
+      togglePlay: playerToggle,
+      toggleQueuePanel: playerToggleQueue,
+      toggleRepeat: playerRepeat,
+      toggleMute: playerMute,
+      updateSetting: playerUpdateVolume,
       volumeDraft,
       volumeDraftRef,
       volumeRangeStyle
@@ -8692,7 +7588,6 @@ function MainModeApp() {
         toggleLike,
         askRemoveSong,
         goToArtist: nav.openArtistPage,
-        goToAlbum: goToSongAlbum,
         openSimilarSongs: (song: Song) => setSimilarRequest({ kind: "song", songId: song.id }),
         notForMe: settings.experimentalMusicAnalysis ? notForMe : undefined
       },
@@ -8700,7 +7595,7 @@ function MainModeApp() {
         seed: similarSeed, songsById, currentId, returnFocusTo: similarRequest?.kind === "song" ? songContextAnchorRef.current : null,
         onClose: () => setSimilarRequest(null),
         openAnalysisSettings: () => { setSimilarRequest(null); setSettingsSearch(""); setSettingsCategory("experimental"); changeView("settings"); },
-        selectSong, queueSong, playSongs: playAlbumSongs, queueSongs: queueAlbumSongs
+        selectSong, queueSong, playSongs: playCollectionSongs, queueSongs: queueCollectionSongs
       },
       queuePanel: connect.queuePanel({
         open: queuePanelOpen,
@@ -8716,9 +7611,9 @@ function MainModeApp() {
         repeatPreview: queuePanelOpen
           ? getRepeatPreview({ repeatMode, currentSong, activePlaylist, activePlaylistSongs, isShuffle, source: playbackSource, songsById })
           : null,
-        playQueueItem,
-        selectSong,
-        openSongContextMenu
+        playQueueItem: playerQueueItem,
+        selectSong: homeSelectSong,
+        openSongContextMenu: playerOpenMenu
       }),
       lyrics: connect.lyrics({
         open: lyricsOpen && settings.lyricsEnabled,
@@ -8726,8 +7621,10 @@ function MainModeApp() {
         song: visualCurrentSong,
         isPlaying,
         getTime: getLyricsTime,
-        seekTo: (seconds: number) => handleSeek((seconds / (durationRef.current || currentDuration || currentSong?.duration || 1)) * 100),
-        openSettings: () => { setLyricsOpen(false); setSettingsSearch(""); setSettingsCategory("experimental"); changeView("settings"); }
+        getPlaybackRate: getLyricsRate,
+        subscribeClock: subscribeLyricsClock,
+        seekTo: playerLyricsSeek,
+        openSettings: playerLyricsSettings
       }),
       whatsNew: {
         open: Boolean(whatsNewOpen),
@@ -8769,7 +7666,7 @@ function MainModeApp() {
         removeSong
       }
     },
-    collections: { playSongs: playAlbumSongs, queueSongs: queueAlbumSongs, playPlaylist, openSimilar: setSimilarRequest },
+    collections: { playSongs: playCollectionSongs, queueSongs: queueCollectionSongs, playPlaylist, openSimilar: setSimilarRequest },
     playbackAudio: {
       audioRef,
       currentSong: visualCurrentSong,
@@ -8802,76 +7699,27 @@ function MainModeApp() {
     }
   };
 
+  // Hydrate the persisted library before enabling actions. No splash screen,
+  // fake progress, or minimum display time.
   if (!ready) {
-    const isBootError = Boolean(bootError);
-
-    if (onboardingOpen && !onboardingDevPreview && !isBootError) {
-      return (
-        <main className="onboardingBootBlank" aria-label="localtify is preparing onboarding">
-          <span>localtify</span>
-        </main>
-      );
-    }
-
-    const bootArtSrc = `${loadingScreenGif}#boot-${bootRetryKey}`;
-
+    if (!bootError) return null;
     return (
-      <main className={`loadingScreen bootScreen ${isBootError ? "bootScreenError" : ""}`} aria-label="localtify is loading">
-        <div className="bootGlow" aria-hidden="true" />
-
-        <section className="bootCard" role={isBootError ? "alert" : "status"} aria-live={isBootError ? "assertive" : "polite"}>
-          <div className="bootArtWrap" aria-hidden="true">
-            <img key={`boot-art-${bootRetryKey}`} className="bootArt" src={bootArtSrc} alt="" loading="eager" decoding="async" />
-            <span className="bootArtAura" />
-          </div>
-
-          <div className="bootCopy">
-            <div className="bootBrandRow">
-              <img className="bootLogo" src={localtifyLogo} alt="" aria-hidden="true" />
-              <span>localtify</span>
-            </div>
-
-            {isBootError ? (
-              <>
-                <h1>localtify had trouble starting</h1>
-                <p>{bootError}</p>
-                <div className="bootActions">
-                  <button type="button" className="bootButton bootButtonPrimary" onClick={retryStartup}>Retry</button>
-                  <button type="button" className="bootButton" onClick={copyStartupLog}>
-                    {bootLogCopied ? "Copied error" : "Open logs"}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <h1>loading your library...</h1>
-                <p>{bootStage}</p>
-                <ul className="bootAssetList" aria-label="startup assets">
-                  {BOOT_STEPS.map((step, index) => {
-                    const state = index < bootStepIndex ? "done" : index === bootStepIndex ? "active" : "waiting";
-                    return (
-                      <li key={step.label} className={`bootAssetItem ${state}`}>
-                        <span className="bootAssetDot" aria-hidden="true" />
-                        <span className="bootAssetText">
-                          <strong>{step.label}</strong>
-                          <small>{step.detail}</small>
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-                <div className="bootProgress" aria-hidden="true"><span /></div>
-              </>
-            )}
+      <main className="appCrashBoundary" aria-label="Localtify startup error">
+        <section className="appCrashCard" role="alert">
+          <h1>Localtify had trouble starting</h1>
+          <pre className="appCrashMessage">{bootError}</pre>
+          <div className="appCrashActions">
+            <button type="button" className="appCrashPrimary" onClick={retryStartup}>Retry</button>
+            <button type="button" onClick={copyStartupLog}>{bootLogCopied ? "Copied error" : "Copy error"}</button>
           </div>
         </section>
       </main>
     );
   }
 
-
   if (onboardingOpen || onboardingDevPreview) {
     return (
+      <Suspense fallback={<main role="status" aria-label="Loading setup" />}>
       <Onboarding
         appVersion={APP_VERSION}
         songsCount={songs.length}
@@ -8884,6 +7732,7 @@ function MainModeApp() {
         onStartListening={handleOnboardingStartListening}
         onSkip={skipOnboarding}
       />
+      </Suspense>
     );
   }
 
@@ -8891,7 +7740,14 @@ function MainModeApp() {
     <>
       <AppShell {...localtifyAppViewProps} />
       <CatBuddy enabled={settings.catBuddyEnabled === true} reducedMotion={settings.reducedMotion === true} />
-      {renderFeedbackPrompt()}
+      {feedbackPromptOpen ? <Suspense fallback={null}><FeedbackPrompt
+        reducedMotion={settings.reducedMotion}
+        feedbackCategory={feedbackCategory} setFeedbackCategory={setFeedbackCategory}
+        feedbackMessage={feedbackMessage} setFeedbackMessage={setFeedbackMessage}
+        feedbackStatus={feedbackStatus} setFeedbackStatus={setFeedbackStatus}
+        feedbackSendBusy={feedbackSendBusy}
+        closeFeedbackPrompt={closeFeedbackPrompt} submitFeedbackPrompt={submitFeedbackPrompt}
+      /></Suspense> : null}
     </>
   );
 }

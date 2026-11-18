@@ -114,3 +114,17 @@ test("removed folders stop being watched and broken folders report why", async (
     assert.equal(watcher.status().folders[0].watching, true);
   } finally { watcher.dispose(); lib.cleanup(); }
 });
+
+test("launch scans wait for a newly copied file to settle", async () => {
+  const lib = tempLibrary();
+  const library = fakeLibrary();
+  const watcher = createLibraryWatcher({ ...library.options, settleMs: 500 });
+  try {
+    const fresh = lib.write("New folder/copying.mp3", { old: false });
+    watcher.setFolders([lib.root]);
+    await waitFor(() => watcher.status().folders.every(entry => entry.checkedAt), "initial scan");
+    assert.equal(library.imports.length, 0, "do not import a file that was just written");
+    await waitFor(() => library.paths.has(fresh), "settled import");
+    assert.equal(library.imports.flat().filter(file => file === fresh).length, 1);
+  } finally { watcher.dispose(); lib.cleanup(); }
+});

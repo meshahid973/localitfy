@@ -304,3 +304,103 @@ test("artist biography requests remain isolated when the API key or Discover set
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("public catalog search requires opt-in but never a Last.fm key", async () => {
+  const handlers = new Map();
+  const settings = { discoverEnabled: false, lastfmApiKey: "" };
+  const id = "12345678-1234-1234-1234-123456789abc";
+  const calls = [];
+  const client = { searchCatalog: async (kind, term) => {
+    calls.push([kind, term]);
+    return [{ id, title: "Track", name: "Artist", "artist-credit": [{ name: "Artist" }], url: "javascript:bad" }, { id, title: "Duplicate" }, { id: "invalid", title: "Unsafe" }];
+  } };
+  registerDiscoverIpc({ handle: (channel, handler) => handlers.set(channel, handler) }, { getSongs: () => songs, getSettings: () => settings, musicBrainzClient: client });
+  const search = (kind, term) => handlers.get("discover:get")({}, { catalog: { kind, term } });
+  assert.equal((await search("recording", "Track")).status, "off");
+  assert.equal(calls.length, 0);
+  settings.discoverEnabled = true;
+  assert.equal((await search("invalid", "Track")).status, "error");
+  assert.equal((await search("album", "Track")).status, "error");
+  assert.equal((await search("artist", "x".repeat(161))).status, "error");
+  for (const [kind, endpoint] of [["recording", "recording"], ["artist", "artist"]]) {
+    const result = await search(kind, " Track ");
+    assert.equal(result.status, "catalog");
+    assert.equal(result.items.length, 1);
+    assert.equal(result.items[0].url, "https://musicbrainz.org/" + endpoint + "/" + id);
+  }
+  assert.deepEqual(calls, [["recording", "Track"], ["artist", "Track"]]);
+});
+test("catalog searches share an in-flight request and drop responses after opt-out", async () => {
+  const handlers = new Map();
+  const settings = { discoverEnabled: true };
+  let release;
+  let calls = 0;
+  const musicBrainzClient = { searchCatalog: () => { calls++; return new Promise(resolve => { release = resolve; }); } };
+  registerDiscoverIpc({ handle: (channel, handler) => handlers.set(channel, handler) }, { getSongs: () => [], getSettings: () => settings, musicBrainzClient });
+  const search = term => handlers.get("discover:get")({}, { catalog: { kind: "recording", term } });
+  const first = search("Track");
+  const second = search("track");
+  assert.equal((await search("Other")).status, "error");
+  assert.equal(calls, 1);
+  settings.discoverEnabled = false;
+  release([]);
+  assert.equal((await first).status, "off");
+  assert.equal((await second).status, "off");
+});
+
+test("Discover permits opt-in with a blank key and sends explicit catalog searches", () => {
+  const view = fs.readFileSync("src/features/discover/DiscoverView.tsx", "utf8");
+  const android = fs.readFileSync("src/platform/android/bridge.ts", "utf8");
+  assert.match(view, /disabled=\{Boolean\(keyDraft.trim\(\)\) && !API_KEY.test/);
+  assert.match(view, /getDiscoveries\(\{ catalog: \{ kind: catalogKind, term \} \}\)/);
+  assert.match(view, /catalogRequestRef.current/);
+  assert.match(android, /payload\?\.catalog \|\| payload\?\.artwork\) \? fromMac<DiscoverResult>/);
+});
+
+test("artwork uses validated releases and rejects ambiguous tracks", async () => {
+  const { catalogArtwork, matchRecordingArtwork, createArtworkLookup } = require("../../electron/discover/artwork.cjs");
+  const id = "12345678-1234-1234-1234-123456789abc";
+  const item = { title:"Track",length:123000,"artist-credit":[{name:"Artist"}],releases:[{id,status:"Official"}] };
+  assert.equal(catalogArtwork("recording",item).coverUrl,"https://coverartarchive.org/release/"+id+"/front-250");
+  assert.equal(catalogArtwork("album",{id}).coverUrl,"https://coverartarchive.org/release-group/"+id+"/front-250");
+  assert.deepEqual(matchRecordingArtwork([item],"Other","Artist"),{});
+  assert.deepEqual(matchRecordingArtwork([item,item],"Track","Artist"),{});
+  assert.equal(catalogArtwork("recording",{releases:[{id:"bad"}]}).coverUrl,undefined);
+  let calls=0;
+  const lookup=createArtworkLookup({searchRecordings:async()=>{calls++;return [item];}});
+  const [a,b]=await Promise.all([lookup("Track","Artist"),lookup("track","artist")]);
+  assert.deepEqual(a,b); assert.equal(a.durationMs,123000);
+  await lookup("Track","Artist"); assert.equal(calls,1);
+});
+test("artwork lookup respects opt-in", async () => {
+  const handlers=new Map(), settings={discoverEnabled:false};
+  let calls=0,finish;
+  registerDiscoverIpc({handle:(channel,handler)=>handlers.set(channel,handler)},{getSongs:()=>[],getSettings:()=>settings,musicBrainzClient:{searchRecordings:()=>{calls++;return new Promise(resolve=>{finish=resolve;});}}});
+  const request=()=>handlers.get("discover:get")({}, {artwork:{title:"Track",artist:"Artist"}});
+  assert.equal((await request()).status,"off"); assert.equal(calls,0);
+  settings.discoverEnabled=true; const pending=request(); await Promise.resolve();
+  settings.discoverEnabled=false; finish([]);
+  assert.equal((await pending).status,"off");
+});
+
+test("Discover lazy renderer modules parse as TSX", () => {
+  const ts = require("typescript");
+  for (const file of ["src/features/discover/DiscoverView.tsx", "src/features/discover/DiscoverArtwork.tsx"]) {
+    const output = ts.transpileModule(fs.readFileSync(file, "utf8"), {
+      fileName: file, reportDiagnostics: true,
+      compilerOptions: { jsx: ts.JsxEmit.ReactJSX, module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2023 }
+    });
+    const errors = (output.diagnostics || []).filter(d => d.category === ts.DiagnosticCategory.Error);
+    assert.deepEqual(errors.map(d => ts.flattenDiagnosticMessageText(d.messageText, " ")), [], file);
+  }
+});
+test("removed analytics cannot load PostHog extensions", () => {
+  const manifest = JSON.parse(fs.readFileSync("package.json", "utf8"));
+  const entry = fs.readFileSync("src/main.tsx", "utf8");
+  const html = fs.readFileSync("index.html", "utf8");
+  assert.equal(fs.existsSync("src/analytics.ts"), false);
+  assert.equal(manifest.dependencies?.["posthog-js"], undefined);
+  assert.equal(manifest.devDependencies?.["posthog-js"], undefined);
+  assert.doesNotMatch(entry, /posthog|["']\.\/analytics["']/i);
+  assert.match(html, /script-src 'self';/);
+});

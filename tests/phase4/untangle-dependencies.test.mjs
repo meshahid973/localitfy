@@ -9,63 +9,38 @@ const transpile = (file) => ts.transpileModule(read(file), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 }
 }).outputText;
 
-function loadThemePresetStyle() {
-  const utilities = {};
+function loadThemeUtilities() {
+  const exports = {};
   runInNewContext(transpile("src/features/settings/theme.utils.ts"), {
-    exports: utilities,
+    exports,
     require(specifier) {
       if (specifier === "./settings.constants") return { coverColorSyncOptions: [] };
-      if (specifier === "./theme.constants") return { RETIRED_ANIMATED_THEME_IDS: new Set(), THEME_ID_SET: new Set() };
+      if (specifier === "./theme.constants") return { RETIRED_ANIMATED_THEME_IDS: new Set(), THEME_ID_SET: new Set(["dark", "light"]) };
       throw new Error("Unexpected utility import: " + specifier);
     }
   });
-  const theme = {};
-  runInNewContext(transpile("src/features/settings/themePresetStyle.ts"), {
-    exports: theme,
-    require(specifier) {
-      if (specifier === "./theme.utils") return utilities;
-      throw new Error("Pure preset code must not import persistence or runtime modules: " + specifier);
-    }
-  });
-  return { ...theme, accentTextColor: utilities.accentTextColor };
+  return exports;
 }
 
-test("theme preset builder stays separate from localStorage and the public settings barrel preserves exports", () => {
-  const style = read("src/features/settings/themePresetStyle.ts");
-  const storage = read("src/features/settings/customTheme.ts");
-  const barrel = read("src/features/settings/index.ts");
-  assert.doesNotMatch(style, /localStorage|useState|useEffect|readLocalJson|writeLocalJson/);
-  assert.doesNotMatch(storage, /makeThemePresetStyle|THEME_PRESET_COLORS/);
-  assert.match(storage, /readSavedCustomThemePresets/);
-  assert.match(barrel, /export \* from "\.\/themePresetStyle"/);
-  assert.match(barrel, /export \* from "\.\/customTheme"/);
-});
+function palette(id) {
+  const css = read("src/styles/themes.css");
+  const block = css.split('.app[data-theme="' + id + '"] {')[1].split("}")[0];
+  return Object.fromEntries([...block.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map(match => [match[1], match[2].trim()]));
+}
 
-test("all 38 existing preset palettes emit stable CSS token values", () => {
-  const theme = loadThemePresetStyle();
-  const palettes = JSON.parse(JSON.stringify(theme.THEME_PRESET_COLORS));
-  assert.equal(Object.keys(palettes).length, 38);
-  const mint = JSON.parse(JSON.stringify(theme.makeThemePresetStyle("mint")));
-  const mono = JSON.parse(JSON.stringify(theme.makeThemePresetStyle("mono")));
-  const stars = JSON.parse(JSON.stringify(theme.makeThemePresetStyle("stars")));
-  assert.equal(Object.keys(mint).length, 38);
-  assert.equal(mint["--bg"], "#020706");
-  assert.equal(mint["--accent"], "#8dffce");
-  assert.equal(mint["--accent-rgb"], "141, 255, 206");
-  assert.equal(mint["--accent-soft"], "rgba(141, 255, 206, 0.14)");
-  assert.equal(mint["--theme-card-glass"], "rgba(141, 255, 206, 0.045)");
-  assert.equal(mono["--bg"], "#030303");
-  assert.equal(mono["--accent"], "#f4f4f5");
-  assert.equal(stars["--bg"], "#050610");
-  assert.equal(stars["--accent"], "#d7d5ff");
-  assert.deepEqual(JSON.parse(JSON.stringify(theme.makeThemePresetStyle("invalid-theme"))), mint);
-  for (const id of Object.keys(palettes)) {
-    const tokens = JSON.parse(JSON.stringify(theme.makeThemePresetStyle(id)));
-    assert.equal(Object.keys(tokens).length, 38, id);
-    assert.equal(tokens["--accent"], palettes[id].accent, id);
-    assert.equal(tokens["--progress"], palettes[id].progress ?? palettes[id].accent, id);
-    assert.equal(tokens["--theme-highlight"], palettes[id].highlight, id);
-  }
+test("fixed palettes share semantic tokens and retired IDs normalize safely", () => {
+  const dark = palette("dark"), light = palette("light");
+  assert.equal(dark["--bg"], "#000000");
+  assert.equal(dark["--accent"], "#ffffff");
+  assert.equal(light["--bg"], "#f5f5f7");
+  assert.equal(light["--accent"], "#18181b");
+  assert.deepEqual(Object.keys(dark).sort(), Object.keys(light).sort());
+  const {normalizeThemeId} = loadThemeUtilities();
+  for (const id of ["mint", "stars", "berry", "oled", "custom", "invalid-theme", undefined]) assert.equal(normalizeThemeId(id), "dark");
+  assert.equal(normalizeThemeId("mono"), "light");
+  assert.match(read("src/styles/themes.css"), /--progress: var\(--accent\)/);
+  assert.match(read("src/styles/themes.css"), /--theme-highlight: var\(--highlight\)/);
+  assert.doesNotMatch(read("src/features/settings/index.ts"), /themePresetStyle|customThemePersistence/);
 });
 
 test("download processing stays React-independent while keeping all established entrypoints", () => {
@@ -92,7 +67,7 @@ test("download processing stays React-independent while keeping all established 
 });
 
 test("accent labels meet WCAG AA for presets and a custom RGB color grid", () => {
-  const theme = loadThemePresetStyle();
+  const theme = loadThemeUtilities();
   const luminance = (hex) => {
     const channels = hex.match(/[a-f0-9]{2}/gi).map(v => parseInt(v, 16) / 255);
     const rgb = channels.map(c => c < .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4);
@@ -102,8 +77,8 @@ test("accent labels meet WCAG AA for presets and a custom RGB color grid", () =>
     const values = [luminance(background), luminance(foreground)].sort((a, b) => b - a);
     assert.ok((values[0] + .05) / (values[1] + .05) >= 4.5, `${background} / ${foreground}`);
   };
-  for (const id of Object.keys(theme.THEME_PRESET_COLORS)) {
-    const tokens = theme.makeThemePresetStyle(id);
+  for (const id of ["dark", "light"]) {
+    const tokens = palette(id);
     assertContrast(tokens["--accent"], tokens["--button-text-on-accent"]);
   }
   for (let r = 0; r <= 255; r += 17) for (let g = 0; g <= 255; g += 17) for (let b = 0; b <= 255; b += 17) {

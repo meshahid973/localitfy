@@ -7,17 +7,16 @@ import { formatTime } from "../../shared/utils/format";
 import { prettyMeta } from "../search/search.utils";
 import PlaylistCoverCollage from "../playlists/components/PlaylistCoverCollage";
 import { useHomeDailyMixes } from "../home/useHomeDailyMixes";
-import { buildAlbumIdBySongId } from "../player/playbackSource";
+import { useHomeDay } from "../home/useHomeDay";
 import { mixTarget, playableIds, useAppActions } from "../shell/appActions";
-import type { LocalAlbumEntry } from "../albums/album.types";
 import type { Song } from "../library/song.types";
+import { ArtworkBackdrop } from "../covers/ArtworkBackdrop";
 import CollectionHero from "./CollectionHero";
 import TrackList from "./TrackList";
 
 export type MixPageProps = {
   mixId: string;
   songs: Song[];
-  albums: readonly LocalAlbumEntry[];
   currentId: string | null;
   isPlaying: boolean;
   toggleLike: (songId: string) => unknown;
@@ -26,11 +25,11 @@ export type MixPageProps = {
 };
 
 /** One of today's daily mixes as a page. */
-export default function MixPage({ mixId, songs, albums, currentId, isPlaying, toggleLike, openPlaylistPicker, savePlaylist }: MixPageProps) {
+export default function MixPage({ mixId, songs, currentId, isPlaying, toggleLike, openPlaylistPicker, savePlaylist }: MixPageProps) {
   const actions = useAppActions();
-  const { result, failed } = useHomeDailyMixes();
+  const day = useHomeDay();
+  const { result, failed } = useHomeDailyMixes(day);
   const songsById = useMemo(() => new Map(songs.map((song) => [song.id, song])), [songs]);
-  const albumIds = useMemo(() => buildAlbumIdBySongId(albums as LocalAlbumEntry[]), [albums]);
   const mix = result?.mixes.find((item) => item.id === mixId) || null;
   const members = useMemo(() => mix?.songIds.flatMap((id) => songsById.get(id) ?? []) ?? [], [mix, songsById]);
 
@@ -59,6 +58,7 @@ export default function MixPage({ mixId, songs, albums, currentId, isPlaying, to
 
   return (
     <section data-page-section="mix" className="collectionPage mixPage" aria-label={mix.name}>
+      <ArtworkBackdrop song={target.coverSong} />
       <CollectionHero
         typeLabel="daily mix"
         title={mix.name}
@@ -77,7 +77,7 @@ export default function MixPage({ mixId, songs, albums, currentId, isPlaying, to
           <Save size={16} strokeWidth={2.2} aria-hidden="true" />
         </button>
       </CollectionHero>
-      <TrackList songs={members} currentId={currentId} isPlaying={isPlaying} albumIdOf={(songId) => albumIds.get(songId)}
+      <TrackList songs={members} currentId={currentId} isPlaying={isPlaying}
         playFrom={(songId) => actions.playCollection(target, { startId: songId })} toggleLike={toggleLike} openPlaylistPicker={openPlaylistPicker} />
     </section>
   );

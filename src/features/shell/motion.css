@@ -6,9 +6,7 @@
  * geometry/proximity motion has been retired.
  */
 
-.app,
-.simpleShell,
-.loadingScreen {
+.app{
   --motion-instant: 80ms;
   --motion-fast: 150ms;
   --motion-normal: 220ms;
@@ -16,25 +14,22 @@
   --motion-pop: cubic-bezier(0.2, 0.95, 0.18, 1.12);
 }
 
-.content,
-.simpleShell{
+.content{
   overscroll-behavior: contain;
 }
 
 .app :where(
   .mainAction,
   .heroMain,
-  .simpleAction,
   .softButton,
   .heroGhost,
-  .simpleGhost,
   .iconAction,
   .songMenuButton,
   .closeModalButton,
   .settingsActionButton,
   .settingsTinyButton,
   .circleButton
-) {
+){
   transition:
     background-color var(--motion-fast) ease,
     border-color var(--motion-fast) ease,
@@ -47,17 +42,15 @@
 .app :where(
   .mainAction,
   .heroMain,
-  .simpleAction,
   .softButton,
   .heroGhost,
-  .simpleGhost,
   .iconAction,
   .songMenuButton,
   .closeModalButton,
   .settingsActionButton,
   .settingsTinyButton,
   .circleButton
-):active:not(:disabled) {
+):active:not(:disabled){
   transform: translate3d(0, 1px, 0) scale(0.975);
   transition-duration: var(--motion-instant);
 }
@@ -70,7 +63,6 @@ button:disabled:active {
 
 /* Page/modal entrances are one-shot; dense rows never get mount animations. */
 .settingsPage,
-.loadingScreen,
 .content > .pageTransition {
   animation: localtifyPageIn var(--motion-normal) var(--motion-ease) both;
 }
@@ -97,17 +89,12 @@ button:disabled:active {
 .nowPlayingCopySwap,
 .nowPlayingMiniCopySwap,
 .nowPlayingMiniTitleSwap,
-.nowPlayingMiniArtistSwap,
-.nowPlayingTitleSwap,
-.nowPlayingArtistSwap,
-.nowPlayingEyebrowSwap {
+.nowPlayingMiniArtistSwap{
   animation: localtifyCopyIn 300ms var(--motion-ease) both;
 }
 
-.nowPlayingArtSwap,
 .nowPlayingPlayerArtSwap,
-.playerArtSwap,
-.simpleHeroArtSwap {
+.playerArtSwap{
   animation: localtifyArtIn 360ms var(--motion-pop) both;
 }
 

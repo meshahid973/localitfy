@@ -1,14 +1,11 @@
-import { Disc3, ListEnd, ListMusic, ListPlus, Pencil, Play, Radio, Shuffle, Tags, UserRound } from "lucide-react";
+import { ListEnd, ListMusic, Play, Radio, Shuffle, UserRound } from "lucide-react";
 import { Cover } from "../../covers/Cover";
 import { ContextMenuLayer } from "../../../shared/ui/ContextMenuLayer";
 import { prettyMeta, prettyTitle } from "../../search/search.utils";
-import { splitArtistCredits } from "../../artists/artistCredits";
 import { playableIds, type CollectionTarget, type PlayCollectionOptions } from "../../shell/appActions";
-import type { LocalAlbumEntry } from "../../albums/album.types";
 import "./song-context-menu.css";
 
-const MAX_ARTIST_LINKS = 3;
-const OPEN_LABELS: Record<CollectionTarget["kind"], string> = { album: "open album", artist: "open artist", genre: "open genre", playlist: "open playlist", mix: "open mix" };
+const OPEN_LABELS: Record<CollectionTarget["kind"], string> = { artist: "open artist", genre: "open genre", playlist: "open playlist", mix: "open mix" };
 
 export type CollectionContextMenuState = { target: CollectionTarget; x: number; y: number };
 
@@ -18,24 +15,14 @@ export type CollectionContextMenuProps = {
   open: (target: CollectionTarget) => unknown;
   play: (target: CollectionTarget, options?: PlayCollectionOptions) => unknown;
   queue: (target: CollectionTarget) => unknown;
-  goToArtist: (artistName: string) => unknown;
   findSimilar: (target: CollectionTarget) => unknown;
-  /** Only albums you made yourself can be edited. */
-  editAlbum?: (album: LocalAlbumEntry) => unknown;
-  /** Present while MusicBrainz tagging is on. */
-  findAlbumOnMusicBrainz?: (album: LocalAlbumEntry) => unknown;
-  /** Lists the album's songs you don't have yet, to download. Present while MusicBrainz tagging is on. */
-  completeAlbum?: (album: LocalAlbumEntry) => unknown;
 };
 
-/** Right-click menu for an album, artist, genre, playlist or mix; the same look and layer as the song menu. */
-export default function CollectionContextMenu({ state, onClose, open, play, queue, goToArtist, findSimilar, editAlbum, findAlbumOnMusicBrainz, completeAlbum }: CollectionContextMenuProps) {
+/** Right-click menu for an artist, genre, playlist or mix; shares the song menu layer. */
+export default function CollectionContextMenu({ state, onClose, open, play, queue, findSimilar }: CollectionContextMenuProps) {
   if (!state) return null;
   const { target } = state;
-  const { album } = target;
   const ids = playableIds(target.songs);
-  const artistNames = album && album.artist?.trim() ? splitArtistCredits(album.albumArtist || album.artist).slice(0, MAX_ARTIST_LINKS) : [];
-  const editable = album && (album as { source?: string }).source === "manual" ? editAlbum : undefined;
   const run = (action: () => unknown) => () => { onClose(); void action(); };
 
   return (
@@ -49,7 +36,7 @@ export default function CollectionContextMenu({ state, onClose, open, play, queu
           </span>
         </div>
         <button type="button" role="menuitem" onClick={run(() => open(target))}>
-          <span className="songContextMenuIcon">{target.kind === "album" ? <Disc3 size={13} strokeWidth={3} /> : target.kind === "artist" ? <UserRound size={13} strokeWidth={3} /> : <ListMusic size={13} strokeWidth={3} />}</span> {OPEN_LABELS[target.kind]}
+          <span className="songContextMenuIcon">{target.kind === "artist" ? <UserRound size={13} strokeWidth={3} /> : <ListMusic size={13} strokeWidth={3} />}</span> {OPEN_LABELS[target.kind]}
         </button>
         <button type="button" role="menuitem" disabled={!ids.length} onClick={run(() => play(target))}>
           <span className="songContextMenuIcon"><Play size={13} strokeWidth={3} /></span> play
@@ -63,24 +50,6 @@ export default function CollectionContextMenu({ state, onClose, open, play, queu
         <button type="button" role="menuitem" disabled={!ids.length} onClick={run(() => findSimilar(target))}>
           <span className="songContextMenuIcon"><Radio size={13} strokeWidth={3} /></span> similar songs
         </button>
-        {artistNames.length ? <div className="songContextMenuDivider" aria-hidden="true" /> : null}
-        {artistNames.map((artistName) => (
-          <button key={artistName} type="button" role="menuitem" onClick={run(() => goToArtist(artistName))}>
-            <span className="songContextMenuIcon"><UserRound size={13} strokeWidth={3} /></span> go to {artistNames.length > 1 ? prettyMeta(artistName) : "artist"}
-          </button>
-        ))}
-        {album && (editable || findAlbumOnMusicBrainz || completeAlbum) ? <div className="songContextMenuDivider" aria-hidden="true" /> : null}
-        {album && editable ? <button type="button" role="menuitem" onClick={run(() => editable(album))}>
-          <span className="songContextMenuIcon"><Pencil size={13} strokeWidth={3} /></span> edit album
-        </button> : null}
-        {album && completeAlbum ? <button type="button" role="menuitem" title="Find this album's other songs and download the ones you don't have"
-          onClick={run(() => completeAlbum(album))}>
-          <span className="songContextMenuIcon"><ListPlus size={13} strokeWidth={3} /></span> complete album
-        </button> : null}
-        {album && findAlbumOnMusicBrainz ? <button type="button" role="menuitem" disabled={!album.songs.some((song) => song.filePath)} title="Search MusicBrainz and match the whole album to one release"
-          onClick={run(() => findAlbumOnMusicBrainz(album))}>
-          <span className="songContextMenuIcon"><Tags size={13} strokeWidth={3} /></span> find on musicbrainz
-        </button> : null}
     </ContextMenuLayer>
   );
 }

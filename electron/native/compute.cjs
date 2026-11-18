@@ -88,7 +88,7 @@ function tryClusterFromCenters(points, centers, minimum) {
 
 /** Batch CLAP Float32 decode/normalize; never incur a native call per audio record. */
 function tryDecodeNormalizedAudio(buffers, dimensions) {
-  const native = getAddon("similarity");
+  const native = getAddon("audio-decode") || getAddon("similarity");
   if (!native || typeof native.decodeNormalizedAudioInto !== "function" ||
       !Array.isArray(buffers) || buffers.length < 192 || buffers.length > 10_000 ||
       !Number.isSafeInteger(dimensions) || dimensions < 1 || dimensions > 16_384 ||
@@ -122,7 +122,7 @@ function tryDecodeNormalizedAudio(buffers, dimensions) {
  */
 function decodeAudioVectors(buffers, dimensions, scalar) {
   if (!Array.isArray(buffers) || !Number.isSafeInteger(dimensions) || dimensions < 1 || dimensions > 16_384) return [];
-  const native = getAddon("similarity");
+  const native = getAddon("audio-decode") || getAddon("similarity");
   if (!native || typeof native.decodeNormalizedAudioRowsInto !== "function" || buffers.length < 192) return buffers.map(scalar);
   const batchSize = Math.min(1024, Math.floor(1_500_000 / dimensions));
   if (batchSize < 192) return buffers.map(scalar);
@@ -147,8 +147,9 @@ function decodeAudioVectors(buffers, dimensions, scalar) {
           new Set(invalid).size !== invalid.length || values.some(v => !Number.isFinite(v))) throw new Error("Invalid native audio row result");
       const rejected = new Set(invalid);
       // Verify one valid row against the scalar reference, including normalization.
-      const first = Array.from({ length: count }, (_, i) => i).find(i => !rejected.has(i));
-      if (first !== undefined) {
+      let first = 0;
+      while (first < count && rejected.has(first)) first++;
+      if (first < count) {
         const expected = scalar(buffers[start + first]);
         if (!expected || expected.length !== dimensions ||
             expected.some((v, j) => Math.abs(v - values[first * dimensions + j]) > 1e-12)) throw new Error("Native audio row parity mismatch");

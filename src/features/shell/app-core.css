@@ -35,21 +35,6 @@ button:disabled{
 }
 
 .app{
-  --accent: #64f0a4;
-  --accent-rgb: 100, 240, 164;
-  --accent-soft: rgba(100, 240, 164, 0.12);
-  --accent-line: rgba(100, 240, 164, 0.32);
-  --bg: #000;
-  --bg-2: #050505;
-  --bg-3: #090909;
-  --text: #f4f4ee;
-  --text-2: rgba(244, 244, 238, 0.78);
-  --muted: rgba(244, 244, 238, 0.54);
-  --faint: rgba(244, 244, 238, 0.32);
-  --surface-2: rgba(255, 255, 255, 0.055);
-  --surface-3: rgba(255, 255, 255, 0.082);
-  --line: rgba(255, 255, 255, 0.075);
-  --line-2: rgba(255, 255, 255, 0.13);
   --danger: #ff4f73;
   --pill: 999px;
   --shadow: 0 24px 70px rgba(0, 0, 0, 0.58);
@@ -91,15 +76,20 @@ button:disabled{
 }
 
 .windowButtons{
-  height: 100%;
+  height: 34px;
   display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  margin-inline-end: var(--lt-space-3);
+  background: transparent;
   -webkit-app-region: no-drag;
 }
 
 .windowButtons button{
-  width: 46px;
-  height: 100%;
+  width: 34px;
+  height: 30px;
   border: 0;
+  border-radius: var(--lt-radius-item);
   color: var(--lt-muted);
   background: transparent;
   transition: background-color var(--lt-duration-fast) ease,
@@ -107,8 +97,8 @@ button:disabled{
 }
 
 .windowButtons button:hover{
-  color: #fff;
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--lt-text);
+  background: var(--lt-surface-raised);
 }
 
 .windowButtons .closeWin:hover{
@@ -119,8 +109,8 @@ button:disabled{
 /* macOS keeps its native traffic lights. Leave room for them instead of
    drawing a second set of Windows-style controls in the renderer. */
 .app[data-platform="mac"] .titleBar{
-  height: 38px;
-  min-height: 38px;
+  height: 48px;
+  min-height: 48px;
 }
 
 .app[data-platform="mac"] .titleDrag{
@@ -132,7 +122,7 @@ button:disabled{
 }
 
 .app[data-platform="mac"] .appShell{
-  height: calc(100vh - 38px);
+  height: calc(100vh - 48px);
 }
 
 .sidebar{
@@ -357,7 +347,7 @@ button:disabled{
 
 .iconAction:hover{
   transform: translateY(-1px);
-  color: #fff;
+  color: var(--lt-text);
   background: var(--surface-3);
 }
 
@@ -466,10 +456,6 @@ button:disabled{
   text-align: center;
 }
 
-.fullList{
-  padding-right: 4px;
-}
-
 .dangerButton{
   min-height: 38px;
   padding: 0 15px;
@@ -492,7 +478,7 @@ button:disabled{
   padding: 28px 24px 22px;
   border-radius: 16px;
   border: 1px solid var(--line);
-  background: rgba(8, 8, 8, 0.96);
+  background: var(--lt-bg-elevated);
   box-shadow: var(--shadow);
   text-align: center;
 }
@@ -526,7 +512,7 @@ button:disabled{
   color: var(--text);
   font-size: clamp(24px, 3vw, 34px);
   line-height: 1.04;
-  font-weight: 900;
+  font-weight: 650;
 }
 
 .deleteModal h3 span{
@@ -587,17 +573,6 @@ button:disabled{
   50% {
     transform: translateY(-2px);
   }
-}
-
-.loadingScreen{
-  width: 100vw;
-  height: 100vh;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    #000;
-  background-size: 42px 42px;
 }
 
 [data-notes="off"] .eq{
@@ -742,9 +717,8 @@ button:disabled{
 }
 
 .editorModal{
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.032), rgba(255, 255, 255, 0.012)),
-    rgba(0, 0, 0, 0.86);
-  border-color: rgba(255, 255, 255, 0.11);
+  background: var(--lt-bg-elevated);
+  border-color: var(--lt-border);
 }
 
 :root{
@@ -754,7 +728,6 @@ button:disabled{
 .app{
   --radius: 16px;
   --small-radius: 10px;
-  --surface: rgba(255, 255, 255, 0.045);
   --motion-fast: 120ms;
 
   background-image: none;
@@ -762,16 +735,15 @@ button:disabled{
 }
 
 .titleBar{
-  height: 34px;
-  background: rgba(0, 0, 0, 0.86) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.055) !important;
-  backdrop-filter: blur(14px) saturate(115%);
+  height: 48px;
+  background: transparent !important;
+  border-bottom: 0 !important;
 }
 
 .titleDrag{
-  font-size: 11px;
-  letter-spacing: 0;
-  color: rgba(255, 255, 255, 0.62);
+  font-size: 14px;
+  letter-spacing: -.02em;
+  color: var(--lt-text);
 }
 
 .sidebar{
@@ -1217,16 +1189,6 @@ button:active,
   background: linear-gradient(90deg, transparent 0 9%, rgba(var(--accent-rgb), .50) 10%, transparent 12% 39%, rgba(255,255,255,.18) 40%, transparent 43% 69%, rgba(var(--accent-rgb), .42) 70%, transparent 72% 100%);
   filter: blur(10px);
   animation: localitfyStageLights 1.35s ease-in-out infinite alternate;
-}
-
-.secretLayer.stars::before{
-  opacity: .58;
-  background-image: radial-gradient(circle at 10% 20%, rgba(255,255,255,.95) 0 1px, transparent 2px),
-    radial-gradient(circle at 35% 75%, rgba(var(--accent-rgb),.95) 0 1px, transparent 2px),
-    radial-gradient(circle at 60% 35%, rgba(255,255,255,.8) 0 1px, transparent 2px),
-    radial-gradient(circle at 82% 68%, rgba(var(--accent-rgb),.75) 0 1px, transparent 2px);
-  background-size: 170px 170px;
-  animation: localitfyStarDrift 4s linear infinite;
 }
 
 .secretLayer.pulse::before{
@@ -1707,7 +1669,7 @@ button{
   height: 46px !important;
   min-width: 46px !important;
   border-color: rgba(var(--accent-rgb), 0.58) !important;
-  color: #050505 !important;
+  color: var(--button-text-on-accent) !important;
   background: var(--accent) !important;
   box-shadow: 0 10px 28px rgba(var(--accent-rgb), 0.22) !important;
   font-size: 15px !important;
@@ -1715,8 +1677,7 @@ button{
 
 .app,
 .appShell,
-.content,
-.simpleShell{
+.content{
   background-image: none !important;
   background-size: auto !important;
 }
@@ -1727,13 +1688,9 @@ button{
 .appShell::after,
 .content::before,
 .content::after,
-.simpleShell::before,
-.simpleShell::after,
 .app,
 .content,
-.loadingScreen,
 .editorModal,
-.loadingScreen::before,
 .editorModal::before{
   background-image: none !important;
   background-size: auto !important;
@@ -1743,16 +1700,13 @@ button{
 .app .content,
 .app .panel,
 .app .coverPage,
-.app .editorModal,
-.app .loadingScreen{
+.app .editorModal{
   background-image: none !important;
   background-size: auto !important;
 }
 
 .app .content{
-  background:
-    radial-gradient(circle at 72% 6%, rgba(var(--accent-rgb), 0.035), transparent 28%),
-    rgba(0, 0, 0, 0.02) !important;
+  background: transparent !important;
   scroll-behavior: auto !important;
   contain: paint !important;
 }
@@ -1771,13 +1725,11 @@ button{
 .app .sidebar{
   overflow: hidden !important;
   padding: 16px 12px !important;
-  background:
-    linear-gradient(180deg, rgba(var(--accent-rgb), 0.055), rgba(0, 0, 0, 0.02) 42%),
-    rgba(0, 0, 0, 0.76) !important;
-  border-right: 1px solid rgba(var(--accent-rgb), 0.18) !important;
-  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.035) !important;
-  backdrop-filter: blur(14px) saturate(120%) !important;
-  -webkit-backdrop-filter: blur(14px) saturate(120%) !important;
+  background: var(--workspace-sidebar, var(--lt-bg)) !important;
+  border-right: 1px solid transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   contain: layout paint !important;
 }
 
@@ -1867,7 +1819,7 @@ button{
 
 .app .sidebar .nav .navItem:hover .navIcon,
 .app .sidebar .nav .navItem.active .navIcon{
-  color: #fff !important;
+  color: var(--lt-text) !important;
   background: rgba(var(--accent-rgb), 0.16) !important;
   border: 0 !important;
   box-shadow: none !important;
@@ -1953,7 +1905,7 @@ body,
 
 .appShell{
 
-  height: calc(100vh - 36px) !important;
+  height: calc(100vh - 48px) !important;
 
   min-height: 0 !important;
 
@@ -1992,23 +1944,6 @@ body,
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
-}
-
-@media (max-width: 900px){
-  .appShell{
-    grid-template-columns: minmax(0, 1fr) !important;
-  }
-
-  .app .sidebar,
-.app .sidebarResizeHandle{
-    display: none !important;
-  }
-
-  .app .content{
-    grid-column: 1 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
 }
 
 :root{
@@ -2489,3 +2424,7 @@ body,
     transition: none !important;
   }
 }
+
+.titleBar.miniTitleBar { height: 34px; }
+.titleBar.miniTitleBar .windowButtons { margin-inline-end: var(--lt-space-1); }
+.windowButtons button:focus-visible { outline: 2px solid var(--lt-accent); outline-offset: -2px; }

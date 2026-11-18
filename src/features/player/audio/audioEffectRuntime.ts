@@ -76,6 +76,7 @@ type AnalyserSnapshot = {
 
 export class AudioEffectRuntime {
   private context: AudioContext | null = null;
+  private resumingContext: AudioContext | null = null;
   private element: HTMLAudioElement | null = null;
   private source: MediaElementAudioSourceNode | null = null;
   private analyser: AnalyserNode | null = null;
@@ -87,6 +88,7 @@ export class AudioEffectRuntime {
   private filter: BiquadFilterNode | null = null;
   private graphConnected = false;
   private analyserConnected = false;
+  private readonly parameterTargets = new WeakMap<AudioParam, number>();
 
   apply(audio: HTMLAudioElement | null | undefined, input: AudioEffectProfileInput) {
     if (!audio) return getAudioEffectProfile(input);
@@ -150,11 +152,14 @@ export class AudioEffectRuntime {
 
   async resume() {
     const context = this.context;
-    if (!context || context.state === "closed" || context.state === "running") return;
+    if (!context || context.state === "closed" || context.state === "running" || this.resumingContext === context) return;
+    this.resumingContext = context;
     try {
       await context.resume();
     } catch {
       // A user gesture/focus retry can resume it later.
+    } finally {
+      if (this.resumingContext === context) this.resumingContext = null;
     }
   }
 
@@ -247,13 +252,14 @@ export class AudioEffectRuntime {
   }
 
   private setAudioParam(param: AudioParam | null | undefined, value: number, now: number) {
-    if (!param || !Number.isFinite(value)) return;
+    if (!param || !Number.isFinite(value) || this.parameterTargets.get(param) === value) return;
     try {
       param.cancelScheduledValues(now);
       param.setTargetAtTime(value, now, 0.018);
     } catch {
       param.value = value;
     }
+    this.parameterTargets.set(param, value);
   }
 
   private applyMediaElementRate(audio: HTMLAudioElement, profile: AudioEffectProfile) {
@@ -262,9 +268,8 @@ export class AudioEffectRuntime {
     }
 
     try {
-      (audio as HTMLAudioElement & { preservesPitch?: boolean }).preservesPitch = profile.preservesPitch;
-      (audio as HTMLAudioElement & { mozPreservesPitch?: boolean }).mozPreservesPitch = profile.preservesPitch;
-      (audio as HTMLAudioElement & { webkitPreservesPitch?: boolean }).webkitPreservesPitch = profile.preservesPitch;
+      // Reassigning pitch flags can reconfigure Chromium's audio pipeline.
+      if (audio.preservesPitch !== profile.preservesPitch) audio.preservesPitch = profile.preservesPitch;
     } catch {
       // Older Chromium builds can ignore pitch flags safely.
     }

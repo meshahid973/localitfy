@@ -31,3 +31,19 @@ test("PCM decoder rejects invalid lengths and non-finite samples", () => {
   bad.writeFloatLE(NaN);
   assert.throws(() => decodePcmChunk(bad), /invalid samples/);
 });
+
+test("aligned and unaligned decoding preserve exact samples and summation order", () => {
+  for (const count of [1, 17, 32768, 480000]) {
+    const aligned = Buffer.alloc(count * 4), unaligned = Buffer.alloc(count * 4 + 1).subarray(1);
+    let expected = 0;
+    for (let i = 0; i < count; i++) { const sample = Math.fround(Math.sin(i * 0.013)); aligned.writeFloatLE(sample, i * 4); expected += sample * sample; }
+    aligned.copy(unaligned);
+    const a = decodePcmChunk(aligned), b = decodePcmChunk(unaligned);
+    assert.equal(a.squareSum, expected);
+    assert.equal(b.squareSum, expected);
+    assert.deepEqual(a.samples, b.samples);
+  }
+  const invalid = Buffer.alloc(9).subarray(1);
+  invalid.writeFloatLE(Infinity, 4);
+  assert.throws(() => decodePcmChunk(invalid), /invalid samples/);
+});

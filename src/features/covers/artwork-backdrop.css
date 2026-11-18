@@ -6,6 +6,14 @@
   pointer-events: none;
 }
 
+.artworkBackdropLayer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 360ms cubic-bezier(.22, 1, .36, 1);
+}
+.artworkBackdropLayer[data-visible="true"] { opacity: 1; }
+
 .artworkBackdrop .artworkBackdropCover {
   position: absolute;
   inset: -24px;
@@ -28,3 +36,24 @@
   inset: 0;
   background: linear-gradient(110deg, color-mix(in srgb, var(--lt-surface) 88%, transparent), transparent);
 }
+
+/* Extended page ambience uses the same thumbnail, never an extra live blur. */
+.homeAtmosphere .artworkBackdrop .artworkBackdropCover,
+.collectionPage > .artworkBackdrop .artworkBackdropCover,
+.playlistDetailPage > .artworkBackdrop .artworkBackdropCover {
+  opacity: .36;
+  filter: blur(32px) saturate(1.05);
+}
+.homeAtmosphere .artworkBackdrop::after,
+.collectionPage > .artworkBackdrop::after,
+.playlistDetailPage > .artworkBackdrop::after {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--lt-bg) 52%, transparent), var(--lt-bg));
+}
+.artworkBackdropCover::before { content: none; }
+.app[data-cover-sync="subtle"] .artworkBackdrop { opacity: .45; }
+.app[data-cover-sync="strong"] .artworkBackdrop { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .artworkBackdropLayer { transition: none; }
+}
+.app.reducedMotion .artworkBackdropLayer { transition: none; }

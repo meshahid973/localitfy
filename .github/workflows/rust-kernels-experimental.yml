@@ -59,9 +59,14 @@ jobs:
       - name: Compare native and JavaScript timings
         run: npm run rust:benchmark
       - name: Application validation with native disabled
+        if: runner.os == 'macOS' || github.event_name == 'workflow_dispatch'
         run: npm run check
         env:
           LOCALTIFY_RUST_PHASES: ""
+      # Linux and Windows already run the full application checks in quality.yml.
+      - name: Build renderer for native packaging
+        if: runner.os != 'macOS' && github.event_name != 'workflow_dispatch'
+        run: npm run build
       - name: Build unpacked native application
         shell: bash
         env:

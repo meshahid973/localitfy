@@ -8,7 +8,7 @@ const read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");
 
 test("non-Home page modules are lazy boundaries", () => {
   const shell = read("src/features/shell/AppShell.tsx");
-  for (const modulePath of ["library/LibraryView", "artists/ArtistsView", "genres/GenresView", "albums/AlbumsView", "playlists/PlaylistsView", "covers/CoversView", "analytics/AnalyticsView", "settings/SettingsView", "downloads/DownloadsView"]) assert.ok(shell.includes('lazy(() => import("../' + modulePath + '"))'), modulePath);
+  for (const modulePath of ["library/LibraryView", "artists/ArtistsView", "genres/GenresView", "playlists/PlaylistsView", "covers/CoversView", "analytics/AnalyticsView", "settings/SettingsView", "downloads/DownloadsView"]) assert.ok(shell.includes('lazy(() => import("../' + modulePath + '"))'), modulePath);
   assert.match(shell, /<Suspense fallback={null}>/);
 });
 

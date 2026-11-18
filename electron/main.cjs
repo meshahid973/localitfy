@@ -12,6 +12,7 @@ let scrobbler = null;
 const { LOCALTIFY_RENDERER_PROTOCOL, MEDIA_PROTOCOL, registerPrivilegedSchemes, getLocaltifyRendererMimeType } = require("./runtime/protocols.cjs");
 const { DEFAULT_WINDOW_TRANSLUCENCY, normalizeWindowTranslucencySettings, createWindowsStartupRuntime } = require("./runtime/windows.cjs");
 const { createElectronServiceRuntime } = require("./runtime/services.cjs");
+const { createBootstrapHandler } = require("./runtime/bootstrap.cjs");
 const { loadLocaltifyEnv } = require("./runtime/environment.cjs");
 const { uniquePaths, createUserDataRuntime } = require("./runtime/user-data.cjs");
 const { createWindowTranslucencyRuntime } = require("./runtime/translucency.cjs");
@@ -1790,9 +1791,9 @@ function shapeSong(song, pixelArtFiles = null) {
   if (!song) return null;
   const exists = fileExists(song.filePath);
   const savedCoverPath = String(song.coverPath || "").trim();
-  const savedCoverExists = Boolean(savedCoverPath && fileExists(savedCoverPath) && isImageFile(savedCoverPath));
-  const runtimeCoverPath = getRuntimeCoverPath(song, pixelArtFiles);
-  const coverExists = Boolean(runtimeCoverPath && fileExists(runtimeCoverPath));
+  const savedCoverExists = Boolean(savedCoverPath && isImageFile(savedCoverPath) && fileExists(savedCoverPath));
+  const runtimeCoverPath = savedCoverExists ? savedCoverPath : pickStablePixelCoverForSong(song, pixelArtFiles);
+  const coverExists = savedCoverExists || Boolean(runtimeCoverPath && fileExists(runtimeCoverPath));
   const runtimeCoverSource = savedCoverExists ? String(song.coverSource || "unknown") : (runtimeCoverPath ? "fallback" : "none");
   const coverUrl = coverExists ? safeMediaUrl(runtimeCoverPath) : "";
   const coverThumbUrl = coverExists ? getCoverThumbnailUrl(runtimeCoverPath) : "";
@@ -2140,7 +2141,7 @@ function createWindow() {
 
 const MAIN_WINDOW_DEFAULT_WIDTH = 1380;
 const MAIN_WINDOW_DEFAULT_HEIGHT = 860;
-const MAIN_WINDOW_MIN_WIDTH = 980;
+const MAIN_WINDOW_MIN_WIDTH = 860;
 const MAIN_WINDOW_MIN_HEIGHT = 640;
 function getSafeMainWindowSize() {
   const display = screen.getPrimaryDisplay();
@@ -2303,20 +2304,20 @@ app.whenReady().then(async () => {
   ipcRouter.handle("feedback:status", async () => getFeedbackStatus());
   ipcRouter.handle("feedback:send", async (_event, payload = {}) => sendLocaltifyFeedback(payload));
 
-  ipcRouter.handle("app:bootstrap", async (_event, options = {}) => {
-    await yieldToMainLoop();
-    if (options?.includeGenres === true) await genreMetadataBackfill.run();
-    scheduleCoverThumbnailWarmup();
-    return {
-      songs: listSongsShaped(),
-      settings: getSettings(),
-      playlists: getPlaylists(),
+  ipcRouter.handle("app:bootstrap", createBootstrapHandler({
+    yieldToMainLoop,
+    backfillGenres: () => genreMetadataBackfill.run(),
+    scheduleCoverWarmup: scheduleCoverThumbnailWarmup,
+    listSongs: listSongsShaped,
+    getSettings,
+    getPlaylists,
+    getDiagnostics: () => ({
       windowsIntegration: getStartWithWindowsStatus(),
       windowTranslucency: getSavedWindowTranslucencySettings(),
       database: { ...getDatabaseStatus(), userDataPath: app.getPath("userData"), dataFolderName: userDataRuntime.dataFolderName },
       discord: getDiscordStatus()
-    };
-  });
+    })
+  }));
 
   ipcRouter.handle("playback:resolve-url", async (_event, payload = {}) => {
     try {
@@ -2433,7 +2434,8 @@ app.whenReady().then(async () => {
   libraryWatcher = startLibraryWatch(ipcRouter, { dialog, isAudioFile, getSongs, getSettings, listSongsShaped,
     importFiles: (files) => importNewAudioFiles(files), getWindow: () => (mainWindow && !mainWindow.isDestroyed() ? mainWindow : null) });
   scrobbler = startScrobbling(ipcRouter, { file: path.join(app.getPath("userData"), "scrobbles.json"), getSong: databaseRepositories.songs.get, listPlays: databaseRepositories.listening.list, safeStorage, shell });
-  registerDiscoverIpc(ipcRouter, { getSongs, getSettings, cacheFile: path.join(app.getPath("userData"), "discover-cache.json"), bioFile: path.join(app.getPath("userData"), "artist-bios.json") });
+  const musicBrainzClient = require("./musicbrainz/client.cjs").createMusicBrainzClient({ userAgent: `localtify/${app.getVersion()} ( https://github.com/meshahid973/localitfy )` });
+  registerDiscoverIpc(ipcRouter, { musicBrainzClient, getSongs, getSettings, cacheFile: path.join(app.getPath("userData"), "discover-cache.json"), bioFile: path.join(app.getPath("userData"), "artist-bios.json") });
   registerMovedSongRepairIpc(ipcRouter, {
     dialog, BrowserWindow, getWindow: () => mainWindow,
     getSongs, fileExists, isAudioFile, readMetadata: readLocalAudioMetadata,
@@ -2509,7 +2511,7 @@ app.whenReady().then(async () => {
   ipcRouter.handle("download:open-folder", async (_event, folder) => { await shell.openPath(getDownloadDirectory(folder)); return true; });
   registerAnalysisIpc(ipcRouter, { app, powerMonitor, repositories: databaseRepositories, ffmpegPath: ffmpegStatic?.replace("app.asar", "app.asar.unpacked") });
   require("./ipc/lyrics.cjs").registerLyricsIpc(ipcRouter, app, databaseRepositories);
-  require("./ipc/tagging.cjs").registerTaggingIpc(ipcRouter, { app, songs: databaseRepositories.songs, getSettings, readLocalAudioMetadata, listSongsShaped, safeMediaUrl, clearFileInfoCache, getWindow: () => mainWindow });
+  require("./ipc/tagging.cjs").registerTaggingIpc(ipcRouter, { app, musicBrainzClient, songs: databaseRepositories.songs, getSettings, readLocalAudioMetadata, listSongsShaped, safeMediaUrl, clearFileInfoCache, getWindow: () => mainWindow });
   require("./ipc/sync.cjs").registerSyncIpc(ipcRouter, { app, repositories: databaseRepositories, coverPath: (s) => getRuntimeCoverPath(s), listSongsShaped, shapeSong, getWindow: () => mainWindow, observePlay: (e) => scrobbler?.observe(e) });
   ipcRouter.handle("listening:record", (_event, payload) => {
     const recorded = databaseRepositories.listening.record(payload);

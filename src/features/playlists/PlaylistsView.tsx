@@ -17,6 +17,7 @@ import type { Song } from "../library/song.types";
 import { describeSmartRules, type ListeningCounts, type SmartRules } from "./smartPlaylist";
 import { MediaCard } from "../../shared/ui/MediaCard";
 import { playlistTarget, useAppActions } from "../shell/appActions";
+import { ArtworkBackdrop } from "../covers/ArtworkBackdrop";
 import CollectionHero from "../pages/CollectionHero";
 
 const SmartPlaylistDialog = lazy(() => import("./components/SmartPlaylistDialog"));
@@ -148,6 +149,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
     const target = playlistTarget(detailPlaylist, detailSongs);
     return (
       <section data-page-section="playlists" className="playlistsPage playlistPageV029 playlistDetailPage">
+      <ArtworkBackdrop song={target.coverSong} />
         <CollectionHero
           typeLabel={detailPlaylist.rules ? "smart playlist" : "playlist"}
           title={detailPlaylist.name}
@@ -277,7 +279,6 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
             {playlistSummaries.length ? playlistSummaries.map(({ playlist, previewSongs, songCount, duration }, index) => (
               <MediaCard
                 key={playlist.id}
-                coverClassName="mediaCardPlayCentered"
                 className={`playlistShelfCard ${activePlaylistId === playlist.id ? "playing" : ""} ${playlistDragOverPlaylistId === playlist.id ? "dropTarget" : ""}`}
                 style={{ "--playlist-stagger": Math.min(index, 12) } as CSSProperties}
                 openLabel={`open ${playlist.name}`}
@@ -295,7 +296,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
                   <strong>{playlist.name}</strong>
                   <small>{playlist.rules ? <>smart<MetaDividerDot /></> : null}{songCount} song{songCount === 1 ? "" : "s"}<MetaDividerDot />{formatTime(duration)}</small>
                 </span>
-                <span className="playlistShelfDropHint">{activePlaylistId === playlist.id ? "playing" : "drop song"}</span>
+                {playlistDragOverPlaylistId === playlist.id ? <span className="playlistShelfDropHint">Drop to add</span> : null}
               </MediaCard>
             )) : (
               <LocaltifyStateCard

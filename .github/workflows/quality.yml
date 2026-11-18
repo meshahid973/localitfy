@@ -27,7 +27,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      - name: Install dependencies
+        id: install
+        run: npm ci
       - name: Report production dependency advisories
         shell: bash
         run: |
@@ -60,7 +62,9 @@ jobs:
           if-no-files-found: warn
       - name: Verify full dependency audit
         run: npm audit --audit-level=moderate
-      - run: npm run release:check
+      # Retain the failed audit gate, but collect independent build/test results too.
+      - if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run release:check
 
   windows-native-smoke:
     runs-on: windows-latest
@@ -78,6 +82,18 @@ jobs:
       - name: Electron runtime smoke
         timeout-minutes: 1
         run: npx electron scripts/ci-electron-smoke.cjs
+      - name: Rendered desktop layout and playback regression
+        timeout-minutes: 4
+        env:
+          LOCALTIFY_QA_OUTPUT: ${{ runner.temp }}/localtify-desktop-qa
+        run: npx electron scripts/ci-desktop-regression.cjs
+      - name: Preserve desktop screenshots and metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-rendered-qa
+          path: ${{ runner.temp }}/localtify-desktop-qa
+          if-no-files-found: warn
 
   discord-activity:
     runs-on: ubuntu-latest

@@ -21,7 +21,7 @@ function countLooseAny(source) {
 const fail = (message) => failures.push(message);
 
 const rebuiltPageStyles = [
-  "src/features/albums/albums.css", "src/features/playlists/playlists.css",
+  "src/features/playlists/playlists.css",
   "src/features/covers/covers.css", "src/features/downloads/downloads.css",
   "src/features/analytics/analytics.css", "src/features/settings/settings.css"
 ];
@@ -31,7 +31,6 @@ const featureRoots = [".albumsPageV318", ".playlistsPage", ".coverStudioLayout",
 const scopedFeatureStyles = [
   ["src/features/home/home.css", ".homePage"],
   ["src/features/library/library.css", ".libraryPage"],
-  ["src/features/albums/albums.css", ".albumsPageV318"],
   ["src/features/covers/covers.css", ".coverStudioLayout"],
   ["src/features/downloads/downloads.css", ".downloadsLayoutV031"],
   ["src/features/playlists/playlists.css", ".playlistsPage"],
@@ -51,7 +50,7 @@ for (const [file, ownedRoot] of scopedFeatureStyles) {
 }
 
 const resetSources = [
-  ["src/features/genres/GenresView.tsx", "genres"], ["src/features/albums/AlbumsView.tsx", "albums"], ["src/features/playlists/PlaylistsView.tsx", "playlists"],
+  ["src/features/genres/GenresView.tsx", "genres"], ["src/features/playlists/PlaylistsView.tsx", "playlists"],
   ["src/features/downloads/DownloadsView.tsx", "downloads"], ["src/features/analytics/AnalyticsView.tsx", "analytics"],
   ["src/features/covers/CoverStudio.tsx", "covers"], ["src/features/settings/SettingsView.tsx", "settings"]
 ];
@@ -70,9 +69,10 @@ const requiredOwners = [
   ["src/features/artists/ArtistsView.tsx", './artists.css'],
   ["src/features/genres/GenresView.tsx", './genres.css'],
   ["src/Onboarding.tsx", './features/onboarding/onboarding.css'],
+  ["src/features/feedback/FeedbackPromptModal.tsx", './feedback-prompt.css'],
+  ["src/features/shell/ScreensaverOverlay.tsx", './screensaver.css'],
   ["src/features/player/components/PlayerBar.tsx", '../player.css'],
   ["src/features/settings/SettingsView.tsx", './settings.css'],
-  ["src/features/albums/AlbumsView.tsx", './albums.css'],
   ["src/features/playlists/PlaylistsView.tsx", './playlists.css'],
   ["src/features/covers/CoversView.tsx", './covers.css'],
   ["src/features/downloads/DownloadsView.tsx", './downloads.css'],
@@ -101,7 +101,7 @@ if (library.includes('data-page-state="reset"')) fail("LibraryView returned to t
 
 const shell = read("src/features/shell/AppShell.tsx");
 for (const specifier of ["./app-core.css", "./motion.css", "./effects.css", "../../styles/view-shell.css"]) if (!shell.includes('import "' + specifier + '";')) fail("AppShell missing shell CSS owner " + specifier);
-for (const modulePath of ["library/LibraryView", "artists/ArtistsView", "genres/GenresView", "albums/AlbumsView", "playlists/PlaylistsView", "covers/CoversView", "analytics/AnalyticsView", "settings/SettingsView", "downloads/DownloadsView"]) {
+for (const modulePath of ["library/LibraryView", "artists/ArtistsView", "genres/GenresView", "playlists/PlaylistsView", "covers/CoversView", "analytics/AnalyticsView", "settings/SettingsView", "downloads/DownloadsView"]) {
   if (!shell.includes('lazy(() => import("../' + modulePath + '"))')) fail("AppShell must lazy-load " + modulePath);
 }
 
@@ -144,7 +144,7 @@ for (const [file, maxBytes, maxImportant] of cssBudgets) {
 }
 
 const anyBudgets = [
-  ["src/App.tsx", 38], ["src/features/albums/AlbumsView.tsx", 69], ["src/features/downloads/DownloadsView.tsx", 54],
+  ["src/App.tsx", 38], ["src/features/downloads/DownloadsView.tsx", 54],
   ["src/features/playlists/PlaylistsView.tsx", 37], ["src/features/player/components/PlayerBar.tsx", 0],
   ["src/features/library/LibraryView.tsx", 0], ["src/features/artists/ArtistsView.tsx", 0], ["src/features/genres/GenresView.tsx", 0], ["src/features/covers/CoversView.tsx", 0],
   ["src/features/analytics/AnalyticsView.tsx", 0], ["src/features/analytics/analyticsSnapshot.ts", 0]

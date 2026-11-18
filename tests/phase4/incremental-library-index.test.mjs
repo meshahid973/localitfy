@@ -103,3 +103,11 @@ test("playback-only edits share facet snapshots, while metadata edits copy only 
   assert.equal(first.artistCount,2);
   assert.equal(third.artistCount,1);
 });
+
+test("no-op patches and identical IPC snapshots preserve library identity", () => {
+  const a = song("a"), b = song("b"), list = [a, b];
+  assert.equal(patchLibrarySong(list, "a", { liked: false, playCount: 0 }), list);
+  assert.equal(replaceLibrarySong(list, { ...a }), list);
+  assert.notEqual(replaceLibrarySong(list, { ...a, url: undefined }), list);
+  assert.notEqual(patchLibrarySong(list, "a", { playCount: 1 }), list);
+});

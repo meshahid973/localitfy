@@ -46,3 +46,10 @@ test("native full clustering and typed arrays preserve bounded large-workload br
  assert.match(kernel,/function tryClusterFromCenters\(/);
  assert.doesNotMatch(kernel,/function tryPairDots\(/);
 });
+
+test("embedding decode can be opted in without costlier native similarity and ranking", () => {
+  const backend = read("electron/native/backend.cjs");
+  const compute = read("electron/native/compute.cjs");
+  assert.match(backend, /"audio-decode"/);
+  assert.equal(compute.split('getAddon("audio-decode") || getAddon("similarity")').length - 1, 2);
+});

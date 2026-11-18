@@ -514,13 +514,10 @@ test("IPC: gated by the setting, proposals stay native, and library-only apply u
   assert.equal(await router.invoke("tagging:album-tracks", { title: "unknown song", artist: "nobody" }), null);
 });
 
-test("songs and albums get a find on musicbrainz menu item only while tagging is on", () => {
+test("songs get a find on musicbrainz menu item only while tagging is on", () => {
   const shell = fs.readFileSync(path.join(root, "src", "features", "shell", "AppShell.tsx"), "utf8");
-  assert.match(shell, /findOnMusicBrainz=\{settings\.musicbrainzTagging \? setTagSearchSong : undefined\}/);
-  assert.match(shell, /findAlbumOnMusicBrainz=\{settings\.musicbrainzTagging \? setTagSearchAlbum : undefined\}/);
+  assert.match(shell, /findOnMusicBrainz=\{taggingEnabled \? setTagSearchSong : undefined\}/);
   assert.match(shell, /<CollectionContextMenu/);
-  const albums = fs.readFileSync(path.join(root, "src", "features", "albums", "AlbumsView.tsx"), "utf8");
-  assert.match(albums, /onContextMenu=\{\(event\) => actions\.openCollectionMenu\(event, albumTarget\(album\)\)\}/);
 });
 
 test("downloads offer tagging once per finished batch, only for the songs that batch added", async () => {
@@ -555,4 +552,54 @@ test("downloads offer tagging once per finished batch, only for the songs that b
 test("main registers tagging IPC and Experimental settings shows the panel", () => {
   assert.match(fs.readFileSync(path.join(root, "electron", "main.cjs"), "utf8"), /registerTaggingIpc\(ipcRouter/);
   assert.match(fs.readFileSync(path.join(root, "src", "features", "settings", "categories", "ExperimentalSettings.tsx"), "utf8"), /<TaggingSettings /);
+});
+
+test("public catalog searches use escaped MusicBrainz queries and the shared cache", async () => {
+  const { createMusicBrainzClient } = electron("musicbrainz/client.cjs");
+  const calls = [];
+  const client = createMusicBrainzClient({ userAgent: "localtify-test", minIntervalMs: 0, fetchImpl: async (url, options) => {
+    calls.push({ url: new URL(url), agent: options.headers["User-Agent"] });
+    return { ok: true, status: 200, json: async () => ({ recordings: [{ id: "r" }], artists: [{ id: "a" }], "release-groups": [{ id: "g" }] }) };
+  } });
+  assert.deepEqual(await client.searchCatalog("recording", 'Say "Hi"'), [{ id: "r" }]);
+  assert.deepEqual(await client.searchCatalog("artist", "Artist"), [{ id: "a" }]);
+  assert.deepEqual(await client.searchCatalog("album", "Album"), [{ id: "g" }]);
+  await client.searchCatalog("album", "Album");
+  assert.equal(calls.length, 3);
+  assert.equal(calls[0].url.hostname, "musicbrainz.org");
+  assert.ok(calls[0].url.searchParams.get("query").includes('Say \\"Hi\\"'));
+  assert.equal(calls[2].url.pathname, "/ws/2/release-group");
+  assert.equal(calls[0].agent, "localtify-test");
+  assert.throws(() => client.searchCatalog("invalid", "Album"), /Unsupported/);
+});
+
+test("MusicBrainz successful responses expire without disabling request coalescing", async () => {
+  let calls = 0;
+  const client = createMusicBrainzClient({ userAgent: "test", minIntervalMs: 0, cacheTtlMs: 0,
+    fetchImpl: async () => { calls++; return { ok: true, status: 200, json: async () => ({ releases: [] }) }; }
+  });
+  await Promise.all([client.searchReleases("Same", ""), client.searchReleases("Same", "")]);
+  assert.equal(calls, 1);
+  await client.searchReleases("Same", "");
+  assert.equal(calls, 2);
+});
+
+test("foreground metadata search takes priority over waiting artwork requests", async () => {
+  const calls = [];
+  let release, begin;
+  const started = new Promise(resolve=>{begin=resolve});
+  const gate = new Promise(resolve=>{release=resolve});
+  const client = createMusicBrainzClient({userAgent:"test",minIntervalMs:0,maxCacheEntries:1,fetchImpl:async url=>{
+    calls.push(new URL(url).searchParams.get("query"));
+    if (calls.length===1) {begin();await gate;}
+    return {ok:true,status:200,json:async()=>({recordings:[]})};
+  }});
+  const first = client.searchRecordings("First","",{background:true});
+  await started;
+  const second = client.searchRecordings("Second","",{background:true});
+  const duplicate = client.searchRecordings("First","",{background:true});
+  const interactive = client.searchRecordings("Manual","");
+  release();
+  await Promise.all([first,second,duplicate,interactive]);
+  assert.deepEqual(calls,['recording:"First"','recording:"Manual"','recording:"Second"']);
 });

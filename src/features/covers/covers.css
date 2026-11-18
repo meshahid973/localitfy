@@ -16,20 +16,20 @@
 
 .coverStudioLayout {
   --cover-edge: var(--lt-border);
-  --cover-surface: var(--lt-surface);
+  --cover-surface: var(--lt-surface-soft);
   --cover-raised: var(--lt-surface-raised);
   --cover-text: var(--lt-text);
   --cover-muted: var(--lt-muted);
   width: 100%; min-width: 0;
   display: grid; align-content: start;
   gap: 13px;
-  padding: 0 0 100px;
+  padding: 0 0 var(--lt-space-5);
   color: var(--cover-text);
 }
 .coverStudioLayout *, .coverStudioLayout *::before, .coverStudioLayout *::after { box-sizing: border-box; }
 .coverStudioLayout .panel { min-width: 0; background: var(--cover-surface) !important; border: 1px solid var(--cover-edge) !important; border-radius: 12px; box-shadow: none !important; }
-.coverStudioLayout .eyebrow { margin: 0 0 8px; color: var(--lt-accent); font-size: 11px; font-weight: 800; letter-spacing: .11em; }
-.coverStudioLayout h3 { margin: 0; color: var(--cover-text); font-size: clamp(17px,1.6vw,24px); font-weight: 720; letter-spacing: -.03em; }
+.coverStudioLayout .eyebrow { margin: 0 0 8px; color: var(--lt-muted); font-size: var(--lt-text-sm); font-weight: 500; }
+.coverStudioLayout h3 { margin: 0; color: var(--cover-text); font-size: clamp(17px,1.6vw,24px); font-weight: 650; letter-spacing: -.03em; }
 .coverStudioLayout button { cursor: pointer; }
 .coverStudioLayout button:disabled { opacity: .45; cursor: not-allowed; }
 .coverStudioLayout :is(button,input):focus-visible { outline: 2px solid var(--lt-accent); outline-offset: 2px; }
@@ -44,7 +44,7 @@
 }
 .coverStudioHeroActions button:not(.heroMain):hover,.coverStudioLayout .coverSongTools button:hover,
 .coverStudioLayout .coverMoodTabs button:hover,.coverStudioLayout .coverGalleryToolbar button:hover {
-  border-color: color-mix(in oklab, var(--lt-accent) 22%,var(--cover-edge)); background: color-mix(in oklab, var(--lt-accent) 9%, var(--cover-raised)); color: var(--cover-text);
+  border-color: var(--lt-border-strong); background: color-mix(in oklab, var(--lt-text) 6%, var(--cover-raised)); color: var(--cover-text);
 }
 .coverStudioEmptyNotice {
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
@@ -62,7 +62,7 @@
 .coverPanelHeadClean,.coverGalleryHeaderClean { min-width: 0; display: flex; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
 .coverStudioLayout :is(.coverPanelHeadClean,.coverGalleryHeaderClean) > span { color: var(--cover-muted); font-size: 11px; }
 .coverSongSearchWrap,.coverGalleryToolbarClean { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.coverStudioSearchInput { flex: 1 1 auto; min-width: 0; width: 100%; min-height: 39px; padding: 8px 12px; border: 1px solid color-mix(in oklab, var(--lt-accent) 24%,var(--cover-edge)); border-radius: 9px; background: var(--lt-bg); color: var(--cover-text); font: inherit; font-size: 13px; outline: none; }
+.coverStudioSearchInput { flex: 1 1 auto; min-width: 0; width: 100%; min-height: 39px; padding: 8px 12px; border: 1px solid color-mix(in oklab, var(--lt-accent) 24%,var(--cover-edge)); border-radius: 9px; background: var(--lt-surface-soft); color: var(--cover-text); font: inherit; font-size: 13px; outline: none; }
 .coverStudioSearchInput::placeholder { color: var(--cover-muted); }
 .coverSongTools { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 .coverStudioLayout .coverSongTools button { min-height: 32px; padding: 6px 9px; font-size: 11px; }
@@ -144,7 +144,6 @@
 .coverStudioLayout .coverPreviewEmpty { display: grid; place-items: center; border-radius: 7px; background: var(--cover-raised); color: var(--cover-muted); }
 
 /* Cover tools stay available without filling the hero with maintenance actions. */
-.app:has(.coverStudioLayout) .content { background: var(--lt-bg) !important; }
 .coverStudioLayout .coverStudioHeroActions details { position: relative; }
 .coverStudioLayout .coverStudioHeroActions summary {
   list-style: none; cursor: pointer; min-height: 35px;

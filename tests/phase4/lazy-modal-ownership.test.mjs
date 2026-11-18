@@ -21,10 +21,6 @@ test("rare library/playlist modal modules are requested only when open", () => {
   }
   assert.ok(shell.includes('const TagSearchDialog = lazy(() => import("../tagging/TagSearchDialog"))'), "TagSearchDialog lazy");
   assert.ok(shell.includes("tagSearchSong ? <Suspense fallback={null}><TagSearchDialog"), "TagSearchDialog open guard");
-  assert.ok(shell.includes('const AlbumTagSearchDialog = lazy(() => import("../tagging/AlbumTagSearchDialog"))'), "AlbumTagSearchDialog lazy");
-  assert.ok(shell.includes("tagSearchAlbum ? <Suspense fallback={null}><AlbumTagSearchDialog"), "AlbumTagSearchDialog open guard");
-  assert.ok(shell.includes('const AlbumTracksDialog = lazy(() => import("../tagging/AlbumTracksDialog"))'), "AlbumTracksDialog lazy");
-  assert.ok(shell.includes("albumTracksRequest ? <Suspense fallback={null}><AlbumTracksDialog"), "AlbumTracksDialog open guard");
   assert.ok(shell.includes('const DownloadTagDialog = lazy(() => import("../tagging/DownloadTagDialog"))'), "DownloadTagDialog lazy");
   assert.ok(shell.includes("downloadTagPrompt.songIds.length ? <Suspense fallback={null}><DownloadTagDialog"), "DownloadTagDialog open guard");
 });

@@ -25,7 +25,7 @@ test("macOS does not duplicate the native traffic lights in the renderer", () =>
   assert.match(titleBarSource, /showWindowButtons = true/);
   assert.match(titleBarSource, /\{showWindowButtons \? <div className="windowButtons">/);
   assert.match(shellCss, /\.app\[data-platform="mac"\] \.titleDrag\s*\{[^}]*padding-left: 78px;/s);
-  assert.match(shellCss, /\.app\[data-platform="mac"\] \.appShell\s*\{[^}]*height: calc\(100vh - 38px\);/s);
+  assert.match(shellCss, /\.app\[data-platform="mac"\] \.appShell\s*\{[^}]*height: calc\(100vh - 48px\);/s);
 });
 
 test("macOS leaves media keys to Chromium Media Session", () => {

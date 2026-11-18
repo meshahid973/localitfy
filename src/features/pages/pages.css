@@ -1,10 +1,12 @@
 /* Album, artist, genre, playlist and mix pages share one layout. */
 .collectionPage {
+  position: relative;
+  isolation: isolate;
   min-width: 0;
   display: grid;
   align-content: start;
   gap: 22px;
-  padding-bottom: 40px;
+  padding: var(--lt-space-5) var(--lt-space-5) 40px;
 }
 
 .collectionHero {
@@ -12,16 +14,14 @@
   isolation: isolate;
   min-width: 0;
   display: grid;
-  grid-template-columns: 180px minmax(0, 1fr);
+  grid-template-columns: 168px minmax(0, 1fr);
   grid-template-areas: "art copy" "art actions";
   align-items: end;
   column-gap: var(--lt-space-5);
   row-gap: 16px;
-  padding: var(--lt-space-5);
+  padding: var(--lt-space-2) 0;
   border: 0;
-  border-radius: var(--lt-control-radius);
-  overflow: hidden;
-  background: var(--lt-surface);
+  background: transparent;
 }
 
 .collectionHeroArt { grid-area: art; min-width: 0; align-self: center; }
@@ -32,11 +32,11 @@
   overflow: hidden;
   border-radius: 12px;
   background: var(--lt-surface-raised);
-  box-shadow: 0 18px 46px rgba(0, 0, 0, .45);
+  box-shadow: var(--lt-shadow-low);
 }
 .collectionHeroCover img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .collectionHero.isRound .collectionHeroCover { border-radius: 50%; }
-.collectionHeroCover.playlistCoverCollage { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px; }
+.collectionHeroCover.playlistCoverCollage { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 2px; }
 .collectionHeroCover .playlistCoverTile { min-width: 0; min-height: 0; display: grid; place-items: center; overflow: hidden; color: var(--lt-faint); background: var(--lt-surface-raised); }
 .collectionHeroCover :is(.playlistCoverImage, .playlistCoverImage img) { display: block; width: 100%; height: 100%; object-fit: cover; }
 
@@ -49,23 +49,23 @@
   -webkit-line-clamp: 2;
   color: var(--lt-text);
   font-size: var(--lt-text-collection);
-  font-weight: 800;
+  font-weight: 650;
   line-height: 1.12;
   letter-spacing: -.03em;
   overflow-wrap: anywhere;
 }
-.collectionHeroByline { min-width: 0; color: var(--lt-text); font-size: 14px; font-weight: 700; }
+.collectionHeroByline { min-width: 0; color: var(--lt-text); font-size: 14px; font-weight: 550; }
 .collectionHeroStats { margin: 0; color: var(--lt-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 
 .collectionHeroActions { grid-area: actions; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .collectionPlayButton {
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  padding: 0;
+  min-height: var(--lt-control-height);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lt-space-2);
+  padding: 0 var(--lt-space-4);
   border: 0;
-  border-radius: 50%;
+  border-radius: var(--lt-radius-item);
   color: var(--accent-contrast, var(--lt-bg));
   background: var(--lt-accent);
   box-shadow: none;
@@ -81,8 +81,8 @@
   display: grid;
   place-items: center;
   padding: 0;
-  border: 1px solid var(--lt-border);
-  border-radius: 50%;
+  border: 1px solid transparent;
+  border-radius: var(--lt-radius-item);
   color: var(--lt-muted);
   background: var(--lt-surface-raised);
   cursor: pointer;
@@ -106,15 +106,14 @@
   cursor: pointer;
 }
 .collectionTextButton:hover { color: var(--lt-text); border-color: var(--lt-border-strong); }
-.collectionTextButton.danger:hover,
-.collectionTextButton.confirmArmed { color: var(--lt-danger); border-color: rgba(255, 107, 138, .45); }
+.collectionTextButton.danger:hover { color: var(--lt-danger); border-color: rgba(255, 107, 138, .45); }
 .collectionShowAll { justify-self: start; margin-top: 4px; }
 
 :is(.collectionPlayButton, .collectionIconButton, .collectionTextButton):disabled { cursor: not-allowed; opacity: .42; }
 :is(.collectionPlayButton, .collectionIconButton, .collectionTextButton, .trackLink, .trackRowIndex):focus-visible { outline: 2px solid rgba(var(--lt-accent-rgb), .62); outline-offset: 2px; }
 
 .collectionSection { min-width: 0; display: grid; gap: 10px; }
-.collectionSection h2 { margin: 0; color: var(--lt-text); font-size: 19px; font-weight: 800; letter-spacing: -.02em; }
+.collectionSection h2 { margin: 0; color: var(--lt-text); font-size: 19px; font-weight: 650; letter-spacing: -.02em; }
 
 .artistAboutText { max-width: 72ch; display: grid; gap: 10px; color: var(--lt-muted); font-size: 13.5px; line-height: 1.6; }
 .artistAboutText p { margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
@@ -131,7 +130,7 @@
 }
 .trackLink:hover { color: var(--lt-text); text-decoration: underline; }
 
-.trackList { min-width: 0; display: grid; }
+.trackList { min-width: 0; display: grid; background: var(--lt-surface-soft); border-radius: var(--lt-radius-sm); }
 .trackListCanvas { position: relative; min-width: 0; }
 .trackVirtualRow { position: absolute; left: 0; width: 100%; }
 .trackRow {
@@ -147,8 +146,6 @@
   cursor: pointer;
 }
 .trackList.withCover .trackRow { --track-columns: var(--lt-control-height) 40px minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
-.trackList.withAlbum .trackRow { --track-columns: var(--lt-control-height) minmax(0, 1.4fr) minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
-.trackList.withCover.withAlbum .trackRow { --track-columns: var(--lt-control-height) 40px minmax(0, 1.4fr) minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
 .trackRow:hover { background: color-mix(in srgb, var(--lt-text) 6%, transparent); }
 .trackRow.active { background: rgba(var(--lt-accent-rgb), .1); }
 .trackRow.missing { cursor: default; opacity: .5; }
@@ -181,44 +178,19 @@
 
 .trackRowTitle { min-width: 0; display: grid; gap: 3px; }
 .trackRowTitle strong,
-.trackRowTitle small,
-.trackRowAlbum { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.trackRowTitle strong { color: var(--lt-text); font-size: 13px; font-weight: 650; }
+.trackRowTitle small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trackRowTitle strong { color: var(--lt-text); font-size: 14px; font-weight: 550; }
 .trackRow.active .trackRowTitle strong { color: var(--lt-accent); }
-.trackRowTitle small,
-.trackRowAlbum { color: var(--lt-muted); font-size: 12px; }
+.trackRowTitle small { color: var(--lt-muted); font-size: 12px; }
 .trackRowDuration { color: var(--lt-muted); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
 .app .collectionPage .trackRow > .iconAction { border-color: transparent !important; background: transparent !important; box-shadow: none !important; }
 .trackRowAdd { opacity: 0; }
 .trackRow:hover .trackRowAdd,
 .trackRowAdd:focus-visible { opacity: 1; }
 
-.collectionCardGrid { min-width: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(156px, 1fr)); gap: 12px; }
-.collectionCard {
-  min-width: 0;
-  display: grid;
-  align-content: start;
-  gap: 8px;
-  padding: 10px;
-  border-radius: 12px;
-  color: var(--lt-text);
-  transition: background-color 140ms ease;
-}
-.collectionCard:hover { background: color-mix(in srgb, var(--lt-text) 6%, transparent); }
-.collectionCardArt,
-.collectionCardArt img { display: block; width: 100%; aspect-ratio: 1; border-radius: 8px; object-fit: cover; }
-.collectionCard strong,
-.collectionCard small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.collectionCard strong { font-size: 13px; font-weight: 700; }
-.collectionCard small { color: var(--lt-muted); font-size: 12px; }
-
 @media (max-width: 760px) {
   .collectionHero { grid-template-columns: 100px minmax(0, 1fr); column-gap: 16px; padding: 18px 16px; }
-  .trackList.withAlbum .trackRow,
-  .trackList.withCover.withAlbum .trackRow { --track-columns: var(--lt-control-height) 40px minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
-  .trackList:not(.withCover).withAlbum .trackRow { --track-columns: var(--lt-control-height) minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
   .collectionHeroCopy h1 { font-size: 26px; }
-  .trackRowAlbum { display: none; }
 }
 
 @media (hover: none), (pointer: coarse) {
@@ -230,4 +202,16 @@
 @media (prefers-reduced-motion: reduce) {
   .collectionPlayButton, .collectionIconButton { transition: none; }
   .collectionPlayButton:hover:not(:disabled) { transform: none; }
+}
+
+.playlistsPage.playlistDetailPage { position: relative; isolation: isolate; padding: var(--lt-space-5) var(--lt-space-5) 40px; }
+.collectionPage > .artworkBackdrop,
+.playlistDetailPage > .artworkBackdrop {
+  inset: 0 0 auto;
+  height: min(700px, 85vh);
+  mask-image: linear-gradient(#000 0%, #000 28%, transparent 100%);
+}
+
+@media (max-width: 760px) {
+  .collectionPage, .playlistsPage.playlistDetailPage { padding-inline: var(--lt-space-3); }
 }

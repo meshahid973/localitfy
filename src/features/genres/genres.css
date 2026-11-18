@@ -7,20 +7,10 @@
   overflow: hidden;
 }
 
-.genreCard::after {
-  content: "";
-  position: absolute;
-  inset: auto 18% 0;
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), .62), transparent);
-  opacity: .5;
-}
-
 .genreCardCover,
 .genreCardCover img {
   width: min(148px, 100%);
-  border-radius: 18px;
+  border-radius: var(--lt-radius-item);
 }
 
 .genresPage .genresSort { width: 150px; min-width: 150px; flex: 0 0 auto; }

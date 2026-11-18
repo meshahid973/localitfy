@@ -7,19 +7,16 @@ import { formatTime } from "../../shared/utils/format";
 import { splitArtistCredits } from "../artists/artistCredits";
 import { splitGenreCredits } from "../genres/genreCredits";
 import { useGenreTaggedSongs } from "../genres/useGenreTaggedSongs";
-import { buildAlbumIdBySongId } from "../player/playbackSource";
 import { artistTarget, genreTarget, playableIds, useAppActions } from "../shell/appActions";
-import type { LocalAlbumEntry } from "../albums/album.types";
 import type { Song } from "../library/song.types";
 import type { ArtistBio } from "../discover/discover.types";
+import { ArtworkBackdrop } from "../covers/ArtworkBackdrop";
 import CollectionHero from "./CollectionHero";
 import TrackList from "./TrackList";
-import AlbumShelf from "./AlbumShelf";
 
 export type SongGroupPageProps = {
   id: string;
   songs: Song[];
-  albums: readonly LocalAlbumEntry[];
   currentId: string | null;
   isPlaying: boolean;
   toggleLike: (songId: string) => unknown;
@@ -51,15 +48,9 @@ export function GenrePage(props: SongGroupPageProps) {
   return <SongGroupBody {...props} kind="genre" name={group.name} members={group.members} loading={tagged.loading} />;
 }
 
-function SongGroupBody({ kind, name, members, loading, albums, currentId, isPlaying, toggleLike, openPlaylistPicker, openSimilar }: SongGroupPageProps & { kind: "artist" | "genre"; name: string; members: Song[]; loading: boolean }) {
+function SongGroupBody({ kind, name, members, loading, currentId, isPlaying, toggleLike, openPlaylistPicker, openSimilar }: SongGroupPageProps & { kind: "artist" | "genre"; name: string; members: Song[]; loading: boolean }) {
   const actions = useAppActions();
   const [showAll, setShowAll] = useState(false);
-  const albumIds = useMemo(() => buildAlbumIdBySongId(albums as LocalAlbumEntry[]), [albums]);
-  const memberAlbums = useMemo(() => {
-    const ids = new Set(members.map((song) => song.id));
-    return albums.filter((album) => album.songs.some((song) => ids.has(song.id)))
-      .sort((a, b) => String(b.year || "").localeCompare(String(a.year || "")) || a.title.localeCompare(b.title));
-  }, [albums, members]);
   // Most played first once there is history; otherwise library order.
   const popular = useMemo(() => (members.some((song) => song.playCount > 0)
     ? [...members].sort((a, b) => (b.playCount || 0) - (a.playCount || 0)) : members), [members]);
@@ -81,13 +72,14 @@ function SongGroupBody({ kind, name, members, loading, albums, currentId, isPlay
 
   return (
     <section data-page-section={kind} className="collectionPage songGroupPage" aria-label={`${name} ${kind}`}>
+      <ArtworkBackdrop song={target.coverSong} />
       <CollectionHero
         typeLabel={kind}
         title={name}
         round={kind === "artist"}
         cover={<Cover song={target.coverSong} className="collectionHeroCover" priority="high" />}
         coverSong={target.coverSong}
-        stats={[`${members.length} track${members.length === 1 ? "" : "s"}`, `${memberAlbums.length} album${memberAlbums.length === 1 ? "" : "s"}`, formatTime(duration)].join(" · ")}
+        stats={[`${members.length} track${members.length === 1 ? "" : "s"}`, formatTime(duration)].join(" · ")}
         playable={playable.length}
         onPlay={() => actions.playCollection(target)}
         onShuffle={() => actions.playCollection(target, { shuffle: true })}
@@ -103,7 +95,6 @@ function SongGroupBody({ kind, name, members, loading, albums, currentId, isPlay
       <section className="collectionSection" aria-label="songs">
         <h2>{members.some((song) => song.playCount > 0) ? "Popular" : "Songs"}</h2>
         <TrackList songs={shown} currentId={currentId} isPlaying={isPlaying} hideArtist={kind === "artist" ? name : undefined}
-          albumIdOf={(songId) => albumIds.get(songId)}
           playFrom={(songId) => actions.playCollection({ ...target, songs: popular }, { startId: songId })}
           toggleLike={toggleLike} openPlaylistPicker={openPlaylistPicker} />
         {popular.length > TOP_SONGS ? (
@@ -112,8 +103,6 @@ function SongGroupBody({ kind, name, members, loading, albums, currentId, isPlay
           </button>
         ) : null}
       </section>
-
-      {memberAlbums.length ? <AlbumShelf title={kind === "artist" ? "Albums" : `${name} albums`} albums={memberAlbums} /> : null}
 
       {kind === "artist" ? <ArtistAbout name={name} /> : null}
     </section>

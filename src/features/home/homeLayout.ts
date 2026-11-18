@@ -3,9 +3,8 @@ export const homeSections = [
   { id: "listenNow", label: "Listen now" },
   { id: "dailyMixes", label: "Daily mixes" },
   { id: "recentlyPlayed", label: "Recently played" },
-  { id: "mostListened", label: "Most listened" },
-  { id: "newAlbums", label: "New albums" },
-  { id: "newReleases", label: "New releases" },
+  { id: "mostListened", label: "Most listened of all time" },
+  { id: "newReleases", label: "Recently added" },
   { id: "likedSongs", label: "Liked songs" },
   { id: "rediscover", label: "Rediscover" },
   { id: "notPlayedYet", label: "Not played yet" }

@@ -24,9 +24,23 @@ function decodePcmChunk(buffer) {
   // FFmpeg emits little-endian f32. Reuse its backing memory when safe.
   const samples = aligned
     ? new Float32Array(buffer.buffer, buffer.byteOffset, count)
-    : Float32Array.from({ length: count }, (_, i) => buffer.readFloatLE(i * 4));
+    : new Float32Array(count);
 
-  if (count >= 32_768 && native && typeof native.pcmSumSquares === "function") {
+  // A single indexed pass both decodes and accumulates energy on the JS
+  // fallback. Avoid allocating a callback and walking unaligned PCM twice.
+  if (!aligned) {
+    const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+    let squareSum = 0;
+    for (let i = 0; i < count; i++) {
+      const value = view.getFloat32(i * 4, true);
+      if (!Number.isFinite(value)) throw new Error("Decoded audio contains invalid samples");
+      samples[i] = value;
+      squareSum += value * value;
+    }
+    return { samples, squareSum };
+  }
+
+  if (count >= 32_768 && count <= 1_000_000 && native && typeof native.pcmSumSquares === "function") {
     try {
       const squareSum = native.pcmSumSquares(samples);
       if (!Number.isFinite(squareSum) || squareSum < 0) throw new Error("Invalid PCM energy");
@@ -37,7 +51,8 @@ function decodePcmChunk(buffer) {
   }
 
   let squareSum = 0;
-  for (const sample of samples) {
+  for (let i = 0; i < samples.length; i++) {
+    const sample = samples[i];
     if (!Number.isFinite(sample)) throw new Error("Decoded audio contains invalid samples");
     squareSum += sample * sample;
   }

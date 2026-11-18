@@ -1,11 +1,10 @@
 import { isPlayableSong } from "../library/library.utils";
 import type { Song } from "../library/song.types";
 import type { Playlist } from "../playlists/playlist.types";
-import type { LocalAlbumEntry } from "../albums/album.types";
 import type { RepeatMode } from "./player.types";
 
-/** An album, artist or genre started as a queue. songIds keeps the play order so repeat-all can loop it. */
-export type PlaybackSourceRef = { kind: "album" | "artist" | "genre"; id: string; label: string };
+/** An artist or genre started as a queue. songIds keeps the play order so repeat-all can loop it. */
+export type PlaybackSourceRef = { kind: "artist" | "genre"; id: string; label: string };
 export type PlaybackSource = PlaybackSourceRef & { songIds: string[] };
 export type NowPlayingContext = { kind: PlaybackSourceRef["kind"] | "playlist" | "library"; id: string; label: string };
 export type RepeatPreview = { label: string; songs: Song[]; hint: string };
@@ -18,7 +17,7 @@ function playableSourceIds(source: PlaybackSource, songsById: Map<string, Song>)
   return source.songIds.filter((songId) => isPlayableSong(songsById.get(songId)));
 }
 
-/** With repeat-all, an album/artist/genre whose queue has run out starts again from its first song. */
+/** With repeat-all, an artist/genre whose queue has run out starts again from its first song. */
 export function getSourceLoopRestart(repeatMode: RepeatMode, source: PlaybackSource | null, inPlaylist: boolean, songsById: Map<string, Song>) {
   if (repeatMode !== "all" || !source || inPlaylist) return null;
   const ids = playableSourceIds(source, songsById);
@@ -48,30 +47,17 @@ export function moveQueueItem(queue: string[], from: number, to: number) {
   return next;
 }
 
-export function buildAlbumIdBySongId(albums: LocalAlbumEntry[]) {
-  const ids = new Map<string, string>();
-  for (const album of albums) {
-    for (const song of album.songs) if (!ids.has(song.id)) ids.set(song.id, album.id);
-  }
-  return ids;
-}
-
-/** Playlist the song is playing from, else the album/artist/genre it was started from, else its own album. */
+/** Playlist the song is playing from, else the artist/genre it was started from, else the library. */
 export function resolveNowPlayingContext(
   song: Song | null,
   activePlaylist: Playlist | null,
-  source: PlaybackSource | null,
-  albums: LocalAlbumEntry[],
-  albumIdBySongId: Map<string, string>
+  source: PlaybackSource | null
 ): NowPlayingContext {
   if (!song) return { kind: "library", id: "", label: "" };
   if (activePlaylist?.songIds.includes(song.id)) {
     return { kind: "playlist", id: activePlaylist.id, label: `playlist: ${activePlaylist.name}` };
   }
-  if (source?.songIds.includes(song.id)) return { kind: source.kind, id: source.id, label: source.label };
-  const albumId = albumIdBySongId.get(song.id);
-  const album = albumId ? albums.find((item) => item.id === albumId) : null;
-  if (album) return { kind: "album", id: album.id, label: `album: ${album.title}` };
+  if (source && source.songIds.includes(song.id)) return { kind: source.kind, id: source.id, label: source.label };
   return { kind: "library", id: "", label: "library" };
 }
 

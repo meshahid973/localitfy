@@ -48,9 +48,9 @@ test("hidden tabs leave the visible list but keep their slot; settings cannot be
 });
 
 test("moving swaps with the next visible neighbour and stops at the edges", () => {
-  // Default library order: home, library, liked, artists, genres, albums, playlists, discover.
+  // Hidden genres retain their slot while artists move below Playlists.
   const order = layout.moveSidebarItem(undefined, ["genres"], "artists", 1);
-  assert.deepEqual(plain(order.library), ["home", "library", "liked", "albums", "genres", "artists", "playlists", "discover"]);
+  assert.deepEqual(plain(order.library), ["home", "library", "playlists", "genres", "artists", "discover"]);
   assert.equal(layout.canMoveSidebarItem(undefined, [], "home", -1), false);
   assert.equal(layout.canMoveSidebarItem(undefined, [], "analytics", 1), false);
   assert.equal(layout.canMoveSidebarItem(undefined, [], "settings", 1), false);
@@ -84,16 +84,21 @@ test("player bar links the song, artist, like state, context menu and queue", ()
   assert.match(read("src/features/player/components/PlayerSurfaces.tsx"), /<QueuePanel \{\.\.\.queue\} \/>/);
 });
 
-test("now-playing context prefers the playlist, then the started source, then the song's album", () => {
-  const source = read("src/features/player/playbackSource.ts");
-  const resolver = source.slice(source.indexOf("export function resolveNowPlayingContext"), source.indexOf("export function getRepeatPreview"));
-  const playlistAt = resolver.indexOf("activePlaylist?.songIds.includes(song.id)");
-  const sourceAt = resolver.indexOf("source?.songIds.includes(song.id)");
-  const albumAt = resolver.indexOf("albumIdBySongId.get(song.id)");
-  assert.ok(playlistAt > 0 && playlistAt < sourceAt && sourceAt < albumAt);
+test("now-playing context prefers the playlist, then the started source, then the library", () => {
+  const { resolveNowPlayingContext } = loadCommonJs("src/features/player/playbackSource.ts", (specifier) => {
+    if (specifier === "../library/library.utils") return { isPlayableSong: () => true };
+    throw new Error(`unexpected import ${specifier}`);
+  });
+  const song = { id: "song-1" };
+  const playlist = { id: "playlist-1", name: "Favorites", songIds: [song.id] };
+  const source = { kind: "artist", id: "artist-1", label: "artist: Example", songIds: [song.id] };
+  assert.deepEqual(plain(resolveNowPlayingContext(song, playlist, source)), { kind: "playlist", id: playlist.id, label: "playlist: Favorites" });
+  assert.deepEqual(plain(resolveNowPlayingContext(song, { ...playlist, songIds: [] }, source)), { kind: source.kind, id: source.id, label: source.label });
+  assert.deepEqual(plain(resolveNowPlayingContext(song, null, { ...source, songIds: [] })), { kind: "library", id: "", label: "library" });
+  assert.deepEqual(plain(resolveNowPlayingContext(null, playlist, source)), { kind: "library", id: "", label: "" });
 });
 
-test("repeat-all loops the album/artist/genre a queue was started from", () => {
+test("repeat-all loops the artist/genre a queue was started from", () => {
   const helpers = read("src/features/player/playbackSource.ts");
   const loop = helpers.slice(helpers.indexOf("export function getSourceLoopRestart"), helpers.indexOf("export function getSourcePreviousStep"));
   assert.match(loop, /repeatMode !== "all" \|\| !source \|\| inPlaylist/);
@@ -106,7 +111,7 @@ test("repeat-all loops the album/artist/genre a queue was started from", () => {
   assert.match(app, /target\.kind === "source-loop"\) \{\s*setPlayQueue\(target\.rest\);/);
   const shell = read("src/features/shell/useCollectionActions.ts");
   assert.match(shell, /target\.kind === "artist" \|\| target\.kind === "genre" \? playbackSourceRef\(target\.kind, target\.title\)/);
-  assert.match(app, /collections: \{ playSongs: playAlbumSongs,/);
+  assert.match(app, /collections: \{ playSongs: playCollectionSongs,/);
   // Leaving the context through a normal song pick stops the loop.
   assert.match(app, /else if \(!playbackContext\?\.keepSource && !playbackContext\?\.keepPlaylistContext\) \{\s*setPlaybackSource\(null\);/);
 });
@@ -118,9 +123,8 @@ test("queue panel shows repeat state", () => {
   assert.match(read("src/App.tsx"), /repeatPreview: queuePanelOpen\s*\? getRepeatPreview\(/);
 });
 
-test("the player bar and song menus open album, artist and genre pages", () => {
+test("the player bar and song menus open artist and genre pages", () => {
   const nav = read("src/features/shell/useNavigationHistory.ts");
-  assert.match(nav, /openAlbumPage: \(albumId: string\) => open\(\{ kind: "album", id: albumId \}\)/);
   assert.match(nav, /openArtistPage: \(artistName: string\) => open\(\{ kind: "artist", id: artistDetailId\(artistName\) \}\)/);
   assert.match(nav, /else open\(\{ kind: context\.kind, id:/);
   const app = read("src/App.tsx");
@@ -133,7 +137,6 @@ test("song context menu is styled and offers queue and navigation actions", () =
   assert.match(menu, /import "\.\/song-context-menu\.css";/);
   assert.match(menu, /queueSong\(song\.id, false\)/);
   assert.match(menu, /goToArtist\(artistName\)/);
-  assert.match(menu, /goToAlbum\(song\)/);
   assert.match(read("src/features/library/components/song-context-menu.css"), /\.songContextMenuLayer\{\s*position: fixed;/);
 });
 

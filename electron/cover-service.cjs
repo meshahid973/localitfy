@@ -76,9 +76,9 @@ function findFolderCover(inputPath) {
   }
 
   const files = entries
-    .filter((entry) => entry.isFile())
+    .filter((entry) => entry.isFile() && isImageFile(entry.name))
     .map((entry) => path.join(folderPath, entry.name))
-    .filter((item) => fileExists(item) && isImageFile(item));
+    .filter(fileExists);
 
   if (!files.length) return "";
 
@@ -133,6 +133,9 @@ async function resolveSongCover(input = {}) {
   const song = input.song || {};
   const metadata = input.metadata || {};
   const now = new Date().toISOString();
+  if (!input.preferFolderCover && song.coverSource === "custom" && existingCoverIsUsable(song)) {
+    return { coverPath: song.coverPath, coverSource: "custom", coverUpdatedAt: song.coverUpdatedAt || now };
+  }
   const folderCover = input.folderCoverPath || findFolderCover(input.filePath || song.filePath || "");
 
   if (input.preferFolderCover && folderCover) {

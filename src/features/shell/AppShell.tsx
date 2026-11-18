@@ -1,18 +1,21 @@
-import { lazy, Suspense, useState } from "react";
-import { AnimatePresence, motion as Motion } from "motion/react";
+import { lazy, memo, Suspense, useEffect, useState, useSyncExternalStore } from "react";
+import { useStableCallback } from "../../shared/hooks/useStableCallback";
+import type { CollectionMenuStore } from "./collectionMenuStore";
 import type { CSSProperties } from "react";
 import { FolderPlus } from "lucide-react";
-import UpdateIsland from "../../app/UpdateIsland";
 import TitleBar from "./TitleBar";
-import HomeView from "../home/HomeView";
+import HomeViewComponent from "../home/HomeView";
 import { Cover } from "../covers/Cover";
+import { ArtworkAmbientContext } from "../covers/ArtworkBackdrop";
+import { useWorkspaceCoverColor } from "../covers/cover.ambient";
 import PlayerSurfaces from "../player/components/PlayerSurfaces";
 import PlaybackAudioElement from "../player/components/PlaybackAudioElement";
-import Onboarding from "../../Onboarding";
 import SongContextMenu from "../library/components/SongContextMenu";
 import CollectionContextMenu from "../library/components/CollectionContextMenu";
-import { AppActionsContext, playableIds } from "./appActions";
+import { AppActionsContext, playableIds, type AppActions } from "./appActions";
 import { useCollectionActions } from "./useCollectionActions";
+import { CollectionLoading } from "../../shared/ui/CollectionLoading";
+import { PageErrorBoundary } from "./PageErrorBoundary";
 import { MascotStateArt, UpdateStatusIcon, WindowCloseIcon } from "../../shared/ui/LocaltifyViewUi";
 import type { MascotStateKey } from "../../shared/ui/LocaltifyViewUi";
 import WhatsNewModal from "../updates/WhatsNewModal";
@@ -20,8 +23,6 @@ import { clamp } from "../../shared/utils/format";
 import { prettyTitle } from "../search";
 import type { AppShellProps } from "./appShell.contract";
 import type { Song } from "../library/song.types";
-import type { TagSearchAlbum } from "../tagging/AlbumTagSearchDialog";
-import type { AlbumTracksDialogProps } from "../tagging/AlbumTracksDialog";
 import { useDownloadTagPrompt } from "../tagging/useDownloadTagPrompt";
 import SidebarNav from "./SidebarNav";
 import { isAndroidApp } from "../../app/platform";
@@ -35,13 +36,19 @@ import "./motion.css";
 import "./effects.css";
 import "../../styles/view-shell.css";
 
+const HomeView = memo(HomeViewComponent);
+const UpdateIsland = lazy(() => import("../../app/UpdateIsland"));
+const ScreensaverOverlay = lazy(() => import("./ScreensaverOverlay"));
+function useOnceVisible(visible: boolean) {
+  const [shown, setShown] = useState(false);
+  useEffect(() => { if (visible) setShown(true); }, [visible]);
+  return visible || shown;
+}
 const SimilarSongsDialog = lazy(() => import("../analysis/SimilarSongsDialog"));
 const PhoneTabBar = lazy(() => import("./PhoneTabBar"));
 const LibraryView = lazy(() => import("../library/LibraryView"));
 const ArtistsView = lazy(() => import("../artists/ArtistsView"));
 const GenresView = lazy(() => import("../genres/GenresView"));
-const AlbumsView = lazy(() => import("../albums/AlbumsView"));
-const AlbumPage = lazy(() => import("../pages/AlbumPage"));
 const ArtistPage = lazy(() => import("../pages/SongGroupPage").then((module) => ({ default: module.ArtistPage })));
 const GenrePage = lazy(() => import("../pages/SongGroupPage").then((module) => ({ default: module.GenrePage })));
 const MixPage = lazy(() => import("../pages/MixPage"));
@@ -55,25 +62,22 @@ const SongEditorModal = lazy(() => import("../library/components/SongEditorModal
 const DeleteSongModal = lazy(() => import("../library/components/DeleteSongModal"));
 const PlaylistPickerModal = lazy(() => import("../playlists/components/PlaylistPickerModal"));
 const TagSearchDialog = lazy(() => import("../tagging/TagSearchDialog"));
-const AlbumTagSearchDialog = lazy(() => import("../tagging/AlbumTagSearchDialog"));
-const AlbumTracksDialog = lazy(() => import("../tagging/AlbumTracksDialog"));
 const DownloadTagDialog = lazy(() => import("../tagging/DownloadTagDialog"));
 
 export type { AppShellProps } from "./appShell.contract";
 
 export default function AppShell(props: AppShellProps) {
   const {
-    frame, updates, screensaver, effects, onboarding, navigation,
-    home, library, artists, genres, albums, playlists, covers, analytics, discover, settingsView, downloads,
+    frame, updates, screensaver, effects, navigation,
+    home, library, artists, genres, playlists, covers, analytics, discover, settingsView, downloads,
     playerBar, modals, playbackAudio, collections
   } = props;
 
   const {
     appRootRef, settings, platformInfo, themeMotionReady, showTopUpdateRibbon, isViewSwitching,
     heroMotion, heroMotionAppClass, homeEntranceSettledClass, isAppBackgrounded, scrollBusyRef,
-    themeSettling, themePresetStyle, animatedThemeVisualStyle, customThemeStyle, effectiveTheme,
-    effectiveAmbient, effectiveCoverColorSyncMode, effectiveNotes, statusText, draggedSongTitle,
-    showStarBackdrop
+    themeSettling, effectiveTheme,
+    effectiveAmbient, effectiveCoverColorSyncMode, effectiveNotes, statusText, draggedSongTitle
   } = frame;
   const { updatePrompt, askUpdaterToDownload, askUpdaterToInstall, manualUpdateCheck, setUpdatePrompt } = updates;
   const {
@@ -82,27 +86,26 @@ export default function AppShell(props: AppShellProps) {
     visualSource: screensaverVisualSource
   } = screensaver;
   const {
-    secretMode, secretBurst, secretToast, starParticleStyles, appToast, importAnimation
+    secretMode, secretBurst, secretToast, appToast, importAnimation
   } = effects;
-  const { open: onboardingOpen, ...onboardingProps } = onboarding;
+  const mountUpdateIsland = useOnceVisible(showTopUpdateRibbon);
+  const mountScreensaver = useOnceVisible(screensaverVisible);
   const {
-    effectiveSimpleMode, simpleModeView, view, importSongs, startSidebarResize,
+    view, importSongs, startSidebarResize,
     contentRef, updateSidebarLayout, openSidebarSettings, history: nav
   } = navigation;
   const detail = nav.detail;
   const { isSeeking, isVolumeDragging, draggedSongId, isPlaying } = playerBar;
   const { isThreeAm } = home;
-  const [tagSearchSong, setTagSearchSong] = useState<Song | null>(null);
-  const [tagSearchAlbum, setTagSearchAlbum] = useState<TagSearchAlbum | null>(null);
-  const [albumTracksRequest, setAlbumTracksRequest] = useState<AlbumTracksDialogProps["request"] | null>(null);
-  // When a download batch finishes, offer to tag the songs it added.
-  const { actions, collectionMenu, closeCollectionMenu } = useCollectionActions(nav, collections, modals.queuePanel.openSongContextMenu);
-  const pageProps = { songs: albums.songs, albums: albums.localAlbums, currentId: albums.currentId, isPlaying, toggleLike: albums.toggleLike, openPlaylistPicker: albums.openPlaylistPicker };
-  const downloadTagPrompt = useDownloadTagPrompt(settings.musicbrainzTagging === true, Boolean(downloads.downloadBusy || downloads.spotifyDownloadBusy), downloads.spotifyTracks, downloads.visibleDownloadResults);
-
-  function openSimilarSongs(songIds: string[], key: string, title: string) {
+  const playerBackground = effectiveTheme === "light" && settings.playerBackgroundStyle === "oledBlack" ? "flat" : settings.playerBackgroundStyle || "coverBlur";
+  const homeBanner = effectiveTheme === "light" && settings.homeBannerType === "cleanBlack" ? "none" : settings.homeBannerType || "dynamic";
+  const cardBackground = effectiveTheme === "light" && settings.mediaCardBackground === "oledFlat" ? "solid" : settings.mediaCardBackground || "glassy";
+  const workspaceCoverColor = useWorkspaceCoverColor(home.ambientStyle, home.currentSong?.id, effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded);
+  const { actions, menu } = useCollectionActions(nav, collections, modals.queuePanel.openSongContextMenu);
+  const pageProps = { songs: library.songs, currentId: home.currentId, isPlaying, toggleLike: modals.songContextMenu.toggleLike, openPlaylistPicker: modals.songContextMenu.openPlaylistPicker };
+  const openSimilarSongs = useStableCallback((songIds: string[], key: string, title: string) => {
     collections.openSimilar({ kind: "songs", key, title, songIds });
-  }
+  });
 
   const homeHeroCoverBrightness = clamp(Number(settings.homeHeroCoverBrightness ?? 1), 0.65, 1.55);
   const homeHeroCoverContrast = clamp(1.02 + (homeHeroCoverBrightness - 1) * 0.08, 0.98, 1.08);
@@ -116,6 +119,7 @@ export default function AppShell(props: AppShellProps) {
 
   return (
     <AppActionsContext.Provider value={actions}>
+    <ArtworkAmbientContext.Provider value={effectiveAmbient && !isAppBackgrounded}>
     <main
       ref={appRootRef}
       className={`app ${settings.animatedGlow ? "animatedGlow" : ""} ${
@@ -131,9 +135,7 @@ export default function AppShell(props: AppShellProps) {
           "--home-hero-cover-contrast": String(homeHeroCoverContrast),
           "--home-hero-cover-saturation": String(homeHeroCoverSaturation),
           "--home-hero-cover-glow-brightness": String(homeHeroCoverGlowBrightness),
-          ...themePresetStyle,
-          ...animatedThemeVisualStyle,
-          ...customThemeStyle
+          "--workspace-cover-color": workspaceCoverColor
         } as CSSProperties
       }
       data-platform={platformId}
@@ -141,20 +143,18 @@ export default function AppShell(props: AppShellProps) {
       data-theme={effectiveTheme}
       data-anime-visuals={settings.animeVisuals || screensaverPreviewActive || screensaverVisible ? "on" : "off"}
       data-gif-visuals={settings.gifVisualsMode}
-      data-custom-theme={settings.customThemeEnabled ? "true" : "false"}
       data-corners={settings.softCorners ? "soft" : "sharp"}
       data-ambient={effectiveAmbient ? "on" : "off"}
       data-cover-sync={effectiveCoverColorSyncMode}
       data-notes={effectiveNotes ? "on" : "off"}
       data-badge={settings.showHeroBadge ? "on" : "off"}
-      data-home-banner={settings.homeBannerType || "dynamic"}
+      data-home-banner={homeBanner}
       data-blur-effects="normal"
-      data-card-background={settings.mediaCardBackground || "glassy"}
+      data-card-background={cardBackground}
       data-home-layout={settings.homeLayoutMode || "balanced"}
       data-library-row-style={settings.libraryRowStyle || "comfyRows"}
-      data-stars-intensity={settings.starsIntensity || "off"}
-      data-sidebar-behavior={settings.sidebarBehavior || "fixed"}
-      data-player-background={settings.playerBackgroundStyle || "coverBlur"}
+      data-sidebar-behavior={settings.sidebarBehavior || "slim"}
+      data-player-background={playerBackground}
       data-hero-expanded={settings.heroExpanded ? "on" : "off"}
       data-hero-motion={heroMotion}
       data-status={statusText}
@@ -166,16 +166,9 @@ export default function AppShell(props: AppShellProps) {
       data-motion-level={settings.reducedMotion ? "reduced" : "smooth"}
       data-drag-title={draggedSongTitle}
     >
-      {showStarBackdrop ? (
-        <div className="localtifyStarsBackdrop" aria-hidden="true">
-          <div className="localtifyStarsLayer localtifyStarsLayerA" />
-          <div className="localtifyStarsLayer localtifyStarsLayerB" />
-          <div className="localtifyStarsLayer localtifyStarsLayerC" />
-        </div>
-      ) : null}
 
-      <TitleBar showWindowButtons={platformId !== "mac"} history={effectiveSimpleMode ? undefined : nav}>
-        <UpdateIsland
+      <TitleBar showWindowButtons={platformId !== "mac"} history={nav}>
+        {mountUpdateIsland ? <Suspense fallback={null}><UpdateIsland
           show={showTopUpdateRibbon}
           updatePrompt={updatePrompt}
           appVersion={APP_VERSION}
@@ -190,51 +183,18 @@ export default function AppShell(props: AppShellProps) {
           onInstall={askUpdaterToInstall}
           onCheckAgain={manualUpdateCheck}
           onDismiss={() => setUpdatePrompt(defaultUpdatePrompt)}
-        />
+        /></Suspense> : null}
       </TitleBar>
 
-      <AnimatePresence>
-        {screensaverVisible ? (
-          <Motion.div
-            className="screensaverOverlay"
-            role="presentation"
-            onPointerMove={dismissScreensaverFromActivity}
-            onClick={() => setScreensaverVisible(false)}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: settings.reducedMotion ? 0.12 : 0.45, ease: "easeOut" }}
-          >
-            <div className="screensaverBackdrop" style={{ backgroundImage: `url(${screensaverVisualSource})` }} />
-            <div className="screensaverGlow" />
-            <Motion.div
-              className="screensaverPanel"
-              initial={settings.reducedMotion ? false : { opacity: 0, y: 18, scale: 0.982 }}
-              animate={settings.reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-              exit={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, y: 14, scale: 0.99 }}
-              transition={settings.reducedMotion ? { duration: 0.12 } : { type: "spring", stiffness: 130, damping: 20, mass: 0.8 }}
-              style={{ backgroundImage: `url(${screensaverVisualSource})` }}
-            >
-              <div className="screensaverShade" />
-              <div className="screensaverIdleText">am waiting..</div>
-            </Motion.div>
-          </Motion.div>
-        ) : null}
-      </AnimatePresence>
+      {mountScreensaver ? <Suspense fallback={null}><ScreensaverOverlay
+        screensaverVisible={screensaverVisible} screensaverVisualSource={screensaverVisualSource}
+        reducedMotion={settings.reducedMotion} dismissScreensaverFromActivity={dismissScreensaverFromActivity}
+        setScreensaverVisible={setScreensaverVisible} /></Suspense> : null}
 
       {secretMode !== "none" ? (
         <div className={`secretLayer ${secretMode}`} key={`${secretMode}-${secretBurst}`} aria-hidden="true">
           {secretToast ? <div className="secretRibbon">{secretToast}</div> : null}
           {secretMode === "yukari" ? <img className="yukariSecretPeek" src={yukariUpdateImage} alt="" width={260} height={260} loading="lazy" decoding="async" fetchPriority="low" draggable={false} aria-hidden="true" /> : null}
-          {secretMode === "stars"
-            ? starParticleStyles.map((style, index) => (
-                <span
-                  key={`star-${index}`}
-                  className={index % 5 === 0 ? "secretParticle starParticle starParticleLarge" : "secretParticle starParticle"}
-                  style={style}
-                />
-              ))
-            : null}
         </div>
       ) : null}
 
@@ -291,16 +251,7 @@ export default function AppShell(props: AppShellProps) {
         </div>
       ) : null}
 
-      {onboardingOpen ? (
-        <Suspense fallback={null}>
-          <Onboarding appVersion={APP_VERSION} {...onboardingProps} />
-        </Suspense>
-      ) : null}
-
-      {effectiveSimpleMode ? (
-        simpleModeView
-      ) : (
-        <div className="appShell">
+      <div className="appShell">
           {isAndroidApp() ? (
             <Suspense fallback={null}>
               <PhoneTabBar view={view} changeView={nav.go} sidebarNavOrder={settings.sidebarNavOrder}
@@ -370,9 +321,10 @@ export default function AppShell(props: AppShellProps) {
               className={`pageTransition pageTransition-${view}`}
               data-view={view}
             >
-              {view === "home" ? <HomeView {...home} /> : null}
+              <PageErrorBoundary key={view + ":" + (detail?.id ?? "")}>
+              {view === "home" ? <HomeView {...home} artworkAmbient={effectiveAmbient && !isAppBackgrounded} bannerType={homeBanner} /> : null}
 
-              <Suspense fallback={null}>
+              <Suspense fallback={<CollectionLoading label="Loading page…" />}>
                 {(view === "library" || view === "liked") ? <LibraryView {...library} /> : null}
                 {view === "artists" ? (detail?.kind === "artist"
                   ? <ArtistPage key={detail.id} id={detail.id} {...pageProps} openSimilar={openSimilarSongs} />
@@ -380,10 +332,6 @@ export default function AppShell(props: AppShellProps) {
                 {view === "genres" ? (detail?.kind === "genre"
                   ? <GenrePage key={detail.id} id={detail.id} {...pageProps} openSimilar={openSimilarSongs} />
                   : <GenresView {...genres} />) : null}
-                {view === "albums" ? (detail?.kind === "album"
-                  ? <AlbumPage key={detail.id} albumId={detail.id} {...pageProps} setSelectedAlbumId={albums.setSelectedAlbumId}
-                    deleteSelectedAlbum={albums.deleteSelectedAlbum} openEditAlbumBuilder={albums.openEditAlbumBuilder} />
-                  : <AlbumsView {...albums} />) : null}
                 {view === "playlists" ? (detail?.kind === "mix"
                   ? <MixPage key={detail.id} mixId={detail.id} {...pageProps} savePlaylist={playlists.dailyMixes.savePlaylist} />
                   : <PlaylistsView {...playlists} detailPlaylistId={detail?.kind === "playlist" ? detail.id : null} />) : null}
@@ -393,27 +341,47 @@ export default function AppShell(props: AppShellProps) {
                 {view === "settings" ? <SettingsView {...settingsView} /> : null}
                 {view === "downloads" ? <DownloadsView {...downloads} /> : null}
               </Suspense>
+              </PageErrorBoundary>
             </div>
           </section>
 
           <PlayerSurfaces player={playerBar} queue={modals.queuePanel} lyrics={modals.lyrics}
-            contentRef={contentRef} backgroundStyle={settings.playerBackgroundStyle || "coverBlur"} backgrounded={isAppBackgrounded} />
-        </div>
-      )}
+            contentRef={contentRef} backgroundStyle={playerBackground} backgrounded={isAppBackgrounded} />
+      </div>
 
-      <SongContextMenu {...modals.songContextMenu} findOnMusicBrainz={settings.musicbrainzTagging ? setTagSearchSong : undefined} />
-      <CollectionContextMenu state={collectionMenu} onClose={closeCollectionMenu} open={actions.openCollection} play={actions.playCollection} queue={actions.queueCollection}
-        goToArtist={nav.openArtistPage} findSimilar={(target) => target.playlist
+      <ShellDialogs modals={modals} menu={menu} actions={actions}
+        collections={collections} downloads={downloads} taggingEnabled={settings.musicbrainzTagging === true}
+        openSimilarSongs={openSimilarSongs} />
+
+      <PlaybackAudioElement {...playbackAudio} />
+    </main>
+    </ArtworkAmbientContext.Provider>
+    </AppActionsContext.Provider>
+  );
+}
+
+/** Menu and tagging state live here; opening a dialog cannot rerender Home or the player. */
+function ShellDialogs({ modals, menu, actions, collections, downloads, taggingEnabled, openSimilarSongs }: {
+  modals: AppShellProps["modals"];
+  menu: CollectionMenuStore;
+  actions: AppActions;
+  collections: AppShellProps["collections"];
+  downloads: AppShellProps["downloads"];
+  taggingEnabled: boolean;
+  openSimilarSongs: (songIds: string[], key: string, title: string) => void;
+}) {
+  const collectionMenu = useSyncExternalStore(menu.subscribe, menu.getSnapshot, menu.getSnapshot);
+  const [tagSearchSong, setTagSearchSong] = useState<Song | null>(null);
+  const downloadTagPrompt = useDownloadTagPrompt(taggingEnabled, Boolean(downloads.downloadBusy || downloads.spotifyDownloadBusy), downloads.spotifyTracks, downloads.visibleDownloadResults);
+  return <>
+      <SongContextMenu {...modals.songContextMenu} findOnMusicBrainz={taggingEnabled ? setTagSearchSong : undefined} />
+      <CollectionContextMenu state={collectionMenu} onClose={menu.close} open={actions.openCollection} play={actions.playCollection} queue={actions.queueCollection}
+        findSimilar={(target) => target.playlist
           ? collections.openSimilar({ kind: "playlist", playlistId: target.playlist.id })
-          : openSimilarSongs(playableIds(target.songs), `${target.kind}:${target.id}`, target.title)}
-        editAlbum={(album) => { nav.go("albums"); albums.openEditAlbumBuilder(album); }}
-        findAlbumOnMusicBrainz={settings.musicbrainzTagging ? setTagSearchAlbum : undefined}
-        completeAlbum={settings.musicbrainzTagging ? (album) => setAlbumTracksRequest({ songIds: album.songs.map((song) => song.id), label: album.title }) : undefined} />
+          : openSimilarSongs(playableIds(target.songs), `${target.kind}:${target.id}`, target.title)} />
       {tagSearchSong ? <Suspense fallback={null}><TagSearchDialog key={tagSearchSong.id} song={tagSearchSong} onClose={() => setTagSearchSong(null)} /></Suspense> : null}
-      {tagSearchAlbum ? <Suspense fallback={null}><AlbumTagSearchDialog album={tagSearchAlbum} onClose={() => setTagSearchAlbum(null)} /></Suspense> : null}
       {downloadTagPrompt.songIds.length ? <Suspense fallback={null}><DownloadTagDialog songIds={downloadTagPrompt.songIds}
         titleOf={(id) => modals.songContextMenu.songsById.get(id)?.title || "Unknown song"} onClose={downloadTagPrompt.dismiss} /></Suspense> : null}
-      {albumTracksRequest ? <Suspense fallback={null}><AlbumTracksDialog request={albumTracksRequest} sendToDownloads={discover.sendToDownloads} onClose={() => setAlbumTracksRequest(null)} /></Suspense> : null}
       {modals.similarSongs.seed ? <Suspense fallback={null}><SimilarSongsDialog key={modals.similarSongs.seed.key} {...modals.similarSongs} /></Suspense> : null}
 
       <WhatsNewModal {...modals.whatsNew} />
@@ -423,9 +391,5 @@ export default function AppShell(props: AppShellProps) {
       {modals.playlistPicker.song ? <Suspense fallback={null}><PlaylistPickerModal {...modals.playlistPicker} /></Suspense> : null}
 
       {modals.deleteSong.song ? <Suspense fallback={null}><DeleteSongModal {...modals.deleteSong} /></Suspense> : null}
-
-      <PlaybackAudioElement {...playbackAudio} />
-    </main>
-    </AppActionsContext.Provider>
-  );
+  </>;
 }

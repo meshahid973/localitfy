@@ -3,7 +3,7 @@ const REPOSITORY_URL = "https://github.com/meshahid973/localitfy";
 // View shortcuts follow the sidebar order; ⌘, already opens Settings.
 const MENU_VIEWS = [
   ["home", "Home"], ["library", "Library"], ["liked", "Liked Songs"], ["artists", "Artists"], ["genres", "Genres"],
-  ["albums", "Albums"], ["playlists", "Playlists"], ["downloads", "Downloads"], ["covers", "Covers"], ["analytics", "Analytics"]
+  ["playlists", "Playlists"], ["downloads", "Downloads"], ["covers", "Covers"], ["analytics", "Analytics"]
 ];
 
 /**
@@ -43,7 +43,6 @@ function createAppMenuRuntime({ Menu, shell, appName = "localtify", isDev = fals
         label: "File",
         submenu: [
           { label: "Import Music…", accelerator: "Command+O", click: command("import-music") },
-          { label: "Import Album Folder…", accelerator: "Shift+Command+O", click: command("import-album-folder") },
           { label: "New Playlist", accelerator: "Command+N", click: command("new-playlist") },
           { type: "separator" },
           { role: "close" }

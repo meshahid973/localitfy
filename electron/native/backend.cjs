@@ -3,14 +3,20 @@
 // This module runs only in trusted Electron/Node processes, never renderer IPC.
 // No native binary is installed or loaded on normal Localtify launches.
 const path = require("node:path");
-const SUPPORTED = new Set(["similarity", "duplicates", "pcm", "bridge", "ranking"]);
+const SUPPORTED = new Set(["similarity", "audio-decode", "duplicates", "pcm", "bridge", "ranking"]);
+let phaseSetting;
+let phaseSet = new Set();
 let addon;
 const warnings = new Set();
 
 function enabled(phase) {
   if (!SUPPORTED.has(phase)) return false;
-  const parts = String(process.env.LOCALTIFY_RUST_PHASES || "").toLowerCase().split(/[\s,;]+/);
-  return parts.includes("all") || parts.includes(phase);
+  const setting = process.env.LOCALTIFY_RUST_PHASES || "";
+  if (phaseSetting !== setting) {
+    phaseSetting = setting;
+    phaseSet = new Set(setting.toLowerCase().split(/[\s,;]+/));
+  }
+  return phaseSet.has("all") || phaseSet.has(phase);
 }
 function warnOnce(phase, error) {
   if (warnings.has(phase)) return;

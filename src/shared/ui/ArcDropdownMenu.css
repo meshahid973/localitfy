@@ -11,11 +11,11 @@
   padding: 0 13px;
   border: 1px solid var(--lt-border);
   border-radius: var(--lt-control-radius);
-  background: var(--lt-surface);
+  background: var(--lt-surface-soft);
   color: var(--lt-text);
   font: inherit;
   font-size: var(--lt-text-sm);
-  font-weight: 650;
+  font-weight: 550;
   text-align: left;
   cursor: pointer;
   transition: background-color var(--lt-duration-fast) ease, border-color var(--lt-duration-fast) ease;
@@ -36,8 +36,8 @@
   padding: 5px;
   border: 1px solid var(--lt-border);
   border-radius: var(--lt-control-radius);
-  /* The raised surface is translucent; an opaque base keeps options readable over dialogs and text. */
-  background: linear-gradient(var(--lt-surface-raised), var(--lt-surface-raised)), var(--lt-bg);
+  background: color-mix(in srgb, var(--lt-bg-elevated) 94%, transparent);
+  backdrop-filter: blur(12px);
   color: var(--lt-text);
   box-shadow: var(--lt-shadow-menu);
   font-size: var(--lt-text-sm);

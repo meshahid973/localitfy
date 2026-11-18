@@ -24,6 +24,7 @@ test("Home owns scroll containment and contradictory intrinsic sizing is removed
   assert.doesNotMatch(effects, /contain-intrinsic-size: 92px 132px/);
   assert.doesNotMatch(effects, /\.app \.homeListenGrid\s*\{/);
   assert.match(home, /\.app \.homeListenGrid\s*\{[^}]*content-visibility: auto/s);
-  assert.match(home, /\.app \.homeAlbumCard\s*\{[^}]*contain-intrinsic-size: 120px 150px/s);
+  assert.doesNotMatch(home + effects, /\.homeAlbumCard\b|\.homeAlbumArt\b/);
+  assert.match(home, /\.homeReleaseCard\s*\{/);
   assert.match(effects, /\.app \.songRow,\s*\.app \.playlistSongRow/);
 });

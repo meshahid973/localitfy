@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { lazy, memo, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import { isAndroidApp } from "../../../app/platform";
 import PlayerBar from "./PlayerBar";
@@ -21,7 +21,7 @@ type Props = {
   backgrounded: boolean;
 };
 
-export default function PlayerSurfaces({ player, queue, lyrics, contentRef, backgroundStyle, backgrounded }: Props) {
+function PlayerSurfaces({ player, queue, lyrics, contentRef, backgroundStyle, backgrounded }: Props) {
   const [expanded, setExpanded] = useState(false);
   const restoreFocus = useRef(false);
   const android = isAndroidApp();
@@ -66,3 +66,21 @@ export default function PlayerSurfaces({ player, queue, lyrics, contentRef, back
       </>}
   </>;
 }
+
+// Compare actual values, not render-created contract object identities. The
+// caller stabilizes local callbacks; remote callbacks remain reactive.
+function shallowEqual(a: object, b: object) {
+  if (Object.is(a, b)) return true;
+  const keys = Object.keys(a);
+  return keys.length === Object.keys(b).length && keys.every(key =>
+    Object.prototype.hasOwnProperty.call(b, key) && Object.is(
+      (a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]));
+}
+export default memo(PlayerSurfaces, (previous, next) =>
+  previous.contentRef === next.contentRef &&
+  previous.backgroundStyle === next.backgroundStyle &&
+  previous.backgrounded === next.backgrounded &&
+  shallowEqual(previous.player, next.player) &&
+  shallowEqual(previous.queue, next.queue) &&
+  shallowEqual(previous.lyrics, next.lyrics)
+);

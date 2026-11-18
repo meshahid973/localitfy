@@ -17,7 +17,7 @@ function compile(file, dependencies = {}) {
   return exports;
 }
 
-function home(android, songs, hidden = []) {
+function home(android, songs, hidden = [], artworkAmbient = true) {
   const layout = compile("src/features/home/homeLayout.ts");
   const Home = compile("src/features/home/HomeView.tsx", {
     "./home.css": {},
@@ -27,6 +27,7 @@ function home(android, songs, hidden = []) {
     "../../shared/ui/LocaltifyViewUi": { MascotStateArt: () => null },
     "../search/search.utils": { prettyMeta: String, prettyTitle: String },
     "./homeLayout": layout,
+    "./useHomeDay": { useHomeDay: () => "2026-11-18" },
     "./HomeShelves": { HomeAlbumRail: () => null, HomeDailyMixRail: () => null, HomeSongRail: () => null },
     "../../shared/ui/MediaCard": { MediaCard: ({ children }) => React.createElement("div", null, children) },
     "../artists/artistCredits": { splitArtistCredits: (name) => [name] },
@@ -37,7 +38,7 @@ function home(android, songs, hidden = []) {
     albums: [], songs, currentSong: songs[0] || null, currentId: songs[0]?.id || null,
     homeListenNowSongs: songs, homeFreshShelfSongs: [], heroDisplayTitle: "Test song",
     heroDisplayArtist: "Test artist", settings: { volume: 0.5, heroExpanded: true, homeSectionOrder: [], homeHiddenSections: hidden },
-    ambientStyle: {}, playableSongCount: songs.length
+    ambientStyle: {}, artworkAmbient, playableSongCount: songs.length
   }));
 }
 
@@ -57,4 +58,17 @@ test("Android Home keeps a short song list and omits the desktop expansion contr
   assert.doesNotMatch(phone, /use compact hero/);
   assert.match(desktop, /use compact hero/);
   assert.match(phone, /aria-label="Customize Home"/);
+});
+
+test("Home foreground artwork remains when ambience is disabled", () => {
+  const song = { id: "a", title: "Test song", artist: "Artist", filePath: "/test.wav" };
+  for (const android of [true, false]) {
+    const on = home(android, [song]);
+    const off = home(android, [song], [], false);
+    assert.match(on, /class="homeFeatureArt"/);
+    assert.match(on, /class="homeAtmosphere"/);
+    assert.match(off, /class="homeFeatureArt"/);
+    assert.doesNotMatch(off, /class="homeAtmosphere"/);
+    assert.doesNotMatch(home(android, []), /class="homeAtmosphere"|class="homeFeatureArt"/);
+  }
 });

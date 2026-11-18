@@ -38,7 +38,7 @@ test("artist cards open the artist page, play from their button, and share the c
   const page = fs.readFileSync("src/features/pages/SongGroupPage.tsx", "utf8");
   assert.match(page, /actions\.playCollection\(target, \{ shuffle: true \}\)/);
   assert.match(page, /actions\.queueCollection\(target\)/);
-  assert.match(page, /<AlbumShelf/);
+  assert.doesNotMatch(page, /<AlbumShelf/);
 });
 
 // Exercise the real parser; source-pattern checks alone miss metadata bugs.

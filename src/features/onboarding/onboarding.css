@@ -1,8 +1,8 @@
 .onboardingV315 {
   --panel-edge: rgba(255, 255, 255, 0.075);
-  --copy-strong: rgba(255, 255, 255, 0.96);
-  --copy-muted: rgba(255, 255, 255, 0.62);
-  --copy-dim: rgba(255, 255, 255, 0.42);
+  --copy-strong: var(--onboarding-accent);
+  --copy-muted: rgba(var(--onboarding-accent-rgb), 0.72);
+  --copy-dim: rgba(var(--onboarding-accent-rgb), 0.64);
   --squish: cubic-bezier(0.18, 0.9, 0.2, 1.1);
   position: fixed;
   inset: 0;
@@ -10,7 +10,7 @@
   display: grid;
   place-items: center;
   padding: 32px;
-  background: linear-gradient(180deg, #02040a 0%, #03050c 100%);
+  background: var(--onboarding-bg);
   overflow: hidden;
 }
 
@@ -150,7 +150,7 @@
 
   border-radius: 28px;
   border: 1px solid var(--panel-edge);
-  background: linear-gradient(180deg, rgba(10, 10, 14, 0.92), rgba(8, 9, 14, 0.96));
+  background: var(--onboarding-surface);
   box-shadow: 0 24px 100px rgba(0, 0, 0, 0.42);
   opacity: 0;
   transform: translate3d(0, 38px, 0) scale(0.982);
@@ -240,7 +240,7 @@
   height: 6px;
   border-radius: 999px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.09);
+  background: rgba(var(--onboarding-accent-rgb), 0.09);
 }
 
 .onboardingProgressTrack span {
@@ -322,7 +322,7 @@
   padding: 16px;
   border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.065);
-  background: rgba(255, 255, 255, 0.028);
+  background: rgba(var(--onboarding-accent-rgb), 0.028);
   transition: transform 200ms var(--squish), border-color 200ms ease, background-color 200ms ease;
 }
 
@@ -331,7 +331,7 @@
 .discordChoice:hover:not(:disabled) {
   transform: translateY(-2px) scale(1.01);
   border-color: rgba(var(--onboarding-accent-rgb), 0.2);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(var(--onboarding-accent-rgb), 0.04);
 }
 
 .onboardingFeatureGrid b,
@@ -396,7 +396,7 @@
   display: grid;
   place-items: center;
   background: var(--theme-accent);
-  color: #07110b;
+  color: var(--theme-bg);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 8px 18px rgba(0,0,0,0.16);
 }
 
@@ -427,7 +427,7 @@
   padding: 20px;
   border-radius: 22px;
   border: 1px solid rgba(255, 255, 255, 0.065);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--onboarding-accent-rgb), 0.03);
 }
 
 .utilityHeader {
@@ -478,8 +478,8 @@
   padding: 0 12px;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.055);
-  background: rgba(255, 255, 255, 0.022);
-  color: rgba(255, 255, 255, 0.82);
+  background: rgba(var(--onboarding-accent-rgb), 0.022);
+  color: rgba(var(--onboarding-accent-rgb), 0.82);
   display: grid;
   place-items: center;
   text-align: center;
@@ -505,7 +505,7 @@
 .onboardingMiniPrimary,
 .onboardingContinue {
   background: var(--onboarding-accent);
-  color: #06110b;
+  color: var(--onboarding-bg);
   box-shadow: 0 12px 26px rgba(var(--onboarding-accent-rgb), 0.2);
 }
 
@@ -523,9 +523,9 @@
 .onboardingMiniGhost,
 .onboardingSkip,
 .onboardingBack {
-  border-color: rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(var(--onboarding-accent-rgb), 0.64);
+  background: rgba(var(--onboarding-accent-rgb), 0.04);
+  color: rgba(var(--onboarding-accent-rgb), 0.9);
 }
 
 .onboardingMiniGhost:hover:not(:disabled),
@@ -533,7 +533,7 @@
 .onboardingBack:hover:not(:disabled) {
   transform: translateY(-2px) scale(1.015);
   border-color: rgba(var(--onboarding-accent-rgb), 0.22);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(var(--onboarding-accent-rgb), 0.06);
 }
 
 .onboardingMiniGhost:active:not(:disabled),
@@ -557,7 +557,7 @@
   display: inline-flex;
   align-items: center;
   border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--onboarding-accent-rgb), 0.03);
   color: var(--copy-dim);
   font-size: 11px;
   font-weight: 800;
@@ -795,8 +795,8 @@
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
-  color: rgba(255,255,255,.58);
-  background: rgba(255,255,255,.032);
+  color: rgba(var(--onboarding-accent-rgb), 0.64);
+  background: rgba(var(--onboarding-accent-rgb), .032);
   border: 1px solid rgba(255,255,255,.055);
   font-size: 12px;
   font-weight: 850;
@@ -806,7 +806,7 @@
   position: relative;
   z-index: 4;
 
-  border-color: rgba(255,255,255,.045);
+  border-color: rgba(var(--onboarding-accent-rgb), 0.64);
   background:
     radial-gradient(circle at 102% 48%, rgba(var(--onboarding-accent-rgb), .07), transparent 28%),
     linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,.006));
@@ -820,7 +820,7 @@
 
 .onboardingWelcomeV505 .onboardingLead{
 
-  color: rgba(255,255,255,.68);
+  color: rgba(var(--onboarding-accent-rgb), 0.68);
 }
 
 
@@ -828,7 +828,7 @@
 
 
   border-radius: 18px;
-  border-color: rgba(255,255,255,.055);
+  border-color: rgba(var(--onboarding-accent-rgb), 0.64);
 
   box-shadow: none;
 }
@@ -849,7 +849,7 @@
 }
 
 .onboardingBenefitGridV505 small{
-  color: rgba(255,255,255,.56);
+  color: rgba(var(--onboarding-accent-rgb), 0.64);
 
 
 }
@@ -872,12 +872,12 @@
 }
 
 .onboardingSkip{
-  color: rgba(255,255,255,.72);
+  color: rgba(var(--onboarding-accent-rgb), 0.72);
 }
 
 .onboardingSkip::after{
 
-  color: rgba(255,255,255,.36);
+  color: rgba(var(--onboarding-accent-rgb), 0.64);
   font-weight: 750;
 }
 
@@ -949,7 +949,7 @@
 .onboardingTrustLineV506{
   max-width: 460px;
   margin: 16px 0 0;
-  color: rgba(255,255,255,.58);
+  color: rgba(var(--onboarding-accent-rgb), 0.64);
   font-size: 12px;
   font-weight: 820;
   line-height: 1.45;

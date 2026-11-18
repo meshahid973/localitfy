@@ -9,7 +9,7 @@ const appSource = fs.readFileSync("src/App.tsx", "utf8");
 test("AppShell uses grouped feature contracts instead of an any prop bus", () => {
   assert.doesNotMatch(shellSource, /Record<string,\s*any>/);
   assert.match(shellSource, /props:\s*AppShellProps/);
-  for (const group of ["frame", "navigation", "home", "library", "artists", "genres", "albums", "playlists", "covers", "analytics", "settingsView", "downloads", "playerBar", "modals", "playbackAudio"]) {
+  for (const group of ["frame", "navigation", "home", "library", "artists", "genres", "playlists", "covers", "analytics", "settingsView", "downloads", "playerBar", "modals", "playbackAudio"]) {
     assert.match(contractSource, new RegExp(`\\b${group}:`), `missing ${group} shell contract`);
   }
 });

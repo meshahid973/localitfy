@@ -94,6 +94,27 @@ function createLibraryWatcher({ isAudioFile, getLibraryPaths, importFiles, onCha
     return importedCount;
   }
 
+  const isWatched = (file) => {
+    const normalized = pathKey(file);
+    for (const key of entries.keys()) {
+      if (normalized === key || normalized.startsWith(key.endsWith(path.sep) ? key : key + path.sep)) return true;
+    }
+    return false;
+  };
+
+  async function settledFiles(files, library) {
+    const candidates = [];
+    for (const file of files) {
+      if (disposed || !isWatched(file) || library.has(pathKey(file))) continue;
+      let stat;
+      try { stat = await fsp.stat(file); } catch { continue; }
+      if (!stat.isFile()) continue;
+      if (now() - stat.mtimeMs < settleMs) schedule(file);
+      else candidates.push(file);
+    }
+    return candidates;
+  }
+
   async function flush() {
     const changed = [...pending];
     pending.clear();
@@ -101,6 +122,7 @@ function createLibraryWatcher({ isAudioFile, getLibraryPaths, importFiles, onCha
     const candidates = [];
     let libraryChanged = false;
     for (const file of changed) {
+      if (disposed || !isWatched(file)) continue;
       let stat;
       try { stat = await fsp.stat(file); } catch {
         // Deleted or moved away: the library shows it as missing on reload.
@@ -109,7 +131,7 @@ function createLibraryWatcher({ isAudioFile, getLibraryPaths, importFiles, onCha
         continue;
       }
       if (stat.isDirectory()) {
-        for (const found of await listAudioFiles(file, isAudioFile)) if (!library.has(pathKey(found))) candidates.push(found);
+        candidates.push(...await settledFiles(await listAudioFiles(file, isAudioFile), library));
       } else if (stat.isFile() && !PARTIAL_FILE.test(file) && !path.basename(file).startsWith(".") && isAudioFile(file)) {
         // A known file changed or came back after going missing.
         if (library.has(pathKey(file))) { libraryChanged = true; continue; }
@@ -118,7 +140,7 @@ function createLibraryWatcher({ isAudioFile, getLibraryPaths, importFiles, onCha
         else candidates.push(file);
       }
     }
-    const importedCount = await add(candidates);
+    const importedCount = await add(candidates.filter(isWatched));
     if (importedCount || libraryChanged) onChange({ importedCount, libraryChanged });
   }
 
@@ -128,9 +150,10 @@ function createLibraryWatcher({ isAudioFile, getLibraryPaths, importFiles, onCha
       let importedCount = 0;
       for (const entry of folders) {
         if (disposed) break;
+        if (entries.get(pathKey(entry.folder)) !== entry) continue;
         const library = new Set(getLibraryPaths().map(pathKey));
-        const files = (await listAudioFiles(entry.folder, isAudioFile)).filter((file) => !library.has(pathKey(file)));
-        importedCount += await add(files);
+        const files = await settledFiles(await listAudioFiles(entry.folder, isAudioFile), library);
+        importedCount += await add(files.filter(isWatched));
         entry.checkedAt = now();
       }
       if (importedCount) onChange({ importedCount, libraryChanged: false });
@@ -164,6 +187,7 @@ function createLibraryWatcher({ isAudioFile, getLibraryPaths, importFiles, onCha
     dispose() {
       disposed = true;
       clearTimeout(timer);
+      pending.clear();
       for (const entry of entries.values()) entry.watcher?.close();
       entries.clear();
     }

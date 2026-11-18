@@ -4,7 +4,7 @@ import test from "node:test";
 
 const read = (file) => fs.readFileSync(file, "utf8");
 
-test("collection browsing classes cannot collide with album and artist detail pages", () => {
+test("collection browsing classes cannot collide with artist and genre detail pages", () => {
   const browse = read("src/shared/ui/collection-layout.css");
   const detail = read("src/features/pages/pages.css");
   const artist = read("src/features/artists/ArtistsView.tsx");
@@ -15,13 +15,15 @@ test("collection browsing classes cannot collide with album and artist detail pa
     assert.doesNotMatch(detail, new RegExp("\\." + klass + "\\b"));
   }
   assert.match(detail, /\.collectionPage\s*\{/);
-  assert.match(detail, /\.collectionCard\s*\{/);
+  assert.doesNotMatch(detail, /\.collectionCard\s*\{/);
   assert.doesNotMatch(browse, /\.collectionPage\s*\{|\.collectionCard\s*\{/);
 });
 
 test("detail collection surfaces adapt to light themes and touch devices", () => {
   const css = read("src/features/pages/pages.css");
-  assert.match(css, /\.collectionHero\s*\{[^}]*background: var\(--lt-surface\);/);
+  assert.match(css, /\.collectionHero\s*\{[^}]*background: transparent;/);
+  assert.match(css, /\.collectionPage > \.artworkBackdrop/);
+  assert.match(css, /\.trackList \{[^}]*background: var\(--lt-surface-soft\)/);
   assert.match(read("src/features/covers/artwork-backdrop.css"), /color-mix\(in srgb, var\(--lt-surface\)/);
   assert.match(css, /color: var\(--accent-contrast, var\(--lt-bg\)\)/);
   assert.match(css, /\.collectionIconButton:hover:not\(:disabled\)[^{}]*\{[^}]*var\(--lt-border-strong\)/);

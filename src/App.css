@@ -82,20 +82,6 @@
   border-radius: 18px !important;
 }
 
-.secretLayer.stars{
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 85 !important;
-  pointer-events: none !important;
-  overflow: hidden !important;
-
-}
-
-.secretLayer .starParticleLarge::before{
-  content: "✧" !important;
-  color: var(--lt-accent) !important;
-}
-
 .secretRibbon{
   backdrop-filter: blur(14px) saturate(125%) !important;
   -webkit-backdrop-filter: blur(14px) saturate(125%) !important;
@@ -560,7 +546,7 @@
   border-radius: 12px;
   display: grid;
   place-items: center;
-  color: #050505;
+  color: var(--button-text-on-accent);
   background: var(--lt-accent);
   font-size: 17px;
   font-weight: 700;
@@ -867,7 +853,7 @@ body.isResizingSidebar{
   flex-direction: column !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   border-radius: 26px !important;
-  background: rgba(7, 7, 7, 0.88) !important;
+  background: var(--lt-surface-raised, var(--lt-surface)) !important;
   box-shadow: 0 32px 120px rgba(0, 0, 0, 0.62),
     0 0 0 1px rgba(var(--lt-accent-rgb), 0.08) inset !important;
   backdrop-filter: blur(26px) saturate(145%) !important;
@@ -1270,13 +1256,11 @@ body{
 .app .songArt,
 .app .panel,
 .app .hero,
-.app .simpleHero,
 .app .circleButton:not(.playerBar *),
 .app .iconAction,
 .app .mainAction,
 .app .softButton,
-.app .heroGhost,
-.app .simpleGhost {
+.app .heroGhost{
   transition: none !important;
   animation: none !important;
   transform: none !important;
@@ -1353,8 +1337,8 @@ body{
   height: var(--control-circle-main) !important;
   min-width: var(--control-circle-main) !important;
   min-height: var(--control-circle-main) !important;
-  background: linear-gradient(135deg, var(--lt-accent), var(--highlight, var(--accent-2))) !important;
-  color: #050505 !important;
+  background: var(--lt-accent) !important;
+  color: var(--button-text-on-accent) !important;
   border-color: color-mix(in oklab, var(--lt-accent) 65%, white 10%) !important;
 }
 
@@ -1485,11 +1469,7 @@ button:hover,
 }
 
 .app[data-theme]{
-  background:
-    linear-gradient(180deg,
-      color-mix(in srgb, var(--lt-accent, #ff6edb) 10%, var(--lt-bg, #050505)) 0%,
-      color-mix(in srgb, var(--lt-accent, #ff6edb) 5%, var(--lt-bg, #050505)) 34%,
-      var(--lt-bg, #050505) 100%) !important;
+  background: var(--workspace-bg, var(--lt-bg)) !important;
 }
 
 .app[data-theme]::before{
@@ -1506,8 +1486,8 @@ button:hover,
 }
 
 .app[data-theme] .navIcon{
-  color: #ffffff !important;
-  stroke: #ffffff !important;
+  color: var(--lt-text) !important;
+  stroke: currentColor !important;
   fill: none !important;
 }
 
@@ -1622,12 +1602,6 @@ body.localitfyThemePainting .app *{
   margin-bottom: 18px !important;
 }
 
-.sidebarBottom::before{
-  content: "";
-  display: block;
-  margin-bottom: 16px;
-}
-
 .mainAction.importMainAction{
   border: 0;
   background: linear-gradient(135deg, var(--lt-accent), color-mix(in srgb, var(--lt-accent) 58%, #ffffff 42%));
@@ -1677,10 +1651,6 @@ html{
 .app{
 
   background-repeat: no-repeat !important;
-}
-
-.loadingScreen{
-  animation-duration: 140ms !important;
 }
 
 .editorModal{
@@ -1742,44 +1712,6 @@ html{
   opacity: 0.16;
 }
 
-.secretLayer.stars{
-  background: transparent !important;
-  mix-blend-mode: normal !important;
-}
-
-.secretLayer.stars::before,
-.secretLayer.stars::after {
-  display: none !important;
-  opacity: 0 !important;
-  background: transparent !important;
-  animation: none !important;
-}
-
-.secretLayer.stars .starParticle{
-  left: var(--x) !important;
-  top: var(--y) !important;
-  color: rgba(255, 255, 255, var(--alpha, .74)) !important;
-  filter: none !important;
-  animation: localtifyWhiteStarFloat var(--duration, 22s) ease-in-out var(--delay, 0ms) infinite alternate !important;
-}
-
-.secretLayer.stars .starParticle::before,
-.secretLayer.stars .starParticleLarge::before{
-  content: "✦" !important;
-  color: rgba(255, 255, 255, var(--alpha, .74)) !important;
-  text-shadow:
-    0 0 8px rgba(255, 255, 255, .36),
-    0 0 18px rgba(255, 255, 255, .14) !important;
-}
-
-.secretLayer.stars .starParticle:nth-child(3n)::before{
-  content: "·" !important;
-}
-
-.secretLayer.stars .starParticle:nth-child(5n)::before{
-  content: "✧" !important;
-}
-
 @keyframes localtifyWhiteStarFloat{
   0%{
     transform: translate3d(0, 0, 0) scale(.74);
@@ -1804,40 +1736,6 @@ html{
   0%{ opacity: 0; transform: translate3d(-50%, -12px, 0) scale(.94); }
   62%{ opacity: 1; transform: translate3d(-50%, 2px, 0) scale(1.025); }
   100%{ opacity: 1; transform: translate3d(-50%, 0, 0) scale(1); }
-}
-
-.app .secretLayer.stars::before,
-.app .secretLayer.stars::after {
-  animation: none !important;
-}
-
-.app .secretLayer.stars .starParticle,
-.app .secretLayer.stars span.starParticle{
-  position: absolute !important;
-  left: var(--x) !important;
-  top: var(--y) !important;
-  width: var(--size, 12px) !important;
-  height: var(--size, 12px) !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  opacity: var(--alpha, .72) !important;
-  filter: none !important;
-  transform: translate3d(0,0,0) scale(.9) !important;
-  animation: localtifyWhiteStarDriftWorking var(--duration, 22s) ease-in-out var(--delay, 0ms) infinite alternate !important;
-}
-
-.app .secretLayer.stars .starParticle::before,
-.app .secretLayer.stars .starParticleLarge::before{
-  content: "✦" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  display: grid !important;
-  place-items: center !important;
-  color: rgba(255, 255, 255, var(--alpha, .72)) !important;
-  font-size: var(--size, 12px) !important;
-  line-height: 1 !important;
-  text-shadow: 0 0 8px rgba(255,255,255,.42), 0 0 18px rgba(255,255,255,.16) !important;
 }
 
 @keyframes localtifyWhiteStarDriftWorking{
@@ -1988,56 +1886,6 @@ html{
   to{ transform: translate3d(42px, 0, 0); }
 }
 
-.app .secretLayer.stars{
-  background: transparent !important;
-  opacity: 1 !important;
-  mix-blend-mode: normal !important;
-}
-
-.app .secretLayer.stars::before,
-.app .secretLayer.stars::after{
-  display: none !important;
-  opacity: 0 !important;
-  background: transparent !important;
-}
-
-.app .secretLayer.stars .starParticle{
-  position: absolute !important;
-  left: var(--x) !important;
-  top: var(--y) !important;
-  width: var(--size, 10px) !important;
-  height: var(--size, 10px) !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: var(--alpha, .72) !important;
-  background: transparent !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  filter: none !important;
-  transform: translate3d(0,0,0) scale(.86) !important;
-  animation: localtifyStarDriftTwinkle var(--duration, 22s) ease-in-out var(--delay, 0ms) infinite alternate !important;
-}
-
-.app .secretLayer.stars .starParticle::before{
-  content: "✦" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  display: grid !important;
-  place-items: center !important;
-  color: rgba(255, 255, 255, var(--alpha, .72)) !important;
-  font-size: var(--size, 10px) !important;
-  line-height: 1 !important;
-  text-shadow:
-    0 0 7px rgba(255, 255, 255, .48),
-    0 0 16px rgba(255, 255, 255, .18) !important;
-  animation: localtifyStarTwinkle 2.6s ease-in-out var(--delay, 0ms) infinite alternate !important;
-}
-
-.app .secretLayer.stars .starParticle:nth-of-type(3n)::before{ content: "·" !important; }
-.app .secretLayer.stars .starParticle:nth-of-type(5n)::before{ content: "✧" !important; }
-.app .secretLayer.stars .starParticleLarge::before{ font-size: calc(var(--size, 10px) * 1.35) !important; }
-
 @keyframes localtifyStarDriftTwinkle{
   0%{ transform: translate3d(0, 0, 0) scale(.72); opacity: calc(var(--alpha, .72) * .46); }
   45%{ opacity: var(--alpha, .72); }
@@ -2051,7 +1899,7 @@ html{
 }
 
 .app .secretLayer{
-  inset: 36px 0 94px 0 !important;
+  inset: var(--localtify-titlebar-height, 48px) 0 94px 0 !important;
   z-index: 35 !important;
   pointer-events: none !important;
   overflow: hidden !important;
@@ -2191,7 +2039,6 @@ button {
 }
 
 .titleLogoImage,
-.loadingLogoImage,
 .buttonInlineIcon{
   display: block;
   object-fit: contain;
@@ -2202,12 +2049,6 @@ button {
 
   border-radius: 5px;
   filter: drop-shadow(0 0 9px rgba(var(--lt-accent-rgb), .38));
-}
-
-.loadingLogoImage{
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 11px;
 }
 
 .buttonInlineIcon{
@@ -2363,21 +2204,12 @@ body.localitfyThemePainting .app .ambientSurface::after{
 }
 
 .app,
-.simpleShell,
-.page,
-.simpleLibraryPanel {
+.page{
   background-size: auto !important;
 }
 
-.app,
-.simpleShell {
-  background-image: none !important;
-}
-
 .app::before,
-.app::after,
-.simpleShell::before,
-.simpleShell::after {
+.app::after{
   background-image: none !important;
   background-size: auto !important;
   animation: none !important;
@@ -2460,12 +2292,6 @@ body.localtifyIdle .app:not(.songDragActive) :where( .secretLayer, .coverSpark){
   background-size: auto !important;
 }
 
-.app{
-  background:
-    radial-gradient(circle at 50% 100%, rgba(var(--player-ambient-rgb, var(--lt-accent-rgb)), 0.075), transparent 46%),
-    radial-gradient(circle at top left, rgba(var(--lt-accent-rgb), 0.10), transparent 31%),
-    var(--lt-bg) !important;
-}
 
 .sidebarNav {
   overflow: hidden !important;
@@ -2493,13 +2319,6 @@ body.localtifyIdle .app:not(.songDragActive) :where( .secretLayer, .coverSpark){
 .songCard{
   content-visibility: auto;
   contain-intrinsic-size: 1px 280px;
-}
-
-.loadingScreen,
-.editorModal{
-  background:
-    radial-gradient(circle at 50% 100%, rgba(var(--lt-accent-rgb), 0.09), transparent 42%),
-    #000 !important;
 }
 
 html,
@@ -3210,463 +3029,6 @@ body.localtifyBackgroundMode .ambientSurface,
   --player-ambient-rgb: var(--cover-rgb, var(--lt-accent-rgb));
 }
 
-.loadingScreen.bootScreen{
-  min-height: 100vh;
-  width: 100%;
-  display: grid;
-  place-items: center;
-  padding: 34px;
-  overflow: hidden;
-  position: relative;
-  isolation: isolate;
-  color: var(--lt-text, #f5efff);
-  background:
-    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--lt-accent, #f16ab6) 20%, transparent), transparent 34%),
-    radial-gradient(circle at 18% 82%, color-mix(in srgb, var(--accent-2, #b4f269) 9%, transparent), transparent 32%),
-    linear-gradient(180deg, color-mix(in srgb, var(--lt-bg, #08050d) 96%, #000 4%), #030207) !important;
-}
-
-.bootGlow{
-  position: absolute;
-  inset: -22%;
-  z-index: -2;
-  background:
-    radial-gradient(circle at 44% 40%, color-mix(in srgb, var(--lt-accent, #f16ab6) 18%, transparent), transparent 34%),
-    radial-gradient(circle at 62% 58%, rgba(255, 255, 255, 0.055), transparent 28%);
-  filter: blur(32px);
-  opacity: 0.8;
-  transform: translate3d(0, 0, 0);
-  animation: bootGlowFloat 5.2s var(--motion-smooth, cubic-bezier(0.16, 1, 0.3, 1)) infinite alternate;
-  pointer-events: none;
-}
-
-.bootCard{
-  width: min(680px, calc(100vw - 42px));
-  min-height: 260px;
-  display: grid;
-  grid-template-columns: 184px minmax(0, 1fr);
-  align-items: center;
-  gap: 24px;
-  padding: 24px;
-  border-radius: 34px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.072), rgba(255, 255, 255, 0.038)),
-    color-mix(in srgb, var(--surface, #17101f) 82%, transparent);
-  border: 1px solid color-mix(in srgb, var(--lt-accent, #f16ab6) 24%, rgba(255, 255, 255, 0.075));
-  box-shadow:
-    0 34px 90px rgba(0, 0, 0, 0.54),
-    0 0 54px color-mix(in srgb, var(--lt-accent, #f16ab6) 14%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.095);
-  backdrop-filter: blur(28px) saturate(1.2);
-  animation: bootCardIn 520ms cubic-bezier(0.18, 1.05, 0.2, 1) both;
-}
-
-.bootScreenError .bootCard{
-  border-color: color-mix(in srgb, #ff6fba 36%, rgba(255, 255, 255, 0.09));
-}
-
-.bootArtWrap{
-  position: relative;
-  width: 184px;
-  aspect-ratio: 1;
-  display: grid;
-  place-items: center;
-  border-radius: 31px;
-  overflow: visible;
-}
-
-.bootArtAura{
-  position: absolute;
-  inset: -18px;
-  border-radius: 38px;
-  background: color-mix(in srgb, var(--lt-accent, #f16ab6) 24%, transparent);
-  filter: blur(26px);
-  opacity: 0.55;
-  transform: translate3d(0, 0, 0);
-  animation: bootAuraPulse 1.9s ease-in-out infinite alternate;
-  pointer-events: none;
-}
-
-.bootArt{
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 30px;
-  box-shadow:
-    0 22px 54px rgba(0, 0, 0, 0.44),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  transform: translate3d(0, 0, 0);
-  animation: bootArtFloat 2.8s ease-in-out infinite alternate;
-}
-
-.bootCopy{
-  min-width: 0;
-  display: grid;
-  gap: 12px;
-}
-
-.bootAssetList{
-  list-style: none;
-  margin: 4px 0 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.bootAssetItem{
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 9px 10px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.045);
-  border: 1px solid rgba(255, 255, 255, 0.055);
-  color: color-mix(in srgb, var(--lt-muted, #b6a8c7) 78%, transparent);
-  transform: translate3d(0, 0, 0);
-  transition:
-    background-color 180ms ease,
-    border-color 180ms ease,
-    color 180ms ease,
-    opacity 180ms ease,
-    transform 180ms ease;
-}
-
-.bootAssetItem.active{
-  color: var(--lt-text, #f5efff);
-  background: color-mix(in srgb, var(--lt-accent, #f16ab6) 13%, rgba(255, 255, 255, 0.055));
-  border-color: color-mix(in srgb, var(--lt-accent, #f16ab6) 24%, rgba(255, 255, 255, 0.07));
-  box-shadow: 0 10px 26px color-mix(in srgb, var(--lt-accent, #f16ab6) 10%, transparent);
-  transform: translate3d(0, -1px, 0);
-}
-
-.bootAssetItem.done{
-  opacity: 0.72;
-}
-
-.bootAssetDot{
-  width: 8px;
-  height: 8px;
-  flex: 0 0 auto;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.28);
-  box-shadow: none;
-}
-
-.bootAssetItem.active .bootAssetDot{
-  background: var(--lt-accent, #f16ab6);
-  box-shadow: 0 0 16px color-mix(in srgb, var(--lt-accent, #f16ab6) 55%, transparent);
-  animation: bootAssetPulse 980ms ease-in-out infinite alternate;
-}
-
-.bootAssetItem.done .bootAssetDot{
-  background: color-mix(in srgb, var(--accent-2, #b4f269) 76%, white 8%);
-}
-
-.bootAssetText{
-  min-width: 0;
-  display: grid;
-  gap: 1px;
-}
-
-.bootAssetText strong,
-.bootAssetText small{
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.bootAssetText strong{
-  font-size: 11px;
-  line-height: 1.05;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  font-weight: 950;
-}
-
-.bootAssetText small{
-  color: color-mix(in srgb, var(--lt-muted, #b6a8c7) 78%, transparent);
-  font-size: 10px;
-  line-height: 1.2;
-  font-weight: 780;
-}
-
-.bootBrandRow{
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  width: fit-content;
-  padding: 7px 10px;
-  border-radius: 999px;
-  color: color-mix(in srgb, var(--lt-text, #f5efff) 84%, transparent);
-  background: rgba(255, 255, 255, 0.055);
-  border: 1px solid rgba(255, 255, 255, 0.075);
-  font-size: 12px;
-  font-weight: 850;
-  letter-spacing: -0.01em;
-}
-
-.bootLogo{
-  width: 18px;
-  height: 18px;
-  border-radius: 6px;
-  object-fit: cover;
-}
-
-.bootCopy h1{
-  margin: 0;
-  font-size: clamp(30px, 5vw, 52px);
-  line-height: 0.9;
-  letter-spacing: -0.075em;
-  max-width: 10ch;
-}
-
-.bootCopy p{
-  margin: 0;
-  max-width: 36ch;
-  color: color-mix(in srgb, var(--lt-muted, #b6a8c7) 82%, transparent);
-  font-size: 14px;
-  line-height: 1.45;
-  font-weight: 750;
-}
-
-.bootProgress{
-  width: min(270px, 100%);
-  height: 7px;
-  margin-top: 8px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.07);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-.bootProgress span{
-  display: block;
-  width: 42%;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, transparent, var(--lt-accent, #f16ab6), transparent);
-  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--lt-accent, #f16ab6) 52%, transparent));
-  animation: bootProgressSweep 1.05s cubic-bezier(0.16, 1, 0.3, 1) infinite;
-}
-
-.bootActions{
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-.bootButton{
-  appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: 999px;
-  padding: 11px 15px;
-  color: rgba(255, 255, 255, 0.9);
-  background: rgba(255, 255, 255, 0.07);
-  font: inherit;
-  font-size: 13px;
-  font-weight: 900;
-  cursor: pointer;
-  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
-}
-
-.bootButton:hover{
-  transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.105);
-  border-color: color-mix(in srgb, var(--lt-accent, #f16ab6) 30%, rgba(255, 255, 255, 0.12));
-}
-
-.bootButtonPrimary{
-  color: #100914;
-  background: var(--lt-accent, #f16ab6);
-  border-color: color-mix(in srgb, var(--lt-accent, #f16ab6) 74%, white 16%);
-  box-shadow: 0 14px 34px color-mix(in srgb, var(--lt-accent, #f16ab6) 22%, transparent);
-}
-
-@keyframes bootCardIn{
-  0%{ opacity: 0; transform: translate3d(0, 18px, 0) scale(0.985); }
-  72%{ opacity: 1; transform: translate3d(0, -2px, 0) scale(1.006); }
-  100%{ opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@keyframes bootGlowFloat{
-  from{ transform: translate3d(-1.2%, -0.8%, 0) scale(1); opacity: 0.68; }
-  to{ transform: translate3d(1.4%, 1%, 0) scale(1.03); opacity: 0.92; }
-}
-
-@keyframes bootAuraPulse{
-  from{ opacity: 0.42; transform: scale(0.965); }
-  to{ opacity: 0.70; transform: scale(1.035); }
-}
-
-@keyframes bootArtFloat{
-  from{ transform: translate3d(0, 0, 0) scale(0.992); }
-  to{ transform: translate3d(0, -4px, 0) scale(1.006); }
-}
-
-@keyframes bootProgressSweep{
-  0%{ transform: translateX(-110%); }
-  100%{ transform: translateX(270%); }
-}
-
-@keyframes bootAssetPulse{
-  from{ transform: scale(0.86); opacity: 0.78; }
-  to{ transform: scale(1.16); opacity: 1; }
-}
-
-@media (max-width: 680px){
-  .bootCard{
-    grid-template-columns: 1fr;
-    justify-items: center;
-    text-align: center;
-    padding: 22px;
-  }
-
-  .bootArtWrap{
-    width: min(176px, 62vw);
-  }
-
-  .bootAssetList{
-    grid-template-columns: 1fr;
-  }
-
-  .bootBrandRow,
-.bootActions{
-    margin-inline: auto;
-  }
-
-  .bootCopy h1,
-.bootCopy p{
-    margin-inline: auto;
-  }
-}
-
-.screensaverOverlay{
-  position: fixed;
-  inset: 0;
-  z-index: 9998;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 52% 52%, color-mix(in srgb, var(--lt-accent) 14%, transparent), transparent 34%),
-    rgba(0, 0, 0, 0.92);
-  cursor: none;
-}
-
-.screensaverBackdrop{
-  position: absolute;
-  inset: -8%;
-  background-position: center;
-  background-size: cover;
-  opacity: 0.28;
-  filter: blur(38px) saturate(1.2) brightness(0.55);
-  transform: scale(1.1);
-  animation: screensaverBackdropDrift 20s ease-in-out infinite alternate;
-}
-
-.screensaverGlow{
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.68), rgba(0, 0, 0, 0.2) 45%, rgba(0, 0, 0, 0.82)),
-    radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--lt-accent) 18%, transparent), transparent 38%);
-  pointer-events: none;
-}
-
-.screensaverPanel{
-  position: relative;
-  width: min(1040px, calc(100vw - 72px));
-  height: min(620px, calc(100vh - 92px));
-  overflow: hidden;
-  display: grid;
-  place-items: end center;
-  padding: clamp(28px, 5vw, 62px);
-  border-radius: clamp(28px, 4vw, 46px);
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-  border: 1px solid color-mix(in srgb, var(--lt-accent) 20%, transparent);
-  box-shadow:
-    0 42px 130px rgba(0, 0, 0, 0.72),
-    0 0 90px color-mix(in srgb, var(--lt-accent) 14%, transparent);
-  isolation: isolate;
-  backdrop-filter: blur(18px) saturate(1.08);
-}
-
-.screensaverPanel::before{
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  background: inherit;
-  transform: scale(1.02);
-  filter: saturate(1.08) brightness(0.8);
-  animation: screensaverWallpaperBreathe 12s ease-in-out infinite alternate;
-}
-
-.screensaverShade{
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.16) 42%, rgba(0, 0, 0, 0.64)),
-    radial-gradient(circle at 50% 58%, transparent 0 42%, rgba(0, 0, 0, 0.42) 100%);
-}
-
-.screensaverIdleText{
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: min(360px, 72vw);
-  padding: 14px 24px 16px;
-  border-radius: 999px;
-  color: rgba(255, 255, 255, 0.92);
-  background: rgba(6, 2, 12, 0.46);
-  border: 1px solid color-mix(in srgb, var(--lt-text) 12%, transparent);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.42), 0 0 34px color-mix(in srgb, var(--lt-accent) 12%, transparent);
-  backdrop-filter: blur(18px) saturate(1.12);
-  font-size: clamp(1.2rem, 2.4vw, 2rem);
-  font-weight: 900;
-  letter-spacing: -0.045em;
-  text-transform: lowercase;
-  text-shadow: 0 10px 36px rgba(0, 0, 0, 0.72);
-  animation: screensaverIdlePulse 4.4s ease-in-out infinite;
-}
-
-[data-anime-visuals="off"] .screensaverOverlay{ display: none; }
-
-@keyframes screensaverBackdropDrift {
-  from { transform: scale(1.1) translate3d(-1.1%, -0.7%, 0); }
-  to { transform: scale(1.16) translate3d(1.2%, 1%, 0); }
-}
-
-@keyframes screensaverWallpaperBreathe {
-  from { transform: scale(1.02); filter: saturate(1.06) brightness(0.78); }
-  to { transform: scale(1.055); filter: saturate(1.18) brightness(0.86); }
-}
-
-@keyframes screensaverIdlePulse {
-  0%, 100% { opacity: 0.88; transform: translateY(0); }
-  50% { opacity: 1; transform: translateY(-3px); }
-}
-
-@media (max-width: 860px) {
-  .screensaverPanel{
-    width: calc(100vw - 32px);
-    height: min(680px, calc(100vh - 56px));
-    padding: 28px;
-    border-radius: 30px;
-  }
-}
-
 .app .topUpdateRibbon,
 .topUpdateRibbon{
 
@@ -3861,13 +3223,14 @@ body.localtifyBackgroundMode .ambientSurface,
 }
 
 .app{
-  --localtify-titlebar-height: 36px !important;
+  --localtify-titlebar-height: 48px !important;
 }
 
 .app .titleBarUpdateSlot,
 .titleBarUpdateSlot{
   grid-column: 2 !important;
-  width: 100% !important;
+  flex: 1 1 360px;
+  width: auto !important;
   min-width: 0 !important;
   height: 100% !important;
   min-height: 0 !important;
@@ -3914,7 +3277,7 @@ body.localtifyBackgroundMode .ambientSurface,
 
 .app .titleBarUpdateSlot .topUpdateRibbon,
 .titleBarUpdateSlot .topUpdateRibbon{
-  --ribbon-h: var(--localtify-titlebar-height, 36px) !important;
+  --ribbon-h: var(--localtify-titlebar-height, 48px) !important;
   position: relative !important;
   width: 100% !important;
   max-width: 100% !important;
@@ -4082,8 +3445,8 @@ body.localtifyBackgroundMode .ambientSurface,
 
 .app .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton,
 .titleBarUpdateSlot .topUpdateRibbon .updatePrimaryButton{
-  color: #08020a !important;
-  background: var(--lt-accent, #e65adf) !important;
+  color: var(--accent-contrast) !important;
+  background: var(--lt-accent) !important;
   border-color: transparent !important;
   box-shadow: 0 0 14px rgba(var(--lt-accent-rgb, 230,90,223), .18) !important;
 }
@@ -4456,122 +3819,12 @@ body:has(.titleBarUpdateSlot) .app > .updateToastLayer.topUpdateRibbonLayer{
 /* hover sidebar CSS moved to effects.css,
 the last imported CSS layer. */
 
-.app[data-stars-intensity="off"] .localtifyStarsBackdrop{
-  display: none !important;
-}
-
-.app .localtifyStarsBackdrop{
-  position: fixed !important;
-  inset: 36px 0 0 0 !important;
-  pointer-events: none !important;
-  overflow: hidden !important;
-  z-index: 0 !important;
-  opacity: 0.34 !important;
-  background:
-    radial-gradient(circle at 18% 18%, rgba(var(--lt-accent-rgb),0.055), transparent 35%),
-    #050511 !important;
-  contain: strict !important;
-}
-
-.app .localtifyStarsLayer{
-  position: absolute !important;
-  inset: 0 !important;
-  background-repeat: repeat !important;
-  transform: translateZ(0) !important;
-
-}
-
-.app .localtifyStarsLayerA{
-  background-image:
-    radial-gradient(circle, rgba(255,255,255,.42) 0 .9px, transparent 1.7px),
-    radial-gradient(circle, rgba(var(--lt-accent-rgb),.30) 0 .8px, transparent 1.6px) !important;
-  background-size: 104px 104px, 156px 156px !important;
-  animation: localtifyV214StarDriftA 150s linear infinite !important;
-}
-
-.app .localtifyStarsLayerB{
-  opacity: .42 !important;
-  background-image: radial-gradient(circle, rgba(120,190,255,.30) 0 .85px, transparent 1.6px) !important;
-  background-size: 182px 182px !important;
-  animation: localtifyV214StarDriftB 190s linear infinite !important;
-}
-
-.app .localtifyStarsLayerC{
-  display: none !important;
-}
-
-.app[data-stars-intensity="subtle"] .localtifyStarsBackdrop,
-.app:not([data-stars-intensity]) .localtifyStarsBackdrop{
-  opacity: .30 !important;
-}
-
-.app[data-stars-intensity="normal"] .localtifyStarsBackdrop{
-  opacity: .52 !important;
-}
-
-.app[data-stars-intensity="bright"] .localtifyStarsBackdrop{
-  opacity: .82 !important;
-  filter: saturate(1.10) brightness(1.12) !important;
-}
-
-.app[data-app-backgrounded="on"] .localtifyStarsBackdrop{
-  opacity: .16 !important;
-  filter: none !important;
-}
-
-.app[data-app-backgrounded="on"] .localtifyStarsLayer,
-.app.themeSettling .localtifyStarsLayer,
-.app.viewSwitching .localtifyStarsLayer{
-  animation-play-state: paused !important;
-}
-
-@keyframes localtifyV214StarDriftA{
-  from{ transform: translate3d(0,0,0); }
-  to{ transform: translate3d(-96px,-48px,0); }
-}
-
-@keyframes localtifyV214StarDriftB{
-  from{ transform: translate3d(0,0,0); }
-  to{ transform: translate3d(112px,-74px,0); }
-}
-
 .app .playerBar > :where(.playerLeft, .playerCenter, .playerRight, .controlRow, .progressRow, .volumeWrap){
   contain: layout style !important;
 }
 
-.app :where(.secretLayer.arcadeGhost){
-  display: none !important;
-  animation: none !important;
-  pointer-events: none !important;
-}
-
 .app .secretLayer:not(.stars):not(.yukari){
   display: none !important;
-}
-
-.app :where(.settingsPanelCard, .settingsResetButton, .settingsChoice, .coverSyncChoice, .songRow, .coverTile).localtifyProximityActive{
-  transform: none !important;
-  box-shadow: inherit !important;
-  background-image: inherit !important;
-}
-
-.app .secretLayer.stars,
-.app .secretLayer.stars .secretRibbon,
-.app .secretLayer.stars .starParticle,
-.app .secretLayer.stars .starParticle::before,
-.app .secretLayer.stars .starParticle::after,
-.app .localtifyStarsBackdrop,
-.app .localtifyStarsLayer,
-.app .localtifyStarsLayerA,
-.app .localtifyStarsLayerB,
-.app .localtifyStarsLayerC,
-.app .localtifyStarsNebula,
-.app .localtifyStarParticle,
-.app .localtifyStarSweep {
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  animation: none !important;
 }
 
 .app::before,
@@ -4588,10 +3841,6 @@ the last imported CSS layer. */
   filter: none !important;
 }
 
-.app[data-theme="stars"]{
-  background-image: none !important;
-  background-color: #050010 !important;
-}
 
 /* theme painting lag guard.
    Color picking now updates CSS variables without forcing expensive animation/filter churn.
@@ -4645,7 +3894,7 @@ body.localitfyThemePainting .app{
 .app .playlistPickerWrap.modalWrap,
 .modalWrap.playlistPickerWrap{
   position: fixed !important;
-  inset: 36px 0 92px 0 !important;
+  inset: var(--localtify-titlebar-height, 48px) 0 92px 0 !important;
   z-index: 150 !important;
   display: grid !important;
   place-items: center !important;
@@ -4680,7 +3929,7 @@ body.localitfyThemePainting .app{
 @media (max-width: 900px){
   .app .playlistPickerWrap.modalWrap,
 .modalWrap.playlistPickerWrap{
-    inset: 36px 0 92px 0 !important;
+    inset: var(--localtify-titlebar-height, 48px) 0 92px 0 !important;
     padding: 12px !important;
   }
 }
@@ -4703,10 +3952,7 @@ body,
   --player-size-used: var(--player-size-live, var(--player-size, 92px));
   --sidebar-width-release: 236px;
   --sidebar-width-used: var(--workspace-sidebar-current, 236px);
-  --sidebar-bg-release:
-    linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.38)),
-    var(--lt-bg, #000);
-  width: 100vw;
+   width: 100vw;
   height: 100vh;
   overflow: hidden;
 
@@ -4714,15 +3960,14 @@ body,
 }
 
 .titleBar{
-  background: var(--lt-bg, #000);
-  background-image: none;
-  border-bottom: 1px solid rgba(var(--lt-accent-rgb), .28);
+  background: transparent;
+  border-bottom: 0;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
 .appShell{
-  height: calc(100vh - 36px);
+  height: calc(100vh - var(--localtify-titlebar-height, 48px));
   display: grid;
   grid-template-columns: var(--workspace-sidebar-current, 236px) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr) var(--player-size-used);
@@ -4730,7 +3975,7 @@ body,
   gap: 0 !important;
   row-gap: 0 !important;
   min-height: 0 !important;
-  background: var(--lt-bg, #000);
+  background: transparent;
 }
 
 /* Fixed sidebar: not transparent, not glass, and content cannot slide underneath it. */
@@ -4750,9 +3995,7 @@ body,
   gap: 12px;
   overflow: hidden;
   color: var(--lt-text);
-  background: var(--sidebar-bg-release);
-  background-color: var(--lt-bg, #000);
-  background-image: linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.38));
+  background: var(--workspace-sidebar);
   border-right: 1px solid rgba(var(--lt-accent-rgb), .25);
   box-shadow: inset -1px 0 0 rgba(255,255,255,.025);
   opacity: 1;
@@ -4764,9 +4007,7 @@ body,
 
 .sidebar:hover,
 .app .sidebar:hover{
-  background: var(--sidebar-bg-release);
-  background-color: var(--lt-bg, #000);
-  background-image: linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.38));
+  background: var(--workspace-sidebar);
   box-shadow: inset -1px 0 0 rgba(255,255,255,.025);
   transform: none;
 }
@@ -5090,7 +4331,7 @@ body.isResizingPlayer .app *{
 .app .modalWrap::before{
   content: "" !important;
   position: fixed !important;
-  inset: 36px 0 0 0 !important;
+  inset: var(--localtify-titlebar-height, 48px) 0 0 0 !important;
   z-index: -1 !important;
   pointer-events: none !important;
   background:
@@ -5256,7 +4497,7 @@ body.isResizingPlayer .app *{
 }
 
 .app .sidebarNavGroupV467 + .sidebarNavGroupV467{
-  margin-top: 8px !important;
+  margin-top: 0 !important;
 }
 
 .app .sidebarGroupLabelV467{
@@ -5361,8 +4602,8 @@ body.isResizingPlayer .app *{
 .app .sidebarNavGroupV467 .navDivider{
   width: calc(100% - 34px) !important;
   height: 1px !important;
-  margin: 8px 17px 10px !important;
-  background: rgba(255,255,255,.055) !important;
+  margin: 4px 17px !important;
+  background: rgba(var(--lt-accent-rgb), .12) !important;
   opacity: .58 !important;
   -webkit-mask-image: none !important;
   mask-image: none !important;
@@ -5385,8 +4626,8 @@ body.isResizingPlayer .app *{
 }
 
 .app .sidebarBottom{
-  border-top-color: rgba(255,255,255,.055) !important;
-  gap: 10px !important;
+  border-top-color: var(--lt-border) !important;
+  gap: 0 !important;
 }
 
 .app .mainAction.importMainAction.iconTextButton{
@@ -5473,36 +4714,28 @@ body.isResizingPlayer .app *{
 }
 
 .app{
-  --panel-calm-bg: rgba(5, 5, 10, .70);
-  --panel-calm-bg-strong: rgba(7, 7, 13, .78);
-  --panel-calm-shadow: 0 12px 32px rgba(0,0,0,.18);
-  --panel-calm-shadow-hover: 0 16px 38px rgba(0,0,0,.22);
+  --panel-calm-bg: var(--lt-surface-soft);
+  --panel-calm-bg-strong: var(--lt-surface-soft);
+  --panel-calm-shadow: none;
+  --panel-calm-shadow-hover: none;
 }
 
-.app :is(.panel, .ambientSurface, .settingsPanel, .settingsCard, .settingsPanelCard):not(.playerBar):not(.topUpdateRibbon){
+.app :is(.panel, .ambientSurface):not(.playerBar):not(.topUpdateRibbon){
 
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.034), rgba(255,255,255,.012)),
-    var(--panel-calm-bg) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.032),
-    var(--panel-calm-shadow) !important;
+  background: var(--panel-calm-bg) !important;
+  box-shadow: none !important;
   color: color-mix(in srgb, var(--text) 90%, transparent) !important;
   isolation: isolate;
   contain: layout paint style;
 }
 
-.app :is(.panel, .ambientSurface, .settingsCard, .settingsPanelCard):not(.playerBar):not(.topUpdateRibbon):hover{
+.app :is(.panel, .ambientSurface):not(.playerBar):not(.topUpdateRibbon):hover{
 
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.044), rgba(255,255,255,.016)),
-    var(--panel-calm-bg-strong) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.04),
-    var(--panel-calm-shadow-hover) !important;
+  background: var(--panel-calm-bg) !important;
+  box-shadow: none !important;
 }
 
-.app :is(.active, .selected, .playing, .loggedIn):is(.panel, .ambientSurface, .settingsCard){
+.app :is(.active, .selected, .playing, .loggedIn):is(.panel, .ambientSurface){
   border-color: rgba(var(--lt-accent-rgb), .22) !important;
   background:
     linear-gradient(180deg, rgba(var(--lt-accent-rgb), .070), rgba(255,255,255,.014)),
@@ -5522,26 +4755,12 @@ body.isResizingPlayer .app *{
   contain: layout style;
 }
 
-.app{
-  --panel-calm-outline-soft: color-mix(in oklab, rgba(255,255,255,.055) 62%, var(--lt-accent) 38%) !important;
-  --panel-calm-outline-strong: color-mix(in oklab, rgba(255,255,255,.08) 42%, var(--lt-accent) 58%) !important;
-}
-
-/* Accent-driven calm outlines instead of fixed pink borders. */
-.app :is(.panel, .ambientSurface, .settingsPanel, .settingsCard, .settingsPanelCard):not(.playerBar):not(.topUpdateRibbon){
-  border-color: var(--panel-calm-outline-soft) !important;
-}
-
-.app :is(.panel, .ambientSurface, .settingsCard, .settingsPanelCard):not(.playerBar):not(.topUpdateRibbon):hover{
-  border-color: var(--panel-calm-outline-strong) !important;
-}
-
 /* Lighter, prettier header stars: twinkle + drift with theme accent. */
 
 .app .topUpdateRibbonLayer,
 .topUpdateRibbonLayer{
 
-  inset: 36px 0 auto 0 !important;
+  inset: var(--localtify-titlebar-height, 48px) 0 auto 0 !important;
 
 }
 
@@ -5616,18 +4835,6 @@ body.isResizingPlayer .app *{
   transform: none !important;
 }
 
-/* Proper contrast layer for the light theme. */
-
-.app[data-theme="mono"] :is(.panel, .ambientSurface, .sidebar, .playerBar){
-  border-color: rgba(72, 78, 104, .13) !important;
-}
-.app[data-theme="mono"] :is(h1, h2, h3, h4, strong){
-  color: var(--lt-text) !important;
-}
-
-.app[data-theme="mono"] :is( p, small, .navText small){
-  color: var(--lt-muted) !important;
-}
 
 @media (max-width: 760px){
   .app .topUpdateRibbon,
@@ -5800,36 +5007,22 @@ body.isResizingPlayer .app *{
 }
 
 /* Fewer outlines globally. Accent outline is mostly active/important only. */
-.app :is(.panel, .ambientSurface, .settingsCard):not(.playerBar):not(.topUpdateRibbon){
+.app :is(.panel, .ambientSurface):not(.playerBar):not(.topUpdateRibbon){
   border-color: var(--outline-calm-v487) !important;
 }
 
-.app :is(.panel, .ambientSurface, .settingsCard):not(.playerBar):not(.topUpdateRibbon):hover{
+.app :is(.panel, .ambientSurface):not(.playerBar):not(.topUpdateRibbon):hover{
   border-color: var(--outline-hover-v487) !important;
 }
 
-.app :is(.active, .playing, .selected):is(.panel, .ambientSurface, .settingsCard){
+.app :is(.active, .playing, .selected):is(.panel, .ambientSurface){
   border-color: var(--outline-active-v487) !important;
 }
 
-/* Light mode app shell readability. */
-.app[data-theme="mono"]{
-  background:
-    linear-gradient(rgba(55,61,87,.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(55,61,87,.030) 1px, transparent 1px),
-    var(--lt-bg) !important;
-  background-size: 42px 42px !important;
-  color: var(--lt-text) !important;
-}
-
-.app[data-theme="mono"] .content{
-  background: transparent !important;
-  color: var(--lt-text) !important;
-}
 
 .app .topUpdateRibbonLayer,
 .topUpdateRibbonLayer{
-  top: 36px !important;
+  top: var(--localtify-titlebar-height, 48px) !important;
   height: 38px !important;
   min-height: 38px !important;
   z-index: 4100 !important;
@@ -5881,8 +5074,8 @@ body.isResizingPlayer .app *{
 .topUpdateRibbon .updatePrimaryButton{
   height: 23px !important;
   min-height: 23px !important;
-  color: #06100d !important;
-  background: color-mix(in oklab, var(--lt-accent) 82%, #ffffff 18%) !important;
+  color: var(--button-text-on-accent) !important;
+  background: var(--lt-accent) !important;
   border: 0 !important;
   box-shadow: none !important;
 }
@@ -5931,11 +5124,4 @@ body.isResizingPlayer .app *{
   background:
     linear-gradient(180deg, rgba(var(--lt-accent-rgb), .10), rgba(var(--lt-accent-rgb), .045)),
     rgba(255,255,255,.030) !important;
-}
-
-.app[data-theme="mono"] .sidebar,
-.app[data-theme="mono"] .content,
-.app[data-theme="mono"] .appShell{
-  border-color: transparent !important;
-  box-shadow: none !important;
 }

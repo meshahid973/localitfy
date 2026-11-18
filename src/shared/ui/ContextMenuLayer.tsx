@@ -46,6 +46,15 @@ export function ContextMenuLayer({
     }
     placeMenu();
     menu.querySelector<HTMLButtonElement>('button[role="menuitem"]:not(:disabled)')?.focus({ preventScroll: true });
+    return () => {
+      // Restore the trigger on action/outside dismissal as well as Escape.
+      // Never steal focus from a newly focused control or dialog.
+      const current = document.activeElement;
+      const trigger = previousFocusRef.current;
+      if (trigger?.isConnected && (current === document.body || menu.contains(current))) {
+        trigger.focus({ preventScroll: true });
+      }
+    };
   }, [identity, placeMenu, x, y]);
 
   useEffect(() => {

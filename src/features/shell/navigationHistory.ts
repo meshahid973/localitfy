@@ -1,11 +1,11 @@
 import type { View } from "./view.types";
 
-/** A page inside a section: one album, artist, genre, playlist or daily mix. */
-export type PageDetail = { kind: "album" | "artist" | "genre" | "playlist" | "mix"; id: string };
+/** A page inside a section: one artist, genre, playlist or daily mix. */
+export type PageDetail = { kind: "artist" | "genre" | "playlist" | "mix"; id: string };
 export type HistoryEntry = { view: View; detail: PageDetail | null; scrollTop: number };
 export type HistoryState = { entries: HistoryEntry[]; index: number };
 
-export const DETAIL_VIEWS: Record<PageDetail["kind"], View> = { album: "albums", artist: "artists", genre: "genres", playlist: "playlists", mix: "playlists" };
+export const DETAIL_VIEWS: Record<PageDetail["kind"], View> = { artist: "artists", genre: "genres", playlist: "playlists", mix: "playlists" };
 const MAX_ENTRIES = 80;
 
 export const artistDetailId = (name: string) => name.trim().toLocaleLowerCase();

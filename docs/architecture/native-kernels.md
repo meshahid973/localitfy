@@ -7,12 +7,13 @@ Localtify's JavaScript implementation remains the production default. The NAPI-R
 | Phase | Purpose | Release status |
 | --- | --- | --- |
 | `pcm` | Decode unaligned FFmpeg Float32 buffers, compute RMS energy and explicit PCM waveforms | Strong synthetic improvement; real-audio QA required |
-| `similarity` | Batched cosine/dot scores and full Daily Mixes clustering | Mixed results; workload-gated |
+| `audio-decode` | Bounded CLAP embedding decode/normalization without enabling ranking or dot-matrix experiments | Consistent synthetic improvement on Windows, Linux and macOS |
+| `similarity` | Batched cosine/dot scores and full Daily Mixes clustering (also supports legacy embedding decode) | Mixed results; workload-gated |
 | `ranking` | Fused group recommendation scoring and top-three selection | Explicit experiment only; slower than optimized JavaScript on CI |
 | `bridge` | JS-owned typed-array score output (with similarity/duplicates) | Opt-in; platform-dependent |
 | `duplicates` | Large candidate-pair dot-score batches | Often slower on smaller buckets |
 
-Enable experiments only through the trusted environment variable `LOCALTIFY_RUST_PHASES`, for example `pcm` or `similarity,bridge`. Unavailable binaries, rejected input, and native errors fall back to JavaScript. No phase is automatically enabled merely because a native package was installed. The slower ranking experiment requires the explicit `ranking` token; neither `similarity` nor `all` enables it.
+Enable experiments only through the trusted environment variable `LOCALTIFY_RUST_PHASES`, for example `pcm,audio-decode` for the two consistently faster measured workloads, or `similarity,bridge` for experiments. Unavailable binaries, rejected input, and native errors fall back to JavaScript. No phase is automatically enabled merely because a native package was installed. The slower ranking experiment requires the explicit `ranking` token; neither `similarity` nor `all` enables it.
 
 Waveform generation is an explicit development utility, not a new background task or an automatic player feature: `node scripts/generate-waveform.cjs /path/to/audio.wav` outputs JSON peak/RMS bins for the first 120 seconds, decoded at 8 kHz mono. Set `LOCALTIFY_RUST_PHASES=pcm` for native comparison. No library metadata or files are modified.
 
