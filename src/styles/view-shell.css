@@ -1,26 +1,7 @@
 /* Workspace atmosphere and navigation geometry have one owner. */
-@property --workspace-cover-color {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: transparent;
-}
-@property --workspace-cover-secondary {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: transparent;
-}
-@property --workspace-cover-tertiary {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: transparent;
-}
 .app {
-  --workspace-cover-color: var(--lt-bg);
-  --workspace-cover-secondary: var(--lt-bg);
-  --workspace-cover-tertiary: var(--lt-bg);
-  --workspace-bg: radial-gradient(ellipse at 12% 5%, var(--workspace-cover-color), transparent 68%),
-    radial-gradient(ellipse at 91% 16%, var(--workspace-cover-secondary), transparent 70%),
-    radial-gradient(ellipse at 48% 100%, var(--workspace-cover-tertiary), transparent 66%), var(--lt-bg);
+  position: relative;
+  isolation: isolate;
   --workspace-sidebar: var(--lt-fill-subtle);
   --workspace-sidebar-expanded: clamp(184px, var(--sidebar-width, 249px), 340px);
   --lt-sidebar-closed: 72px;
@@ -30,14 +11,7 @@
   --workspace-sidebar-rail: var(--lt-sidebar-closed);
   --workspace-sidebar-current: var(--workspace-sidebar-expanded);
 }
-.app[data-theme][data-workspace-artwork] { background: var(--workspace-bg) !important; }
-.app[data-workspace-artwork]:not(.reducedMotion):not(.appBackgrounded):not(.themeSettling) {
-  transition: --workspace-cover-color var(--lt-duration-atmosphere) var(--lt-ease-out), --workspace-cover-secondary var(--lt-duration-atmosphere) var(--lt-ease-out),
-    --workspace-cover-tertiary var(--lt-duration-atmosphere) var(--lt-ease-out) !important;
-}
-@media (prefers-reduced-motion: reduce) {
-  .app[data-workspace-artwork] { transition: none !important; }
-}
+.app[data-theme][data-workspace-artwork] { background: var(--lt-bg) !important; }
 .app[data-sidebar-behavior="slim"],
 .app[data-sidebar-behavior="hover"] { --workspace-sidebar-current: var(--workspace-sidebar-rail); }
 .appShell {

@@ -1,3 +1,5 @@
+import { usePageAtmosphere } from "./pageAtmosphere";
+import { getRendererSafeImageUrl } from "./cover.ambient";
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { CoverGalleryEntry, CoverMood, CoverStudioProps } from "./cover.types";
 import { coverEntryMatches, coverSongMatches, normalizeCoverSearch } from "./cover.utils";
@@ -24,6 +26,7 @@ export default function CoverStudio({ pixelArtBusy, selectedCoverSongs, currentS
   const previewEntry = useMemo(() => visibleGalleryAssets.find((entry) => entry.key === previewEntryKey) || recentCoverEntries[0] || coverStats.least || visibleGalleryAssets[0] || null, [coverStats.least, previewEntryKey, recentCoverEntries, visibleGalleryAssets]);
   const previewImageUrl = previewEntry ? previewEntry.asset.url || pixelArtUrl(previewEntry.asset.file) : "";
   const activeTargetSong = selectedCoverSongs[0] || currentSong;
+  usePageAtmosphere([getRendererSafeImageUrl(previewImageUrl), getRendererSafeImageUrl(activeTargetSong?.coverUrl), getRendererSafeImageUrl(activeTargetSong?.coverPath)].filter(Boolean));
 
   useEffect(() => { if (previewEntryKey && !visibleGalleryAssets.some((entry) => entry.key === previewEntryKey)) setPreviewEntryKey(""); }, [previewEntryKey, visibleGalleryAssets]);
   useEffect(() => { if (coverGalleryMood === "favorites") setCoverGalleryMood("all"); }, [coverGalleryMood, setCoverGalleryMood]);

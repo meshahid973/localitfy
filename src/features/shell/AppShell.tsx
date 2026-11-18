@@ -6,8 +6,8 @@ import { FolderPlus } from "lucide-react";
 import TitleBar from "./TitleBar";
 import HomeViewComponent from "../home/HomeView";
 import { ImportProgress } from "../library/ImportProgress";
-import { ArtworkAmbientContext } from "../covers/ArtworkBackdrop";
-import { PageAtmosphereContext, pageArtworkSources, usePagePalette, type PageAtmosphereRegistration } from "../covers/pageAtmosphere";
+import { ArtworkAmbientContext, WorkspaceArtworkBackdrop } from "../covers/ArtworkBackdrop";
+import { PageAtmosphereContext, pageArtworkSources, resolveWorkspaceArtwork, type PageAtmosphereRegistration } from "../covers/pageAtmosphere";
 import PlayerSurfaces from "../player/components/PlayerSurfaces";
 import PlaybackAudioElement from "../player/components/PlaybackAudioElement";
 import SongContextMenu from "../library/components/SongContextMenu";
@@ -99,7 +99,7 @@ export default function AppShell(props: AppShellProps) {
   const playerBackground = effectiveTheme === "light" && settings.playerBackgroundStyle === "oledBlack" ? "flat" : settings.playerBackgroundStyle || "coverBlur";
   const homeBanner = effectiveTheme === "light" && settings.homeBannerType === "cleanBlack" ? "none" : settings.homeBannerType || "dynamic";
   const cardBackground = effectiveTheme === "light" && settings.mediaCardBackground === "oledFlat" ? "solid" : settings.mediaCardBackground || "glassy";
-  // Page and listening atmospheres have independent ownership.
+  // The active track owns shell artwork; the mounted entity is a fallback.
   const route = view + ":" + (detail?.kind ?? "") + ":" + (detail?.id ?? "");
   const [pageArtwork, setPageArtwork] = useState<PageAtmosphereRegistration | null>(null);
   const register = useCallback((next: PageAtmosphereRegistration | null, previous?: PageAtmosphereRegistration) => {
@@ -108,9 +108,10 @@ export default function AppShell(props: AppShellProps) {
   const atmosphereContext = useMemo(() => ({ route, register }), [route, register]);
   const homeSources = useMemo(() => view === "home" ? pageArtworkSources(home.homeFreshShelfSongs.length ? home.homeFreshShelfSongs : home.songs) : [], [view, home.homeFreshShelfSongs, home.songs]);
   const sources = pageArtwork?.route === route && pageArtwork.sources.length ? pageArtwork.sources : homeSources;
-  const artworkEnabled = effectiveAmbient && effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded;
-  const strength = effectiveCoverColorSyncMode === "strong" ? .52 : effectiveCoverColorSyncMode === "subtle" ? .19 : .38;
-  const workspacePalette = usePagePalette(route, sources, artworkEnabled, effectiveTheme === "light", strength);
+  // A paused current track remains the listening context; navigation never interrupts its backdrop.
+  const trackSources = useMemo(() => pageArtworkSources(home.currentSong ? [home.currentSong] : []), [home.currentSong]);
+  const workspaceSources = useMemo(() => resolveWorkspaceArtwork(trackSources, sources), [trackSources, sources]);
+  const artworkEnabled = effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded;
   const { actions, menu } = useCollectionActions(nav, collections, modals.queuePanel.openSongContextMenu);
   const pageProps = { songs: library.songs, currentId: home.currentId, isPlaying, toggleLike: modals.songContextMenu.toggleLike, openPlaylistPicker: modals.songContextMenu.openPlaylistPicker };
   const openSimilarSongs = useStableCallback((songIds: string[], key: string, title: string) => {
@@ -129,7 +130,7 @@ export default function AppShell(props: AppShellProps) {
 
   return (
     <AppActionsContext.Provider value={actions}>
-    <ArtworkAmbientContext.Provider value={effectiveAmbient && effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded}>
+    <ArtworkAmbientContext.Provider value={artworkEnabled}>
     <PageAtmosphereContext.Provider value={atmosphereContext}>
     <main
       ref={appRootRef}
@@ -145,10 +146,7 @@ export default function AppShell(props: AppShellProps) {
           "--home-hero-cover-brightness": String(homeHeroCoverBrightness),
           "--home-hero-cover-contrast": String(homeHeroCoverContrast),
           "--home-hero-cover-saturation": String(homeHeroCoverSaturation),
-          "--home-hero-cover-glow-brightness": String(homeHeroCoverGlowBrightness),
-          "--workspace-cover-color": workspacePalette?.[0],
-          "--workspace-cover-secondary": workspacePalette?.[1],
-          "--workspace-cover-tertiary": workspacePalette?.[2]
+          "--home-hero-cover-glow-brightness": String(homeHeroCoverGlowBrightness)
         } as CSSProperties
       }
       data-platform={platformId}
@@ -159,7 +157,7 @@ export default function AppShell(props: AppShellProps) {
       data-corners={settings.softCorners ? "soft" : "sharp"}
       data-ambient={effectiveAmbient ? "on" : "off"}
       data-cover-sync={effectiveCoverColorSyncMode}
-      data-workspace-artwork={workspacePalette ? "on" : "off"}
+      data-workspace-artwork={artworkEnabled && workspaceSources.length ? "on" : "off"}
       data-notes={effectiveNotes ? "on" : "off"}
       data-badge={settings.showHeroBadge ? "on" : "off"}
       data-home-banner={homeBanner}
@@ -181,6 +179,7 @@ export default function AppShell(props: AppShellProps) {
       data-drag-title={draggedSongTitle}
     >
 
+      {artworkEnabled && workspaceSources.length ? <WorkspaceArtworkBackdrop sources={workspaceSources} /> : null}
       <TitleBar showWindowButtons={platformId !== "mac"} history={nav}>
         {mountUpdateIsland ? <Suspense fallback={null}><UpdateIsland
           show={showTopUpdateRibbon}

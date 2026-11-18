@@ -46,3 +46,26 @@
   .artworkBackdropLayer { transition: none; animation: none; }
 }
 .app.reducedMotion .artworkBackdropLayer { transition: none; animation: none; }
+
+/* Shell artwork is real thumbnail imagery, not a synthetic palette gradient.
+   A bounded opacity cap keeps white/black artwork readable in both modes. */
+.app > .workspaceArtworkBackdrop {
+  opacity: 1;
+  inset: 0;
+  z-index: -1;
+  contain: strict;
+  --workspace-art-opacity: .23;
+}
+.app[data-cover-sync="subtle"] > .workspaceArtworkBackdrop { --workspace-art-opacity: .12; }
+.app[data-cover-sync="strong"] > .workspaceArtworkBackdrop { --workspace-art-opacity: .27; }
+.app[data-theme="light"] > .workspaceArtworkBackdrop { --workspace-art-opacity: .15; }
+.app[data-theme="light"][data-cover-sync="strong"] > .workspaceArtworkBackdrop { --workspace-art-opacity: .19; }
+.app[data-theme="light"][data-cover-sync="subtle"] > .workspaceArtworkBackdrop { --workspace-art-opacity: .08; }
+.workspaceArtworkBackdrop .artworkBackdropCover {
+  inset: -64px;
+  width: calc(100% + 128px);
+  height: calc(100% + 128px);
+  opacity: var(--workspace-art-opacity);
+  filter: blur(64px) saturate(.95);
+}
+.workspaceArtworkBackdrop::after { background: none; }

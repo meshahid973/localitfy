@@ -203,17 +203,20 @@ server.listen(5173,async()=>{
     const listenBackground = await win.webContents.executeJavaScript("getComputedStyle(document.querySelector('.homeListenGrid')).backgroundColor");
     assert.equal(listenBackground, "rgba(0, 0, 0, 0)", "Listen Now must not paint a separate container");
     const previous=await win.webContents.executeJavaScript("document.querySelector('.homeFeatureCover').dataset.coverTitle");
-    const homePalette = await win.webContents.executeJavaScript("document.querySelector('.app').style.getPropertyValue('--workspace-cover-color')");
+    await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.workspaceArtworkBackdrop .artworkBackdropLayer[data-visible=true] img')"),"decoded shell artwork");
+    const homeArtwork = await win.webContents.executeJavaScript("document.querySelector('.workspaceArtworkBackdrop .artworkBackdropLayer[data-visible=true] img').src");
     await win.webContents.executeJavaScript("document.querySelector('.playerBar button[aria-label=\\\"next song\\\"]').click()");
     await until(()=>win.webContents.executeJavaScript("document.querySelector('.homeFeatureCover')?.dataset.coverTitle").then(title=>title&&title!==previous).catch(()=>false),"next track");
     const samples=[];
-    for(let index=0;index<8;index++){samples.push(await win.webContents.executeJavaScript("document.querySelectorAll('.artworkBackdropLayer').length"));await sleep(100);}
+    for(let index=0;index<8;index++){samples.push(await win.webContents.executeJavaScript("document.querySelectorAll('.workspaceArtworkBackdrop .artworkBackdropLayer').length"));await sleep(100);}
     assert.ok(samples.every(n=>n<=2),"ambient transition must keep at most two artwork layers");
-    await until(()=>win.webContents.executeJavaScript("document.querySelector('.app').dataset.workspaceArtwork==='on' && getComputedStyle(document.querySelector('.app')).backgroundImage.includes('radial-gradient')").catch(()=>false),"settled artwork transition",5000);
-    assert.equal(await win.webContents.executeJavaScript("document.querySelector('.app').style.getPropertyValue('--workspace-cover-color')"),homePalette,"Home artwork must not change when playback advances");
+    await until(()=>win.webContents.executeJavaScript("document.querySelector('.workspaceArtworkBackdrop .artworkBackdropLayer[data-visible=true] img')?.src").catch(()=>false),"settled artwork transition",5000);
+    await until(()=>win.webContents.executeJavaScript("document.querySelector('.workspaceArtworkBackdrop .artworkBackdropLayer[data-visible=true] img')?.src").then(src=>src&&src!==homeArtwork),"track cover drives shell");
+    const playingArtwork = await win.webContents.executeJavaScript("document.querySelector('.workspaceArtworkBackdrop .artworkBackdropLayer[data-visible=true] img').src");
     await screenshot(win,"home-next-track");
     await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=settings]').click()");
-    await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.settingsModeButton').length===2 && document.querySelector('.app').dataset.workspaceArtwork==='off'").catch(()=>false),"two appearance modes");
+    await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.settingsModeButton').length===2 && document.querySelector('.app').dataset.workspaceArtwork==='on'").catch(()=>false),"two appearance modes");
+    assert.equal(await win.webContents.executeJavaScript("document.querySelector('.workspaceArtworkBackdrop .artworkBackdropLayer[data-visible=true] img')?.src"),playingArtwork,"navigation preserves active cover");
     for(const mode of ["light","dark"]){
       await win.webContents.executeJavaScript(`document.querySelector('.settingsModeButton:has([data-preview-mode="${mode}"])').click()`);
       // Compare the actual resolved color, not the spelling of a minified CSS token
@@ -233,7 +236,7 @@ server.listen(5173,async()=>{
       await assertShellChrome();
       await screenshot(win,"settings-"+mode);
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=library]').click()");
-      await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.libraryCollectionShortcuts') && document.querySelector('.app').dataset.workspaceArtwork==='off'").catch(()=>false),"library "+mode);
+      await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.libraryCollectionShortcuts') && document.querySelector('.app').dataset.workspaceArtwork==='on'").catch(()=>false),"library "+mode);
       await screenshot(win,"library-"+mode);
       await win.webContents.executeJavaScript("document.querySelector('.librarySort').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.arcDropdownMenu.ltOverlaySurface')").catch(()=>false),"shared menu surface "+mode);
@@ -255,14 +258,14 @@ server.listen(5173,async()=>{
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=playlists]').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('button[aria-label=\"open qa playlist\"]')").catch(()=>false),"fixture playlist "+mode);
       await win.webContents.executeJavaScript("document.querySelector('button[aria-label=\"open qa playlist\"]').click()");
-      await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.playlistDetailPage .collectionHero') && document.querySelector('.app').dataset.workspaceArtwork==='on'").catch(()=>false),"playlist owns its palette "+mode);
+      await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.playlistDetailPage .collectionHero') && document.querySelector('.app').dataset.workspaceArtwork==='on'").catch(()=>false),"playlist retains shell artwork "+mode);
       await screenshot(win,"playlist-atmosphere-"+mode);
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=home]').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.homeStartButton')").catch(()=>false),"Home "+mode);
       await assertShellChrome();
       await screenshot(win,"home-"+mode);
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=discover]').click()");
-      await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.discoverPage') && !document.querySelector('.appCrashBoundary') && document.querySelector('.app').dataset.workspaceArtwork==='off'").catch(()=>false),"Discover "+mode);
+      await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.discoverPage') && !document.querySelector('.appCrashBoundary') && document.querySelector('.app').dataset.workspaceArtwork==='on'").catch(()=>false),"Discover "+mode);
       await screenshot(win,"discover-"+mode);
       for (const width of [1280,860]) {
         win.setSize(width,800);
