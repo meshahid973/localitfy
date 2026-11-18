@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Check, ChevronDown } from "lucide-react";
 import "./ArcDropdownMenu.css";
+import { useMenuTypeahead } from "../hooks/useMenuTypeahead";
 
 /**
  * Localtify's dependency-free Radix alternative, adapted from Arc UI's MIT-licensed
@@ -42,6 +43,7 @@ export function ArcDropdownMenu<T extends string>({
   const menuRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const [open, setOpen] = useState(false);
+  const typeahead = useMenuTypeahead(open);
   const [activeIndex, setActiveIndex] = useState(0);
   const [position, setPosition] = useState({ left: EDGE_GAP, top: EDGE_GAP, width: 176 });
   const [themeStyle, setThemeStyle] = useState<CSSProperties>({});
@@ -144,6 +146,10 @@ export function ArcDropdownMenu<T extends string>({
       event.preventDefault();
       const index = event.key === "Home" ? firstEnabled : items.findLastIndex(item => !item.disabled);
       if (index >= 0) { setActiveIndex(index); optionRefs.current[index]?.focus(); }
+    } else {
+      const enabled = items.map((item, index) => ({ ...item, index })).filter(item => !item.disabled);
+      const index = typeahead(event, enabled.map(item => item.label), enabled.findIndex(item => item.index === activeIndex));
+      if (index >= 0) { setActiveIndex(enabled[index].index); optionRefs.current[enabled[index].index]?.focus(); }
     }
   };
   const choose = (item: ArcDropdownItem<T>) => {

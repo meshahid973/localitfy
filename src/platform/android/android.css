@@ -175,8 +175,8 @@ html.platformAndroid .queuePanel{
   z-index: 7600 !important;
   width: 100% !important;
   max-width: none !important;
-  height: min(78dvh, 720px) !important;
-  max-height: none !important;
+  height: auto !important;
+  max-height: min(78dvh, 720px) !important;
   border-radius: 28px 28px 0 0 !important;
   padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) !important;
   background: linear-gradient(var(--lt-surface-raised), var(--lt-surface-raised)), var(--lt-bg, #07070b) !important;

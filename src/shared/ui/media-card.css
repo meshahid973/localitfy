@@ -16,6 +16,7 @@
   display: block;
   min-width: 0;
   max-width: 100%;
+  isolation: isolate;
 }
 
 .mediaCardOpen {
@@ -67,6 +68,7 @@
 .mediaCardPlay:hover { background: color-mix(in srgb, var(--lt-accent) 90%, var(--lt-bg)); }
 .mediaCardPlay:focus-visible { opacity: 1; transform: none; outline: 2px solid var(--lt-text); outline-offset: 2px; }
 .mediaCardPlay svg { margin-left: 2px; }
+.mediaCardPlay:active { transform: scale(.96); }
 
 @media (prefers-reduced-motion: reduce) {
   .mediaCardPlay { transition: opacity 80ms linear; transform: none; }

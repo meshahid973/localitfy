@@ -221,10 +221,9 @@
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
-  min-height: 2.25em;
   color: var(--lt-text);
-  font-family: "Space Grotesk", Inter, ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(24px, 2.6cqi, 40px);
+  font-family: inherit;
+  font-size: clamp(24px, 2.6cqi, 34px);
   font-weight: 650;
   line-height: 1.12;
   letter-spacing: -.035em;
@@ -318,7 +317,7 @@
 .homeSectionHead > h3 {
   margin: 0;
   color: var(--lt-text);
-  font-size: clamp(20px, 2cqi, 26px);
+  font-size: clamp(20px, 2cqi, 24px);
   font-weight: 650;
   line-height: 1;
   letter-spacing: -.025em;
@@ -472,7 +471,7 @@
   .homeJumpBack.expanded { --home-art-size: 136px; }
   .homeJumpCopy h2 { font-size: 22px; }
 }
-@container (max-width: 330px) {
+@container (max-width: 280px) {
   .homeJumpBack { flex-direction: column; align-items: stretch; }
   .homeFeatureArt { flex-basis: auto; align-self: center; }
 }

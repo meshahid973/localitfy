@@ -10,10 +10,10 @@
   position: fixed;
   z-index: 11001;
   width: min(258px, calc(100vw - 24px));
-  max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   overflow-y: auto;
   padding: 5px;
-  border: 1px solid var(--lt-border);
+  border: 0;
   border-radius: var(--lt-control-radius);
   color: var(--text);
   background: color-mix(in srgb, var(--lt-bg-elevated) 94%, transparent);

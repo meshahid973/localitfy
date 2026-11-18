@@ -21,7 +21,8 @@ test("cover and library scans remain functional without floating mascot notifica
   assert.doesNotMatch(shell, /libraryScanBusy|pixelArtBusy|libraryScanMessage/);
   assert.doesNotMatch(contract, /libraryScanBusy|pixelArtBusy|libraryScanMessage/);
   assert.match(shell, /appToast \? <div className="appToast error"/, "preserve actionable error messages");
-  assert.match(shell, /importAnimation\.active/, "preserve the local import progress overlay");
+  assert.match(shell, /<ImportProgress state=\{importAnimation\}/, "preserve the local import progress overlay");
+  assert.match(read("src/features/library/ImportProgress.tsx"), /state\.active/, "show import progress only while active");
   assert.match(app, /libraryScanBusy, setLibraryScanBusy/, "keep library scan tracking");
   assert.match(app, /pixelArtBusy/, "keep cover-processing state");
   assert.match(app, /libraryScanMessage/, "keep Settings status feedback");

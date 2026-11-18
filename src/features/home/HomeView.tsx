@@ -1,3 +1,4 @@
+import { IconButton } from "../../shared/ui/IconButton";
 import "./home.css";
 import { Fragment, lazy, Suspense, useCallback, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { AudioLines, Maximize2, Minimize2, Play, Shuffle, SlidersHorizontal, Smartphone } from "lucide-react";
@@ -127,12 +128,12 @@ export default function HomeView(props: HomeViewProps) {
               {needsPhoneSync ? <Smartphone size={12} aria-hidden="true" /> : <Play size={12} fill="currentColor" strokeWidth={2.3} aria-hidden="true" />}
               <span>{needsPhoneSync ? "Set up phone sync" : android ? (currentSong ? "Play" : "Shuffle music") : currentSong ? "Play track" : "Start Listening"}</span>
             </button>
-            {!needsPhoneSync ? <button className="homeRoundButton" type="button" onClick={shuffleLibrarySongsAction} disabled={playableSongCount < 2} aria-label="shuffle library" title="Shuffle library">
+            {!needsPhoneSync ? <IconButton className="homeRoundButton" type="button" onClick={shuffleLibrarySongsAction} disabled={playableSongCount < 2} aria-label="shuffle library" title="Shuffle library">
               <Shuffle size={14} strokeWidth={2.2} aria-hidden="true" />
-            </button> : null}
-            {!android ? <button className="homeRoundButton" type="button" onClick={toggleHeroExpanded} aria-label={settings.heroExpanded ? "use compact hero" : "expand hero"} title={settings.heroExpanded ? "Use compact hero" : "Expand hero"}>
+            </IconButton> : null}
+            {!android ? <IconButton className="homeRoundButton" type="button" onClick={toggleHeroExpanded} aria-label={settings.heroExpanded ? "use compact hero" : "expand hero"} title={settings.heroExpanded ? "Use compact hero" : "Expand hero"}>
               {settings.heroExpanded ? <Minimize2 size={14} strokeWidth={2.1} aria-hidden="true" /> : <Maximize2 size={14} strokeWidth={2.1} aria-hidden="true" />}
-            </button> : null}
+            </IconButton> : null}
           </div>
         </div>
 

@@ -21,6 +21,7 @@ function home(android, songs, hidden = []) {
   const layout = compile("src/features/home/homeLayout.ts");
   const Home = compile("src/features/home/HomeView.tsx", {
     "./home.css": {},
+    "../../shared/ui/IconButton": compile("src/shared/ui/IconButton.tsx", { "./icon-button.css": {} }),
     "../../app/platform": { isAndroidApp: () => android },
     "../covers/Cover": { Cover: () => null },
     "../../shared/ui/LocaltifyViewUi": { MascotStateArt: () => null },

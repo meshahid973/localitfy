@@ -1,3 +1,4 @@
+import { IconButton } from "../../shared/ui/IconButton";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, RefObject } from "react";
 import { RotateCw, X, Search, RotateCcw } from "lucide-react";
@@ -36,6 +37,8 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, ge
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const lineRefs = useRef<Array<HTMLElement | null>>([]);
   const manualScrollUntilRef = useRef(0);
+  const [manualScrollUntil, setManualScrollUntil] = useState(0);
+  const following = manualScrollUntil === 0;
   const [result, setResult] = useState<LyricsResult | null>(null);
   const [matcherOpen, setMatcherOpen] = useState(false);
   const [offsetSaving, setOffsetSaving] = useState(false);
@@ -50,7 +53,7 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, ge
   currentSongId.current = songId;
   currentRevision.current = songRevision;
   openRef.current = open;
-  useEffect(() => { setMatcherOpen(false); }, [songId]);
+  useEffect(() => { setMatcherOpen(false); setManualScrollUntil(0); manualScrollUntilRef.current = 0; }, [songId]);
 
   const load = useCallback((refresh: boolean) => {
     const generation = ++requestGeneration.current;
@@ -182,11 +185,21 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, ge
     const line = lineRefs.current[activeIndex];
     if (!scroller || !line) return;
     const target = line.offsetTop - scroller.clientHeight * 0.36 + line.offsetHeight / 2;
-    scroller.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
-  }, [activeIndex]);
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches || !!document.querySelector(".app.reducedMotion");
+    scroller.scrollTo({ top: Math.max(0, target), behavior: reduceMotion ? "auto" : "smooth" });
+  }, [activeIndex, following]);
+
+  useEffect(() => {
+    if (following || !open) return;
+    const timer = window.setTimeout(() => {
+      manualScrollUntilRef.current = 0;
+      setManualScrollUntil(0);
+    }, Math.max(0, manualScrollUntil - Date.now()));
+    return () => window.clearTimeout(timer);
+  }, [following, manualScrollUntil, open]);
 
   if (!open) return null;
-  const holdManualScroll = () => { manualScrollUntilRef.current = Date.now() + MANUAL_SCROLL_HOLD_MS; };
+  const holdManualScroll = () => { manualScrollUntilRef.current = Date.now() + MANUAL_SCROLL_HOLD_MS; setManualScrollUntil(manualScrollUntilRef.current); };
 
   let body;
   if (!song) body = <p className="lyricsMessage">Play a song to see its lyrics.</p>;
@@ -204,7 +217,7 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, ge
               key={index}
               ref={(node) => { lineRefs.current[index] = node; }}
               className={`lyricsLine ${state} ${line.text ? "" : "isBreak"}`}
-              onClick={() => { manualScrollUntilRef.current = 0; seekTo(Math.max(0, line.time + (result?.offsetMs || 0) / 1000)); }}
+              onClick={() => { manualScrollUntilRef.current = 0; setManualScrollUntil(0); seekTo(Math.max(0, line.time + (result?.offsetMs || 0) / 1000)); }}
               aria-current={index === activeIndex ? "true" : undefined}
             >
               {text}
@@ -258,6 +271,7 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, ge
           </div>
         ) : <span />}
         <div className="lyricsHeadActions">
+          {synced && !following ? <button type="button" className="lyricsTextButton" onClick={() => { manualScrollUntilRef.current = 0; setManualScrollUntil(0); }}>Follow lyrics</button> : null}
           {song && result?.status === "synced" ? (
             <div className="lyricsOffsetControls" aria-label="lyrics timing offset">
               <button type="button" disabled={offsetSaving} aria-label="show lyrics 0.25 seconds earlier" onClick={() => void shiftLyrics(-250)}>−</button>
@@ -273,9 +287,9 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, ge
           {song ? <button type="button" className="lyricsTextButton" onClick={() => setMatcherOpen(value => !value)} aria-expanded={matcherOpen}>
             <Search size={14} aria-hidden="true" /> {matcherOpen ? "back to lyrics" : "find lyrics"}
           </button> : null}
-          <button type="button" className="lyricsIconButton" onClick={onClose} aria-label="close lyrics">
+          <IconButton type="button" className="lyricsIconButton" onClick={onClose} aria-label="close lyrics">
             <X size={18} strokeWidth={2.4} aria-hidden="true" />
-          </button>
+          </IconButton>
         </div>
       </header>
       <div ref={scrollerRef} className="lyricsScroller" onWheel={holdManualScroll} onTouchMove={holdManualScroll} onKeyDown={(event) => { if (["ArrowUp", "ArrowDown", "PageUp", "PageDown"].includes(event.key)) holdManualScroll(); }}>

@@ -12,7 +12,7 @@ test("expanded song menu has enough room for recommendation controls", () => {
   const app = fs.readFileSync("src/App.tsx", "utf8");
   const menu = fs.readFileSync("src/features/library/components/song-context-menu.css", "utf8");
   assert.match(app, /const menuHeight = 600;/);
-  assert.match(menu, /max-height: calc\(100vh - 24px\)/);
+  assert.match(menu, /max-height: calc\(100dvh - 24px - env\(safe-area-inset-top\) - env\(safe-area-inset-bottom\)\)/);
   assert.match(menu, /overflow-y: auto/);
 });
 
