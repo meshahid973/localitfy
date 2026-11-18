@@ -394,11 +394,12 @@ test("Discover lazy renderer modules parse as TSX", () => {
     assert.deepEqual(errors.map(d => ts.flattenDiagnosticMessageText(d.messageText, " ")), [], file);
   }
 });
-test("analytics cannot download executable PostHog extensions", () => {
-  const analytics = fs.readFileSync("src/analytics.ts", "utf8");
+test("external telemetry SDK stays removed and scripts remain restricted", () => {
+  assert.equal(fs.existsSync("src/analytics.ts"), false);
+  const manifest = JSON.parse(fs.readFileSync("package.json", "utf8"));
+  const lock = JSON.parse(fs.readFileSync("package-lock.json", "utf8"));
+  assert.ok(!manifest.dependencies?.["posthog-js"] && !manifest.devDependencies?.["posthog-js"]);
+  assert.ok(!Object.keys(lock.packages).some(name => /(?:^|\/)posthog-js$|@posthog\//.test(name)));
   const html = fs.readFileSync("index.html", "utf8");
-  assert.match(analytics, /disable_external_dependency_loading: true/);
-  assert.match(analytics, /capture_performance: false/);
-  assert.match(analytics, /disable_surveys: true/);
   assert.match(html, /script-src 'self';/);
 });

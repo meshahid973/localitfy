@@ -486,7 +486,8 @@
   .homeListenGrid[data-count="7"] > .homeListenRow:nth-child(n+4) { grid-column: span 3; }
 }
 @container (min-width: 1100px) {
-  .homeJumpBack:has(+ .homeListenSection) { grid-column: 1 / 7; align-self: center; }
+  .homeJumpBack:has(+ .homeListenSection) { grid-column: 1 / 7; align-self: center; --home-art-size: clamp(144px, 17cqi, 220px); }
+  .homeJumpBack.expanded:has(+ .homeListenSection) { --home-art-size: clamp(180px, 20cqi, 280px); }
   .homeJumpBack + .homeListenSection { grid-column: 7 / -1; align-self: center; min-width: 0; }
   .homeJumpBack + .homeListenSection .homeListenGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .homeJumpBack + .homeListenSection .homeListenGrid > .homeListenRow { grid-column: auto; }

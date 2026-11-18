@@ -153,6 +153,7 @@ export default function HomeView(props: HomeViewProps) {
                   onClick={() => void selectSong(song.id, true)}
                   onContextMenu={(event) => void actions.openSongMenu(event, song)}
                   title={`play ${song.title}`}
+                  aria-current={active ? "true" : undefined}
                 >
                   <Cover song={song} className="homeListenCover" preferThumbnail />
                   <span className="homeListenCopy">

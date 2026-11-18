@@ -86,6 +86,9 @@ test('decorative artwork uses low-resolution source without changing eager loadi
  const backdrop=fs.readFileSync('src/features/covers/ArtworkBackdrop.tsx','utf8');
  assert.match(source,/const useFullCover = isImmediateCover && !preferThumbnail/);
  assert.match(source,/const directCover = useFullCover \? getFullCoverUrl\(song\) : getCardCoverUrl\(song\)/);
- assert.match(backdrop,/priority="high" preferThumbnail/);
+ const ambient=fs.readFileSync('src/features/covers/cover.ambient.ts','utf8');
+ assert.match(backdrop,/getSongAmbientSource\(song\)/);
+ assert.match(ambient,/song.coverThumbUrl[\s\S]*song.coverFullUrl/);
+ assert.match(backdrop,/decodeArtwork\(source, controller.signal\)/);
  assert.match(source,/preferThumbnail \? getFullCoverUrl\(song\) : ""/);
 });
