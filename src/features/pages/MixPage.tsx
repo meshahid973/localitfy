@@ -10,7 +10,7 @@ import { useHomeDailyMixes } from "../home/useHomeDailyMixes";
 import { useHomeDay } from "../home/useHomeDay";
 import { mixTarget, playableIds, useAppActions } from "../shell/appActions";
 import type { Song } from "../library/song.types";
-import { ArtworkBackdrop } from "../covers/ArtworkBackdrop";
+import { PageAtmosphere } from "../covers/pageAtmosphere";
 import CollectionHero from "./CollectionHero";
 import TrackList from "./TrackList";
 
@@ -58,7 +58,7 @@ export default function MixPage({ mixId, songs, currentId, isPlaying, toggleLike
 
   return (
     <section data-page-section="mix" className="collectionPage mixPage" aria-label={mix.name}>
-      <ArtworkBackdrop song={target.coverSong} />
+      <PageAtmosphere songs={members} />
       <CollectionHero
         typeLabel="daily mix"
         title={mix.name}

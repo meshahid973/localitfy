@@ -38,16 +38,6 @@
   background: linear-gradient(110deg, color-mix(in srgb, var(--lt-surface) 88%, transparent), transparent);
 }
 
-/* Extended page ambience uses the same thumbnail, never an extra live blur. */
-.collectionPage > .artworkBackdrop .artworkBackdropCover,
-.playlistDetailPage > .artworkBackdrop .artworkBackdropCover {
-  opacity: .36;
-  filter: blur(32px) saturate(1.05);
-}
-.collectionPage > .artworkBackdrop::after,
-.playlistDetailPage > .artworkBackdrop::after {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--lt-bg) 52%, transparent), var(--lt-bg));
-}
 .artworkBackdropCover::before { content: none; }
 .app[data-cover-sync="subtle"] .artworkBackdrop { opacity: .45; }
 .app[data-cover-sync="strong"] .artworkBackdrop { opacity: 1; }

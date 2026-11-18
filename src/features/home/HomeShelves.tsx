@@ -5,6 +5,7 @@ import { prettyMeta, prettyTitle } from "../search/search.utils";
 import type { Song } from "../library/song.types";
 import { CollectionLoading } from "../../shared/ui/CollectionLoading";
 import { useHomeDailyMixes } from "./useHomeDailyMixes";
+import { pageArtworkSources, usePageAtmosphere } from "../covers/pageAtmosphere";
 import { HomeMixArtwork } from "./HomeMixArtwork";
 import { MediaCard } from "../../shared/ui/MediaCard";
 import { mixTarget, useAppActions } from "../shell/appActions";
@@ -109,6 +110,8 @@ export function HomeDailyMixRail({ day, songsById, openDailyMixes, openAnalysisS
   const mixes = useMemo(() => (result?.mixes ?? [])
     .map((mix) => ({ ...mix, songs: mix.songIds.flatMap((id) => { const song = songsById.get(id); return song && (song.filePath || song.url) && song.fileExists !== false ? [song] : []; }) }))
     .filter((mix) => mix.songs.length), [result, songsById]);
+  const atmosphereSources = useMemo(() => pageArtworkSources(mixes[0]?.songs ?? []), [mixes]);
+  usePageAtmosphere(atmosphereSources);
   if (!result) return <section className="homeSection homeReleasesSection homeMixesSection" aria-labelledby="home-daily-mixes-title">
     <HomeSectionHead id="home-daily-mixes-title" title="Daily mixes" />
     <div role="status" aria-atomic="true">

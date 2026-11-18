@@ -11,7 +11,7 @@ import { useGenreTaggedSongs } from "../genres/useGenreTaggedSongs";
 import { artistTarget, genreTarget, playableIds, useAppActions } from "../shell/appActions";
 import type { Song } from "../library/song.types";
 import type { ArtistBio } from "../discover/discover.types";
-import { ArtworkBackdrop } from "../covers/ArtworkBackdrop";
+import { PageAtmosphere } from "../covers/pageAtmosphere";
 import CollectionHero from "./CollectionHero";
 import TrackList from "./TrackList";
 
@@ -78,7 +78,7 @@ function SongGroupBody({ kind, name, members, loading, currentId, isPlaying, tog
 
   return (
     <section data-page-section={kind} className="collectionPage songGroupPage" aria-label={`${name} ${kind}`}>
-      <ArtworkBackdrop song={target.coverSong} />
+      <PageAtmosphere songs={members} />
       <CollectionHero
         typeLabel={kind}
         title={name}

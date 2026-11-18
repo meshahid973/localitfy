@@ -206,12 +206,6 @@
 }
 
 .playlistsPage.playlistDetailPage { position: relative; isolation: isolate; padding: var(--lt-space-5) var(--lt-space-5) 40px; }
-.collectionPage > .artworkBackdrop,
-.playlistDetailPage > .artworkBackdrop {
-  inset: 0 0 auto;
-  height: min(700px, 85vh);
-  mask-image: linear-gradient(#000 0%, #000 28%, transparent 100%);
-}
 
 @media (max-width: 760px) {
   .collectionPage, .playlistsPage.playlistDetailPage { padding-inline: var(--lt-space-3); }
