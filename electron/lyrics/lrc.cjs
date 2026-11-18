@@ -1,38 +1,68 @@
 // LRC parsing and lookup-text cleanup for lyrics. Pure functions so tests can run without Electron.
 
 const TIME_TAG = /^\[(\d{1,3}):(\d{1,2})(?:[.:](\d{1,3}))?\]/;
-const WORD_TAG = /<\d{1,3}:\d{1,2}(?:[.:]\d{1,3})?>/g;
+const WORD_TAG = /<(\d{1,3}):(\d{1,2})(?:[.:](\d{1,3}))?>/g;
 const MAX_LINES = 2000;
+const MAX_SOURCE = 512 * 1024;
+
+function seconds(match) {
+  return Number(match[1]) * 60 + Number(match[2]) + (match[3] ? Number(match[3]) / 10 ** match[3].length : 0);
+}
+
+// Enhanced LRC timestamps mark the start of a segment; do not synthesize timings.
+function timedSegments(rest, lineStart, shift) {
+  const tags = [...rest.matchAll(WORD_TAG)];
+  if (!tags.length || rest.slice(0, tags[0].index).trim()) return null;
+  const segments = [];
+  let last = lineStart;
+  for (let i = 0; i < tags.length; i++) {
+    const tag = tags[i];
+    const time = seconds(tag);
+    if (time < last) return null;
+    last = time;
+    const content = rest.slice(tag.index + tag[0].length, tags[i + 1]?.index ?? rest.length);
+    if (content) segments.push({ time: Math.max(0, time - shift), text: content });
+  }
+  return segments.length && segments.some(segment => segment.text.trim()) ? segments : null;
+}
 
 function parseLrc(source) {
-  const text = String(source || "").replace(/^﻿/, "");
-  let offset = 0;
+  const text = String(source || "").slice(0, MAX_SOURCE).replace(/^\uFEFF/, "");
+  // LRC metadata is global, even if the offset tag is at the bottom of the file.
+  const offsetTag = /^\s*\[offset:\s*([+-]?\d+)\s*\]/im.exec(text);
+  const offset = offsetTag ? Math.max(-300, Math.min(300, Number(offsetTag[1]) / 1000)) : 0;
   const lines = [];
   for (const raw of text.split(/\r?\n/)) {
-    const offsetTag = /^\s*\[offset:\s*([+-]?\d+)\s*\]/i.exec(raw);
-    if (offsetTag) { offset = Number(offsetTag[1]) / 1000; continue; }
     const times = [];
     let rest = raw.trim();
     let match;
-    // Timestamps lead the line; one line may repeat at several times.
     while ((match = TIME_TAG.exec(rest))) {
-      const fraction = match[3] ? Number(match[3]) / 10 ** match[3].length : 0;
-      times.push(Number(match[1]) * 60 + Number(match[2]) + fraction);
+      times.push(seconds(match));
       rest = rest.slice(match[0].length);
+      if (times.length >= MAX_LINES) break;
     }
     if (!times.length) continue;
     const words = rest.replace(WORD_TAG, "").replace(/\s+/g, " ").trim();
-    for (const time of times) lines.push({ time: Math.max(0, time - offset), text: words });
+    // Repeated line tags are ambiguous for word timings: retain line-level sync.
+    const segments = times.length === 1 ? timedSegments(rest, times[0], offset) : null;
+    for (const time of times) {
+      if (lines.length >= MAX_LINES) break;
+      lines.push({ time: Math.max(0, time - offset), text: words, ...(segments ? { words: segments } : {}) });
+    }
     if (lines.length >= MAX_LINES) break;
   }
   lines.sort((a, b) => a.time - b.time);
-  // Drop leading blank lines; keep inner blanks as instrumental breaks.
   while (lines.length && !lines[0].text) lines.shift();
+  // Reject impossible word times crossing into the next distinct lyric line.
+  for (let i = 0; i < lines.length; i++) {
+    const next = lines[i + 1]?.time ?? Infinity;
+    if (lines[i].words?.some(word => word.time >= next)) delete lines[i].words;
+  }
   return lines;
 }
 
 function plainLines(source) {
-  return String(source || "").replace(/^﻿/, "").split(/\r?\n/).map((line) => line.trim()).slice(0, MAX_LINES)
+  return String(source || "").slice(0, MAX_SOURCE).replace(/^﻿/, "").split(/\r?\n/).map((line) => line.trim()).slice(0, MAX_LINES)
     .filter((line, index, all) => line || (index > 0 && all[index - 1]));
 }
 
