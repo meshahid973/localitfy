@@ -5253,7 +5253,7 @@ function MainModeApp() {
   const subscribeLyricsClock = useCallback((listener: () => void) => {
     const audio = audioRef.current;
     if (!audio) return () => undefined;
-    const events = ["seeked", "ratechange", "playing", "pause", "loadedmetadata"] as const;
+    const events = ["seeked", "seeking", "ratechange", "playing", "pause", "loadedmetadata", "timeupdate"] as const;
     for (const event of events) audio.addEventListener(event, listener);
     return () => { for (const event of events) audio.removeEventListener(event, listener); };
   }, []);
@@ -7608,7 +7608,7 @@ function MainModeApp() {
       lyrics: connect.lyrics({
         open: lyricsOpen && settings.lyricsEnabled,
         onClose: closeLyrics,
-        song: visualCurrentSong,
+        song: currentSong,
         isPlaying,
         getTime: getLyricsTime,
         getPlaybackRate: getLyricsRate,

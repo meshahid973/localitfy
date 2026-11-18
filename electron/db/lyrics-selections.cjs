@@ -23,7 +23,7 @@ function readLyricsSelection(database, songId) {
 }
 
 function saveLyricsSelection(database, songId, lrclibId, result) {
-  if (!Number.isSafeInteger(lrclibId) || lrclibId <= 0) throw new TypeError("Invalid LRCLIB record ID");
+  if (!(lrclibId === null && result?.source === "manual") && (!Number.isSafeInteger(lrclibId) || lrclibId <= 0)) throw new TypeError("Invalid LRCLIB record ID");
   if (!result || !["synced", "plain", "instrumental"].includes(result.status)) throw new TypeError("Lyrics record has no usable content");
   const encoded = JSON.stringify(result);
   if (encoded.length > 200000) throw new RangeError("Lyrics record is too large");

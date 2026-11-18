@@ -120,3 +120,14 @@ const recommendationMs = bench(() => recommendations.relatedSongScores(seeds, la
 console.log("[hotpaths] 50k-library single playback update:", updateMs.toFixed(2), "ms");
 console.log("[hotpaths] 50k-song recommendations / 500 seeds:", recommendationMs.toFixed(2), "ms");
 console.log("[hotpaths] old/new outputs match; timings are machine-dependent, not UI latency measurements");
+
+// Bounded binary search across a worst-case supported 2,000-line lyric document.
+const clock = loadTs("src/features/lyrics/lyrics.utils.ts");
+const lyricLines = Array.from({length:2000}, (_,i)=>({time:i*.75,text:"Fixture",words:[{time:i*.75,text:"Fix"},{time:i*.75+.3,text:"ture"}]}));
+const positions = Array.from({length:10000},(_,i)=>(i*17%150000)/100);
+const lookup = () => positions.map(time=>{const active=clock.activeLyricIndex(lyricLines,time);return [active,clock.nextLyricCheckDelay(lyricLines,active,time,1)];});
+for (const [i,[active,delay]] of lookup().entries()) {
+  assert.equal(active,Math.min(1999,Math.floor(positions[i]/.75)));
+  assert.ok(delay>=16 && delay<=250);
+}
+console.log("[lyrics-clock] 10k line/word boundary calculations across 2k lines:",bench(lookup).toFixed(2),"ms (algorithm only)");

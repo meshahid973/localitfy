@@ -28,6 +28,9 @@ test("manual lyrics and offset persist by stable song ID, preserve each other, a
     assert.deepEqual(saved.result, lyrics);
     assert.throws(() => selections.saveLyricsOffset(db, "song1", 31000), /within 30 seconds/);
     assert.throws(() => selections.saveLyricsSelection(db, "song1", -3, lyrics), /Invalid LRCLIB/);
+    const custom = { ...lyrics, source: "manual" };
+    assert.deepEqual(selections.saveLyricsSelection(db, "song1", null, custom), { lrclibId: null, result: custom, offsetMs: 750 });
+    assert.throws(() => selections.saveLyricsSelection(db, "song1", null, lyrics), /Invalid LRCLIB/);
     assert.deepEqual(selections.clearLyricsSelection(db, "song1"), { lrclibId: null, result: null, offsetMs: 750 });
 
     selections.saveLyricsSelection(db, "song1", 42, lyrics);

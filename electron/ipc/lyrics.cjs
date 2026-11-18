@@ -1,5 +1,5 @@
 const path = require("node:path");
-const { createLyricsService } = require("../lyrics/service.cjs");
+const { createLyricsService, shapeResult } = require("../lyrics/service.cjs");
 
 function registerLyricsIpc(router, app, repositories) {
   const service = createLyricsService({
@@ -13,14 +13,31 @@ function registerLyricsIpc(router, app, repositories) {
     const song = repositories.songs.get(String(payload?.id || ""));
     return { settings, song };
   }
+  const requests = new Map();
   router.handle("lyrics:get", async (_event, payload) => {
+    const token = typeof payload?.requestId === "string" && /^[a-zA-Z0-9-]{1,80}$/.test(payload.requestId) ? payload.requestId : null;
+    if (payload?.cancel === true) {
+      if (token) requests.get(token)?.abort();
+      return { status: "offline", source: "none", lines: [] };
+    }
     const { settings, song } = getEnabledSong(payload);
     if (settings.lyricsEnabled !== true) return { status: "disabled", source: "none", lines: [] };
     if (!song) return { status: "missing", source: "none", lines: [] };
     const chosen = repositories.lyrics.get(song.id);
-    if (chosen.lrclibId && chosen.result) return { ...chosen.result, manual: true, offsetMs: chosen.offsetMs };
-    const result = await service.get(song, { online: settings.lyricsOnlineLookup !== false, refresh: payload?.refresh === true });
-    return { ...result, offsetMs: chosen.offsetMs };
+    if (chosen.result && (chosen.lrclibId || chosen.result.source === "manual")) return { ...await service.attachCompanions(song.filePath, chosen.result), manual: true, offsetMs: chosen.offsetMs };
+    const controller = new AbortController();
+    if (token) {
+      requests.get(token)?.abort();
+      if (requests.size >= 128) requests.values().next().value?.abort();
+      requests.set(token, controller);
+    }
+    try {
+      const result = await service.get(song, { online: settings.lyricsOnlineLookup !== false, refresh: payload?.refresh === true, signal: controller.signal });
+      return { ...result, offsetMs: repositories.lyrics.get(song.id).offsetMs };
+    } catch (error) {
+      if (controller.signal.aborted) return { status: "offline", source: "none", lines: [] };
+      throw error;
+    } finally { if (token && requests.get(token) === controller) requests.delete(token); }
   });
   router.handle("lyrics:search", async (_event, payload) => {
     const { settings, song } = getEnabledSong(payload);
@@ -29,12 +46,19 @@ function registerLyricsIpc(router, app, repositories) {
   });
   router.handle("lyrics:select-match", async (_event, payload) => {
     const { settings, song } = getEnabledSong(payload);
-    if (!song || settings.lyricsOnlineLookup === false) throw new Error("Enable online lyrics to select a match");
+    if (!song) throw new Error("Song unavailable or lyrics disabled");
+    if (typeof payload?.localLyrics === "string") {
+      if (payload.localLyrics.length > 50000) throw new RangeError("Local lyrics are too long");
+      const result = shapeResult("manual", { synced: payload.localLyrics, plain: payload.localLyrics });
+      const chosen = repositories.lyrics.save(song.id, null, result);
+      return { ...await service.attachCompanions(song.filePath, result), manual: true, offsetMs: chosen.offsetMs };
+    }
+    if (settings.lyricsOnlineLookup === false) throw new Error("Enable online lyrics to select a match");
     const id = Number(payload?.lrclibId);
     if (!Number.isSafeInteger(id) || id <= 0) throw new TypeError("Invalid LRCLIB record ID");
     const result = await service.getManual(id);
     const chosen = repositories.lyrics.save(song.id, id, result);
-    return { ...result, manual: true, offsetMs: chosen.offsetMs };
+    return { ...await service.attachCompanions(song.filePath, result), manual: true, offsetMs: chosen.offsetMs };
   });
   router.handle("lyrics:set-offset", async (_event, payload) => {
     const { song } = getEnabledSong(payload);

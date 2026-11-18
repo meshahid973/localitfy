@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const { parseLrc, cleanTitle, primaryArtist } = require(path.join(root, "electron", "lyrics", "lrc.cjs"));
-const { createLyricsService, chooseLyricsResult } = require(path.join(root, "electron", "lyrics", "service.cjs"));
+const { createLyricsService, chooseLyricsResult, embeddedLyricsResult } = require(path.join(root, "electron", "lyrics", "service.cjs"));
 
 const SYNCED = "[ar:Nobody]\n[00:01.50]first line\n[00:04.25][00:20.00]repeated line\n[00:08.00]\n[00:09.123]<00:09.20>word <00:09.80>sync";
 
@@ -23,7 +23,9 @@ function fakeFetch(routes) {
   const fetchImpl = async (url) => {
     calls.push(url);
     const endpoint = new URL(url).pathname.split("/").pop();
-    const body = routes[endpoint];
+    const raw = routes[endpoint];
+    const withTags = item => ({ trackName: new URL(url).searchParams.get("track_name") || new URL(url).searchParams.get("q"), artistName: "Nobody", duration: 200, ...item });
+    const body = Array.isArray(raw) ? raw.map(withTags) : raw === undefined ? undefined : withTags(raw);
     if (body === undefined) return { ok: false, status: 404, json: async () => ({}) };
     return { ok: true, status: 200, json: async () => body };
   };
@@ -32,11 +34,12 @@ function fakeFetch(routes) {
 
 const song = { id: "s1", title: "Made Up Song (Official Video)", artist: "Nobody feat. Someone", album: "Demo", duration: 200.4, filePath: "" };
 
-test("parseLrc sorts timestamps, repeats lines, strips word tags and applies offset", () => {
+test("parseLrc sorts timestamps, repeats lines, preserves real word timing and applies offset", () => {
   const lines = parseLrc(SYNCED);
   assert.deepEqual(lines.map((line) => line.text), ["first line", "repeated line", "", "word sync", "repeated line"]);
   assert.equal(lines[0].time, 1.5);
   assert.equal(lines[3].time, 9.123);
+  assert.deepEqual(lines[3].words, [{time:9.2,text:"word "},{time:9.8,text:"sync"}]);
   assert.equal(parseLrc("[offset:+500]\n[00:02.00]shifted")[0].time, 1.5);
   assert.deepEqual(parseLrc("no timestamps here"), []);
 });
@@ -112,7 +115,7 @@ test("service retries a single LRCLIB server error", async () => {
     attempts += 1;
     return attempts === 1
       ? { ok: false, status: 503, json: async () => ({}) }
-      : { ok: true, status: 200, json: async () => ({ syncedLyrics: SYNCED }) };
+      : { ok: true, status: 200, json: async () => ({ trackName: "Made Up Song", artistName: "Nobody", duration: 200, syncedLyrics: SYNCED }) };
   };
   const service = createLyricsService({ cacheDir: tempDir(), userAgent: "test", fetchImpl, retryDelayMs: 0 });
   assert.equal((await service.get(song)).status, "synced");
@@ -190,7 +193,7 @@ test("503 respects Retry-After and does not turn a busy server into a cached mis
     if (attempts === 1) return {
       status: 503, ok: false, headers: { get: name => name === "retry-after" ? "1" : null }
     };
-    return { ok: true, status: 200, json: async () => ({ syncedLyrics: SYNCED }) };
+    return { ok: true, status: 200, json: async () => ({ trackName: "Made Up Song", artistName: "Nobody", duration: 200, syncedLyrics: SYNCED }) };
   };
   const service = createLyricsService({ cacheDir: tempDir(), userAgent: "test", fetchImpl,
     requestSpacingMs: 0, retryDelayMs: 0, sleep: async ms => { waits.push(ms); } });
@@ -297,8 +300,45 @@ test("disk lyrics cache is bounded and an in-flight lookup cannot resurrect a cl
     const result = delayed.get(song);
     await started;
     await delayed.clearCache();
-    finish({ok:true,status:200,json:async()=>({duration:200,syncedLyrics:SYNCED})});
+    finish({ok:true,status:200,json:async()=>({trackName:"Made Up Song",artistName:"Nobody",duration:200,syncedLyrics:SYNCED})});
     assert.equal((await result).status,"synced");
     assert.equal(fs.existsSync(path.join(dir,"delayed")),false);
   } finally { fs.rmSync(dir,{recursive:true,force:true}); }
+});
+
+test("enhanced Japanese LRC preserves segments, global offsets and invalid timing fallback", () => {
+  const lines = parseLrc("[00:02.00]<00:02.00>きみ<00:02.50>の声\n[00:04.00]Next\n[offset:500]");
+  assert.deepEqual(lines[0], {time:1.5,text:"きみの声",words:[{time:1.5,text:"きみ"},{time:2,text:"の声"}]});
+  assert.equal(parseLrc("[00:02.00]<00:02.10>one <00:04.00>two\n[00:03.00]next")[0].words, undefined);
+  assert.equal(parseLrc("[00:02.00][00:06.00]<00:02.00>one")[0].words, undefined);
+});
+
+test("exact provider lookup validates metadata and unknown runtimes never enable timed seeking", async () => {
+  const {fetchImpl} = fakeFetch({get:{trackName:"Unrelated",duration:200,syncedLyrics:SYNCED},search:[{trackName:"Made Up Song",duration:170,syncedLyrics:SYNCED}]});
+  const service = createLyricsService({cacheDir:tempDir(),userAgent:"test",fetchImpl,requestSpacingMs:0});
+  assert.equal((await service.get(song)).status,"plain");
+  assert.equal(chooseLyricsResult([{trackName:"Made Up Song",artistName:"Nobody",syncedLyrics:SYNCED}],{track:"Made Up Song",artist:"Nobody",duration:200}).status,"plain");
+  assert.equal(chooseLyricsResult([{artistName:"Nobody",duration:200,syncedLyrics:SYNCED}],{track:"Made Up Song",artist:"Nobody",duration:200}),null);
+});
+
+test("embedded lyrics and timed local companion files are usable offline", async t => {
+  const dir=tempDir(); t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+  const filePath=path.join(dir,"sample.mp3");
+  fs.writeFileSync(path.join(dir,"sample.romanized.lrc"),"[00:01.50]kimi");
+  fs.writeFileSync(path.join(dir,"sample.translation.lrc"),"[00:01.50]you\n[00:09.99]not aligned");
+  const service=createLyricsService({cacheDir:path.join(dir,"cache"),userAgent:"test",readEmbedded:async()=>embeddedLyricsResult([{text:"[00:01.50]きみ"}]),fetchImpl:async()=>{throw Error("network not permitted")}});
+  const result=await service.get({...song,filePath},{online:false});
+  assert.equal(result.source,"embedded"); assert.equal(result.lines[0].romanization,"kimi"); assert.equal(result.lines[0].translation,"you");
+  const native=embeddedLyricsResult([{text:"plain"},{timeStampFormat:2,contentType:1,syncText:[{timestamp:1000,text:"\nOne "},{timestamp:1500,text:"two"},{timestamp:3000,text:"\nNext"}]}]);
+  assert.equal(native.status,"synced"); assert.equal(native.lines[0].words[1].time,1.5);
+  assert.equal(embeddedLyricsResult([{timeStampFormat:1,contentType:1,syncText:[{timestamp:10,text:"Frames"}]}]),null);
+});
+
+test("cancelling a consumer aborts the provider after the last consumer leaves", async t => {
+  const dir=tempDir(); t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+  const controller=new AbortController();
+  let started, stopped=false; const ready=new Promise(resolve=>{started=resolve});
+  const service=createLyricsService({cacheDir:dir,userAgent:"test",requestSpacingMs:0,fetchImpl:async(url,{signal})=>{started();return new Promise((resolve,reject)=>signal.addEventListener("abort",()=>{stopped=true;reject(signal.reason)},{once:true}));}});
+  const work=service.get(song,{signal:controller.signal}); await ready; controller.abort();
+  await assert.rejects(work,{name:"AbortError"}); assert.equal(stopped,true);
 });

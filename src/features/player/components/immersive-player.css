@@ -43,7 +43,7 @@
 }
 .immersiveTop{
   display: grid;
-  grid-template-columns: 44px minmax(0,1fr) 44px;
+  grid-template-columns: minmax(88px,1fr) minmax(0,2fr) minmax(88px,1fr);
   align-items: center;
   gap: var(--lt-space-3);
 }
@@ -77,7 +77,6 @@
   aspect-ratio: 1;
   overflow: hidden;
   border-radius: var(--lt-radius-sm);
-  box-shadow: var(--lt-shadow-menu);
 }
 .immersivePlayer :is(.immersiveArtwork, .artworkBackdropCover)::before{
   content: none;
@@ -211,4 +210,24 @@
   }
   .immersiveTop{ grid-column: 1 / -1; }
   .immersiveBottom{ align-self: center; }
+}
+
+.immersiveTopActions { display: flex; justify-content: end; gap: var(--lt-space-1); }
+.immersiveNotice { margin: 0; color: var(--lt-muted); text-align: center; }
+.immersiveStage[data-lyrics-only="true"] { grid-template-columns: minmax(0,1fr); }
+.immersiveStage[data-lyrics-only="true"] > .immersiveArtwork { display: none; }
+.immersiveLyrics .lyricsView { background: transparent; border: 0; }
+.immersiveIntensity { min-width: 0; max-width: 90px; color: var(--lt-text); background: var(--lt-surface-soft); border: 0; border-radius: var(--lt-radius-item); font: inherit; padding: var(--lt-space-1) var(--lt-space-2); }
+.app .immersivePlayer[data-intensity="subtle"] .artworkBackdrop { opacity: .45; }
+.app .immersivePlayer[data-intensity="strong"] .artworkBackdrop { opacity: 1; }
+.immersivePlayer .artworkBackdropCover { inset: -48px; width: calc(100% + 96px); height: calc(100% + 96px); filter: blur(48px) saturate(.85); opacity: .32; }
+.immersivePlayer .artworkBackdropLayer[data-visible="true"] .artworkBackdropCover { animation: immersiveDrift 36s ease-in-out infinite alternate; }
+@keyframes immersiveDrift { from { transform: scale(1.02) translate3d(-1%, 0, 0); } to { transform: scale(1.11) translate3d(2%, -2%, 0); } }
+.app[data-theme="light"] .immersivePlayer .artworkBackdropCover { opacity: .22; }
+.app.reducedMotion .immersivePlayer .artworkBackdropCover { animation: none; }
+@media (prefers-reduced-motion: reduce) { .immersivePlayer .artworkBackdropCover { animation: none; } }
+@media (max-width: 600px) {
+  .immersiveVolume { width: min(32%, 120px); }
+  .immersiveTools { flex-wrap: wrap; }
+  .immersiveActions { flex-wrap: wrap; justify-content: end; }
 }

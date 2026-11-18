@@ -48,8 +48,8 @@ export function markMacReachable() {
 }
 
 /** The Mac's answer when it can be reached (kept for offline use), otherwise the last kept answer, otherwise `fallback`. */
-export async function fromMacOrKept<T>(channel: string, payload: unknown, key: string, fallback: T, keep: (result: T) => boolean = () => true): Promise<T> {
-  const answer = await callMac<T>(channel, payload);
+export async function fromMacOrKept<T>(channel: string, payload: unknown, key: string, fallback: T, keep: (result: T) => boolean = () => true, timeoutMs?: number): Promise<T> {
+  const answer = await callMac<T>(channel, payload, timeoutMs);
   if (answer.ok) {
     const result = answer.result as T;
     if (keep(result)) await writeValues({ [key]: result }).catch(() => undefined);
