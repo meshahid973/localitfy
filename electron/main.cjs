@@ -12,6 +12,7 @@ let scrobbler = null;
 const { LOCALTIFY_RENDERER_PROTOCOL, MEDIA_PROTOCOL, registerPrivilegedSchemes, getLocaltifyRendererMimeType } = require("./runtime/protocols.cjs");
 const { DEFAULT_WINDOW_TRANSLUCENCY, normalizeWindowTranslucencySettings, createWindowsStartupRuntime } = require("./runtime/windows.cjs");
 const { createElectronServiceRuntime } = require("./runtime/services.cjs");
+const { createBootstrapHandler } = require("./runtime/bootstrap.cjs");
 const { loadLocaltifyEnv } = require("./runtime/environment.cjs");
 const { uniquePaths, createUserDataRuntime } = require("./runtime/user-data.cjs");
 const { createWindowTranslucencyRuntime } = require("./runtime/translucency.cjs");
@@ -1790,9 +1791,9 @@ function shapeSong(song, pixelArtFiles = null) {
   if (!song) return null;
   const exists = fileExists(song.filePath);
   const savedCoverPath = String(song.coverPath || "").trim();
-  const savedCoverExists = Boolean(savedCoverPath && fileExists(savedCoverPath) && isImageFile(savedCoverPath));
-  const runtimeCoverPath = getRuntimeCoverPath(song, pixelArtFiles);
-  const coverExists = Boolean(runtimeCoverPath && fileExists(runtimeCoverPath));
+  const savedCoverExists = Boolean(savedCoverPath && isImageFile(savedCoverPath) && fileExists(savedCoverPath));
+  const runtimeCoverPath = savedCoverExists ? savedCoverPath : pickStablePixelCoverForSong(song, pixelArtFiles);
+  const coverExists = savedCoverExists || Boolean(runtimeCoverPath && fileExists(runtimeCoverPath));
   const runtimeCoverSource = savedCoverExists ? String(song.coverSource || "unknown") : (runtimeCoverPath ? "fallback" : "none");
   const coverUrl = coverExists ? safeMediaUrl(runtimeCoverPath) : "";
   const coverThumbUrl = coverExists ? getCoverThumbnailUrl(runtimeCoverPath) : "";
@@ -2303,20 +2304,20 @@ app.whenReady().then(async () => {
   ipcRouter.handle("feedback:status", async () => getFeedbackStatus());
   ipcRouter.handle("feedback:send", async (_event, payload = {}) => sendLocaltifyFeedback(payload));
 
-  ipcRouter.handle("app:bootstrap", async (_event, options = {}) => {
-    await yieldToMainLoop();
-    if (options?.includeGenres === true) await genreMetadataBackfill.run();
-    scheduleCoverThumbnailWarmup();
-    return {
-      songs: listSongsShaped(),
-      settings: getSettings(),
-      playlists: getPlaylists(),
+  ipcRouter.handle("app:bootstrap", createBootstrapHandler({
+    yieldToMainLoop,
+    backfillGenres: () => genreMetadataBackfill.run(),
+    scheduleCoverWarmup: scheduleCoverThumbnailWarmup,
+    listSongs: listSongsShaped,
+    getSettings,
+    getPlaylists,
+    getDiagnostics: () => ({
       windowsIntegration: getStartWithWindowsStatus(),
       windowTranslucency: getSavedWindowTranslucencySettings(),
       database: { ...getDatabaseStatus(), userDataPath: app.getPath("userData"), dataFolderName: userDataRuntime.dataFolderName },
       discord: getDiscordStatus()
-    };
-  });
+    })
+  }));
 
   ipcRouter.handle("playback:resolve-url", async (_event, payload = {}) => {
     try {

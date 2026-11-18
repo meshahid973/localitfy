@@ -508,7 +508,7 @@ declare global {
 
   interface Window {
     localitfy: {
-      bootstrap: (options?: { includeGenres?: boolean }) => Promise<{
+      bootstrap: (options?: { includeGenres?: boolean; includeDiagnostics?: boolean }) => Promise<{
         songs: Song[];
         settings: Partial<Settings>;
         playlists?: LocalitfyPlaylistRecord[];

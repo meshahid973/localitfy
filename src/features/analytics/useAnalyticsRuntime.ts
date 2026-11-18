@@ -8,7 +8,7 @@ import {
   makeLocaltifyAnalyticsSnapshotFallback,
   type LocaltifyAnalyticsSnapshot
 } from "./analyticsSnapshot";
-import { trackAudienceSnapshot, trackMarketingSnapshot, trackPlaylistSnapshot } from "../../analytics";
+import { isLocaltifyAnalyticsConfigured, trackAudienceSnapshot, trackMarketingSnapshot, trackPlaylistSnapshot } from "../../analytics";
 
 import { runLocaltifyIdleTask as runIdleTask } from "../../app/runtime/idle";
 
@@ -156,7 +156,7 @@ export function useAnalyticsRuntime(options: UseAnalyticsRuntimeOptions) {
   }, []);
 
   useEffect(() => {
-    if (!ready || !analyticsAudienceSnapshotReady) return;
+    if (!ready || !analyticsAudienceSnapshotReady || !isLocaltifyAnalyticsConfigured()) return;
     const cancel = runIdleTask(() => {
       trackAudienceSnapshot(analyticsAudienceSnapshot);
       trackMarketingSnapshot(analyticsAudienceSnapshot);

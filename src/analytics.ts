@@ -615,6 +615,8 @@ function fireAppPageview(view = "home", source = "unknown", properties: Analytic
   );
 }
 
+export function isLocaltifyAnalyticsConfigured() { return Boolean(safeEnv("VITE_PUBLIC_POSTHOG_KEY")); }
+
 /** Synchronously accept events; load the SDK only after the lifecycle schedules init. */
 export function initLocalitfyAnalytics(input?: InitInput): boolean {
   if (initialized) return true;

@@ -76,6 +76,7 @@ type AnalyserSnapshot = {
 
 export class AudioEffectRuntime {
   private context: AudioContext | null = null;
+  private resumingContext: AudioContext | null = null;
   private element: HTMLAudioElement | null = null;
   private source: MediaElementAudioSourceNode | null = null;
   private analyser: AnalyserNode | null = null;
@@ -151,11 +152,14 @@ export class AudioEffectRuntime {
 
   async resume() {
     const context = this.context;
-    if (!context || context.state === "closed" || context.state === "running") return;
+    if (!context || context.state === "closed" || context.state === "running" || this.resumingContext === context) return;
+    this.resumingContext = context;
     try {
       await context.resume();
     } catch {
       // A user gesture/focus retry can resume it later.
+    } finally {
+      if (this.resumingContext === context) this.resumingContext = null;
     }
   }
 

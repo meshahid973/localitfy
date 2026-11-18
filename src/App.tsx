@@ -418,6 +418,8 @@ function MainModeApp() {
 
   useAppLifecycleRuntime({
     appVersion: APP_VERSION,
+    ready,
+    isPlaying,
     analytics: {
       init: initLocalitfyAnalytics,
       appLaunched: trackAppLaunched,
@@ -879,7 +881,7 @@ function MainModeApp() {
 
     let cancelled = false;
 
-    runLocaltifyIdleTask(() => {
+    const cancelIdle = runLocaltifyIdleTask(() => {
       window.localitfy
         .getPerformanceStatus?.()
         .then((status: any) => {
@@ -890,6 +892,7 @@ function MainModeApp() {
 
     return () => {
       cancelled = true;
+      cancelIdle();
     };
   }, [ready]);
 
@@ -898,7 +901,7 @@ function MainModeApp() {
 
     let cancelled = false;
 
-    runLocaltifyIdleTask(() => {
+    const cancelIdle = runLocaltifyIdleTask(() => {
       window.localitfy
         .getFeedbackStatus?.()
         .then((status: any) => {
@@ -920,6 +923,7 @@ function MainModeApp() {
 
     return () => {
       cancelled = true;
+      cancelIdle();
     };
   }, [ready]);
 
@@ -2150,8 +2154,9 @@ function MainModeApp() {
     setBootError(null);
     setBootLogCopied(false);
 
+    let cancelPixelArtLoad: (() => void) | undefined;
     devPerfStart("bootstrap:ipc");
-    window.localitfy.bootstrap().then(async (payload) => {
+    window.localitfy.bootstrap({ includeDiagnostics: false }).then(async (payload) => {
       if (!mounted) return;
       devPerfEnd("bootstrap:ipc", `${payload.songs?.length ?? 0} songs`);
 
@@ -2225,12 +2230,12 @@ function MainModeApp() {
         window.localitfy.savePlaylists(localPlaylists).catch(() => undefined);
       }
 
-      loadPixelArtAssets(false)
-        .then((assets) => {
-          if (!mounted) return;
-          setPixelArtAssets(assets);
-        })
-        .catch(() => undefined);
+      cancelPixelArtLoad = runLocaltifyIdleTask(() => {
+        if (!mounted) return;
+        void loadPixelArtAssets(false)
+          .then((assets) => { if (mounted) setPixelArtAssets(assets); })
+          .catch(() => undefined);
+      }, 1800);
       bootedRef.current = true;
     }).catch((error) => {
       if (!mounted) return;
@@ -2244,6 +2249,7 @@ function MainModeApp() {
 
     return () => {
       mounted = false;
+      cancelPixelArtLoad?.();
     };
   }, [loadPixelArtAssets, bootRetryKey]);
   // Heavy automatic late-night secret effects were removed in V215.

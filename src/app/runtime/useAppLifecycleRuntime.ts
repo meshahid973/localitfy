@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 import type { MutableRefObject } from "react";
 import type { View } from "../../features/shell/view.types";
+import { runLocaltifyIdleTask } from "./idle";
 
 export type AppReturnRepairReason = "focus" | "visibility" | "background-tick";
 
@@ -17,6 +18,8 @@ type LifecycleAnalytics = {
 
 type AppLifecycleRuntimeOptions = {
   appVersion: string;
+  ready: boolean;
+  isPlaying: boolean;
   analytics: LifecycleAnalytics;
   analyticsViewRef: MutableRefObject<View>;
   appRootRef: MutableRefObject<HTMLElement | null>;
@@ -27,6 +30,8 @@ type AppLifecycleRuntimeOptions = {
 
 export function useAppLifecycleRuntime({
   appVersion,
+  ready,
+  isPlaying,
   analytics,
   analyticsViewRef,
   appRootRef,
@@ -41,19 +46,49 @@ export function useAppLifecycleRuntime({
     repairPlaybackAfterAppReturnsRef.current = repairPlaybackAfterAppReturns;
   }, [repairPlaybackAfterAppReturns]);
 
+  const analyticsStartedRef = useRef(false);
+
+  // Initialize only after hydrated UI has had a chance to paint, once per session.
   useEffect(() => {
-    let analyticsLaunchCancelled = false;
-    const analyticsLaunchTimer = window.setTimeout(() => {
-      if (analyticsLaunchCancelled) return;
-      const analyticsReady = analytics.init(appVersion);
-
-      if (analyticsReady) {
-        analytics.appLaunched({ initial_view: analyticsViewRef.current });
-        analytics.appActive({ reason: "launch", current_view: analyticsViewRef.current });
-        analytics.acquisitionSource({ source: "direct_app_launch", initial_view: analyticsViewRef.current });
-      }
+    if (!ready || analyticsStartedRef.current) return;
+    let cancelIdle: (() => void) | undefined;
+    const timer = window.setTimeout(() => {
+      cancelIdle = runLocaltifyIdleTask(() => {
+        if (analyticsSessionEndedRef.current || analyticsStartedRef.current) return;
+        analyticsStartedRef.current = true;
+        if (analytics.init(appVersion)) {
+          analytics.appLaunched({ initial_view: analyticsViewRef.current });
+          analytics.appActive({ reason: "launch", current_view: analyticsViewRef.current });
+          analytics.acquisitionSource({ source: "direct_app_launch", initial_view: analyticsViewRef.current });
+        }
+      }, 1800);
     }, 950);
+    return () => { window.clearTimeout(timer); cancelIdle?.(); };
+  }, [ready, appVersion]);
 
+  // Retain the existing safety net only during hidden playback, not while
+  // browsing the foreground, paused or idle.
+  useEffect(() => {
+    if (!isPlaying) return;
+    let backgroundAudioKeeper: number | null = null;
+    const stop = () => {
+      if (backgroundAudioKeeper !== null) window.clearInterval(backgroundAudioKeeper);
+      backgroundAudioKeeper = null;
+    };
+    const sync = () => {
+      if (!document.hidden) { stop(); return; }
+      if (backgroundAudioKeeper !== null) return;
+      backgroundAudioKeeper = window.setInterval(() => {
+        if (!document.hidden || !playingRef.current) { stop(); return; }
+        repairPlaybackAfterAppReturnsRef.current("background-tick");
+      }, 1800);
+    };
+    sync();
+    document.addEventListener("visibilitychange", sync);
+    return () => { stop(); document.removeEventListener("visibilitychange", sync); };
+  }, [isPlaying, playingRef]);
+
+  useEffect(() => {
     const finishAnalyticsSession = (reason: "beforeunload" | "unmount") => {
       if (analyticsSessionEndedRef.current) return;
       analyticsSessionEndedRef.current = true;
@@ -125,11 +160,6 @@ export function useAppLifecycleRuntime({
       if (!document.hidden) analytics.appActive({ reason: "heartbeat", current_view: analyticsViewRef.current });
     }, 300_000);
 
-    const backgroundAudioKeeper = window.setInterval(() => {
-      if (!document.hidden || !playingRef.current) return;
-      repairPlayback("background-tick");
-    }, 1800);
-
     window.addEventListener("beforeunload", handleBeforeUnload);
     window.addEventListener("focus", handleFocus);
     window.addEventListener("blur", handleBlur);
@@ -138,14 +168,11 @@ export function useAppLifecycleRuntime({
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      analyticsLaunchCancelled = true;
-      window.clearTimeout(analyticsLaunchTimer);
       if (focusRepairTimer) window.clearTimeout(focusRepairTimer);
       document.body.classList.remove("localtifyFocusRecovering");
       appRootRef.current?.classList.remove("localtifyHeroAmbienceRecovering");
       finishAnalyticsSession("unmount");
       window.clearInterval(heartbeatTimer);
-      window.clearInterval(backgroundAudioKeeper);
       window.removeEventListener("beforeunload", handleBeforeUnload);
       window.removeEventListener("focus", handleFocus);
       window.removeEventListener("blur", handleBlur);
