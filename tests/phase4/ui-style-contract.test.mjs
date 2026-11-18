@@ -137,10 +137,10 @@ test("overlay menus use Localtify theme surfaces and expose keyboard focus", () 
   const queue = read("src/features/player/components/queue-panel.css");
 
   assert.match(dropdown, /\.arcDropdownOption:focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\) !important; outline-offset: -2px !important/);
-  assert.match(context, /\.songContextMenu\{[\s\S]*?background: var\(--lt-glass-background\)/);
+  assert.match(read("src/shared/ui/surface.css"), /\.ltOverlaySurface\s*\{[^}]*background: var\(--lt-glass-background\)/);
   assert.match(context, /\.app \.songContextMenuLayer \.songContextMenu button:focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\) !important/);
   assert.match(context, /\.songContextMenu \.songContextMenuIcon\{[^}]*color: var\(--lt-muted\)/);
-  assert.match(queue, /\.queuePanel\{[\s\S]*?background: var\(--lt-glass-background\)/);
+  assert.match(read("src/features/player/components/QueuePanel.tsx"), /className="queuePanel ltOverlaySurface"/);
   assert.match(queue, /\.app \.queuePanel button\.queuePanelRowMain:focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\) !important/);
   assert.doesNotMatch(context, /background: linear-gradient\(180deg, rgba\(20, 20, 20/);
   assert.doesNotMatch(queue, /background: linear-gradient\(180deg, rgba\(20, 20, 24/);

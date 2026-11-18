@@ -60,3 +60,10 @@
   :where(.localtifySurface-interactive) { transition: none; }
 }
 .app.reducedMotion :where(.localtifySurface-interactive) { transition: none; }
+
+/* Shared top-level overlay skin; menus and the queue own only geometry. */
+.ltOverlaySurface {
+  background: var(--lt-glass-background);
+  backdrop-filter: blur(var(--lt-glass-blur));
+  box-shadow: var(--lt-shadow-menu);
+}

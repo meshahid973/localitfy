@@ -62,7 +62,7 @@ function mixState(state) {
   '../home/useHomeDay':{useHomeDay:()=> '2026-11-18'},
   '../home/useHomeDailyMixes':{useHomeDailyMixes:day=>{assert.equal(day,'2026-11-18');return state;}},
   '../shell/appActions':{useAppActions:()=>({nav:{go(){}}})},
-  '../covers/ArtworkBackdrop':{ArtworkBackdrop:()=>null},
+  '../covers/pageAtmosphere':{PageAtmosphere:()=>null},
   './CollectionHero':{}, './TrackList':{}
  };
  const exports={};runInNewContext(output,{exports,require:n=>dependencies[n]??require(n)});

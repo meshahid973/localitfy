@@ -11,9 +11,6 @@
   border: 1px solid var(--lt-border);
   border-radius: var(--lt-radius-md);
   color: var(--lt-text);
-  background: var(--lt-glass-background);
-  backdrop-filter: blur(var(--lt-glass-blur));
-  box-shadow: var(--lt-shadow-menu);
   outline: 0;
   animation: queuePanelIn var(--lt-duration-fast) var(--lt-ease-out) both;
 }

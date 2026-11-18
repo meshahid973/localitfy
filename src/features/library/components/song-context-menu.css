@@ -16,9 +16,6 @@
   border: 1px solid var(--lt-border);
   border-radius: var(--lt-control-radius);
   color: var(--text);
-  background: var(--lt-glass-background);
-  backdrop-filter: blur(var(--lt-glass-blur));
-  box-shadow: var(--lt-shadow-menu);
   animation: songContextMenuIn var(--lt-duration-fast) var(--lt-ease-out) both;
 }
 

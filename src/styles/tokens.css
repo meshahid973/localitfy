@@ -52,6 +52,7 @@
   --lt-glass-blur: 12px;
   --lt-duration-fast: 120ms;
   --lt-duration-normal: 180ms;
+  --lt-control-motion: var(--lt-duration-fast);
   --lt-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --lt-duration-atmosphere: 360ms;
   --lt-shadow-menu: 0 12px 32px rgba(0, 0, 0, .28);
@@ -75,3 +76,6 @@
     --lt-menu-item-height: 44px;
   }
 }
+
+.app.reducedMotion { --lt-control-motion: 0ms; }
+@media (prefers-reduced-motion: reduce) { :root { --lt-control-motion: 0ms; } }

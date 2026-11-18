@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Check, ChevronDown } from "lucide-react";
 import "./ArcDropdownMenu.css";
+import "./surface.css";
 import { useMenuTypeahead } from "../hooks/useMenuTypeahead";
 
 /**
@@ -84,10 +85,17 @@ export function ArcDropdownMenu<T extends string>({
     placeMenu();
     const root = triggerRef.current?.closest<HTMLElement>(".app");
     if (root) {
-      const computed = getComputedStyle(root);
-      const copied = {} as Record<string, string>;
-      for (const key of THEME_VARS) copied[key] = computed.getPropertyValue(key).trim();
-      setThemeStyle(copied as CSSProperties);
+      const sync = () => {
+        const computed = getComputedStyle(root);
+        const copied = {} as Record<string, string>;
+        for (const key of THEME_VARS) copied[key] = computed.getPropertyValue(key).trim();
+        setThemeStyle(copied as CSSProperties);
+      };
+      sync();
+      const observer = new MutationObserver(sync);
+      observer.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+      optionRefs.current[activeIndex]?.focus({ preventScroll: true });
+      return () => observer.disconnect();
     }
     optionRefs.current[activeIndex]?.focus({ preventScroll: true });
   }, [open, placeMenu]);
@@ -198,7 +206,7 @@ export function ArcDropdownMenu<T extends string>({
               ref={menuRef}
               role="menu"
               aria-label={ariaLabel}
-              className="arcDropdownMenu"
+              className="arcDropdownMenu ltOverlaySurface"
               style={{ ...themeStyle, left: position.left, top: position.top, width: position.width }}
               initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -5, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}

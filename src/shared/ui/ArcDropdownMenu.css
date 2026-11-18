@@ -36,10 +36,7 @@
   padding: 5px;
   border: 1px solid var(--lt-border);
   border-radius: var(--lt-control-radius);
-  background: var(--lt-glass-background);
-  backdrop-filter: blur(var(--lt-glass-blur));
   color: var(--lt-text);
-  box-shadow: var(--lt-shadow-menu);
   font-size: var(--lt-text-sm);
   font-weight: 600;
 }
