@@ -170,7 +170,7 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, ge
     if (wordFrame.current.line === index && wordFrame.current.word === word) return;
     const line = lineRefs.current[index];
     if (!line) return;
-    for (const segment of line.querySelectorAll<HTMLElement>("[data-lyric-word]")) {
+    for (const segment of Array.from(line.querySelectorAll<HTMLElement>("[data-lyric-word]"))) {
       segment.dataset.sung = Number(segment.dataset.lyricWord) <= word ? "true" : "false";
     }
     wordFrame.current = { line: index, word };
