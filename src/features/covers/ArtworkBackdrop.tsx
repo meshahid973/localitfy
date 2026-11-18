@@ -1,63 +1,47 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import type { Song } from "../library/song.types";
-import { Cover } from "./Cover";
-import { getSongAmbientSource } from "./cover.ambient";
+import { decodeArtwork, getSongAmbientSource } from "./cover.ambient";
 import "./artwork-backdrop.css";
 
 export const ArtworkAmbientContext = createContext(true);
 const FADE_MS = 360;
-type Layer = { key: string; song: Song };
+type Frame = { current: string; previous: string };
 
-function CrossfadeArtwork({ song }: { song: Song }) {
-  const key = getSongAmbientSource(song) || song.id;
-  const [displayed, setDisplayed] = useState<Layer | null>(null);
-  const [outgoing, setOutgoing] = useState<Layer | null>(null);
-  const pending = displayed?.key !== key;
-  const incomingRef = useRef<HTMLDivElement>(null);
-
-  // Keep the last decoded cover until the next one loads. Never retain
-  // more than two mounted images, even during rapid track changes.
+function CrossfadeArtwork({ source }: { source: string }) {
+  const [frame, setFrame] = useState<Frame>({ current: "", previous: "" });
   useEffect(() => {
-    if (!outgoing) return;
-    const timer = window.setTimeout(() => setOutgoing(null), FADE_MS + 40);
-    return () => window.clearTimeout(timer);
-  }, [outgoing]);
+    if (!source) { setFrame({ current: "", previous: "" }); return; }
+    const controller = new AbortController();
+    void decodeArtwork(source, controller.signal).then(ready => {
+      if (controller.signal.aborted) return;
+      setFrame(old => !ready ? { current: "", previous: "" } :
+        old.current === source ? old : { current: source, previous: old.current });
+    });
+    return () => controller.abort();
+  }, [source]);
 
   useEffect(() => {
-    if (!pending) return;
-    const incoming = incomingRef.current?.querySelector("img");
-    // A → B → A may reuse the already-loaded outgoing element.
-    const delay = incoming?.complete && incoming.naturalWidth > 0 ? 0 : 2000;
+    if (!frame.previous) return;
     const timer = window.setTimeout(() => {
-      setOutgoing(displayed);
-      setDisplayed({ key, song });
-    }, delay);
+      setFrame(old => old === frame ? { current: old.current, previous: "" } : old);
+    }, FADE_MS + 40);
     return () => window.clearTimeout(timer);
-  }, [key, pending, displayed, song]);
+  }, [frame]);
 
-  function reveal() {
-    if (!pending) return;
-    setOutgoing(displayed);
-    setDisplayed({ key, song });
-  }
-
-  const layers = pending ? [displayed, { key, song }] : [outgoing, displayed];
-  return (
-    <div className="artworkBackdrop" aria-hidden="true">
-      {layers.map((layer) => layer ? (
-        <div key={layer.key} className="artworkBackdropLayer"
-          data-visible={(pending ? layer.key !== key : layer.key === key) ? "true" : "false"}
-          ref={layer.key === key ? incomingRef : undefined}
-          onLoadCapture={layer.key === key ? reveal : undefined}>
-          <Cover song={layer.song} className="artworkBackdropCover" priority="high" preferThumbnail />
+  return <div className="artworkBackdrop" aria-hidden="true">
+    {[frame.previous, frame.current].filter(Boolean).map(src => (
+      <div key={src} className="artworkBackdropLayer" data-visible={src === frame.current ? "true" : "false"}>
+        <div className="artworkBackdropCover">
+          <img className="coverImage isLoaded" src={src} alt="" draggable={false} decoding="async" referrerPolicy="no-referrer"
+            onError={() => setFrame(old => old.current === src ? { current: "", previous: "" } : old.previous === src ? { ...old, previous: "" } : old)} />
         </div>
-      ) : null)}
-    </div>
-  );
+      </div>
+    ))}
+  </div>;
 }
 
 export function ArtworkBackdrop({ song }: { song: Song | null }) {
   const enabled = useContext(ArtworkAmbientContext);
-  if (!song || !enabled) return null;
-  return <CrossfadeArtwork song={song} />;
+  const source = getSongAmbientSource(song);
+  return enabled && source ? <CrossfadeArtwork source={source} /> : null;
 }
