@@ -205,6 +205,13 @@ server.listen(5173,async()=>{
     const previous=await win.webContents.executeJavaScript("document.querySelector('.homeFeatureCover').dataset.coverTitle");
     await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.workspaceArtworkBackdrop .artworkBackdropLayer[data-visible=true] img')"),"decoded shell artwork");
     const homeArtwork = await win.webContents.executeJavaScript("document.querySelector('.workspaceArtworkBackdrop .artworkBackdropLayer[data-visible=true] img').src");
+    const shellArtworkGeometry = await win.webContents.executeJavaScript(`(()=>{
+      const root=document.querySelector('.app'), backdrop=document.querySelector('.workspaceArtworkBackdrop');
+      const cover=backdrop.querySelector('.artworkBackdropLayer[data-visible=true] .artworkBackdropCover');
+      const img=cover.querySelector('img'), r=root.getBoundingClientRect(), b=backdrop.getBoundingClientRect(), css=getComputedStyle(cover);
+      return {width:b.width,height:b.height,rootWidth:r.width,rootHeight:r.height,blur:css.filter,opacity:Number(css.opacity),loaded:img.complete&&img.naturalWidth>0};
+    })()`);
+    assert.ok(shellArtworkGeometry.loaded&&shellArtworkGeometry.width>=shellArtworkGeometry.rootWidth-2&&shellArtworkGeometry.height>=shellArtworkGeometry.rootHeight-2&&shellArtworkGeometry.blur.includes('blur(64px)')&&shellArtworkGeometry.opacity>0&&shellArtworkGeometry.opacity<=.27,"shell uses decoded bounded cover imagery: "+JSON.stringify(shellArtworkGeometry));
     await win.webContents.executeJavaScript("document.querySelector('.playerBar button[aria-label=\\\"next song\\\"]').click()");
     await until(()=>win.webContents.executeJavaScript("document.querySelector('.homeFeatureCover')?.dataset.coverTitle").then(title=>title&&title!==previous).catch(()=>false),"next track");
     const samples=[];

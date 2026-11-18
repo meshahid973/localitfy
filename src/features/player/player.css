@@ -312,7 +312,7 @@
 
 .progressRow input[type="range"]::-webkit-slider-runnable-track,
 .volumeWrap input[type="range"]::-webkit-slider-runnable-track{
-  height: 6px !important;
+  height: var(--lt-progress-height) !important;
   border-radius: 999px !important;
   background: transparent !important;
   border: 0 !important;
@@ -1342,7 +1342,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 .playerBar .volumeWrap input[type="range"]::-webkit-slider-runnable-track{
-  height: 6px !important;
+  height: var(--lt-progress-height) !important;
   border-radius: 999px !important;
   border: 0 !important;
   background:

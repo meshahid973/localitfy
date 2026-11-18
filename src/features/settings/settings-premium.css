@@ -1,7 +1,7 @@
 /* Settings layout refinements. Base control styles live in settings.css. */
 .settingsPage.settingsPageV027 {
-  width: 100%;
-  margin: 0;
+  width: min(100%, 1120px);
+  margin: 0 auto;
   gap: var(--lt-page-gap);
   padding: 0 0 var(--lt-space-5);
   color: var(--settings-text);
