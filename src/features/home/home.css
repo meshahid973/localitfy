@@ -387,11 +387,6 @@
 .homeListenRow:focus-visible .homeListenPlay,
 .homeListenRow.playing .homeListenPlay { opacity:1; }
 
-.homeReleaseRail {
-  width: 100%;
-  min-width: 0;
-}
-
 .homeReleaseCard {
   min-width:0;
   padding:0;
@@ -404,13 +399,13 @@
 
 .homePage .mediaCard { --media-play-size:36px; --media-play-inset:6px; }
 .homeReleaseRail {
+  width: 100%;
+  min-width: 0;
   display:grid;
   grid-auto-flow: column;
   grid-auto-columns: clamp(136px, 16cqi, 208px);
   gap:clamp(14px,1.3vw,22px);
   padding: 4px 3px 6px;
-}
-.homeReleaseRail {
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;

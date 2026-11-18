@@ -90,6 +90,7 @@ export default function AppShell(props: AppShellProps) {
   const { isThreeAm } = home;
   const playerBackground = effectiveTheme === "light" && settings.playerBackgroundStyle === "oledBlack" ? "flat" : settings.playerBackgroundStyle || "coverBlur";
   const homeBanner = effectiveTheme === "light" && settings.homeBannerType === "cleanBlack" ? "none" : settings.homeBannerType || "dynamic";
+  const cardBackground = effectiveTheme === "light" && settings.mediaCardBackground === "oledFlat" ? "solid" : settings.mediaCardBackground || "glassy";
   const workspaceCoverColor = useWorkspaceCoverColor(home.ambientStyle, home.currentSong?.id, effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded);
   const [tagSearchSong, setTagSearchSong] = useState<Song | null>(null);
   // When a download batch finishes, offer to tag the songs it added.
@@ -145,7 +146,7 @@ export default function AppShell(props: AppShellProps) {
       data-badge={settings.showHeroBadge ? "on" : "off"}
       data-home-banner={homeBanner}
       data-blur-effects="normal"
-      data-card-background={settings.mediaCardBackground || "glassy"}
+      data-card-background={cardBackground}
       data-home-layout={settings.homeLayoutMode || "balanced"}
       data-library-row-style={settings.libraryRowStyle || "comfyRows"}
       data-sidebar-behavior={settings.sidebarBehavior || "slim"}

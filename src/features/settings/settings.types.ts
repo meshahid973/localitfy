@@ -4,15 +4,8 @@ import type { CoverColorSyncMode, ThemeId } from "./theme.types";
 export type SettingsCategory = "appearance" | "playback" | "discord" | "library" | "downloads" | "covers" | "updates" | "about" | "advanced" | "metadata" | "experimental";
 export type AudioEffectMode = "normal" | "nightcore" | "daycore";
 
-export type Settings = {
-  experimentalMusicAnalysis: boolean;
-  analysisOnBattery: boolean;
-  listeningHistoryEnabled: boolean;
-  lyricsEnabled: boolean;
-  lyricsOnlineLookup: boolean;
-  musicbrainzTagging: boolean;
-  musicbrainzWriteFiles: boolean;
-  theme: ThemeId;
+/** Preserved only for old saved settings and rollback. Not active appearance controls. */
+export type LegacyThemeSettings = {
   themePanelCollapsed: boolean;
   customThemeEnabled: boolean;
   customThemeColor: string;
@@ -22,6 +15,17 @@ export type Settings = {
   customThemeText: string;
   customThemeHighlight: string;
   customThemeProgress: string;
+};
+
+export type Settings = LegacyThemeSettings & {
+  experimentalMusicAnalysis: boolean;
+  analysisOnBattery: boolean;
+  listeningHistoryEnabled: boolean;
+  lyricsEnabled: boolean;
+  lyricsOnlineLookup: boolean;
+  musicbrainzTagging: boolean;
+  musicbrainzWriteFiles: boolean;
+  theme: ThemeId;
   volume: number;
   playerSize: number;
   sidebarWidth: number;
