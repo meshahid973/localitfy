@@ -21,8 +21,8 @@ test("shared surface components have a theme-token style owner", () => {
   const component = read("src/shared/ui/Surface.tsx");
   const css = read("src/shared/ui/surface.css");
   assert.match(component, /import "\.\/surface\.css";/);
-  assert.match(css, /var\(--lt-surface\)/);
-  assert.match(css, /var\(--lt-radius-md\)/);
+  assert.match(css, /var\(--lt-fill\)/);
+  assert.match(css, /var\(--lt-radius-panel\)/);
   assert.match(css, /\.localtifySurface-success/);
   assert.match(css, /\.localtifySurface-danger/);
   assert.doesNotMatch(css, /!important/);

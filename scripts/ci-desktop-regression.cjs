@@ -235,9 +235,28 @@ server.listen(5173,async()=>{
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=library]').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.libraryCollectionShortcuts') && document.querySelector('.app').dataset.workspaceArtwork==='off'").catch(()=>false),"library "+mode);
       await screenshot(win,"library-"+mode);
+      await win.webContents.executeJavaScript("document.querySelector('.librarySort').click()");
+      await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.arcDropdownMenu.ltOverlaySurface')").catch(()=>false),"shared menu surface "+mode);
+      const menuSkin=await win.webContents.executeJavaScript(`(()=>{
+        const root=document.querySelector('.app'),menu=document.querySelector('.arcDropdownMenu');
+        const probe=document.createElement('span');probe.style.backgroundColor='var(--lt-glass-background)';root.appendChild(probe);
+        const expected=getComputedStyle(probe).backgroundColor;probe.remove();
+        return {actual:getComputedStyle(menu).backgroundColor,expected,blur:getComputedStyle(menu).backdropFilter};
+      })()`);
+      assert.equal(menuSkin.actual,menuSkin.expected,"portal follows the active theme's glass token");
+      assert.notEqual(menuSkin.blur,"none","glass surface has its shared blur");
+      await win.webContents.executeJavaScript("document.activeElement.dispatchEvent(new KeyboardEvent('keydown',{key:'t',bubbles:true}))");
+      assert.match(await win.webContents.executeJavaScript("document.activeElement.textContent"),/title/i,"typeahead moves keyboard focus");
+      await win.webContents.executeJavaScript("document.activeElement.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}))");
+      await until(()=>win.webContents.executeJavaScript("!document.querySelector('.arcDropdownMenu') && document.activeElement.classList.contains('librarySort')").catch(()=>false),"dropdown restores focus "+mode);
       await win.webContents.executeJavaScript("document.querySelector('.libraryCollectionShortcuts button:has([data-kind=liked])').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.libraryPageLiked')").catch(()=>false),"liked songs "+mode);
       await screenshot(win,"liked-"+mode);
+      await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=playlists]').click()");
+      await until(()=>win.webContents.executeJavaScript("!!document.querySelector('button[aria-label=\"open qa playlist\"]')").catch(()=>false),"fixture playlist "+mode);
+      await win.webContents.executeJavaScript("document.querySelector('button[aria-label=\"open qa playlist\"]').click()");
+      await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.playlistDetailPage .collectionHero') && document.querySelector('.app').dataset.workspaceArtwork==='on'").catch(()=>false),"playlist owns its palette "+mode);
+      await screenshot(win,"playlist-atmosphere-"+mode);
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=home]').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.homeStartButton')").catch(()=>false),"Home "+mode);
       await assertShellChrome();
