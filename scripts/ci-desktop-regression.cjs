@@ -245,6 +245,13 @@ server.listen(5173,async()=>{
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=library]').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.libraryCollectionShortcuts') && document.querySelector('.app').dataset.workspaceArtwork==='on'").catch(()=>false),"library "+mode);
       await screenshot(win,"library-"+mode);
+      const selectionBefore = await win.webContents.executeJavaScript("document.querySelector('.playerMeta strong')?.textContent");
+      await win.webContents.executeJavaScript("[...document.querySelectorAll('.libraryAction')].find(b=>b.textContent==='Select tracks').click()");
+      await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.librarySelectionTools') && !!document.querySelector('.songButton[aria-pressed=false]')"),"library selection "+mode);
+      await win.webContents.executeJavaScript("document.querySelector('.songButton[aria-pressed=false]').click()");
+      await until(()=>win.webContents.executeJavaScript("document.querySelector('.librarySelectionTools .pageHeaderCount').textContent.includes('1 selected')"),"select without playback "+mode);
+      assert.equal(await win.webContents.executeJavaScript("document.querySelector('.playerMeta strong')?.textContent"),selectionBefore,"selection must not change playback");
+      await win.webContents.executeJavaScript("[...document.querySelectorAll('.libraryAction')].find(b=>b.textContent==='Done').click()");
       await win.webContents.executeJavaScript("document.querySelector('.librarySort').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.arcDropdownMenu.ltOverlaySurface')").catch(()=>false),"shared menu surface "+mode);
       const menuSkin=await win.webContents.executeJavaScript(`(()=>{
@@ -262,11 +269,16 @@ server.listen(5173,async()=>{
       await win.webContents.executeJavaScript("document.querySelector('.libraryCollectionShortcuts button:has([data-kind=liked])').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.libraryPageLiked')").catch(()=>false),"liked songs "+mode);
       await screenshot(win,"liked-"+mode);
+      await win.webContents.executeJavaScript(`(()=>{const e=document.querySelector('.librarySearch');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value").set.call(e,"no matching fixture");e.dispatchEvent(new Event("input",{bubbles:true}));})()`);
+      await until(()=>win.webContents.executeJavaScript("document.querySelector('.libraryPageLiked')?.textContent.includes('No songs found')"),"liked search empty "+mode);
+      await win.webContents.executeJavaScript("[...document.querySelectorAll('.libraryPageLiked button')].find(b=>b.textContent==='clear search').click()");
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=playlists]').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('button[aria-label=\"open qa playlist\"]')").catch(()=>false),"fixture playlist "+mode);
       await win.webContents.executeJavaScript("document.querySelector('button[aria-label=\"open qa playlist\"]').click()");
-      await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.playlistDetailPage .collectionHero') && document.querySelector('.app').dataset.workspaceArtwork==='on'").catch(()=>false),"playlist retains shell artwork "+mode);
+      await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.playlistDetailPage .collectionHero') && document.querySelector('.app').dataset.workspaceArtwork==='on'").catch(()=>false),"playlist contextual shell artwork "+mode);
       await screenshot(win,"playlist-atmosphere-"+mode);
+      await win.webContents.executeJavaScript(`(()=>{const e=document.querySelector('input[aria-label="Search playlist tracks"]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value").set.call(e,"no matching fixture");e.dispatchEvent(new Event("input",{bubbles:true}));})()`);
+      await until(()=>win.webContents.executeJavaScript("document.querySelector('.playlistTracksPanel [role=status]')?.textContent.includes('No matching tracks')"),"playlist search empty "+mode);
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=home]').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.homeStartButton')").catch(()=>false),"Home "+mode);
       await assertShellChrome();

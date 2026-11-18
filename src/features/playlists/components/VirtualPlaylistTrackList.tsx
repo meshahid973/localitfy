@@ -6,7 +6,7 @@ import type { Song, LibraryDropSide } from "../../library/song.types";
 import { Cover } from "../../covers/Cover";
 import { MascotStateArt, PlayingBarsIcon } from "../../../shared/ui/LocaltifyViewUi";
 import { formatTime } from "../../../shared/utils/format";
-import { displaySongArtistV444, displaySongTitleV444 } from "../../library/components/SongRows";
+import { TrackMetadata } from "../../library/TrackMetadata";
 
 function readPlaylistDraggedSongId(event: DragEvent<HTMLElement>, fallbackSongId = "") {
   return (
@@ -24,6 +24,8 @@ function getPlaylistDropSide(event: DragEvent<HTMLElement>): LibraryDropSide {
 
 export type VirtualPlaylistTrackListProps = {
   selectedPlaylistId: string;
+  editable?: boolean;
+  reorderable?: boolean;
   list: Song[];
   currentId: string;
   isPlaying: boolean;
@@ -39,6 +41,8 @@ export type VirtualPlaylistTrackListProps = {
 
 export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
   selectedPlaylistId,
+  editable = true,
+  reorderable = editable,
   list,
   currentId,
   isPlaying,
@@ -66,23 +70,23 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
 
   const handleEmptyDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
     const songId = readPlaylistDraggedSongId(event, draggedSongId);
-    if (!selectedPlaylistId || !songId) return;
+    if (!reorderable || !selectedPlaylistId || !songId) return;
 
     event.preventDefault();
     event.stopPropagation();
     event.dataTransfer.dropEffect = "copy";
-  }, [draggedSongId, selectedPlaylistId]);
+  }, [draggedSongId, selectedPlaylistId, reorderable]);
 
   const handleEmptyDrop = useCallback((event: DragEvent<HTMLDivElement>) => {
     const songId = readPlaylistDraggedSongId(event, draggedSongId);
-    if (!selectedPlaylistId || !songId) return;
+    if (!reorderable || !selectedPlaylistId || !songId) return;
 
     event.preventDefault();
     event.stopPropagation();
     onAppendSong(selectedPlaylistId, songId);
     clearLocalDropTarget();
     onDragEnd();
-  }, [clearLocalDropTarget, draggedSongId, onAppendSong, onDragEnd, selectedPlaylistId]);
+  }, [clearLocalDropTarget, draggedSongId, onAppendSong, onDragEnd, selectedPlaylistId, reorderable]);
 
   if (!selectedPlaylistId || !list.length) {
     return (
@@ -122,11 +126,11 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
                 "--playlist-row-y": `${virtualRow.start - scrollMargin}px`,
                 "--playlist-stagger": Math.min(virtualRow.index, 12)
               } as CSSProperties}
-              draggable
+              draggable={reorderable}
               onDragStart={(event) => onStartSongDrag(event, song.id)}
               onDragOver={(event) => {
                 const incomingSongId = readPlaylistDraggedSongId(event, draggedSongId);
-                if (!incomingSongId || incomingSongId === song.id) return;
+                if (!reorderable || !incomingSongId || incomingSongId === song.id) return;
 
                 event.preventDefault();
                 event.stopPropagation();
@@ -146,7 +150,7 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
               }}
               onDrop={(event) => {
                 const incomingSongId = readPlaylistDraggedSongId(event, draggedSongId);
-                if (!incomingSongId || incomingSongId === song.id) return;
+                if (!reorderable || !incomingSongId || incomingSongId === song.id) return;
 
                 event.preventDefault();
                 event.stopPropagation();
@@ -161,17 +165,14 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
               }}
               onContextMenu={(event) => onOpenContextMenu(event, song)}
             >
-              <span className="playlistTrackGrip"><GripVertical size={14} strokeWidth={2.25} /></span>
+              <span className="playlistTrackGrip">{reorderable ? <GripVertical size={14} strokeWidth={2.25} /> : null}</span>
               <button className="playlistTrackMain" type="button" disabled={song.fileExists === false} aria-current={active ? "true" : undefined} onClick={() => onSelectSong(song.id)}>
                 <span className="playlistTrackIndex">{active && isPlaying ? <PlayingBarsIcon /> : virtualRow.index + 1}</span>
                 <Cover song={song} className="playlistTrackCover" preferThumbnail />
-                <span className="playlistTrackText">
-                  <strong>{displaySongTitleV444(song, 7)}</strong>
-                  <small>{displaySongArtistV444(song)}</small>
-                </span>
+                <TrackMetadata song={song} className="playlistTrackText" subtitle={song.fileExists === false ? "Missing local file" : undefined} />
               </button>
               <span className="playlistTrackDuration">{formatTime(song.duration)}</span>
-              <button className="iconAction iconActionSvg" type="button" onClick={() => onRemoveSong(selectedPlaylistId, song.id)} aria-label="remove from playlist">
+              <button className="iconAction iconActionSvg" type="button" disabled={!editable} onClick={() => onRemoveSong(selectedPlaylistId, song.id)} aria-label={`Remove ${song.title} from playlist`}>
                 <X size={16} strokeWidth={2.5} />
               </button>
             </article>

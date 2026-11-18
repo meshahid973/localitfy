@@ -9,7 +9,7 @@
 
 .genreCardCover,
 .genreCardCover img {
-  width: min(148px, 100%);
+  width: 100%;
   border-radius: var(--lt-radius-item);
 }
 

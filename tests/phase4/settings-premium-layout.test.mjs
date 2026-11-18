@@ -136,9 +136,10 @@ test("Settings search and switches are readable with reduced-motion support", ()
 test("Library uses an unfilled list with theme-aware hover and active rows", () => {
   const lib = read("src/features/library/library.css");
   assert.match(lib, /\.libraryTrackSurface \{[\s\S]*?background: transparent/);
-  assert.match(lib, /\.songRow:hover:not\(\.songDragging\):not\(\.songDropTarget\) \{[\s\S]*?background: color-mix\(in srgb, var\(--lt-text\) 4%, transparent\)/);
-  assert.match(lib, /\.songRow.active:not\(\.songDragging\):not\(\.songDropTarget\) \{[\s\S]*?background: color-mix\(in srgb, var\(--lt-text\) 6%, transparent\)/);
-  assert.match(lib, /\.songRow:not\(\.songDropTarget\)::before/);
+  assert.match(lib, /\.songRow:hover:not\(\.songDragging\):not\(\.songDropTarget\) \{[\s\S]*?background: var\(--lt-fill-hover\)/);
+  assert.match(lib, /\.songRow.active:not\(\.songDragging\):not\(\.songDropTarget\) \{[\s\S]*?background: var\(--lt-fill-selected\)/);
+  assert.doesNotMatch(read("src/features/shell/app-core.css"), /\.songRow::(?:before|after)\s*\{/);
+  assert.match(read("src/App.css"), /\.songDropTarget::before\s*\{/);
 });
 
 test("Covers keeps interactive tools while replacing fixed blue surfaces", () => {

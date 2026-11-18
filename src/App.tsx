@@ -1090,12 +1090,12 @@ function MainModeApp() {
 
   const mostPlayed = topSongs[0] ?? null;
   const missingSongsForLibrary = useMemo(() => songs.filter((song) => song.fileExists === false), [songs]);
-  const unsortedVisibleSongs =
-    view === "liked"
-      ? likedSongs
-      : view === "library" && libraryFilterMode === "missing"
-        ? missingSongsForLibrary
-        : filteredSongs;
+  const likedSongIds = useMemo(() => new Set(likedSongs.map(song => song.id)), [likedSongs]);
+  const unsortedVisibleSongs = useMemo(() => {
+    if (view === "liked") return deferredQuery.trim() ? filteredSongs.filter(song => likedSongIds.has(song.id)) : likedSongs;
+    if (view === "library" && libraryFilterMode === "missing") return deferredQuery.trim() ? filteredSongs.filter(song => song.fileExists === false) : missingSongsForLibrary;
+    return filteredSongs;
+  }, [view, libraryFilterMode, deferredQuery, filteredSongs, likedSongIds, likedSongs, missingSongsForLibrary]);
   const visibleSongs = useMemo(
     () => sortLibrarySongs(unsortedVisibleSongs, librarySortMode),
     [unsortedVisibleSongs, librarySortMode]
@@ -4447,7 +4447,8 @@ function MainModeApp() {
   }
 
   async function shuffleLibrarySongsAction() {
-    const { shuffled, nextSong, queuedSongIds } = buildShuffleQueue(playableSongs, currentId);
+    const scope = view === "library" || view === "liked" ? visibleSongs.filter(isPlayableSong) : playableSongs;
+    const { shuffled, nextSong, queuedSongIds } = buildShuffleQueue(scope, currentId);
 
     if (!nextSong || shuffled.length < 2) {
       setStatusText("add more playable songs before shuffling");
@@ -6674,8 +6675,8 @@ function MainModeApp() {
     endSongDrag();
   });
 
-  const selectPlaylistSongAction = useStableCallback((songId: string) => {
-    void playSongFromPlaylist(selectedPlaylist?.id || "", songId, true);
+  const selectPlaylistSongAction = useStableCallback((songId: string, playlistId?: string) => {
+    void playSongFromPlaylist(playlistId || selectedPlaylist?.id || "", songId, true);
   });
 
   const startPlaylistSongDragAction = useStableCallback((event: DragEvent<HTMLElement>, songId: string) => {

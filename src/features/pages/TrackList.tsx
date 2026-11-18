@@ -5,7 +5,8 @@ import { Cover } from "../covers/Cover";
 import { LikeHeartAnimationV443 } from "../../shared/ui/LikeHeartAnimation";
 import { PlayingBarsIcon } from "../../shared/ui/LocaltifyViewUi";
 import { formatTime } from "../../shared/utils/format";
-import { prettyMeta, prettyTitle } from "../search/search.utils";
+import { prettyMeta } from "../search/search.utils";
+import { TrackMetadata } from "../library/TrackMetadata";
 import { splitArtistCredits } from "../artists/artistCredits";
 import { useAppActions } from "../shell/appActions";
 import type { Song } from "../library/song.types";
@@ -53,17 +54,12 @@ export default function TrackList({ songs, currentId, isPlaying, playFrom, toggl
           <Play className="trackRowPlayIcon" size={13} fill="currentColor" aria-hidden="true" />
         </button>
         {showCover ? <Cover song={song} className="trackRowCover" preferThumbnail /> : null}
-        <span className="trackRowTitle">
-          <strong title={song.title}>{prettyTitle(song.title, 10)}</strong>
-          <small>
-            {shown.length ? shown.map((name, at) => (
+        <TrackMetadata song={song} className="trackRowTitle" maxWords={10} subtitle={shown.length ? shown.map((name, at) => (
               <Fragment key={name}>
                 {at ? ", " : null}
                 <button className="trackLink" type="button" onClick={(event) => { event.stopPropagation(); nav.openArtistPage(name); }}>{prettyMeta(name)}</button>
               </Fragment>
-            )) : prettyMeta(song.artist || "unknown artist")}
-          </small>
-        </span>
+            )) : prettyMeta(song.artist || "unknown artist")} />
         <button className={`iconAction likeActionV443 noActionHoverV444 ${song.liked ? "liked likeActionActiveV443" : ""}`} type="button"
           onClick={(event) => { event.stopPropagation(); void toggleLike(song.id); }} aria-label={song.liked ? "unlike song" : "like song"} aria-pressed={song.liked}>
           <LikeHeartAnimationV443 liked={song.liked} />

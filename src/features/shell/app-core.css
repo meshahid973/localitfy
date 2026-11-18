@@ -268,20 +268,6 @@ button:disabled{
 
 }
 
-.songRow::before{
-  content: "";
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.09), transparent 42%);
-  transition: opacity 120ms ease;
-}
-
-.songRow:hover::before{
-  opacity: 1;
-}
-
 .songButton{
   position: relative;
 
@@ -292,7 +278,7 @@ button:disabled{
   align-items: center;
   gap: 12px;
   color: var(--text);
-  background: #000;
+  background: transparent;
   text-align: left;
 }
 
@@ -314,10 +300,6 @@ button:disabled{
   height: 42px;
   border-radius: 9px;
   font-weight: 850;
-}
-
-.songButton:hover .songArt{
-  transform: scale(1.035);
 }
 
 .songMeta{
@@ -346,7 +328,6 @@ button:disabled{
 }
 
 .iconAction:hover{
-  transform: translateY(-1px);
   color: var(--lt-text);
   background: var(--surface-3);
 }
@@ -469,7 +450,6 @@ button:disabled{
 }
 
 .dangerButton:hover{
-  transform: translateY(-1px);
   background: var(--danger);
 }
 
@@ -672,7 +652,7 @@ button:disabled{
   font-weight: 900;
 }
 
-.songRow.active .songMeta strong::after{
+.songRow.playing .songMeta strong::after{
   content: "  playing";
   color: var(--accent);
   font-size: 10px;
@@ -705,17 +685,6 @@ button:disabled{
 .iconAction{
   transition-duration: 120ms;
 }
-
-.navItem:hover,
-.heroGhost:hover,
-.softButton:hover,
-.mainAction:hover,
-.heroMain:hover,
-.circleButton:hover:not(.playerBar *),
-.iconAction:hover{
-  transform: translate3d(0, -1px, 0);
-}
-
 .editorModal{
   background: var(--lt-bg-elevated);
   border-color: var(--lt-border);
@@ -775,20 +744,6 @@ button:disabled{
 
   padding: 6px 8px;
   background: rgba(255, 255, 255, 0.035);
-}
-
-.songRow::after{
-  content: "";
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.12), transparent 44%);
-  transition: opacity var(--motion-fast) ease;
-}
-
-.songRow:hover::after{
-  opacity: 1;
 }
 
 .songButton{
@@ -894,11 +849,6 @@ button:disabled{
 }
 }
 
-@media (hover: hover){
-.songRow:hover{
-  filter: brightness(1.045);
-}
-}
 
 .secretRibbon{
   position: absolute;
@@ -1065,13 +1015,6 @@ button:disabled{
 .app::before{
   display: none !important;
   content: none !important;
-}
-
-button:active,
-.songRow:active,
-.iconAction:active,
-.circleButton:active:not(.playerBar *){
-  transform: scale(.985) !important;
 }
 
 .ambientSurface{
@@ -1243,14 +1186,6 @@ button:active,
 @keyframes localitfyRain {
   from { background-position: 0 0; }
   to { background-position: -80px 120px; }
-}
-
-button:hover{
-  transform: translateY(-1px) !important;
-}
-
-button:active{
-  transform: translateY(0) scale(.985) !important;
 }
 
 .content{
@@ -1560,27 +1495,11 @@ body.isResizingPlayer{
   -moz-osx-font-smoothing: grayscale;
 }
 
-.navItem.active,
-.mainAction,
-.circleButton.main:not(.playerBar *){
-  box-shadow: 0 12px 30px rgba(var(--accent-rgb), 0.12),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
-}
-
 .songRow{
   transition: transform 190ms cubic-bezier(0.16, 1, 0.3, 1),
     background-color 190ms ease,
     border-color 190ms ease,
     box-shadow 190ms ease !important;
-}
-
-.songRow.active{
-  animation: activeRowGlow 2.4s ease-in-out infinite;
-}
-
-@keyframes activeRowGlow {
-  0%, 100% { box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.05); }
-  50% { box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.22), 0 0 28px rgba(var(--accent-rgb), 0.08); }
 }
 
 .ambientSurface{
@@ -1628,13 +1547,7 @@ body.isResizingPlayer{
   transition: opacity 520ms ease;
 }
 
-button{
-  transition: transform 190ms cubic-bezier(0.16, 1, 0.3, 1),
-    background-color 190ms ease,
-    border-color 190ms ease,
-    opacity 190ms ease,
-    box-shadow 190ms ease !important;
-}
+button { transition: color var(--lt-control-motion) ease, background-color var(--lt-control-motion) ease, border-color var(--lt-control-motion) ease; }
 
 .circleButton:not(.playerBar *){
 

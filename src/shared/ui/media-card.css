@@ -48,17 +48,14 @@
   border-radius: 50%;
   color: var(--accent-contrast, var(--lt-bg));
   background: var(--lt-accent);
-  box-shadow: var(--lt-shadow-menu);
   cursor: pointer;
   opacity: 0;
-  transform: translateY(6px);
-  transition: opacity var(--lt-duration-fast) ease, transform var(--lt-duration-normal) var(--lt-ease-out), background-color var(--lt-duration-fast) ease;
+  transition: opacity var(--lt-control-motion) ease, background-color var(--lt-control-motion) ease;
 }
 
 .mediaCard:hover .mediaCardPlay,
 .mediaCard:focus-within .mediaCardPlay {
   opacity: 1;
-  transform: translateY(0);
 }
 
 /* Small or collage covers: the button sits in the middle instead of the corner. */
@@ -68,7 +65,7 @@
 .mediaCardPlay:hover { background: color-mix(in srgb, var(--lt-accent) 90%, var(--lt-bg)); }
 .mediaCardPlay:focus-visible { opacity: 1; transform: none; outline: 2px solid var(--lt-text); outline-offset: 2px; }
 .mediaCardPlay svg { margin-left: 2px; }
-.mediaCardPlay:active { transform: scale(.96); }
+
 
 @media (prefers-reduced-motion: reduce) {
   .mediaCardPlay { transition: opacity 80ms linear; transform: none; }

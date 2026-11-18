@@ -51,7 +51,7 @@ export function buildGenres(songs: Song[]): GenreEntry[] {
       artistCount: new Set(
         group.songs.flatMap((song) => splitArtistCredits(song.artist)).map((name) => name.toLocaleLowerCase())
       ).size,
-      playCount: group.songs.reduce((total, song) => total + (song.playCount || 0), 0),
+      playCount: group.songs.reduce((total, song) => total + Math.max(0, Number(song.playCount) || 0), 0),
       addedAt: group.songs.reduce((latest, song) => Math.max(latest, timeOf(song.dateAdded)), 0),
       coverSong: group.songs.find((song) => Boolean(song.coverUrl || song.coverPath || song.coverThumbnailUrl)) || group.songs[0]
     }))

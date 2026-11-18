@@ -168,7 +168,7 @@ test("Home 3.1 keeps Listen Now on the workspace atmosphere and real mix covers 
 test("workspace artwork prioritizes current cover then active page", () => {
   const shell = read("src/features/shell/AppShell.tsx");
   assert.match(shell, /const artworkEnabled = effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded/);
-  assert.match(shell, /resolveWorkspaceArtwork\(trackSources, sources\)/);
+  assert.match(shell, /resolveWorkspaceArtwork\(trackSources, sources,/);
   assert.match(shell, /pageArtwork\?\.route === route/);
   assert.doesNotMatch(shell, /useWorkspacePalette\(home.ambientStyle/);
   assert.doesNotMatch(shell, /const artworkEnabled = view === "home"/);

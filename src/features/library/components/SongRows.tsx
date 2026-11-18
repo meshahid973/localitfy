@@ -5,61 +5,8 @@ import { usePageVirtualizer } from "../../../shared/hooks/usePageVirtualizer";
 import type { Song, LibraryDropSide } from "../song.types";
 import { Cover, getCardCoverCssUrl } from "../../covers/Cover";
 import { MascotStateArt, PlayingBarsIcon } from "../../../shared/ui/LocaltifyViewUi";
-import { collapseSpaces, formatTime, lower } from "../../../shared/utils/format";
-import { looksUnknownMeta, prettyMeta, prettyTitle } from "../../search/search.utils";
-
-export function displaySongWordCountV444(value: string) {
-  return collapseSpaces(value).split(/\s+/).filter(Boolean).length;
-}
-
-export function looksLikeArtistInTitleSlotV444(title: string) {
-  const value = lower(collapseSpaces(title));
-  if (!value || value === "unknown artist") return false;
-
-  return /^(dj|mc|lil|yung|young|mr|mrs|ms|dr)\b/.test(value)
-    || (/^[a-z0-9_.]+(?:\s+[a-z0-9_.]+)?$/i.test(value) && displaySongWordCountV444(value) <= 2);
-}
-
-export function looksLikeSongInArtistSlotV444(artist: string) {
-  const value = lower(collapseSpaces(artist));
-  if (!value || value === "unknown artist" || value === "unknown") return false;
-
-  return displaySongWordCountV444(value) >= 3
-    || /\b(the|you|your|me|my|love|said|hero|night|ost|collection|theme|song|slowed|remix|edit)\b/.test(value);
-}
-
-export function shouldSwapDisplayTitleArtistV444(song: Pick<Song, "title" | "artist"> & { album?: string | null }) {
-  const rawTitle = collapseSpaces(song.title || "");
-  const rawArtist = collapseSpaces(song.artist || "");
-  if (!rawTitle || !rawArtist) return false;
-
-  // A real album tag means the file was tagged properly, so "The Beatles" stays the artist.
-  const album = lower(collapseSpaces(song.album || ""));
-  if (!looksUnknownMeta(album) && album !== "local files") return false;
-
-  const cleanArtist = lower(rawArtist);
-  if (cleanArtist === "unknown" || cleanArtist === "unknown artist") return false;
-
-  return looksLikeArtistInTitleSlotV444(rawTitle) && looksLikeSongInArtistSlotV444(rawArtist);
-}
-
-export function displaySongTitleV444(song: Pick<Song, "title" | "artist"> & { album?: string | null }, maxWords = 7) {
-  return shouldSwapDisplayTitleArtistV444(song)
-    ? prettyTitle(song.artist, maxWords)
-    : prettyTitle(song.title, maxWords);
-}
-
-export function displaySongArtistV444(song: Pick<Song, "title" | "artist"> & { album?: string | null }) {
-  return shouldSwapDisplayTitleArtistV444(song)
-    ? prettyMeta(song.title)
-    : prettyMeta(song.artist);
-}
-
-export function displaySongPickerSublineV444(song: Pick<Song, "title" | "artist"> & { album?: string | null }) {
-  const artist = displaySongArtistV444(song);
-  if (!artist || artist === "unknown artist") return "Pick a playlist or make a new one.";
-  return `${artist} · Pick a playlist or make a new one.`;
-}
+import { formatTime } from "../../../shared/utils/format";
+import { TrackMetadata } from "../TrackMetadata";
 
 export type SongInteractionHandlers = {
   onSelectSong: (songId: string, shouldPlay?: boolean) => void;
@@ -86,6 +33,8 @@ export type SongRowItemProps = SongInteractionHandlers & {
   isDropTarget: boolean;
   libraryDropSide: LibraryDropSide;
   draggedSongTitle: string;
+  selected?: boolean;
+  onToggleSelection?: (id: string) => void;
 };
 
 
@@ -98,6 +47,8 @@ export const SongRowItem = memo(function SongRowItem({
   isDropTarget,
   libraryDropSide,
   draggedSongTitle,
+  selected,
+  onToggleSelection,
   onSelectSong,
   onToggleLike,
   onOpenPlaylistPicker,
@@ -112,11 +63,11 @@ export const SongRowItem = memo(function SongRowItem({
 
   return (
     <article
-      className={`songRow ${active ? "active" : ""} ${active && isPlaying ? "playing" : ""} ${isDragging ? "songDragging" : ""} ${isDropTarget ? "songDropTarget" : ""} ${isMissingFile ? "songMissingFileV039" : ""}`}
+      className={`songRow ${selected ? "selected" : ""} ${active ? "active" : ""} ${active && isPlaying ? "playing" : ""} ${isDragging ? "songDragging" : ""} ${isDropTarget ? "songDropTarget" : ""} ${isMissingFile ? "songMissingFileV039" : ""}`}
       data-library-song-id={song.id}
       data-file-exists={isMissingFile ? "false" : "true"}
       data-drop-side={isDropTarget ? libraryDropSide : undefined}
-      draggable
+      draggable={!onToggleSelection}
       onDragStart={(event) => onStartSongDrag(event, song.id)}
       onDragOver={(event) => onDragOverSong(event, song.id)}
       onDragLeave={(event) => onDragLeaveSong(event, song.id)}
@@ -127,15 +78,12 @@ export const SongRowItem = memo(function SongRowItem({
       title={isMissingFile ? "Local audio file missing" : draggedSongTitle ? `dragging ${draggedSongTitle}` : undefined}
       style={{ "--stagger": `${Math.min(index, 20) * 18}ms` } as CSSProperties}
     >
-      <button className="songButton" onClick={() => onSelectSong(song.id, true)}>
-        <span className="songIndex">{active && isPlaying ? <PlayingBarsIcon /> : index + 1}</span>
+      <button className="songButton" type="button" disabled={isMissingFile && !onToggleSelection} aria-pressed={onToggleSelection ? Boolean(selected) : undefined} aria-current={!onToggleSelection && active ? "true" : undefined} aria-label={`${onToggleSelection ? (selected ? "Deselect" : "Select") : "Play"} ${song.title}`} onClick={() => onToggleSelection ? onToggleSelection(song.id) : onSelectSong(song.id, true)}>
+        <span className="songIndex">{onToggleSelection ? (selected ? "✓" : "○") : active && isPlaying ? <PlayingBarsIcon /> : index + 1}</span>
 
         <Cover song={song} className="songArt" />
 
-        <span className="songMeta">
-          <strong title={displaySongTitleV444(song, 12)}>{displaySongTitleV444(song, 7)}</strong>
-          <small>{isMissingFile ? "missing local file · reimport or relink" : displaySongArtistV444(song)}</small>
-        </span>
+        <TrackMetadata song={song} className="songMeta" subtitle={isMissingFile ? "missing local file · reimport or relink" : undefined} />
       </button>
 
       <span className="songInfo songDurationInfo">{isMissingFile ? "missing" : formatTime(song.duration)}</span>
@@ -255,10 +203,7 @@ export const LibrarySongCardItem = memo(function LibrarySongCardItem({
         <span className="homeAlbumRank">{rankLabel}</span>
       </button>
 
-      <div className="homeAlbumMeta">
-        <strong title={song.title}>{prettyTitle(song.title, 7)}</strong>
-        <small>{prettyMeta(song.artist)}</small>
-      </div>
+      <TrackMetadata song={song} className="homeAlbumMeta" />
 
       <div className="homeAlbumStats">
         <span>{formatTime(song.duration)}</span>
@@ -306,6 +251,8 @@ export type VirtualSongRowsProps = SongInteractionHandlers & {
   libraryDragOverSongId: string;
   libraryDropSide: LibraryDropSide;
   draggedSongTitle: string;
+  selectedIds?: ReadonlySet<string>;
+  onToggleSelection?: (id: string) => void;
   onAreaDragOver: (event: DragEvent<HTMLDivElement>) => void;
   onAreaDragLeave: (event: DragEvent<HTMLDivElement>) => void;
   onAreaDrop: (event: DragEvent<HTMLDivElement>) => void;
@@ -320,6 +267,8 @@ export const VirtualSongRows = memo(function VirtualSongRows({
   libraryDragOverSongId,
   libraryDropSide,
   draggedSongTitle,
+  selectedIds,
+  onToggleSelection,
   onAreaDragOver,
   onAreaDragLeave,
   onAreaDrop,
@@ -391,6 +340,8 @@ export const VirtualSongRows = memo(function VirtualSongRows({
             >
               <SongRowItem
                 song={song}
+                selected={selectedIds?.has(song.id)}
+                onToggleSelection={onToggleSelection}
                 index={virtualRow.index}
                 active={active}
                 isPlaying={isPlaying}

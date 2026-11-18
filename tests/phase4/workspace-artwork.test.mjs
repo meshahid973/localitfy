@@ -5,11 +5,16 @@ import ts from "typescript";
 import { runInNewContext } from "node:vm";
 const exports = {};
 runInNewContext(ts.transpileModule(fs.readFileSync("src/features/covers/workspaceArtwork.ts","utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports});
-const resolve = (track,page) => Array.from(exports.resolveWorkspaceArtwork(track,page));
+const resolve = (track,page,preferPage=false) => Array.from(exports.resolveWorkspaceArtwork(track,page,preferPage));
 test("shell artwork gives current song priority and falls back without duplicate reads",()=>{
   assert.deepEqual(resolve(["track"],["track","page"]),["track","page"]);
   assert.deepEqual(resolve([],["page"]),["page"]);
   assert.deepEqual(resolve([""],[]),[]);
   assert.deepEqual(resolve(["a","b","c","d"],["a","e","f","g","h"]),["a","b","c","e","f","g"]);
   assert.equal(resolve(["a","b","c"],["d","e","f","g"]).length,6);
+});
+
+test("entity art takes precedence but falls back to track art",()=>{
+  assert.deepEqual(resolve(["track"],["custom","page","track"],true),["custom","page","track"]);
+  assert.deepEqual(resolve(["track"],[],true),["track"]);
 });
