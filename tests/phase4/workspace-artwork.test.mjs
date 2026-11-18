@@ -10,5 +10,6 @@ test("shell artwork gives current song priority and falls back without duplicate
   assert.deepEqual(resolve(["track"],["track","page"]),["track","page"]);
   assert.deepEqual(resolve([],["page"]),["page"]);
   assert.deepEqual(resolve([""],[]),[]);
+  assert.deepEqual(resolve(["a","b","c","d"],["a","e","f","g","h"]),["a","b","c","e","f","g"]);
   assert.equal(resolve(["a","b","c"],["d","e","f","g"]).length,6);
 });

@@ -7,7 +7,7 @@ import TitleBar from "./TitleBar";
 import HomeViewComponent from "../home/HomeView";
 import { ImportProgress } from "../library/ImportProgress";
 import { ArtworkAmbientContext, WorkspaceArtworkBackdrop } from "../covers/ArtworkBackdrop";
-import { PageAtmosphereContext, pageArtworkSources, resolveWorkspaceArtwork, type PageAtmosphereRegistration } from "../covers/pageAtmosphere";
+import { PageAtmosphereContext, pageArtworkSources, trackArtworkSources, resolveWorkspaceArtwork, type PageAtmosphereRegistration } from "../covers/pageAtmosphere";
 import PlayerSurfaces from "../player/components/PlayerSurfaces";
 import PlaybackAudioElement from "../player/components/PlaybackAudioElement";
 import SongContextMenu from "../library/components/SongContextMenu";
@@ -109,7 +109,7 @@ export default function AppShell(props: AppShellProps) {
   const homeSources = useMemo(() => view === "home" ? pageArtworkSources(home.homeFreshShelfSongs.length ? home.homeFreshShelfSongs : home.songs) : [], [view, home.homeFreshShelfSongs, home.songs]);
   const sources = pageArtwork?.route === route && pageArtwork.sources.length ? pageArtwork.sources : homeSources;
   // A paused current track remains the listening context; navigation never interrupts its backdrop.
-  const trackSources = useMemo(() => pageArtworkSources(home.currentSong ? [home.currentSong] : []), [home.currentSong]);
+  const trackSources = useMemo(() => trackArtworkSources(home.currentSong), [home.currentSong]);
   const workspaceSources = useMemo(() => resolveWorkspaceArtwork(trackSources, sources), [trackSources, sources]);
   const artworkEnabled = effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded;
   const { actions, menu } = useCollectionActions(nav, collections, modals.queuePanel.openSongContextMenu);

@@ -6,20 +6,20 @@
   --playlist-text: var(--lt-text);
   --playlist-muted: var(--lt-muted);
   width: 100%; min-width: 0;
-  display: grid; align-content: start; gap: var(--lt-space-5);
+  display: grid; align-content: start; gap: var(--lt-page-gap);
   padding: 0 0 var(--lt-space-5);
   color: var(--playlist-text);
 }
 .playlistsPage *, .playlistsPage *::before, .playlistsPage *::after { box-sizing: border-box; }
 .playlistsPage .eyebrow { margin: 0 0 9px; color: var(--lt-muted); font-size: var(--lt-text-sm); font-weight: 500; }
-.playlistsPage h3 { margin: 0; color: var(--lt-text); font-size: clamp(18px,1.55vw,24px); font-weight: 700; letter-spacing: -.03em; } .playlistsPage p:not(.eyebrow, .pageHeader p) { color: var(--playlist-muted); font-size: 13px; line-height: 1.5; }
+.playlistsPage h3 { margin: 0; color: var(--lt-text); font-size: var(--lt-text-heading); font-weight: 700; letter-spacing: -.03em; } .playlistsPage p:not(.eyebrow, .pageHeader p) { color: var(--playlist-muted); font-size: 13px; line-height: 1.5; }
 .playlistsPage :is(.heroMain,.softButton,.mainAction,.settingsTinyButton) { min-height: 38px; font-size: 12px; font-weight: 700; }
 .playlistsPage :is(.heroMain,.softButton,.mainAction,.settingsTinyButton):focus-visible { outline: 2px solid rgba(var(--lt-accent-rgb), .58); outline-offset: 2px; }
 .playlistsPage button:disabled { cursor: not-allowed; opacity: .48; }
 .playlistCreateForm { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
 :is(.playlistRenameForm, .smartPlaylistModal) input {
   flex: 1 1 170px; min-height: 40px; padding: 8px 12px;
-  border: 1px solid rgba(var(--lt-accent-rgb), .17); border-radius: 9px;
+  border: 1px solid rgba(var(--lt-accent-rgb), .17); border-radius: var(--lt-control-radius);
   background: var(--lt-surface-soft); color: var(--lt-text); font: inherit; font-size: 13px;
 }
 :is(.playlistRenameForm, .smartPlaylistModal) input::placeholder { color: var(--lt-faint); }
@@ -36,7 +36,7 @@
   border: 1px solid transparent; border-radius: var(--lt-control-radius);
   color: var(--playlist-text); background: transparent; font: inherit; text-align: left; cursor: pointer;
 }
-.playlistShelfCard:hover { background: var(--lt-surface-soft); }
+.playlistShelfCard:hover { background: var(--lt-fill-hover); }
 .playlistShelfCard.dropTarget { outline: 2px dashed rgba(var(--lt-accent-rgb), .58); outline-offset: -3px; }
 .playlistShelfCard .playlistCoverCollage { width: 100%; aspect-ratio: 1; border-radius: var(--lt-radius-item); }
 .playlistShelfMeta { min-width: 0; display: grid; gap: 6px; }

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import type { Song } from "../library/song.types";
 import { decodeArtwork, getSongAmbientSource } from "./cover.ambient";
 import { advanceArtworkFrame, type ArtworkFrame } from "./artworkPalette";
@@ -9,9 +9,12 @@ const FADE_MS = 360;
 
 function CrossfadeArtwork({ source, fallbacks = [], workspace = false }: { source: string; fallbacks?: readonly string[]; workspace?: boolean }) {
   const fallbackKey = JSON.stringify(fallbacks);
+  const loadedSource = useRef("");
   const [frame, setFrame] = useState<ArtworkFrame>({ current: "", previous: "" });
   useEffect(() => {
-    if (!source) { setFrame({ current: "", previous: "" }); return; }
+    if (!source) { loadedSource.current = ""; setFrame({ current: "", previous: "" }); return; }
+    // Changes to fallback entities do not reload successfully decoded primary art.
+    if (loadedSource.current === source) return;
     const controller = new AbortController();
     async function load() {
       for (const candidate of [source, ...JSON.parse(fallbackKey) as string[]]) {
@@ -19,11 +22,15 @@ function CrossfadeArtwork({ source, fallbacks = [], workspace = false }: { sourc
         const ready = await decodeArtwork(candidate, controller.signal);
         if (controller.signal.aborted) return;
         if (ready === true) {
+          loadedSource.current = candidate;
           setFrame(old => advanceArtworkFrame(old, candidate, true));
           return;
         }
       }
-      if (!controller.signal.aborted) setFrame(old => advanceArtworkFrame(old, "", false));
+      if (!controller.signal.aborted) {
+        loadedSource.current = "";
+        setFrame(old => advanceArtworkFrame(old, "", false));
+      }
     }
     void load();
     return () => controller.abort();
@@ -42,7 +49,7 @@ function CrossfadeArtwork({ source, fallbacks = [], workspace = false }: { sourc
       <div key={src} className="artworkBackdropLayer" data-visible={src === frame.current ? "true" : "false"}>
         <div className="artworkBackdropCover">
           <img className="coverImage isLoaded" src={src} alt="" draggable={false} decoding="async" referrerPolicy="no-referrer"
-            onError={() => setFrame(old => old.current === src ? { current: "", previous: "" } : old.previous === src ? { ...old, previous: "" } : old)} />
+            onError={() => { if (loadedSource.current === src) loadedSource.current = ""; setFrame(old => old.current === src ? { current: "", previous: "" } : old.previous === src ? { ...old, previous: "" } : old); }} />
         </div>
       </div>
     ))}

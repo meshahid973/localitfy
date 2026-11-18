@@ -2,8 +2,8 @@
 .collectionBrowsePage {
   min-width: 0;
   display: grid;
-  gap: 18px;
-  padding-bottom: 32px;
+  gap: var(--lt-page-gap);
+  padding-bottom: var(--lt-space-5);
 }
 
 .collectionBrowseGrid {
@@ -25,11 +25,11 @@
   background: transparent;
   text-align: left;
   cursor: pointer;
-  transition: background-color var(--lt-duration-fast) ease;
+  transition: background-color var(--lt-control-motion) ease;
 }
 
 .collectionBrowseCard:hover {
-  background: color-mix(in srgb, var(--lt-text) 5%, transparent);
+  background: var(--lt-fill-hover);
 }
 
 .collectionBrowseCardCover,
@@ -56,7 +56,7 @@
 
 .collectionBrowseCard strong {
   color: var(--lt-text);
-  font-size: 14px;
+  font-size: var(--lt-text-label);
   font-weight: 550;
 }
 

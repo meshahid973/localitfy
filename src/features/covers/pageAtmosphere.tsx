@@ -1,6 +1,12 @@
 import { createContext, useContext, useEffect, useMemo } from "react";
 import type { Song } from "../library/song.types";
 import { getRendererSafeImageUrl } from "./cover.ambient";
+
+/** Prefer thumbnails, but recover from a broken thumbnail using another saved cover. */
+export function trackArtworkSources(song: Song | null | undefined): string[] {
+  if (!song) return [];
+  return [...new Set([song.coverThumbUrl, song.coverThumbnailUrl, song.thumbnailUrl, song.coverFullUrl, song.coverUrl, song.coverPath].map(getRendererSafeImageUrl).filter(Boolean))].slice(0, 3);
+}
 import { resolveWorkspaceArtwork } from "./workspaceArtwork";
 export { resolveWorkspaceArtwork };
 
@@ -17,8 +23,7 @@ export function pageArtworkSources(songs: readonly Song[], custom?: string | nul
   if (preferred) sources.add(preferred);
   for (const song of songs.slice(0, 64)) {
     if (sources.size >= 3) break;
-    const source = [song.coverThumbUrl, song.coverThumbnailUrl, song.thumbnailUrl, song.coverUrl, song.coverPath, song.coverFullUrl]
-      .map(getRendererSafeImageUrl).find(Boolean);
+    const source = trackArtworkSources(song)[0];
     if (source) sources.add(source);
   }
   return [...sources];
