@@ -122,7 +122,7 @@ export default function AppShell(props: AppShellProps) {
 
   return (
     <AppActionsContext.Provider value={actions}>
-    <ArtworkAmbientContext.Provider value={effectiveAmbient && !isAppBackgrounded}>
+    <ArtworkAmbientContext.Provider value={effectiveAmbient && !isAppBackgrounded && !workspacePalette}>
     <main
       ref={appRootRef}
       className={`app ${settings.animatedGlow ? "animatedGlow" : ""} ${

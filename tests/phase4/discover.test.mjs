@@ -378,7 +378,7 @@ test("artwork lookup respects opt-in", async () => {
   registerDiscoverIpc({handle:(channel,handler)=>handlers.set(channel,handler)},{getSongs:()=>[],getSettings:()=>settings,musicBrainzClient:{searchRecordings:()=>{calls++;return new Promise(resolve=>{finish=resolve;});}}});
   const request=()=>handlers.get("discover:get")({}, {artwork:{title:"Track",artist:"Artist"}});
   assert.equal((await request()).status,"off"); assert.equal(calls,0);
-  settings.discoverEnabled=true; const pending=request(); while (!finish) await Promise.resolve();
+  settings.discoverEnabled=true; const pending=request(); for (let attempts=0; !finish && attempts<20; attempts++) await Promise.resolve(); assert.equal(typeof finish,"function");
   settings.discoverEnabled=false; finish([]);
   assert.equal((await pending).status,"off");
 });

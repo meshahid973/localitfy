@@ -104,7 +104,7 @@ test("shared artwork palette follows the existing ambient preference and backgro
   const backdrop = read("src/features/covers/ArtworkBackdrop.tsx");
   const workspace = read("src/styles/view-shell.css");
   const player = read("src/features/player/player.css");
-  assert.match(shell, /<ArtworkAmbientContext.Provider value=\{effectiveAmbient && !isAppBackgrounded\}>/);
+  assert.match(shell, /<ArtworkAmbientContext.Provider value=\{effectiveAmbient && !isAppBackgrounded && !workspacePalette\}>/);
   assert.match(backdrop, /enabled && source \? <CrossfadeArtwork/);
   assert.match(workspace, /--workspace-cover-color/);
   assert.match(player, /\.playerBar\[data-ambient\] \{\s*background: transparent !important/);
