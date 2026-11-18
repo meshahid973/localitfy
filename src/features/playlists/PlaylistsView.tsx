@@ -16,7 +16,7 @@ import type { Playlist } from "./playlist.types";
 import type { Song } from "../library/song.types";
 import { describeSmartRules, type ListeningCounts, type SmartRules } from "./smartPlaylist";
 import { MediaCard } from "../../shared/ui/MediaCard";
-import { playlistTarget, useAppActions } from "../shell/appActions";
+import { playlistTarget, playableIds, useAppActions } from "../shell/appActions";
 import { ArtworkBackdrop } from "../covers/ArtworkBackdrop";
 import CollectionHero from "../pages/CollectionHero";
 
@@ -108,6 +108,9 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
   // undefined: closed; null: creating a new smart playlist.
   const [smartEditing, setSmartEditing] = useState<Playlist | null | undefined>(undefined);
   const [prompting, setPrompting] = useState(false);
+  const [playlistQuery, setPlaylistQuery] = useState("");
+  const visiblePlaylists = useMemo(() => playlistSummaries.filter((summary: { playlist: Playlist }) =>
+    summary.playlist.name.toLocaleLowerCase().includes(playlistQuery.trim().toLocaleLowerCase())), [playlistSummaries, playlistQuery]);
   const hidden = useMemo(() => notForMeTest(props.notForMe.marks), [props.notForMe.marks]);
   const playlists = useMemo(() => playlistSummaries.map((summary: { playlist: Playlist }) => summary.playlist), [playlistSummaries]);
   const actions = useAppActions();
@@ -157,7 +160,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
           coverSong={target.coverSong}
           byline={detailPlaylist.rules ? <span className="smartPlaylistSummary">{describeSmartRules(detailPlaylist.rules)}</span> : undefined}
           stats={`${detailSongs.length} song${detailSongs.length === 1 ? "" : "s"} · ${formatTime(detailSongs.reduce((total, song) => total + (Number(song.duration) || 0), 0))}`}
-          playable={detailPlaylist.songIds.length}
+          playable={playableIds(detailSongs).length}
           onPlay={() => void playPlaylist(detailPlaylist, false)}
           onShuffle={() => void playPlaylist(detailPlaylist, true)}
           onQueue={() => actions.queueCollection(target)}
@@ -271,12 +274,15 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
         <section className="playlistShelfPanel">
           <div className="panelHead">
             <div>
-              <h3>your playlists</h3>
+              <h3>Your playlists</h3>
             </div>
+            <input className="pageHeaderSearch" type="search" value={playlistQuery}
+              onChange={event => setPlaylistQuery(event.currentTarget.value)} placeholder="Search playlists" aria-label="Search playlists" />
           </div>
 
+          {playlistSummaries.length > 0 && visiblePlaylists.length === 0 ? <p role="status">No matching playlists.</p> : null}
           <div className="playlistShelfGrid">
-            {playlistSummaries.length ? playlistSummaries.map(({ playlist, previewSongs, songCount, duration }, index) => (
+            {playlistSummaries.length ? visiblePlaylists.map(({ playlist, previewSongs, songCount, duration }, index) => (
               <MediaCard
                 key={playlist.id}
                 className={`playlistShelfCard ${activePlaylistId === playlist.id ? "playing" : ""} ${playlistDragOverPlaylistId === playlist.id ? "dropTarget" : ""}`}

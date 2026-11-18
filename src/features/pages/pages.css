@@ -14,10 +14,10 @@
   isolation: isolate;
   min-width: 0;
   display: grid;
-  grid-template-columns: 168px minmax(0, 1fr);
+  grid-template-columns: clamp(168px, 18vw, 272px) minmax(0, 1fr);
   grid-template-areas: "art copy" "art actions";
   align-items: end;
-  column-gap: var(--lt-space-5);
+  column-gap: clamp(18px, 3vw, 40px);
   row-gap: 16px;
   padding: var(--lt-space-2) 0;
   border: 0;
@@ -30,9 +30,8 @@
   width: 100%;
   aspect-ratio: 1;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: var(--lt-radius-item);
   background: var(--lt-surface-raised);
-  box-shadow: var(--lt-shadow-low);
 }
 .collectionHeroCover img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .collectionHero.isRound .collectionHeroCover { border-radius: 50%; }
@@ -46,9 +45,9 @@
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   color: var(--lt-text);
-  font-size: var(--lt-text-collection);
+  font-size: clamp(26px, 3vw, 48px);
   font-weight: 650;
   line-height: 1.12;
   letter-spacing: -.03em;
@@ -70,10 +69,10 @@
   background: var(--lt-accent);
   box-shadow: none;
   cursor: pointer;
-  transition: transform 140ms ease, filter 140ms ease;
+  transition: filter 140ms ease;
 }
 .collectionPlayButton svg { margin-left: 3px; }
-.collectionPlayButton:hover:not(:disabled) { transform: scale(1.05); filter: brightness(1.08); }
+.collectionPlayButton:hover:not(:disabled) { filter: brightness(1.06); }
 
 .collectionIconButton {
   width: var(--lt-control-height);
@@ -84,11 +83,11 @@
   border: 1px solid transparent;
   border-radius: var(--lt-radius-item);
   color: var(--lt-muted);
-  background: var(--lt-surface-raised);
+  background: var(--lt-fill);
   cursor: pointer;
   transition: color 120ms ease, border-color 120ms ease, background-color 120ms ease;
 }
-.collectionIconButton:hover:not(:disabled) { color: var(--lt-text); border-color: var(--lt-border-strong); background: color-mix(in srgb, var(--lt-text) 6%, var(--lt-surface-raised)); }
+.collectionIconButton:hover:not(:disabled) { color: var(--lt-text); border-color: var(--lt-border-strong); background: var(--lt-fill-hover); }
 
 .collectionTextButton {
   min-height: var(--lt-control-height);
@@ -130,7 +129,7 @@
 }
 .trackLink:hover { color: var(--lt-text); text-decoration: underline; }
 
-.trackList { min-width: 0; display: grid; background: var(--lt-surface-soft); border-radius: var(--lt-radius-sm); }
+.trackList { min-width: 0; display: grid; background: transparent; }
 .trackListCanvas { position: relative; min-width: 0; }
 .trackVirtualRow { position: absolute; left: 0; width: 100%; }
 .trackRow {
@@ -146,8 +145,8 @@
   cursor: pointer;
 }
 .trackList.withCover .trackRow { --track-columns: var(--lt-control-height) 40px minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
-.trackRow:hover { background: color-mix(in srgb, var(--lt-text) 6%, transparent); }
-.trackRow.active { background: rgba(var(--lt-accent-rgb), .1); }
+.trackRow:hover { background: var(--lt-fill-hover); }
+.trackRow.active { background: var(--lt-fill-selected); }
 .trackRow.missing { cursor: default; opacity: .5; }
 
 .trackRowIndex {
