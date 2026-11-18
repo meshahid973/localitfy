@@ -288,7 +288,7 @@ function runYtDlp(ytDlp, args, onProgress, job) {
     proc.on("close", (code) => {
       activeDownloadProcesses.delete(proc);
       if (activeDownloadCancelled) return reject(new Error("Download cancelled"));
-      if (typeof code === "number" && code !== 0) return reject(new Error(`yt-dlp exited with code ${code}`));
+      if (code !== 0) return reject(new Error(`yt-dlp exited with code ${code ?? "unknown (terminated)"}`));
       resolve();
     });
   });
@@ -499,7 +499,7 @@ function hasHardSpotifyRejectWord(track = {}, candidate = {}) {
 }
 
 function getSpotifyTrackId(track = {}) {
-  return String(track.spotifyTrackId || track.id || track.trackId || "").trim();
+  return String(track?.spotifyTrackId || track?.id || track?.trackId || "").trim();
 }
 
 function getSpotifyTrackUrl(track = {}) {

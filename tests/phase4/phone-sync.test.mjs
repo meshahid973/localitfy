@@ -37,11 +37,11 @@ test("song edits: songs that are new since the last sync have nothing to push", 
 });
 
 test("playlists: phone additions and removals merge into the Mac's edited order", () => {
-  assert.deepEqual(merge.mergeSongIds(["1", "2", "3"], ["3", "1", "2", "4"], ["1", "5", "3"]), ["3", "1", "5", "4"]);
+  assert.deepEqual(Array.from(merge.mergeSongIds(["1", "2", "3"], ["3", "1", "2", "4"], ["1", "5", "3"])), ["3", "1", "5", "4"]);
 });
 
 test("playlists: a phone addition stays in place when its neighbour was removed on the Mac", () => {
-  assert.deepEqual(merge.mergeSongIds(["1", "5", "9"], ["1", "5"], ["1", "5", "9", "12"]), ["1", "5", "12"]);
+  assert.deepEqual(Array.from(merge.mergeSongIds(["1", "5", "9"], ["1", "5"], ["1", "5", "9", "12"])), ["1", "5", "12"]);
 });
 
 test("playlists: a phone-only edit replaces the Mac copy; a Mac-only edit pushes nothing", () => {
@@ -197,5 +197,5 @@ test("playlist artwork changes merge without losing independent name or track ch
 });
 
 test("playlist sync removes duplicate IDs without dropping unique concurrent additions",()=>{
-  assert.deepEqual(merge.mergeSongIds(["a","b"],["a","a","b","c"],["a","d"]),["a","d","c"]);
+  assert.deepEqual(Array.from(merge.mergeSongIds(["a","b"],["a","a","b","c"],["a","d"])),["a","d","c"]);
 });

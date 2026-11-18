@@ -483,19 +483,24 @@ test("IPC: gated by the setting, proposals stay native, and library-only apply u
   assert.equal(pending[0].groupKey, `marrow\0${dir}`);
 
   const result = await router.invoke("tagging:apply", { songIds: ["a", "unknown"] });
-  assert.deepEqual(result, { applied: 1, written: 0, failed: [] });
+  assert.deepEqual(result, { applied: 1, written: 0, failed: [{ songId: "unknown", title: "unknown", error: "Song or matching proposal is no longer available" }] });
   assert.equal(songs.get("a").genre, "Hyperpop; Emo Rap");
   assert.equal(songs.get("a").coverPath, path.join(dir, "musicbrainz-covers", "rel-marrow.jpg"));
   assert.equal(songs.get("a").coverSource, "custom");
   assert.equal(songs.get("b").genre, "", "unselected songs are untouched");
   assert.equal(sent[0][0], "library:watched-change");
   assert.equal(sent[0][1].libraryChanged, true, "tag edits trigger a full library update");
-  assert.deepEqual(await router.invoke("tagging:apply", { songIds: ["a"] }), { applied: 0, written: 0, failed: [] }, "a proposal is used once");
+  assert.deepEqual(await router.invoke("tagging:apply", { songIds: ["a"] }), { applied: 0, written: 0, failed: [{ songId: "a", title: songs.get("a").title, error: "Song or matching proposal is no longer available" }] }, "a proposal is used once and a subsequent apply reports failure");
 
   assert.deepEqual(await router.invoke("tagging:search", { songId: "b", title: "death rolL", artist: "" }), [], "the fake has no recordings to search");
   const chosen = await router.invoke("tagging:choose", { songId: "b", recordingId: "rec-2", releaseId: "rel-marrow" });
   assert.deepEqual([chosen.songId, chosen.tags.trackNumber, chosen.coverUrl], ["b", 2, "localtify-media://rel-marrow.jpg"]);
   assert.deepEqual((await router.invoke("tagging:pending")).map((proposal) => proposal.songId), [], "a hand-picked match stays with its dialog");
+  const originalTitle = songs.get("b").title;
+  songs.get("b").title = "Edited after preview";
+  assert.match((await router.invoke("tagging:apply", { songIds: ["b"] })).failed[0].error, /Metadata changed since preview/);
+  assert.equal(songs.get("b").title, "Edited after preview");
+  songs.get("b").title = originalTitle;
   settings.musicbrainzWriteFiles = true;
   assert.deepEqual(await router.invoke("tagging:apply", { songIds: ["b"] }), { applied: 1, written: 0, failed: [] }, "backend file-write gate cannot be overridden by settings");
   await assert.rejects(router.invoke("tagging:search", { songId: "missing", title: "x" }), /could not be found/);
