@@ -396,6 +396,8 @@ test("Discover lazy renderer modules parse as TSX", () => {
 });
 test("external telemetry SDK stays removed and scripts remain restricted", () => {
   assert.equal(fs.existsSync("src/analytics.ts"), false);
+  const entry = fs.readFileSync("src/main.tsx", "utf8");
+  assert.doesNotMatch(entry, /posthog|["']\.\/analytics["']/i);
   const manifest = JSON.parse(fs.readFileSync("package.json", "utf8"));
   const lock = JSON.parse(fs.readFileSync("package-lock.json", "utf8"));
   assert.ok(!manifest.dependencies?.["posthog-js"] && !manifest.devDependencies?.["posthog-js"]);
