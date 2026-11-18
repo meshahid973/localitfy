@@ -7,6 +7,7 @@ import { formatTime } from "../../shared/utils/format";
 import { prettyMeta } from "../search/search.utils";
 import PlaylistCoverCollage from "../playlists/components/PlaylistCoverCollage";
 import { useHomeDailyMixes } from "../home/useHomeDailyMixes";
+import { useHomeDay } from "../home/useHomeDay";
 import { mixTarget, playableIds, useAppActions } from "../shell/appActions";
 import type { Song } from "../library/song.types";
 import { ArtworkBackdrop } from "../covers/ArtworkBackdrop";
@@ -26,7 +27,8 @@ export type MixPageProps = {
 /** One of today's daily mixes as a page. */
 export default function MixPage({ mixId, songs, currentId, isPlaying, toggleLike, openPlaylistPicker, savePlaylist }: MixPageProps) {
   const actions = useAppActions();
-  const { result, failed } = useHomeDailyMixes();
+  const day = useHomeDay();
+  const { result, failed } = useHomeDailyMixes(day);
   const songsById = useMemo(() => new Map(songs.map((song) => [song.id, song])), [songs]);
   const mix = result?.mixes.find((item) => item.id === mixId) || null;
   const members = useMemo(() => mix?.songIds.flatMap((id) => songsById.get(id) ?? []) ?? [], [mix, songsById]);
