@@ -108,15 +108,45 @@ jobs:
           test "$(adb shell getprop sys.boot_completed | tr -d "\r")" = "1"
           adb shell wm size 720x1600
           adb shell wm density 320
+          adb shell input keyevent KEYCODE_WAKEUP
+          adb shell wm dismiss-keyguard
+          adb shell settings put system screen_off_timeout 2147483647
           adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+          # Always collect diagnostics, including on a failed UI dump.
+          collect_android_diagnostics() {
+            adb exec-out screencap -p > qa-android/home.png || true
+            adb shell dumpsys activity activities > qa-android/activities.txt || true
+            adb shell dumpsys window > qa-android/windows.txt || true
+            adb logcat -d -t 1500 > qa-android/logcat.txt || true
+          }
+          trap 'collect_android_diagnostics; adb emu kill || true; kill "$emulator_pid" 2>/dev/null || true; tail -n 100 qa-android/emulator.log || true' EXIT
           adb shell am start -W -n com.meshahid973.localitfy/.MainActivity
-          sleep 20
-          adb shell uiautomator dump /sdcard/localtify-ui.xml
-          adb pull /sdcard/localtify-ui.xml qa-android/ui.xml
-          adb exec-out screencap -p > qa-android/home.png
-          adb logcat -d -t 1500 > qa-android/logcat.txt
+          # A booted emulator is not necessarily an unlocked, resumed activity.
+          foreground=false
+          for attempt in $(seq 1 20); do
+            if adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' | grep -q 'com.meshahid973.localitfy'; then
+              foreground=true
+              break
+            fi
+            sleep 2
+          done
+          test "$foreground" = true
+          # UIAutomator can return a null root while WebView initializes or animates.
+          # Require a fresh dump containing the app package; never turn a failed dump into a pass.
+          captured=false
+          for attempt in $(seq 1 8); do
+            adb shell rm -f /sdcard/localtify-ui.xml
+            if timeout 35s adb shell uiautomator dump /sdcard/localtify-ui.xml &&
+               adb pull /sdcard/localtify-ui.xml qa-android/ui.xml &&
+               grep -q 'package="com.meshahid973.localitfy"' qa-android/ui.xml; then
+              captured=true
+              break
+            fi
+            sleep 3
+          done
+          collect_android_diagnostics
+          test "$captured" = true
           test -s qa-android/home.png
-          grep -q 'com.meshahid973.localitfy' qa-android/ui.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
