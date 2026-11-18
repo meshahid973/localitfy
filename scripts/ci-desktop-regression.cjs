@@ -269,10 +269,13 @@ server.listen(5173,async()=>{
       await win.webContents.executeJavaScript("document.querySelector('.libraryCollectionShortcuts button:has([data-kind=liked])').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.libraryPageLiked')").catch(()=>false),"liked songs "+mode);
       await screenshot(win,"liked-"+mode);
+      await win.webContents.executeJavaScript(`(()=>{const e=document.querySelector('.librarySearch');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value").set.call(e,"no matching fixture");e.dispatchEvent(new Event("input",{bubbles:true}));})()`);
+      await until(()=>win.webContents.executeJavaScript("document.querySelector('.libraryPageLiked')?.textContent.includes('No songs found')"),"liked search empty "+mode);
+      await win.webContents.executeJavaScript("[...document.querySelectorAll('.libraryPageLiked button')].find(b=>b.textContent==='clear search').click()");
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=playlists]').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('button[aria-label=\"open qa playlist\"]')").catch(()=>false),"fixture playlist "+mode);
       await win.webContents.executeJavaScript("document.querySelector('button[aria-label=\"open qa playlist\"]').click()");
-      await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.playlistDetailPage .collectionHero') && document.querySelector('.app').dataset.workspaceArtwork==='on'").catch(()=>false),"playlist retains shell artwork "+mode);
+      await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.playlistDetailPage .collectionHero') && document.querySelector('.app').dataset.workspaceArtwork==='on'").catch(()=>false),"playlist contextual shell artwork "+mode);
       await screenshot(win,"playlist-atmosphere-"+mode);
       await win.webContents.executeJavaScript(`(()=>{const e=document.querySelector('input[aria-label="Search playlist tracks"]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value").set.call(e,"no matching fixture");e.dispatchEvent(new Event("input",{bubbles:true}));})()`);
       await until(()=>win.webContents.executeJavaScript("document.querySelector('.playlistTracksPanel [role=status]')?.textContent.includes('No matching tracks')"),"playlist search empty "+mode);

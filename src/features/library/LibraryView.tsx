@@ -79,6 +79,7 @@ export default function LibraryView(props: LibraryViewProps) {
   const toggleSelection = useCallback((id: string) => setSelection(old => { const next = new Set(old); if (next.has(id)) next.delete(id); else next.add(id); return next; }), []);
   const exitSelection = () => { setSelectionMode(false); setSelection(new Set()); };
 
+  const playableVisibleCount = useMemo(() => visibleSongs.reduce((count, song) => count + Number(song.fileExists !== false), 0), [visibleSongs]);
   const likedCount = useMemo(() => songs.reduce((count, song) => count + Number(Boolean(song.liked)), 0), [songs]);
   const isLiked = view === "liked";
   const grid = !selectionMode && settings.libraryRowStyle === "coverCards";
@@ -111,7 +112,7 @@ export default function LibraryView(props: LibraryViewProps) {
         <button className="libraryAction" type="button" aria-pressed={selectionMode} onClick={() => selectionMode ? exitSelection() : setSelectionMode(true)} disabled={!visibleSongs.length && !selectionMode}>{selectionMode ? "Done" : "Select tracks"}</button>
         {!isLiked ? (
           <>
-            <button className="libraryAction" type="button" onClick={shuffleLibrarySongsAction} disabled={songs.length < 2}>
+            <button className="libraryAction" type="button" onClick={shuffleLibrarySongsAction} disabled={playableVisibleCount < 2}>
               <ActionLabel icon={Shuffle}>shuffle</ActionLabel>
             </button>
             {isAndroidApp() ? null : <button className="libraryAction" type="button" onClick={() => setDuplicatesOpen(true)} disabled={songs.length < 2} title="Find songs that are in your library more than once">
@@ -186,17 +187,15 @@ export default function LibraryView(props: LibraryViewProps) {
             <LocaltifyStateCard
               centered={!isLiked}
               cute={!isLiked}
-              tone={showingMissingFiles ? "success" : isLiked || query.trim() ? "info" : "warning"}
+              tone={query.trim() || isLiked ? "info" : showingMissingFiles ? "success" : "warning"}
               eyebrow={showingMissingFiles ? "file check" : isLiked ? "liked songs" : query.trim() ? "search" : "library"}
-              title={showingMissingFiles ? "All files are cozy" : isLiked ? "No liked songs yet" : query.trim() ? "No songs found" : "No songs yet"}
-               message={showingMissingFiles ? "All your files are available." : isLiked ? "Like a song to save it here." : query.trim() ? "Try a different title or artist." : isAndroidApp() ? `Sync with your ${computerName()} in Settings → Library to get started.` : "Import music to get started."}
-              mascotState={showingMissingFiles ? "happy" : query.trim() ? "question" : "empty"}
-              actions={showingMissingFiles ? (
+              title={query.trim() ? "No songs found" : showingMissingFiles ? "No missing files" : isLiked ? "No liked songs yet" : "No songs yet"}
+               message={query.trim() ? "Try a different title or artist." : showingMissingFiles ? "All your files are available." : isLiked ? "Like a song to save it here." : isAndroidApp() ? `Sync with your ${computerName()} in Settings → Library to get started.` : "Import music to get started."}
+              mascotState={query.trim() ? "question" : showingMissingFiles ? "happy" : "empty"}
+              actions={query.trim() ? (<button className="softButton" type="button" onClick={() => handleSearchInput("")}>clear search</button>) : showingMissingFiles ? (
                 <button className="softButton" type="button" onClick={() => setLibraryFilterMode?.("all")}>show all tracks</button>
               ) : isLiked ? (
                 <button className="softButton" type="button" onClick={() => changeView("library", "empty-liked")}>browse library</button>
-              ) : query.trim() ? (
-                <button className="softButton" type="button" onClick={() => handleSearchInput("")}>clear search</button>
               ) : isAndroidApp() ? null : (
                 <button className="mainAction" type="button" onClick={importSongs}>import songs</button>
               )}
