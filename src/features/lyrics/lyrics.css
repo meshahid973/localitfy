@@ -129,7 +129,7 @@
 .lyricsLines.isSynced .lyricsLine{
   color: var(--lt-faint);
   cursor: pointer;
-  transition: color 260ms ease, transform 260ms ease;
+  transition: color var(--lt-control-motion) ease;
 }
 
 .lyricsLines.isSynced .lyricsLine.isPast{
@@ -140,9 +140,8 @@
   color: var(--lt-text);
 }
 
-.lyricsLines.isSynced .lyricsLine:hover{
-  color: var(--lt-text);
-}
+.lyricsLines.isSynced .lyricsLine:not(.isActive):hover { color: color-mix(in srgb, var(--lt-text) 72%, var(--lt-faint)); }
+.lyricsLines.isSynced .lyricsLine:focus-visible { outline: 2px solid var(--lt-accent); outline-offset: 3px; border-radius: var(--lt-radius-item); }
 
 .lyricsLine.isBreak{
   font-size: clamp(18px, 2vw, 26px);

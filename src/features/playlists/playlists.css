@@ -56,11 +56,11 @@
   transform: translateY(var(--playlist-row-y,0px));
   display: grid; grid-template-columns: 18px minmax(0,1fr) 54px 34px;
   align-items: center; gap: 9px; padding: 8px 10px;
-  border-bottom: 1px solid rgba(var(--lt-accent-rgb), .08);
-  border-radius: 8px; color: var(--playlist-text); background: transparent;
+  border-bottom: 1px solid transparent;
+  border-radius: var(--lt-radius-item); color: var(--playlist-text); background: transparent;
 }
-.playlistTrackRow.virtualPlaylistTrackRow:hover { background: var(--lt-surface-raised); }
-.playlistTrackRow.virtualPlaylistTrackRow.active { background: rgba(var(--lt-accent-rgb),.12); }
+.playlistTrackRow.virtualPlaylistTrackRow:hover { background: var(--lt-fill-hover); }
+.playlistTrackRow.virtualPlaylistTrackRow.active { background: var(--lt-fill-selected); }
 .playlistTrackRow.songDropTarget[data-drop-side="before"] { border-top: 2px solid var(--lt-accent); }
 .playlistTrackRow.songDropTarget[data-drop-side="after"] { border-bottom: 2px solid var(--lt-accent); }
 .playlistTrackRow.songDragging { opacity: .46; }

@@ -700,19 +700,10 @@ body.isResizingSidebar{
 }
 .app button{
   transition:
-    transform 150ms cubic-bezier(0.16, 1, 0.3, 1),
     border-color 150ms ease,
     background-color 150ms ease,
     color 150ms ease,
     opacity 150ms ease !important;
-}
-
-.app button:hover{
-  transform: translateY(-1px) translateZ(0);
-}
-
-.app button:active{
-  transform: translateY(0) scale(0.985) translateZ(0);
 }
 
 .app.themeSettling{
@@ -1012,22 +1003,10 @@ body.isResizingSidebar{
 .heroMain,
 .heroGhost,
 .dangerButton {
-  transition:
-    color 180ms ease,
-    background-color 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease,
-    transform 180ms var(--shell-ease) !important;
+  transition: color var(--lt-control-motion) ease, background-color var(--lt-control-motion) ease, border-color var(--lt-control-motion) ease !important;
 }
 
-.songRow.active{
-  background:
-    linear-gradient(90deg, rgba(var(--lt-accent-rgb), 0.13), rgba(var(--lt-accent-rgb), 0.05)) !important;
-  border-color: rgba(var(--lt-accent-rgb), 0.32) !important;
-  box-shadow:
-    inset 3px 0 0 var(--lt-accent),
-    0 16px 42px rgba(0, 0, 0, 0.25) !important;
-}
+.songRow.active { background: var(--lt-fill-selected) !important; }
 
 .iconAction,
 .circleButton:not(.playerBar *),
@@ -1219,19 +1198,11 @@ body{
   isolation: isolate !important;
   overflow: hidden !important;
   border-radius: 12px !important;
-  background: color-mix(in oklab, var(--theme-accent, var(--lt-accent)) 4%, rgba(0,0,0,.46)) !important;
-  border: 1px solid color-mix(in oklab, var(--theme-accent, var(--lt-accent)) 14%, rgba(255,255,255,.06)) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
-  filter: none !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
 }
 
-.app .songRow.active{
-  background: color-mix(in oklab, var(--theme-accent, var(--lt-accent)) 7%, rgba(0,0,0,.48)) !important;
-  border-color: color-mix(in oklab, var(--theme-accent, var(--lt-accent)) 28%, rgba(255,255,255,.08)) !important;
-  box-shadow:
-    inset 3px 0 0 var(--lt-accent),
-    inset 0 1px 0 rgba(255,255,255,.045) !important;
-}
+.app .songRow.active { background: var(--lt-fill-selected) !important; }
 
 .app .songRow,
 .app .songArt,
@@ -1438,17 +1409,6 @@ button,
     color 150ms ease,
     filter 150ms ease !important;
 }
-
-button:hover,
-.button:hover,
-.circleButton:hover:not(.playerBar *),
-.softButton:hover,
-.heroGhost:hover,
-.mainAction:hover,
-.heroMain:hover {
-  box-shadow: 0 0 12px color-mix(in oklab, var(--lt-accent, #ff65df) 14%, transparent) !important;
-}
-
 
 .app[data-theme]::before{
   opacity: 0 !important;
@@ -2457,10 +2417,6 @@ body::after,
   transform: translate3d(0,0,0) !important;
 
   transition: background-color 170ms ease, border-color 170ms ease, color 170ms ease, box-shadow 170ms ease, opacity 170ms ease !important;
-}
-
-.app .sidebarNav button:hover{
-  transform: translate3d(0,0,0) !important;
 }
 
 .app .whatsNewCard ul {
@@ -3845,28 +3801,6 @@ body.localitfyThemePainting .app{
   transition: none !important;
   filter: none !important;
   box-shadow: none !important;
-}
-
-.app .iconAction.noActionHoverV444:hover,
-.app .homeAlbumActions .iconAction:hover,
-.app .songRow > .iconAction:hover,
-.app .playlistAddAction:hover,
-.app .likeActionV443:hover{
-  transform: none !important;
-  filter: none !important;
-  box-shadow: none !important;
-}
-
-.app .iconAction.noActionHoverV444:active,
-.app .homeAlbumActions .iconAction:active,
-.app .songRow > .iconAction:active,
-.app .playlistAddAction:active,
-.app .likeActionV443:active,
-.app .iconAction.likeActionV443:not(.liked):not(.likeActionActiveV443):hover .likeHeartShellV443,
-.app .iconAction.likeActionV443:hover .likeHeartShellV443,
-.app .playlistAddAction:hover{
-  transform: none !important;
-  filter: none !important;
 }
 
 .app .playlistPickerWrap.modalWrap,

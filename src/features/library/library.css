@@ -97,7 +97,6 @@
   color: var(--lt-text); background: radial-gradient(ellipse at 75% 25%, color-mix(in srgb,var(--collection-hue) 38%,var(--lt-bg)),var(--lt-surface) 85%);
 }
 .libraryCollectionArtwork[data-kind="liked"] { --collection-hue: #a28bea; }
-.libraryCollectionArtwork[data-kind="albums"] { --collection-hue: #7696ff; }
 .libraryCollectionArtwork[data-kind="artists"] { --collection-hue: #58a699; }
 .libraryCollectionShortcuts strong { font-size: 14px; font-weight: 550; }
 .libraryCollectionShortcuts small { font-size: var(--lt-text-base); color: var(--lt-muted); }
@@ -253,16 +252,11 @@
 .app .libraryPage .songRow:not(.songDragging):not(.songDropTarget) {
   background: transparent !important;
 }
-.app .libraryPage .songRow:not(.songDropTarget)::before,
-.app .libraryPage .songRow:not(.songDropTarget)::after {
-  content: none;
-  display: none;
-}
 .app .libraryPage .songRow:hover:not(.songDragging):not(.songDropTarget) {
-  background: color-mix(in srgb, var(--lt-text) 4%, transparent) !important;
+  background: var(--lt-fill-hover) !important;
 }
 .app .libraryPage .songRow.active:not(.songDragging):not(.songDropTarget) {
-  background: color-mix(in srgb, var(--lt-text) 6%, transparent) !important;
+  background: var(--lt-fill-selected) !important;
   border-color: color-mix(in srgb, var(--lt-accent) 18%, transparent) !important;
   box-shadow: inset 2px 0 0 var(--lt-accent) !important;
 }
@@ -395,7 +389,7 @@
 
 .libraryPage .libraryTrackSurface.libraryFullListV025 { scrollbar-color: color-mix(in oklab,var(--lt-accent) 28%,transparent) transparent; }
 .libraryPage .songRow :is(.iconAction,.songButton):focus-visible {
-  outline: 1px solid var(--lt-accent);
+  outline: 2px solid var(--lt-accent);
   outline-offset: 1px;
 }
 .libraryPage .librarySearch:focus-visible,
@@ -430,3 +424,10 @@
   .libraryPage .songArt,
   .libraryPage .songArt .coverImage { width: 42px !important; height: 42px !important; }
 }
+
+.libraryCollectionShortcuts button { border-radius: var(--lt-radius-item); }
+.libraryCollectionShortcuts button:hover .libraryCollectionArtwork { filter: brightness(1.08); }
+.libraryCollectionShortcuts button:hover strong { color: var(--lt-accent); }
+.libraryPage .songRow.selected:not(.songDragging):not(.songDropTarget) { background: var(--lt-fill-selected) !important; outline: 1px solid var(--lt-border-strong); outline-offset: -1px; }
+.librarySelectionTools { display: flex; flex-wrap: wrap; gap: var(--lt-gap-control); align-items: center; }
+.librarySelectionTools .pageHeaderCount { margin-inline-end: auto; }

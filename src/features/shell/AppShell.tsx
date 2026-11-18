@@ -110,7 +110,7 @@ export default function AppShell(props: AppShellProps) {
   const sources = pageArtwork?.route === route && pageArtwork.sources.length ? pageArtwork.sources : homeSources;
   // A paused current track remains the listening context; navigation never interrupts its backdrop.
   const trackSources = useMemo(() => trackArtworkSources(home.currentSong), [home.currentSong]);
-  const workspaceSources = useMemo(() => resolveWorkspaceArtwork(trackSources, sources), [trackSources, sources]);
+  const workspaceSources = useMemo(() => resolveWorkspaceArtwork(trackSources, sources, Boolean(detail) && view !== "home"), [trackSources, sources, detail, view]);
   const artworkEnabled = effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded;
   const { actions, menu } = useCollectionActions(nav, collections, modals.queuePanel.openSongContextMenu);
   const pageProps = { songs: library.songs, currentId: home.currentId, isPlaying, toggleLike: modals.songContextMenu.toggleLike, openPlaylistPicker: modals.songContextMenu.openPlaylistPicker };
