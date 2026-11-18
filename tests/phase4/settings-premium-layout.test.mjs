@@ -112,7 +112,7 @@ test("Downloads keeps import and queue controls but omits mascot and redundant e
   assert.match(downloads, /spotifyTrackList/);
   assert.match(downloads, /converterProgress/);
   assert.doesNotMatch(downloads, /MascotHelperBubble|MascotStateArt|LocaltifyStateCard/);
-  assert.match(css, /--downloads-surface: var\(--lt-surface\)/);
+  assert.match(css, /--downloads-surface: var\(--lt-surface-soft\)/);
   assert.doesNotMatch(css, /#82b3ce|#0d1d26|mascotHelper/);
 });
 
@@ -128,7 +128,7 @@ test("Library track canvas stays unboxed, preserving theme text and virtual posi
 test("Settings search and switches are readable with reduced-motion support", () => {
   assert.match(skin, /padding: 10px 36px 10px 39px/);
   assert.match(skin, /::-webkit-search-decoration/);
-  assert.match(read("src/features/settings/settings.css"), /--settings-surface: var\(--lt-surface\)/);
+  assert.match(read("src/features/settings/settings.css"), /--settings-surface: var\(--lt-surface-soft\)/);
   assert.match(skin, /background: var\(--settings-text\); transition: transform/);
   assert.match(skin, /toggleRow input\[type="checkbox"\]::before \{ transition: none/);
 });
@@ -145,7 +145,7 @@ test("Covers keeps interactive tools while replacing fixed blue surfaces", () =>
   const css = read("src/features/covers/covers.css");
   const studio = read("src/features/covers/CoverStudio.tsx");
   const view = read("src/features/covers/CoversView.tsx");
-  assert.match(css, /--cover-surface: var\(--lt-surface\)/);
+  assert.match(css, /--cover-surface: var\(--lt-surface-soft\)/);
   assert.match(css, /--cover-text: var\(--lt-text\)/);
   assert.doesNotMatch(css, /#0d1d26|#112630|#dce8ed/);
   assert.match(studio, /coverMaintenanceMenu/);

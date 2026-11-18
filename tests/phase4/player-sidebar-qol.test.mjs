@@ -85,12 +85,17 @@ test("player bar links the song, artist, like state, context menu and queue", ()
 });
 
 test("now-playing context prefers the playlist, then the started source, then the library", () => {
-  const source = read("src/features/player/playbackSource.ts");
-  const resolver = source.slice(source.indexOf("export function resolveNowPlayingContext"), source.indexOf("export function getRepeatPreview"));
-  const playlistAt = resolver.indexOf("activePlaylist?.songIds.includes(song.id)");
-  const sourceAt = resolver.indexOf("source?.songIds.includes(song.id)");
-  const libraryAt = resolver.lastIndexOf('kind: "library"');
-  assert.ok(playlistAt > 0 && playlistAt < sourceAt && sourceAt < libraryAt);
+  const { resolveNowPlayingContext } = loadCommonJs("src/features/player/playbackSource.ts", (specifier) => {
+    if (specifier === "../library/library.utils") return { isPlayableSong: () => true };
+    throw new Error(`unexpected import ${specifier}`);
+  });
+  const song = { id: "song-1" };
+  const playlist = { id: "playlist-1", name: "Favorites", songIds: [song.id] };
+  const source = { kind: "artist", id: "artist-1", label: "artist: Example", songIds: [song.id] };
+  assert.deepEqual(plain(resolveNowPlayingContext(song, playlist, source)), { kind: "playlist", id: playlist.id, label: "playlist: Favorites" });
+  assert.deepEqual(plain(resolveNowPlayingContext(song, { ...playlist, songIds: [] }, source)), { kind: source.kind, id: source.id, label: source.label });
+  assert.deepEqual(plain(resolveNowPlayingContext(song, null, { ...source, songIds: [] })), { kind: "library", id: "", label: "library" });
+  assert.deepEqual(plain(resolveNowPlayingContext(null, playlist, source)), { kind: "library", id: "", label: "" });
 });
 
 test("repeat-all loops the artist/genre a queue was started from", () => {

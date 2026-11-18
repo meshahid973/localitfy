@@ -4,7 +4,7 @@ import test from "node:test";
 
 const read = (file) => fs.readFileSync(file, "utf8");
 
-test("collection browsing classes cannot collide with album and artist detail pages", () => {
+test("collection browsing classes cannot collide with artist and genre detail pages", () => {
   const browse = read("src/shared/ui/collection-layout.css");
   const detail = read("src/features/pages/pages.css");
   const artist = read("src/features/artists/ArtistsView.tsx");
@@ -15,7 +15,7 @@ test("collection browsing classes cannot collide with album and artist detail pa
     assert.doesNotMatch(detail, new RegExp("\\." + klass + "\\b"));
   }
   assert.match(detail, /\.collectionPage\s*\{/);
-  assert.match(detail, /\.collectionCard\s*\{/);
+  assert.doesNotMatch(detail, /\.collectionCard\s*\{/);
   assert.doesNotMatch(browse, /\.collectionPage\s*\{|\.collectionCard\s*\{/);
 });
 

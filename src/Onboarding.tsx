@@ -124,6 +124,7 @@ export default function Onboarding({
     "--onboarding-accent": selectedTheme.color,
     "--onboarding-accent-rgb": hexToRgbString(selectedTheme.color),
     "--onboarding-bg": selectedTheme.bg,
+    "--onboarding-surface": selectedTheme.id === "light" ? "#ffffff" : "#101012",
     "--onboarding-progress": `${progress}%`
   } as CssVars;
 
