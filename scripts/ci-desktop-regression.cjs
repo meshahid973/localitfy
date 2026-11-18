@@ -1,5 +1,5 @@
 "use strict";
-const {app,BrowserWindow,session}=require("electron");
+const {app,BrowserWindow,session,nativeImage}=require("electron");
 const fs=require("node:fs"),os=require("node:os"),path=require("node:path"),http=require("node:http");
 const {spawnSync}=require("node:child_process");
 const assert=require("node:assert/strict");
@@ -19,7 +19,21 @@ function wav(name){
   for(let i=0;i<samples;i++)buf.writeInt16LE(Math.round(Math.sin(i*2*Math.PI*440/48000)*1000),44+i*2);
   const target=path.join(dir,name+".wav");fs.writeFileSync(target,buf);return target;
 }
-const songs=Array.from({length:12},(_,i)=>({id:"qa-"+i,title:"test track "+i,artist:"test artist "+(i%8),album:"test album "+Math.floor(i/4),genre:"ambient",filePath:wav("qa-"+i),duration:20,dateAdded:"2026-01-01T00:00:00Z",playCount:12-i,lastPlayed:"2026-11-16T00:00:00Z",liked:i===0}));
+function fixtureCover(index) {
+  const width=32,height=32,bitmap=Buffer.alloc(width*height*4);
+  for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+    const offset=(y*width+x)*4;
+    bitmap[offset]=(80+index*19+y*3)%256;
+    bitmap[offset+1]=(55+index*31+x*4)%256;
+    bitmap[offset+2]=(120+index*13+y*2)%256;
+    bitmap[offset+3]=255;
+  }
+  const target=path.join(dir,"qa-cover-"+index+".png");
+  const image=nativeImage.createFromBitmap(bitmap,{width,height});
+  if(image.isEmpty())throw Error("Could not build fixture cover");
+  fs.writeFileSync(target,image.toPNG());return target;
+}
+const songs=Array.from({length:12},(_,i)=>({id:"qa-"+i,title:"test track "+i,artist:"test artist "+(i%8),album:"test album "+Math.floor(i/4),genre:"ambient",filePath:wav("qa-"+i),coverPath:fixtureCover(i),coverSource:"local",duration:20,dateAdded:"2026-01-01T00:00:00Z",playCount:12-i,lastPlayed:"2026-11-16T00:00:00Z",liked:i===0}));
 for (const song of songs) fs.writeFileSync(song.filePath.replace(/\.wav$/, ".lrc"), "[00:00.00]Local lyric fixture\n[00:05.00]Second lyric line\n");
 const seed=spawnSync(process.execPath,["-e",
   "const db=require(process.argv[1]);db.initDatabase(process.argv[2]);const songs=JSON.parse(process.argv[3]);db.insertSongs(songs);db.savePlaylists([{id:'qa-playlist',name:'qa playlist',songIds:songs.map(s=>s.id),createdAt:Date.now()}]);db.saveSettings({startWithWindows:false,idleScreensaverEnabled:false,discordRpcEnabled:false,reducedMotion:false,discoverEnabled:true,lyricsEnabled:true,lyricsOnlineLookup:false,coverColorSyncMode:'strong',homeBannerType:'dynamic',showAmbientGradient:true,playerBackgroundStyle:'coverBlur',homeHiddenSections:['dailyMixes','likedSongs','rediscover','notPlayedYet']});",
@@ -56,7 +70,7 @@ server.listen(5173,async()=>{
     await until(()=>win.webContents.executeJavaScript("document.readyState === 'complete' && !!document.querySelector('#root')").catch(()=>false),"document ready");
     // A fresh profile initially shows onboarding, not the workspace. Record
     // first-render latency separately, then dismiss onboarding in the fixture.
-    await until(()=>win.webContents.executeJavaScript("!document.querySelector('.appCrashBoundary') && (!!document.querySelector('.appShell') || !!document.querySelector('#root h1'))").catch(()=>false),"initial desktop render");
+    await until(()=>win.webContents.executeJavaScript("!document.querySelector('.appCrashBoundary') && (!!document.querySelector('.appShell') || !!document.querySelector('.onboardingLayer h2'))").catch(()=>false),"initial desktop render");
     const startupMs=Date.now()-started;
     await win.webContents.executeJavaScript(`localStorage.setItem('localitfy.onboarding.v1','done');localStorage.setItem('localitfy.onboarding.release-showcase.' + ${JSON.stringify(version)},'done');localStorage.setItem('localitfy.whatsNewSeenVersion',${JSON.stringify(version)})`);
     const reloadStarted=Date.now();
