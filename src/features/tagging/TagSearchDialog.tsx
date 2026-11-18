@@ -24,6 +24,7 @@ export default function TagSearchDialog({ song, onClose }: TagSearchDialogProps)
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
   const [saved, setSaved] = useState(false);
+  const [undoId, setUndoId] = useState<string | null>(null);
 
   useLayoutEffect(() => {
     const dialog = dialogRef.current;
@@ -55,6 +56,7 @@ export default function TagSearchDialog({ song, onClose }: TagSearchDialogProps)
     setBusy("Saving tags…"); setMessage("");
     try {
       const result = await window.localitfy.applyMusicBrainzTags([song.id]);
+      if (result.applied) setUndoId(result.undoId || null);
       if (result.failed.length) { setMessage(`Could not update this song: ${result.failed[0].error}.`); return; }
       if (!result.applied) { setMessage("No metadata changes were applied. Look up the song again."); return; }
       setSaved(true);
@@ -63,6 +65,16 @@ export default function TagSearchDialog({ song, onClose }: TagSearchDialogProps)
   }
 
   const { tags } = proposal || {};
+  async function undo() {
+    if (!undoId) return;
+    setBusy("Restoring previous tags…"); setMessage("");
+    try {
+      const result = await window.localitfy.undoMusicBrainzTags(undoId);
+      setUndoId(null); setSaved(true);
+      setMessage(`Restored ${plural(result.restored, "song")}.${result.failed.length ? " Could not restore: " + result.failed.map(item => item.title + " (" + item.error + ")").join(", ") + "." : ""}`);
+    } catch (reason) { setMessage(errorText(reason)); } finally { setBusy(""); }
+  }
+
   return <dialog ref={dialogRef} className="tagSearchDialog" aria-labelledby="tag-search-title" aria-modal="true"
     onCancel={(event) => { event.preventDefault(); if (!busy) onClose(); }}>
     <section className="tagSearchContent">
@@ -86,7 +98,8 @@ export default function TagSearchDialog({ song, onClose }: TagSearchDialogProps)
           </span>
         </div>
         <div className="tagSearchActions">
-          {saved ? <button type="button" className="tagSearchButton primary" onClick={onClose}>Done</button> : <>
+          {undoId ? <button type="button" className="tagSearchButton" disabled={Boolean(busy)} onClick={() => void undo()}>Undo save</button> : null}
+          {saved ? <button type="button" className="tagSearchButton primary" disabled={Boolean(busy)} onClick={onClose}>Done</button> : <>
             <button type="button" className="tagSearchButton" disabled={Boolean(busy)} onClick={() => { setProposal(null); setMessage(""); }}><ArrowLeft size={14} /> Back to results</button>
             <button type="button" className="tagSearchButton primary" disabled={Boolean(busy)} onClick={() => void save()}><Check size={14} /> Save tags</button>
           </>}

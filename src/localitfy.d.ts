@@ -554,6 +554,8 @@ declare global {
       getPendingMusicBrainzTags: () => Promise<import("./features/tagging/tagging.types").TagProposal[]>;
       lookUpMusicBrainzTags: (songIds: string[]) => Promise<import("./features/tagging/tagging.types").TagLookupResult>;
       applyMusicBrainzTags: (songIds: string[]) => Promise<import("./features/tagging/tagging.types").TagApplyResult>;
+      getMusicBrainzUndo: () => Promise<{ id: string; count: number } | null>;
+      undoMusicBrainzTags: (id: string) => Promise<import("./features/tagging/tagging.types").TagUndoResult>;
       searchMusicBrainz: (songId: string, title: string, artist: string) => Promise<import("./features/tagging/tagging.types").TagSearchResult[]>;
       chooseMusicBrainzMatch: (songId: string, recordingId: string, releaseId: string) => Promise<import("./features/tagging/tagging.types").TagProposal>;
       searchMusicBrainzAlbum: (songIds: string[], album: string, artist: string) => Promise<import("./features/tagging/tagging.types").TagAlbumSearchResult[]>;

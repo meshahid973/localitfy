@@ -483,7 +483,9 @@ test("IPC: gated by the setting, proposals stay native, and library-only apply u
   assert.equal(pending[0].groupKey, `marrow\0${dir}`);
 
   const result = await router.invoke("tagging:apply", { songIds: ["a", "unknown"] });
-  assert.deepEqual(result, { applied: 1, written: 0, failed: [{ songId: "unknown", title: "unknown", error: "Song or matching proposal is no longer available" }] });
+  assert.ok(result.undoId);
+  assert.deepEqual({ ...result, undoId: undefined }, { applied: 1, written: 0, failed: [{ songId: "unknown", title: "unknown", error: "Song or matching proposal is no longer available" }], undoId: undefined });
+  assert.deepEqual(await router.invoke("tagging:undo-state"), { id: result.undoId, count: 1 });
   assert.equal(songs.get("a").genre, "Hyperpop; Emo Rap");
   assert.equal(songs.get("a").coverPath, path.join(dir, "musicbrainz-covers", "rel-marrow.jpg"));
   assert.equal(songs.get("a").coverSource, "custom");
@@ -492,6 +494,11 @@ test("IPC: gated by the setting, proposals stay native, and library-only apply u
   assert.equal(sent[0][1].libraryChanged, true, "tag edits trigger a full library update");
   assert.deepEqual(await router.invoke("tagging:apply", { songIds: ["a"] }), { applied: 0, written: 0, failed: [{ songId: "a", title: songs.get("a").title, error: "Song or matching proposal is no longer available" }] }, "a proposal is used once and a subsequent apply reports failure");
 
+  assert.deepEqual(await router.invoke("tagging:undo", { id: result.undoId }), { restored: 1, failed: [] });
+  assert.equal(songs.get("a").genre, "");
+  assert.equal(songs.get("a").coverPath, null);
+  assert.equal(await router.invoke("tagging:undo-state"), null);
+  await assert.rejects(async () => router.invoke("tagging:undo", { id: result.undoId }), /no longer available/);
   assert.deepEqual(await router.invoke("tagging:search", { songId: "b", title: "death rolL", artist: "" }), [], "the fake has no recordings to search");
   const chosen = await router.invoke("tagging:choose", { songId: "b", recordingId: "rec-2", releaseId: "rel-marrow" });
   assert.deepEqual([chosen.songId, chosen.tags.trackNumber, chosen.coverUrl], ["b", 2, "localtify-media://rel-marrow.jpg"]);
@@ -502,7 +509,16 @@ test("IPC: gated by the setting, proposals stay native, and library-only apply u
   assert.equal(songs.get("b").title, "Edited after preview");
   songs.get("b").title = originalTitle;
   settings.musicbrainzWriteFiles = true;
-  assert.deepEqual(await router.invoke("tagging:apply", { songIds: ["b"] }), { applied: 1, written: 0, failed: [] }, "backend file-write gate cannot be overridden by settings");
+  const saved = await router.invoke("tagging:apply", { songIds: ["b"] });
+  assert.equal(saved.applied, 1);
+  assert.equal(saved.written, 0, "backend file-write gate cannot be overridden by settings");
+  assert.deepEqual(saved.failed, []);
+  songs.get("b").title = "New manual edit";
+  const undoConflict = await router.invoke("tagging:undo", { id: saved.undoId });
+  assert.equal(undoConflict.restored, 0);
+  assert.match(undoConflict.failed[0].error, /newer edits were kept/);
+  assert.equal(songs.get("b").title, "New manual edit");
+  songs.get("b").title = originalTitle;
   await assert.rejects(router.invoke("tagging:search", { songId: "missing", title: "x" }), /could not be found/);
 
   const releases = await router.invoke("tagging:search-album", { songIds: ["a", "b"], album: "marroW", artist: "brakence" });

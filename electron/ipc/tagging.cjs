@@ -1,6 +1,7 @@
 "use strict";
 
 const fs = require("node:fs");
+const { randomUUID } = require("node:crypto");
 const path = require("node:path");
 const { createTagAuditor, albumGroupKey } = require("../musicbrainz/audit.cjs");
 const { createMusicBrainzClient } = require("../musicbrainz/client.cjs");
@@ -29,6 +30,13 @@ function registerTaggingIpc(router, deps) {
   const lookup = createTaggingLookup({ client: deps.musicBrainzClient || createMusicBrainzClient({ userAgent, fetchImpl, ...deps.clientOptions }), coverDir: path.join(app.getPath("userData"), "musicbrainz-covers"), userAgent, fetchImpl });
   // Proposals stay in the main process; the renderer only ever sends song IDs back.
   const proposals = new Map();
+  const MAX_UNDO_TRACKS = 10000;
+  let lastUndo = null;
+  const notifyChanges = (count) => {
+    clearFileInfoCache?.();
+    const window = getWindow();
+    if (count && window && !window.isDestroyed()) window.webContents.send("library:watched-change", { importedCount: 0, libraryChanged: true, songs: listSongsShaped() });
+  };
   const requireEnabled = () => { if (getSettings()?.musicbrainzTagging !== true) throw new Error("Turn on MusicBrainz tagging first"); };
   const songsFor = (ids) => [...new Set((Array.isArray(ids) ? ids : []).map(String))].map((id) => repository.get(id)).filter((song) => song?.filePath && fs.existsSync(song.filePath));
 
@@ -118,6 +126,7 @@ function registerTaggingIpc(router, deps) {
     let applied = 0;
     let written = 0;
     const failed = [];
+    const undoEntries = [];
     for (const id of new Set((Array.isArray(payload.songIds) ? payload.songIds : []).map(String))) {
       const song = repository.get(id);
       const proposal = proposals.get(id);
@@ -141,18 +150,48 @@ function registerTaggingIpc(router, deps) {
         } else if (proposal.coverPath) {
           Object.assign(patch, { coverPath: proposal.coverPath, coverSource: "custom", coverUpdatedAt: new Date().toISOString() });
         }
+        const before = Object.fromEntries(Object.keys(patch).map(key => [key, song[key] ?? null]));
         repository.patch(song.id, patch);
+        const after = repository.get(song.id);
+        if (!after) throw new Error("Song disappeared during save");
+        if (!write && undoEntries.length <= MAX_UNDO_TRACKS) undoEntries.push({ songId: song.id, filePath: song.filePath, before, after: Object.fromEntries(Object.keys(patch).map(key => [key, after[key] ?? null])) });
         proposals.delete(song.id);
         applied += 1;
       } catch (error) {
         failed.push({ songId: song.id, title: song.title, error: error?.message || "tagging failed" });
       }
     }
-    clearFileInfoCache?.();
-    // Reuses the watched-folders push so the open library updates without a reload.
-    const window = getWindow();
-    if (applied && window && !window.isDestroyed()) window.webContents.send("library:watched-change", { importedCount: 0, libraryChanged: true, songs: listSongsShaped() });
-    return { applied, written, failed };
+    if (applied) lastUndo = written === 0 && undoEntries.length && undoEntries.length <= MAX_UNDO_TRACKS ? { id: randomUUID(), entries: undoEntries } : null;
+    notifyChanges(applied);
+    return { applied, written, failed, ...(applied && lastUndo ? { undoId: lastUndo.id } : {}) };
+  });
+
+  // Only the last successful library-only save can be undone. The native journal
+  // prevents a renderer from supplying arbitrary restore values or overwriting later edits.
+  router.handle("tagging:undo-state", () => {
+    requireEnabled();
+    return lastUndo ? { id: lastUndo.id, count: lastUndo.entries.length } : null;
+  });
+  router.handle("tagging:undo", (_event, payload = {}) => {
+    requireEnabled();
+    if (!lastUndo || payload.id !== lastUndo.id) throw new Error("This undo is no longer available");
+    const { entries } = lastUndo;
+    lastUndo = null;
+    let restored = 0;
+    const failed = [];
+    for (const entry of entries) {
+      const song = repository.get(entry.songId);
+      try {
+        if (!song || song.filePath !== entry.filePath || Object.keys(entry.after).some(key => (song[key] ?? null) !== entry.after[key])) throw new Error("Song changed after save; newer edits were kept");
+        repository.patch(entry.songId, entry.before);
+        proposals.delete(entry.songId);
+        restored += 1;
+      } catch (error) {
+        failed.push({ songId: entry.songId, title: song?.title || entry.songId, error: error?.message || "Undo failed" });
+      }
+    }
+    notifyChanges(restored);
+    return { restored, failed };
   });
 }
 

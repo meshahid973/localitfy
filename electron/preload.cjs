@@ -44,6 +44,8 @@ contextBridge.exposeInMainWorld("localitfy", {
   getPendingMusicBrainzTags: () => ipcRenderer.invoke("tagging:pending"),
   lookUpMusicBrainzTags: (songIds) => ipcRenderer.invoke("tagging:lookup", { songIds }),
   applyMusicBrainzTags: (songIds) => ipcRenderer.invoke("tagging:apply", { songIds }),
+  getMusicBrainzUndo: () => ipcRenderer.invoke("tagging:undo-state"),
+  undoMusicBrainzTags: (id) => ipcRenderer.invoke("tagging:undo", { id }),
   searchMusicBrainz: (songId, title, artist) => ipcRenderer.invoke("tagging:search", { songId, title, artist }),
   chooseMusicBrainzMatch: (songId, recordingId, releaseId) => ipcRenderer.invoke("tagging:choose", { songId, recordingId, releaseId }),
   searchMusicBrainzAlbum: (songIds, album, artist) => ipcRenderer.invoke("tagging:search-album", { songIds, album, artist }),

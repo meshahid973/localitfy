@@ -25,7 +25,9 @@ export type TagProposal = {
 
 export type TagLookupResult = { proposals: TagProposal[]; missed: string[] };
 
-export type TagApplyResult = { applied: number; written: number; failed: { songId: string; title: string; error: string }[] };
+export type TagFailure = { songId: string; title: string; error: string };
+export type TagApplyResult = { applied: number; written: number; failed: TagFailure[]; undoId?: string };
+export type TagUndoResult = { restored: number; failed: TagFailure[] };
 
 /** One recording on one release, from a hand-typed MusicBrainz search. */
 export type TagSearchResult = {
