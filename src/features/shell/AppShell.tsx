@@ -1,10 +1,12 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, memo, Suspense, useState, useSyncExternalStore } from "react";
+import { useStableCallback } from "../../shared/hooks/useStableCallback";
+import type { CollectionMenuStore } from "./collectionMenuStore";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties } from "react";
 import { FolderPlus } from "lucide-react";
 import UpdateIsland from "../../app/UpdateIsland";
 import TitleBar from "./TitleBar";
-import HomeView from "../home/HomeView";
+import HomeViewComponent from "../home/HomeView";
 import { Cover } from "../covers/Cover";
 import { ArtworkAmbientContext } from "../covers/ArtworkBackdrop";
 import { useWorkspaceCoverColor } from "../covers/cover.ambient";
@@ -13,7 +15,7 @@ import PlaybackAudioElement from "../player/components/PlaybackAudioElement";
 import Onboarding from "../../Onboarding";
 import SongContextMenu from "../library/components/SongContextMenu";
 import CollectionContextMenu from "../library/components/CollectionContextMenu";
-import { AppActionsContext, playableIds } from "./appActions";
+import { AppActionsContext, playableIds, type AppActions } from "./appActions";
 import { useCollectionActions } from "./useCollectionActions";
 import { CollectionLoading } from "../../shared/ui/CollectionLoading";
 import { PageErrorBoundary } from "./PageErrorBoundary";
@@ -37,6 +39,7 @@ import "./motion.css";
 import "./effects.css";
 import "../../styles/view-shell.css";
 
+const HomeView = memo(HomeViewComponent);
 const SimilarSongsDialog = lazy(() => import("../analysis/SimilarSongsDialog"));
 const PhoneTabBar = lazy(() => import("./PhoneTabBar"));
 const LibraryView = lazy(() => import("../library/LibraryView"));
@@ -93,15 +96,11 @@ export default function AppShell(props: AppShellProps) {
   const homeBanner = effectiveTheme === "light" && settings.homeBannerType === "cleanBlack" ? "none" : settings.homeBannerType || "dynamic";
   const cardBackground = effectiveTheme === "light" && settings.mediaCardBackground === "oledFlat" ? "solid" : settings.mediaCardBackground || "glassy";
   const workspaceCoverColor = useWorkspaceCoverColor(home.ambientStyle, home.currentSong?.id, effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded);
-  const [tagSearchSong, setTagSearchSong] = useState<Song | null>(null);
-  // When a download batch finishes, offer to tag the songs it added.
-  const { actions, collectionMenu, closeCollectionMenu } = useCollectionActions(nav, collections, modals.queuePanel.openSongContextMenu);
+  const { actions, menu } = useCollectionActions(nav, collections, modals.queuePanel.openSongContextMenu);
   const pageProps = { songs: library.songs, currentId: home.currentId, isPlaying, toggleLike: modals.songContextMenu.toggleLike, openPlaylistPicker: modals.songContextMenu.openPlaylistPicker };
-  const downloadTagPrompt = useDownloadTagPrompt(settings.musicbrainzTagging === true, Boolean(downloads.downloadBusy || downloads.spotifyDownloadBusy), downloads.spotifyTracks, downloads.visibleDownloadResults);
-
-  function openSimilarSongs(songIds: string[], key: string, title: string) {
+  const openSimilarSongs = useStableCallback((songIds: string[], key: string, title: string) => {
     collections.openSimilar({ kind: "songs", key, title, songIds });
-  }
+  });
 
   const homeHeroCoverBrightness = clamp(Number(settings.homeHeroCoverBrightness ?? 1), 0.65, 1.55);
   const homeHeroCoverContrast = clamp(1.02 + (homeHeroCoverBrightness - 1) * 0.08, 0.98, 1.08);
@@ -375,8 +374,33 @@ export default function AppShell(props: AppShellProps) {
             contentRef={contentRef} backgroundStyle={playerBackground} backgrounded={isAppBackgrounded} />
       </div>
 
-      <SongContextMenu {...modals.songContextMenu} findOnMusicBrainz={settings.musicbrainzTagging ? setTagSearchSong : undefined} />
-      <CollectionContextMenu state={collectionMenu} onClose={closeCollectionMenu} open={actions.openCollection} play={actions.playCollection} queue={actions.queueCollection}
+      <ShellDialogs modals={modals} menu={menu} actions={actions}
+        collections={collections} downloads={downloads} taggingEnabled={settings.musicbrainzTagging === true}
+        openSimilarSongs={openSimilarSongs} />
+
+      <PlaybackAudioElement {...playbackAudio} />
+    </main>
+    </ArtworkAmbientContext.Provider>
+    </AppActionsContext.Provider>
+  );
+}
+
+/** Menu and tagging state live here; opening a dialog cannot rerender Home or the player. */
+function ShellDialogs({ modals, menu, actions, collections, downloads, taggingEnabled, openSimilarSongs }: {
+  modals: AppShellProps["modals"];
+  menu: CollectionMenuStore;
+  actions: AppActions;
+  collections: AppShellProps["collections"];
+  downloads: AppShellProps["downloads"];
+  taggingEnabled: boolean;
+  openSimilarSongs: (songIds: string[], key: string, title: string) => void;
+}) {
+  const collectionMenu = useSyncExternalStore(menu.subscribe, menu.getSnapshot, menu.getSnapshot);
+  const [tagSearchSong, setTagSearchSong] = useState<Song | null>(null);
+  const downloadTagPrompt = useDownloadTagPrompt(taggingEnabled, Boolean(downloads.downloadBusy || downloads.spotifyDownloadBusy), downloads.spotifyTracks, downloads.visibleDownloadResults);
+  return <>
+      <SongContextMenu {...modals.songContextMenu} findOnMusicBrainz={taggingEnabled ? setTagSearchSong : undefined} />
+      <CollectionContextMenu state={collectionMenu} onClose={menu.close} open={actions.openCollection} play={actions.playCollection} queue={actions.queueCollection}
         findSimilar={(target) => target.playlist
           ? collections.openSimilar({ kind: "playlist", playlistId: target.playlist.id })
           : openSimilarSongs(playableIds(target.songs), `${target.kind}:${target.id}`, target.title)} />
@@ -392,10 +416,5 @@ export default function AppShell(props: AppShellProps) {
       {modals.playlistPicker.song ? <Suspense fallback={null}><PlaylistPickerModal {...modals.playlistPicker} /></Suspense> : null}
 
       {modals.deleteSong.song ? <Suspense fallback={null}><DeleteSongModal {...modals.deleteSong} /></Suspense> : null}
-
-      <PlaybackAudioElement {...playbackAudio} />
-    </main>
-    </ArtworkAmbientContext.Provider>
-    </AppActionsContext.Provider>
-  );
+  </>;
 }

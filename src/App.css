@@ -2221,10 +2221,6 @@ body.localitfyThemePainting .app .ambientSurface::after{
   background-size: auto !important;
 }
 
-.app{
-  background-image: none !important;
-}
-
 .app::before,
 .app::after{
   background-image: none !important;

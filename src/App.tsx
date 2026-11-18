@@ -7513,6 +7513,46 @@ function MainModeApp() {
     });
   };
 
+  const homeSettings = useMemo(() => ({
+    heroExpanded: settings.heroExpanded,
+    volume: settings.volume,
+    homeSectionOrder: settings.homeSectionOrder,
+    homeHiddenSections: settings.homeHiddenSections
+  }), [settings.heroExpanded, settings.volume, settings.homeSectionOrder, settings.homeHiddenSections]);
+  const homeOpenAnalysis = useStableCallback(() => { setSettingsSearch(""); setSettingsCategory("experimental"); changeView("settings"); });
+  const homeOpenCovers = useStableCallback(openCoversViewWithCurrentSong);
+  const homeOpenMixes = useStableCallback(() => nav.go("playlists"));
+  const homePlaySongs = useStableCallback(playCollectionSongs);
+  const homeSelectSong = useStableCallback(selectSong);
+  const homeShuffle = useStableCallback(shuffleLibrarySongsAction);
+  const homeToggleHero = useStableCallback(toggleHeroExpanded);
+  const homeUpdateLayout = useStableCallback((patch: Parameters<typeof updateSettingsPatch>[0]) => void updateSettingsPatch(patch));
+
+  const playerVolumeSettings = useMemo(() => ({ volume: settings.volume }), [settings.volume]);
+  const playerCommitSeek = useStableCallback(commitSeek);
+  const playerCommitVolume = useStableCallback(commitVolume);
+  const playerDragLeave = useStableCallback(handlePlayerDragLeave);
+  const playerDragOver = useStableCallback(handlePlayerDragOver);
+  const playerDrop = useStableCallback(handlePlayerDrop);
+  const playerOpenMenu = useStableCallback(openSongContextMenu);
+  const playerNext = useStableCallback(playNext);
+  const playerPrevious = useStableCallback(playPrevious);
+  const playerPreviewSeek = useStableCallback(previewSeek);
+  const playerPreviewVolume = useStableCallback(previewVolume);
+  const playerToggleLyrics = useStableCallback(() => setLyricsOpen(open => !open));
+  const playerReveal = useStableCallback(revealNowPlaying);
+  const playerResize = useStableCallback(startPlayerResize);
+  const playerStartSeek = useStableCallback(startSeekPreview);
+  const playerLike = useStableCallback(toggleLike);
+  const playerToggle = useStableCallback(togglePlay);
+  const playerToggleQueue = useStableCallback(() => setQueuePanelOpen(open => !open));
+  const playerRepeat = useStableCallback(toggleRepeat);
+  const playerMute = useStableCallback(toggleMuteFromNative);
+  const playerUpdateVolume = useStableCallback((key: "volume", value: number, persist?: boolean) => updateSetting(key, value, persist));
+  const playerQueueItem = useStableCallback(playQueueItem);
+  const playerLyricsSeek = useStableCallback((seconds: number) => handleSeek((seconds / (durationRef.current || currentDuration || currentSong?.duration || 1)) * 100));
+  const playerLyricsSettings = useStableCallback(() => { setLyricsOpen(false); setSettingsSearch(""); setSettingsCategory("experimental"); changeView("settings"); });
+
   const localtifyAppViewProps: AppShellProps = {
     frame: {
       appRootRef,
@@ -7592,19 +7632,19 @@ function MainModeApp() {
       isThreeAm,
       nowPlayingSongMotionClass,
       nowPlayingTransitionKey,
-      openAnalysisSettings: () => { setSettingsSearch(""); setSettingsCategory("experimental"); changeView("settings"); },
-      openCoversViewWithCurrentSong,
-      openDailyMixes: () => nav.go("playlists"),
+      openAnalysisSettings: homeOpenAnalysis,
+      openCoversViewWithCurrentSong: homeOpenCovers,
+      openDailyMixes: homeOpenMixes,
       openSimilarSongs: setSimilarRequest,
       playableSongCount: playableSongs.length,
       playerError,
-      playSongs: playCollectionSongs,
-      selectSong,
+      playSongs: homePlaySongs,
+      selectSong: homeSelectSong,
       songs,
-      settings,
-      shuffleLibrarySongsAction,
-      toggleHeroExpanded,
-      updateHomeLayout: (patch) => void updateSettingsPatch(patch),
+      settings: homeSettings,
+      shuffleLibrarySongsAction: homeShuffle,
+      toggleHeroExpanded: homeToggleHero,
+      updateHomeLayout: homeUpdateLayout,
     },
     library: {
       changeView,
@@ -7794,8 +7834,8 @@ function MainModeApp() {
     },
     playerBar: connect.playerBar({
       ambientStyle,
-      commitSeek,
-      commitVolume,
+      commitSeek: playerCommitSeek,
+      commitVolume: playerCommitVolume,
       currentDuration,
       currentSong: visualCurrentSong,
       displayedProgress,
@@ -7803,9 +7843,9 @@ function MainModeApp() {
       draggedSongId,
       effectiveAmbient,
       effectiveCoverColorSyncMode,
-      handlePlayerDragLeave,
-      handlePlayerDragOver,
-      handlePlayerDrop,
+      handlePlayerDragLeave: playerDragLeave,
+      handlePlayerDragOver: playerDragOver,
+      handlePlayerDrop: playerDrop,
       isPlaying,
       isSeeking,
       isShuffle,
@@ -7814,12 +7854,12 @@ function MainModeApp() {
       nowPlayingSongMotionClass,
       nowPlayingTransitionKey,
       openArtistPage: nav.openArtistPage,
-      openSongContextMenu,
+      openSongContextMenu: playerOpenMenu,
       playButtonBurst,
-      playNext,
-      playPrevious,
-      previewSeek,
-      previewVolume,
+      playNext: playerNext,
+      playPrevious: playerPrevious,
+      previewSeek: playerPreviewSeek,
+      previewVolume: playerPreviewVolume,
       progressDurationLabelRefs,
       progressInputRefs,
       progressRangeStyle,
@@ -7828,23 +7868,23 @@ function MainModeApp() {
       queueDropHot,
       queuePanelOpen,
       lyricsOpen: settings.lyricsEnabled ? lyricsOpen : undefined,
-      toggleLyrics: () => setLyricsOpen((open) => !open),
+      toggleLyrics: playerToggleLyrics,
       repeatButtonAriaLabel,
       repeatButtonStateText,
       repeatButtonTitle,
       repeatMode,
-      revealNowPlaying,
+      revealNowPlaying: playerReveal,
       setIsShuffle,
       setIsVolumeDragging,
-      settings,
-      startPlayerResize,
-      startSeekPreview,
-      toggleLike,
-      togglePlay,
-      toggleQueuePanel: () => setQueuePanelOpen((open) => !open),
-      toggleRepeat,
-      toggleMute: toggleMuteFromNative,
-      updateSetting,
+      settings: playerVolumeSettings,
+      startPlayerResize: playerResize,
+      startSeekPreview: playerStartSeek,
+      toggleLike: playerLike,
+      togglePlay: playerToggle,
+      toggleQueuePanel: playerToggleQueue,
+      toggleRepeat: playerRepeat,
+      toggleMute: playerMute,
+      updateSetting: playerUpdateVolume,
       volumeDraft,
       volumeDraftRef,
       volumeRangeStyle
@@ -7884,9 +7924,9 @@ function MainModeApp() {
         repeatPreview: queuePanelOpen
           ? getRepeatPreview({ repeatMode, currentSong, activePlaylist, activePlaylistSongs, isShuffle, source: playbackSource, songsById })
           : null,
-        playQueueItem,
-        selectSong,
-        openSongContextMenu
+        playQueueItem: playerQueueItem,
+        selectSong: homeSelectSong,
+        openSongContextMenu: playerOpenMenu
       }),
       lyrics: connect.lyrics({
         open: lyricsOpen && settings.lyricsEnabled,
@@ -7896,8 +7936,8 @@ function MainModeApp() {
         getTime: getLyricsTime,
         getPlaybackRate: getLyricsRate,
         subscribeClock: subscribeLyricsClock,
-        seekTo: (seconds: number) => handleSeek((seconds / (durationRef.current || currentDuration || currentSong?.duration || 1)) * 100),
-        openSettings: () => { setLyricsOpen(false); setSettingsSearch(""); setSettingsCategory("experimental"); changeView("settings"); }
+        seekTo: playerLyricsSeek,
+        openSettings: playerLyricsSettings
       }),
       whatsNew: {
         open: Boolean(whatsNewOpen),

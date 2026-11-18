@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { useStableCallback } from "../../shared/hooks/useStableCallback";
 import type { View } from "./view.types";
 import type { NowPlayingContext } from "../player/playbackSource";
 import { artistDetailId, createSwipeDetector, DETAIL_VIEWS, pushHistory, stepHistory, type HistoryState, type PageDetail } from "./navigationHistory";
@@ -25,6 +26,7 @@ function scrollsSideways(target: EventTarget | null, deltaX: number) {
  * anywhere else (menus, settings links) is recorded too, and each entry keeps its scroll position.
  */
 export function useNavigationHistory(view: View, changeView: (view: View, source?: "nav" | "unknown") => unknown, contentRef: RefObject<HTMLElement | null>) {
+  const changeViewStable = useStableCallback(changeView);
   const [history, setHistory] = useState<HistoryState>(() => ({ entries: [{ view, detail: null, scrollTop: 0 }], index: 0 }));
   const pendingScrollRef = useRef<number | null>(null);
   const entry = history.entries[history.index];
@@ -43,15 +45,15 @@ export function useNavigationHistory(view: View, changeView: (view: View, source
   const go = useCallback((nextView: View, source: "nav" | "unknown" = "nav") => {
     const destination = String(nextView) === "albums" ? "library" : nextView;
     push(destination, null);
-    changeView(destination, source);
-  }, [push, changeView]);
+    changeViewStable(destination, source);
+  }, [push, changeViewStable]);
 
   const open = useCallback((detail: PageDetail) => {
     if (!detail.id) return;
     if (String(detail.kind) === "album") { go("library", "unknown"); return; }
     push(DETAIL_VIEWS[detail.kind], detail);
-    changeView(DETAIL_VIEWS[detail.kind], "unknown");
-  }, [push, changeView, go]);
+    changeViewStable(DETAIL_VIEWS[detail.kind], "unknown");
+  }, [push, changeViewStable, go]);
 
   const step = useCallback((delta: -1 | 1) => {
     const target = history.entries[history.index + delta];
@@ -59,8 +61,8 @@ export function useNavigationHistory(view: View, changeView: (view: View, source
     const scrollTop = contentRef.current?.scrollTop ?? 0;
     setHistory((current) => stepHistory(current, delta, scrollTop));
     pendingScrollRef.current = target.scrollTop;
-    changeView(target.view, "unknown");
-  }, [history, contentRef, changeView]);
+    changeViewStable(target.view, "unknown");
+  }, [history, contentRef, changeViewStable]);
 
   const back = useCallback(() => step(-1), [step]);
   const forward = useCallback(() => step(1), [step]);
@@ -128,11 +130,13 @@ export function useNavigationHistory(view: View, changeView: (view: View, source
 
   const detail = entry.view === view ? entry.detail
     : committedEntryRef.current.view === view ? committedEntryRef.current.detail : null;
-  return {
+  const canGoBack = history.index > 0;
+  const canGoForward = history.index < history.entries.length - 1;
+  return useMemo(() => ({
     view,
     detail,
-    canGoBack: history.index > 0,
-    canGoForward: history.index < history.entries.length - 1,
+    canGoBack,
+    canGoForward,
     go,
     open,
     back,
@@ -143,7 +147,7 @@ export function useNavigationHistory(view: View, changeView: (view: View, source
       if (context.kind === "library") go("library", "unknown");
       else open({ kind: context.kind, id: context.kind === "artist" ? artistDetailId(context.id) : context.id });
     }
-  };
+  }), [view, detail, canGoBack, canGoForward, go, open, back, forward, gesture]);
 }
 
 export type NavigationHistory = ReturnType<typeof useNavigationHistory>;
