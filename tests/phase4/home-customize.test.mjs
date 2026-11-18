@@ -57,7 +57,9 @@ test("Customize Home edits the layout instead of opening Covers", () => {
   const home = read("src/features/home/HomeView.tsx");
   assert.match(home, /<HomeCustomizePanel/);
   assert.doesNotMatch(home, /className="homeCustomizeButton" type="button" onClick=\{openCoversViewWithCurrentSong\}/);
-  assert.match(read("src/App.tsx"), /updateHomeLayout: \(patch\) => void updateSettingsPatch\(patch\)/);
+  const app = read("src/App.tsx");
+  assert.match(app, /updateHomeLayout: homeUpdateLayout/);
+  assert.match(app, /homeUpdateLayout = useStableCallback\([^\n]*updateSettingsPatch\(patch\)/);
   assert.match(read("src/features/settings/settings.constants.ts"), /homeSectionOrder:\[\],homeHiddenSections:\["likedSongs","rediscover","notPlayedYet"\]/);
   assert.match(read("src/features/home/HomeCustomizePanel.tsx"), /homeHiddenSections: \[\.\.\.defaultHiddenHomeSections\]/);
 });

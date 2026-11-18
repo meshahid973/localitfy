@@ -1,5 +1,4 @@
 import { lazy, startTransition, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
 import { X, Send } from "lucide-react";
 import { HtmlAudioEngine } from "./features/player/engine/htmlAudioEngine";
@@ -69,7 +68,6 @@ import type { PlaybackSource, PlaybackSourceRef } from "./features/player/playba
 import { makeShuffledPlayableSongs } from "./features/player/shuffleSongs";
 import { useNavigationHistory } from "./features/shell/useNavigationHistory";
 import { revealSidebarSettingsPanel } from "./features/shell/sidebarLayout";
-import Onboarding from "./Onboarding";
 import CatBuddy from "./CatBuddy";
 import { runLocaltifyIdleTask } from "./app/runtime/idle";
 import { useBodyRuntimeClasses } from "./app/runtime/useBodyRuntimeClasses";
@@ -179,6 +177,7 @@ import type { View } from "./features/shell/view.types";
 import { usePlaybackConnect } from "./features/connect/usePlaybackConnect";
 import { useDevToolsShortcut } from "./features/shell/useDevToolsShortcut";
 
+const Onboarding = lazy(() => import("./Onboarding"));
 const SettingsCategoryContent = lazy(() => import("./features/settings/SettingsCategoryContent"));
 
 
@@ -7186,23 +7185,14 @@ function MainModeApp() {
     const feedbackReady = feedbackMessage.trim().length >= 4;
 
     return (
-      <AnimatePresence>
-        <Motion.div
+      <div
           className="feedbackPromptOverlayV331"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
           role="dialog"
           aria-modal="true"
           aria-labelledby="feedbackPromptTitleV329"
         >
-          <Motion.div
+          <div
             className={`feedbackPromptCardV331 ${feedbackStatus.kind === "success" ? "feedbackSentV337" : ""} ${feedbackSendBusy ? "feedbackSendingV337" : ""}`}
-            initial={{ opacity: 0, y: 18, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 12, scale: 0.97 }}
-            transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="feedbackPromptTopV331">
               <div className="feedbackPromptBrandV331">
@@ -7294,9 +7284,8 @@ function MainModeApp() {
                 <span className="feedbackSendSparkV334" aria-hidden="true"><Send size={14} strokeWidth={2.4} /></span>
               </button>
             </div>
-          </Motion.div>
-        </Motion.div>
-      </AnimatePresence>
+          </div>
+        </div>
     );
   }
 
@@ -7980,6 +7969,7 @@ function MainModeApp() {
 
   if (onboardingOpen || onboardingDevPreview) {
     return (
+      <Suspense fallback={<main role="status" aria-label="Loading setup" />}>
       <Onboarding
         appVersion={APP_VERSION}
         songsCount={songs.length}
@@ -7992,6 +7982,7 @@ function MainModeApp() {
         onStartListening={handleOnboardingStartListening}
         onSkip={skipOnboarding}
       />
+      </Suspense>
     );
   }
 

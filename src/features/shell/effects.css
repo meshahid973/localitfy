@@ -1266,3 +1266,18 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468:focus-visible .navIcon 
   outline-offset: 3px !important;
   border-radius: 9px !important;
 }
+
+/* Feedback opens infrequently; a CSS entry avoids loading Motion for it. */
+@keyframes feedbackOverlayEnter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes feedbackCardEnter {
+  from { opacity: 0; transform: translateY(18px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.feedbackPromptOverlayV331 { animation: feedbackOverlayEnter .18s cubic-bezier(.22, 1, .36, 1); }
+.feedbackPromptCardV331 { animation: feedbackCardEnter .26s cubic-bezier(.22, 1, .36, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .feedbackPromptOverlayV331, .feedbackPromptCardV331 { animation: none; }
+}

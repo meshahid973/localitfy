@@ -516,7 +516,7 @@ test("IPC: gated by the setting, proposals stay native, and library-only apply u
 
 test("songs get a find on musicbrainz menu item only while tagging is on", () => {
   const shell = fs.readFileSync(path.join(root, "src", "features", "shell", "AppShell.tsx"), "utf8");
-  assert.match(shell, /findOnMusicBrainz=\{settings\.musicbrainzTagging \? setTagSearchSong : undefined\}/);
+  assert.match(shell, /findOnMusicBrainz=\{taggingEnabled \? setTagSearchSong : undefined\}/);
   assert.match(shell, /<CollectionContextMenu/);
 });
 

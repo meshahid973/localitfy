@@ -1,10 +1,8 @@
-import { lazy, memo, Suspense, useState, useSyncExternalStore } from "react";
+import { lazy, memo, Suspense, useEffect, useState, useSyncExternalStore } from "react";
 import { useStableCallback } from "../../shared/hooks/useStableCallback";
 import type { CollectionMenuStore } from "./collectionMenuStore";
-import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties } from "react";
 import { FolderPlus } from "lucide-react";
-import UpdateIsland from "../../app/UpdateIsland";
 import TitleBar from "./TitleBar";
 import HomeViewComponent from "../home/HomeView";
 import { Cover } from "../covers/Cover";
@@ -12,7 +10,6 @@ import { ArtworkAmbientContext } from "../covers/ArtworkBackdrop";
 import { useWorkspaceCoverColor } from "../covers/cover.ambient";
 import PlayerSurfaces from "../player/components/PlayerSurfaces";
 import PlaybackAudioElement from "../player/components/PlaybackAudioElement";
-import Onboarding from "../../Onboarding";
 import SongContextMenu from "../library/components/SongContextMenu";
 import CollectionContextMenu from "../library/components/CollectionContextMenu";
 import { AppActionsContext, playableIds, type AppActions } from "./appActions";
@@ -40,6 +37,13 @@ import "./effects.css";
 import "../../styles/view-shell.css";
 
 const HomeView = memo(HomeViewComponent);
+const UpdateIsland = lazy(() => import("../../app/UpdateIsland"));
+const ScreensaverOverlay = lazy(() => import("./ScreensaverOverlay"));
+function useOnceVisible(visible: boolean) {
+  const [shown, setShown] = useState(false);
+  useEffect(() => { if (visible) setShown(true); }, [visible]);
+  return visible || shown;
+}
 const SimilarSongsDialog = lazy(() => import("../analysis/SimilarSongsDialog"));
 const PhoneTabBar = lazy(() => import("./PhoneTabBar"));
 const LibraryView = lazy(() => import("../library/LibraryView"));
@@ -64,7 +68,7 @@ export type { AppShellProps } from "./appShell.contract";
 
 export default function AppShell(props: AppShellProps) {
   const {
-    frame, updates, screensaver, effects, onboarding, navigation,
+    frame, updates, screensaver, effects, navigation,
     home, library, artists, genres, playlists, covers, analytics, discover, settingsView, downloads,
     playerBar, modals, playbackAudio, collections
   } = props;
@@ -84,7 +88,8 @@ export default function AppShell(props: AppShellProps) {
   const {
     secretMode, secretBurst, secretToast, appToast, importAnimation
   } = effects;
-  const { open: onboardingOpen, ...onboardingProps } = onboarding;
+  const mountUpdateIsland = useOnceVisible(showTopUpdateRibbon);
+  const mountScreensaver = useOnceVisible(screensaverVisible);
   const {
     view, importSongs, startSidebarResize,
     contentRef, updateSidebarLayout, openSidebarSettings, history: nav
@@ -163,7 +168,7 @@ export default function AppShell(props: AppShellProps) {
     >
 
       <TitleBar showWindowButtons={platformId !== "mac"} history={nav}>
-        <UpdateIsland
+        {mountUpdateIsland ? <Suspense fallback={null}><UpdateIsland
           show={showTopUpdateRibbon}
           updatePrompt={updatePrompt}
           appVersion={APP_VERSION}
@@ -178,37 +183,13 @@ export default function AppShell(props: AppShellProps) {
           onInstall={askUpdaterToInstall}
           onCheckAgain={manualUpdateCheck}
           onDismiss={() => setUpdatePrompt(defaultUpdatePrompt)}
-        />
+        /></Suspense> : null}
       </TitleBar>
 
-      <AnimatePresence>
-        {screensaverVisible ? (
-          <Motion.div
-            className="screensaverOverlay"
-            role="presentation"
-            onPointerMove={dismissScreensaverFromActivity}
-            onClick={() => setScreensaverVisible(false)}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: settings.reducedMotion ? 0.12 : 0.45, ease: "easeOut" }}
-          >
-            <div className="screensaverBackdrop" style={{ backgroundImage: `url(${screensaverVisualSource})` }} />
-            <div className="screensaverGlow" />
-            <Motion.div
-              className="screensaverPanel"
-              initial={settings.reducedMotion ? false : { opacity: 0, y: 18, scale: 0.982 }}
-              animate={settings.reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-              exit={settings.reducedMotion ? { opacity: 0 } : { opacity: 0, y: 14, scale: 0.99 }}
-              transition={settings.reducedMotion ? { duration: 0.12 } : { type: "spring", stiffness: 130, damping: 20, mass: 0.8 }}
-              style={{ backgroundImage: `url(${screensaverVisualSource})` }}
-            >
-              <div className="screensaverShade" />
-              <div className="screensaverIdleText">am waiting..</div>
-            </Motion.div>
-          </Motion.div>
-        ) : null}
-      </AnimatePresence>
+      {mountScreensaver ? <Suspense fallback={null}><ScreensaverOverlay
+        screensaverVisible={screensaverVisible} screensaverVisualSource={screensaverVisualSource}
+        reducedMotion={settings.reducedMotion} dismissScreensaverFromActivity={dismissScreensaverFromActivity}
+        setScreensaverVisible={setScreensaverVisible} /></Suspense> : null}
 
       {secretMode !== "none" ? (
         <div className={`secretLayer ${secretMode}`} key={`${secretMode}-${secretBurst}`} aria-hidden="true">
@@ -268,12 +249,6 @@ export default function AppShell(props: AppShellProps) {
             </div>
           </div>
         </div>
-      ) : null}
-
-      {onboardingOpen ? (
-        <Suspense fallback={null}>
-          <Onboarding appVersion={APP_VERSION} {...onboardingProps} />
-        </Suspense>
       ) : null}
 
       <div className="appShell">

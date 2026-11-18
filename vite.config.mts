@@ -22,12 +22,12 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (!id.includes("node_modules")) return undefined;
-          if (id.includes("react") || id.includes("react-dom")) return "vendor-react";
-          if (id.includes("motion")) return "vendor-motion";
+          if (/[\\/]node_modules[\\/](?:react|react-dom|scheduler)[\\/]/.test(id)) return "vendor-react";
+          if (/[\\/]node_modules[\\/](?:motion|motion-dom|motion-utils|framer-motion)[\\/]/.test(id)) return "vendor-motion";
           if (id.includes("lucide-react") || id.includes("@animateicons")) return "vendor-icons";
           if (id.includes("posthog-js")) return "vendor-analytics";
           if (id.includes("fast-average-color")) return "vendor-cover-tools";
-          return "vendor";
+          return undefined;
         }
       }
     }

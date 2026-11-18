@@ -1,4 +1,6 @@
-import posthog from "posthog-js";
+import type { PostHog } from "posthog-js";
+
+let posthog: PostHog | null = null;
 
 export type AnalyticsValue = string | number | boolean | null | undefined;
 export type AnalyticsProperties = Record<string, AnalyticsValue>;
@@ -542,9 +544,9 @@ function identifyInstall(properties: AnalyticsProperties = {}): void {
       ...properties
     });
 
-    posthog.identify(installId, identityProperties);
+    posthog?.identify(installId, identityProperties);
 
-    posthog.register(
+    posthog?.register(
       sanitizeProperties({
         app_name: "localtify",
         app_version: appVersion,
@@ -567,14 +569,14 @@ function pushQueuedEvent(name: string, properties: AnalyticsProperties): void {
 }
 
 function flushQueuedEvents(): void {
-  if (!initialized || !loadedOnce) return;
+  if (!initialized || !loadedOnce || !posthog) return;
 
   while (pendingEvents.length > 0) {
     const event = pendingEvents.shift();
     if (!event) continue;
 
     try {
-      posthog.capture(event.name, baseProperties(event.properties));
+      posthog?.capture(event.name, baseProperties(event.properties));
     } catch {
       // ignored
     }
@@ -613,62 +615,49 @@ function fireAppPageview(view = "home", source = "unknown", properties: Analytic
   );
 }
 
+/** Synchronously accept events; load the SDK only after the lifecycle schedules init. */
 export function initLocalitfyAnalytics(input?: InitInput): boolean {
+  if (initialized) return true;
+  const key = safeEnv("VITE_PUBLIC_POSTHOG_KEY");
+  if (!key) return false;
+  const host = safeEnv("VITE_PUBLIC_POSTHOG_HOST") || DEFAULT_HOST;
   const props = isPlainObject(input) ? input : {};
   appVersion = isPlainObject(input)
     ? cleanString(input.app_version, DEFAULT_APP_VERSION)
     : cleanString(input, DEFAULT_APP_VERSION);
-
   sessionStartedAt = Date.now();
   appLaunchTracked = false;
   createSessionId();
+  initialized = true;
 
-  const key = safeEnv("VITE_PUBLIC_POSTHOG_KEY");
-  const host = safeEnv("VITE_PUBLIC_POSTHOG_HOST") || DEFAULT_HOST;
-
-  if (!key) {
+  void import("posthog-js").then(({ default: sdk }) => {
+    posthog = sdk;
+    sdk.init(key, {
+      api_host: host,
+      person_profiles: "identified_only",
+      autocapture: false,
+      capture_pageview: false,
+      capture_pageleave: false,
+      disable_session_recording: true,
+      disable_external_dependency_loading: true,
+      disable_surveys: true,
+      capture_performance: false,
+      disable_web_experiments: true,
+      persistence: "localStorage+cookie",
+      loaded: () => {
+        loadedOnce = true;
+        identifyInstall({ ...props, ...getVersionProperties() });
+        fireAppPageview("home", "app_launch", { is_initial_pageview: true });
+        flushQueuedEvents();
+      }
+    } as unknown as Parameters<typeof sdk.init>[1]);
+  }).catch(() => {
     initialized = false;
     loadedOnce = false;
-    return false;
-  }
-
-  try {
-    if (!initialized) {
-      posthog.init(key, {
-        api_host: host,
-        person_profiles: "identified_only",
-        autocapture: false,
-        capture_pageview: false,
-        capture_pageleave: false,
-        disable_session_recording: true,
-        // Electron only permits bundled executable code. Analytics events still use HTTPS.
-        disable_external_dependency_loading: true,
-        disable_surveys: true,
-        capture_performance: false,
-        disable_web_experiments: true,
-        persistence: "localStorage+cookie",
-        loaded: () => {
-          loadedOnce = true;
-          identifyInstall({ ...props, ...getVersionProperties() });
-          fireAppPageview("home", "app_launch", { is_initial_pageview: true });
-          flushQueuedEvents();
-        }
-      } as unknown as Parameters<typeof posthog.init>[1]);
-
-      initialized = true;
-    } else {
-      loadedOnce = true;
-      identifyInstall({ ...props, ...getVersionProperties() });
-      fireAppPageview("home", "app_reinit", { is_initial_pageview: true });
-      flushQueuedEvents();
-    }
-
-    return true;
-  } catch {
-    initialized = false;
-    loadedOnce = false;
-    return false;
-  }
+    posthog = null;
+    pendingEvents.length = 0;
+  });
+  return true;
 }
 
 export function captureLocaltifyEvent(
@@ -687,7 +676,7 @@ export function captureLocaltifyEvent(
       return;
     }
 
-    posthog.capture(name, baseProperties(properties));
+    posthog?.capture(name, baseProperties(properties));
   } catch {
     // ignored
   }
