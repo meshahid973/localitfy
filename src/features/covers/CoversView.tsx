@@ -1,3 +1,5 @@
+import { CollectionLoading } from "../../shared/ui/CollectionLoading";
+import { PageHeader } from "../../shared/ui/PageHeader";
 import "./covers.css";
 import { Suspense } from "react";
 import type { CoverSong, CoverStudioProps } from "./cover.types";
@@ -50,7 +52,13 @@ export default function CoversView(props: CoversViewProps) {
   return (
 
               <>
-              {!songs.length ? (
+
+
+              <Suspense
+                fallback={<section data-page-section="covers" className="coverStudioLayout"><PageHeader title="Covers" /><CollectionLoading label="Loading covers…" /></section>}
+              >
+                <CoverStudio
+                notice={!songs.length ? (
                 <div className="coverStudioEmptyNotice" role="status">
                   <span>Import songs to use Covers.</span>
                   <button className="softButton" type="button" onClick={importSongs}>Import songs</button>
@@ -61,19 +69,6 @@ export default function CoversView(props: CoversViewProps) {
                   <button className="softButton" type="button" onClick={() => void rescanPixelArtFolder()}>Rescan</button>
                 </div>
               ) : null}
-
-              <Suspense
-                fallback={
-                  <section className="panel coverStudioLoading" role="status" aria-live="polite">
-                    <div className="panelHead">
-                      <div>
-                        <h3>Loading covers...</h3>
-                      </div>
-                    </div>
-                  </section>
-                }
-              >
-                <CoverStudio
                 pixelArtBusy={pixelArtBusy}
                 selectedCoverSongs={selectedCoverSongs}
                 currentSong={currentSong}

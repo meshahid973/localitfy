@@ -174,7 +174,7 @@ export default function QueuePanel({
               <span className="queuePanelDuration">{formatTime(currentSong.duration || 0)}</span>
             </div>
           ) : (
-            <p className="queuePanelEmpty">nothing playing</p>
+            <p className="queuePanelEmpty">Nothing playing. Choose a song to start listening.</p>
           )}
         </section>
 
@@ -243,7 +243,7 @@ export default function QueuePanel({
               </div>
             </>
           ) : (
-            <p className="queuePanelEmpty">queue is empty</p>
+            <p className="queuePanelEmpty">Your queue is empty. Add songs from their track menus.</p>
           )}
           {entries.length > renderLimit ? (
             <button type="button" className="queuePanelTextButton queuePanelMore" onClick={() => setRenderLimit((limit) => limit + QUEUE_RENDER_STEP)}>
