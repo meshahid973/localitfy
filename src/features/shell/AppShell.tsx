@@ -7,7 +7,7 @@ import TitleBar from "./TitleBar";
 import HomeViewComponent from "../home/HomeView";
 import { Cover } from "../covers/Cover";
 import { ArtworkAmbientContext } from "../covers/ArtworkBackdrop";
-import { useWorkspaceCoverColor } from "../covers/cover.ambient";
+import { useWorkspacePalette } from "../covers/cover.ambient";
 import PlayerSurfaces from "../player/components/PlayerSurfaces";
 import PlaybackAudioElement from "../player/components/PlaybackAudioElement";
 import SongContextMenu from "../library/components/SongContextMenu";
@@ -100,7 +100,10 @@ export default function AppShell(props: AppShellProps) {
   const playerBackground = effectiveTheme === "light" && settings.playerBackgroundStyle === "oledBlack" ? "flat" : settings.playerBackgroundStyle || "coverBlur";
   const homeBanner = effectiveTheme === "light" && settings.homeBannerType === "cleanBlack" ? "none" : settings.homeBannerType || "dynamic";
   const cardBackground = effectiveTheme === "light" && settings.mediaCardBackground === "oledFlat" ? "solid" : settings.mediaCardBackground || "glassy";
-  const workspaceCoverColor = useWorkspaceCoverColor(home.ambientStyle, home.currentSong?.id, effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded);
+  // Playback atmosphere belongs to the workspace, not the route or Home layout.
+  const artworkEnabled = !!home.currentSong && effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded;
+  const strength = effectiveCoverColorSyncMode === "strong" ? .52 : effectiveCoverColorSyncMode === "subtle" ? .19 : .38;
+  const workspacePalette = useWorkspacePalette(home.ambientStyle, artworkEnabled, effectiveTheme === "light", strength);
   const { actions, menu } = useCollectionActions(nav, collections, modals.queuePanel.openSongContextMenu);
   const pageProps = { songs: library.songs, currentId: home.currentId, isPlaying, toggleLike: modals.songContextMenu.toggleLike, openPlaylistPicker: modals.songContextMenu.openPlaylistPicker };
   const openSimilarSongs = useStableCallback((songIds: string[], key: string, title: string) => {
@@ -119,7 +122,7 @@ export default function AppShell(props: AppShellProps) {
 
   return (
     <AppActionsContext.Provider value={actions}>
-    <ArtworkAmbientContext.Provider value={effectiveAmbient && !isAppBackgrounded}>
+    <ArtworkAmbientContext.Provider value={effectiveAmbient && !isAppBackgrounded && !workspacePalette}>
     <main
       ref={appRootRef}
       className={`app ${settings.animatedGlow ? "animatedGlow" : ""} ${
@@ -135,7 +138,9 @@ export default function AppShell(props: AppShellProps) {
           "--home-hero-cover-contrast": String(homeHeroCoverContrast),
           "--home-hero-cover-saturation": String(homeHeroCoverSaturation),
           "--home-hero-cover-glow-brightness": String(homeHeroCoverGlowBrightness),
-          "--workspace-cover-color": workspaceCoverColor
+          "--workspace-cover-color": workspacePalette?.[0],
+          "--workspace-cover-secondary": workspacePalette?.[1],
+          "--workspace-cover-tertiary": workspacePalette?.[2]
         } as CSSProperties
       }
       data-platform={platformId}
@@ -146,6 +151,7 @@ export default function AppShell(props: AppShellProps) {
       data-corners={settings.softCorners ? "soft" : "sharp"}
       data-ambient={effectiveAmbient ? "on" : "off"}
       data-cover-sync={effectiveCoverColorSyncMode}
+      data-workspace-artwork={workspacePalette ? "on" : "off"}
       data-notes={effectiveNotes ? "on" : "off"}
       data-badge={settings.showHeroBadge ? "on" : "off"}
       data-home-banner={homeBanner}
@@ -322,7 +328,7 @@ export default function AppShell(props: AppShellProps) {
               data-view={view}
             >
               <PageErrorBoundary key={view + ":" + (detail?.id ?? "")}>
-              {view === "home" ? <HomeView {...home} artworkAmbient={effectiveAmbient && !isAppBackgrounded} bannerType={homeBanner} /> : null}
+              {view === "home" ? <HomeView {...home} /> : null}
 
               <Suspense fallback={<CollectionLoading label="Loading page…" />}>
                 {(view === "library" || view === "liked") ? <LibraryView {...library} /> : null}

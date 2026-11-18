@@ -1468,9 +1468,6 @@ button:hover,
   box-shadow: 0 0 12px color-mix(in oklab, var(--lt-accent, #ff65df) 14%, transparent) !important;
 }
 
-.app[data-theme]{
-  background: var(--workspace-bg, var(--lt-bg)) !important;
-}
 
 .app[data-theme]::before{
   opacity: 0 !important;
@@ -3982,7 +3979,7 @@ body,
 .sidebar,
 .app .sidebar {
   grid-column: 1;
-  grid-row: 1 / 3;
+  grid-row: 1;
   position: relative;
   z-index: 20;
   width: var(--workspace-sidebar-current, 236px);
@@ -4451,67 +4448,6 @@ body.isResizingPlayer .app *{
   0%{ opacity: 0; width: min(620px, calc(100vw - var(--workspace-sidebar-current, 236px) - 320px)); transform: translate3d(0,-12px,0) scale(.94); filter: blur(5px); }
   58%{ opacity: 1; width: min(1260px, calc(100vw - var(--workspace-sidebar-current, 236px) - 96px)); transform: translate3d(0,0,0) scale(1.006); filter: blur(0); }
   100%{ opacity: 1; width: min(1240px, calc(100vw - var(--workspace-sidebar-current, 236px) - 116px)); transform: translate3d(0,0,0) scale(1); filter: blur(0); }
-}
-
-.sidebarNavGroupsV467{
-  display: grid;
-  gap: 0;
-  min-width: 0;
-}
-
-.sidebarNavGroupV467{
-  display: grid;
-  gap: 7px;
-  min-width: 0;
-}
-
-.sidebarGroupLabelV467{
-  margin: 0 0 1px 12px;
-  color: color-mix(in srgb, var(--text) 34%, transparent);
-  font-size: 9px;
-  font-weight: 1000;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  line-height: 1.1;
-}
-
-.navGroupedV467{
-  gap: 6px;
-}
-
-.sidebarNavGroup-app .navItem{
-  min-height: 42px;
-}
-
-.sidebarNavGroupV467 .navDivider{
-  margin-top: 8px;
-  margin-bottom: 10px;
-}
-
-.app .sidebarNavGroupsV467{
-  gap: 2px !important;
-}
-
-.app .sidebarNavGroupV467{
-  gap: 6px !important;
-}
-
-.app .sidebarNavGroupV467 + .sidebarNavGroupV467{
-  margin-top: 0 !important;
-}
-
-.app .sidebarGroupLabelV467{
-  margin: 0 0 2px 13px !important;
-  color: var(--lt-muted) !important;
-  font-size: 10px !important;
-  font-weight: 650 !important;
-  letter-spacing: .08em !important;
-  line-height: 1 !important;
-  text-transform: uppercase !important;
-}
-
-.app .navGroupedV467{
-  gap: 5px !important;
 }
 
 /* No left glow / Discord indicator. Active state should be a soft pill only. */

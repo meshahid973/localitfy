@@ -92,8 +92,8 @@ test("sidebar navigation retains keyboard focus and theme contrast", () => {
   const nav = read("src/features/shell/SidebarNav.tsx");
   const effects = read("src/features/shell/effects.css");
   assert.ok(nav.includes('aria-current={view === item.id ? "page" : undefined}'));
-  assert.match(effects, /\.navItemAnimatedV468:focus-visible \.navIcon\s*\{\s*outline: 2px solid var\(--lt-accent\) !important/);
-  assert.match(effects, /\.navItemAnimatedV468\.active \.navText strong\s*\{\s*color: var\(--lt-text\) !important/);
+  assert.match(read("src/styles/view-shell.css"), /\.navItem:focus-visible \.navIcon\s*\{\s*outline: 2px solid var\(--lt-accent\) !important/);
+  assert.match(read("src/styles/view-shell.css"), /\.navItem\.active \{[^}]*color: var\(--lt-text\) !important/);
 });
 
 
@@ -249,7 +249,7 @@ test("shared shell owns viewport and responsive sidebar behavior only", () => {
     '[data-sidebar-behavior="slim"]',
     '[data-sidebar-behavior="hover"]',
     ":focus-within",
-    'content: "LOCALTIFY"'
+    '--rail-label: none'
   ]) {
     assert.equal(css.includes(marker), true, "sidebar behavior guard is missing " + marker);
   }

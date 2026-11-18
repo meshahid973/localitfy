@@ -17,13 +17,12 @@ function compile(file, dependencies = {}) {
   return exports;
 }
 
-function home(android, songs, hidden = [], artworkAmbient = true) {
+function home(android, songs, hidden = []) {
   const layout = compile("src/features/home/homeLayout.ts");
   const Home = compile("src/features/home/HomeView.tsx", {
     "./home.css": {},
     "../../app/platform": { isAndroidApp: () => android },
     "../covers/Cover": { Cover: () => null },
-    "../covers/ArtworkBackdrop": { ArtworkBackdrop: () => null },
     "../../shared/ui/LocaltifyViewUi": { MascotStateArt: () => null },
     "../search/search.utils": { prettyMeta: String, prettyTitle: String },
     "./homeLayout": layout,
@@ -38,7 +37,7 @@ function home(android, songs, hidden = [], artworkAmbient = true) {
     albums: [], songs, currentSong: songs[0] || null, currentId: songs[0]?.id || null,
     homeListenNowSongs: songs, homeFreshShelfSongs: [], heroDisplayTitle: "Test song",
     heroDisplayArtist: "Test artist", settings: { volume: 0.5, heroExpanded: true, homeSectionOrder: [], homeHiddenSections: hidden },
-    ambientStyle: {}, artworkAmbient, playableSongCount: songs.length
+    ambientStyle: {}, playableSongCount: songs.length
   }));
 }
 
@@ -60,15 +59,15 @@ test("Android Home keeps a short song list and omits the desktop expansion contr
   assert.match(phone, /aria-label="Customize Home"/);
 });
 
-test("Home foreground artwork remains when ambience is disabled", () => {
+test("Home foreground artwork stays independent of the shell's ambience", () => {
   const song = { id: "a", title: "Test song", artist: "Artist", filePath: "/test.wav" };
   for (const android of [true, false]) {
-    const on = home(android, [song]);
-    const off = home(android, [song], [], false);
-    assert.match(on, /class="homeFeatureArt"/);
-    assert.match(on, /class="homeAtmosphere"/);
-    assert.match(off, /class="homeFeatureArt"/);
-    assert.doesNotMatch(off, /class="homeAtmosphere"/);
+    const html = home(android, [song]);
+    assert.match(html, /class="homeFeatureArt"/);
+    assert.doesNotMatch(html, /class="homeAtmosphere"/);
     assert.doesNotMatch(home(android, []), /class="homeAtmosphere"|class="homeFeatureArt"/);
   }
+  const shell = fs.readFileSync("src/features/shell/AppShell.tsx", "utf8");
+  assert.match(shell, /data-workspace-artwork=/);
+  assert.match(shell, /effectiveCoverColorSyncMode !== "off"/);
 });

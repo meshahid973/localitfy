@@ -3,10 +3,10 @@ import fs from "node:fs";
 import test from "node:test";
 const read = (f) => fs.readFileSync(f, "utf8");
 
-test("effects use valid pseudo-element selectors without retired busy styles", () => {
+test("busy-paint suppression targets valid CSS pseudo-element selectors", () => {
   const css = read("src/features/shell/effects.css");
   assert.doesNotMatch(css, /:is\([^)]*::(?:before|after)/);
-  assert.doesNotMatch(css, /\.localtifyInteractionBusy/);
+  assert.doesNotMatch(css, /\.localtifyInteractionBusy|\.coverTargetPanelCleanOnly/);
   assert.doesNotMatch(css, /\.heroAmbiencePulse\b/);
 });
 
@@ -19,7 +19,7 @@ test("queue and history controls use Localtify theme tokens and keyboard focus",
   assert.match(history, /\.titleHistoryNav \{[^}]*background: transparent/);
   assert.match(history, /\.titleHistoryNav button:focus-visible/);
   assert.match(history, /-webkit-app-region: no-drag/);
-  assert.match(history, /color-mix\(in srgb, var\(--lt-text\) 10%, var\(--lt-surface-raised\)\)/);
+  assert.match(history, /background: var\(--lt-fill-hover\)/);
 });
 
 
@@ -28,7 +28,7 @@ test("shell interactions are calm, theme-aware and retain the existing native co
   const view = read("src/styles/view-shell.css");
   const nav = read("src/features/shell/SidebarNav.tsx");
   assert.doesNotMatch(effects, /@keyframes localtifyNav(?:StrokeDraw|Home|Library|Disc|Playlist|Heart|Covers|Analytics|Download|Settings)V468/);
-  assert.match(effects, /\.navItemAnimatedV468\.active\{[\s\S]*?background: color-mix\(in srgb, var\(--lt-text\) 10%, transparent\)/);
+  assert.match(view, /\.sidebar \.navItem\.active \{[^}]*background: var\(--lt-fill-selected\)/);
   assert.match(view, /\.navText strong \{[\s\S]*?font-size: var\(--lt-text-base\)/);
   assert.match(nav, /title=\{item\.label\}/);
   assert.match(nav, /aria-current=\{view === item\.id \? "page" : undefined\}/);

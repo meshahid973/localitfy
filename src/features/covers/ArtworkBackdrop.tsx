@@ -6,7 +6,6 @@ import "./artwork-backdrop.css";
 
 export const ArtworkAmbientContext = createContext(true);
 const FADE_MS = 360;
- 
 
 function CrossfadeArtwork({ source }: { source: string }) {
   const [frame, setFrame] = useState<ArtworkFrame>({ current: "", previous: "" });

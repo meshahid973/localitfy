@@ -13,7 +13,7 @@ test("sidebar geometry and behavior belong to view-shell, never effects", () => 
   const core = file("src/features/shell/app-core.css");
   assert.match(view, /main\.app\.app\[data-sidebar-behavior="fixed"\] > \.appShell/);
   assert.match(view, /main\.app\.app\[data-sidebar-behavior="hover"\] > \.appShell > \.sidebar:hover/);
-  assert.doesNotMatch(effects, /--lt-sidebar-closed:/);
+  assert.doesNotMatch(effects, /--lt-sidebar-closed:|main\.app\.app\[data-sidebar-behavior=/);
   assert.doesNotMatch(effects, /main\.app\.app\[data-sidebar-behavior="fixed"\] > \.appShell/);
   assert.doesNotMatch(core, /@media \(max-width: 760px\)\s*\{\s*\.appShell\{\s*grid-template-columns: 1fr/);
 });
@@ -25,4 +25,10 @@ test("mobile navigation remains a visible 64px rail regardless of desktop mode",
   for (const behavior of ["fixed", "slim", "hover"]) {
     assert.ok(mobile.includes('data-sidebar-behavior="' + behavior + '"'));
   }
+});
+
+test("desktop rail never spans the full-width playback row", () => {
+  const view = file("src/styles/view-shell.css");
+  assert.match(view, /main\.app\.app > \.appShell > \.sidebar \{[^}]*grid-row: 1;/);
+  for (const name of ["src/App.css","src/features/shell/app-core.css"]) assert.doesNotMatch(file(name), /\.sidebar[^{]*\{[^}]*grid-row: 1 \/ 3;/);
 });

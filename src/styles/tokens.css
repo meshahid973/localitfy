@@ -4,7 +4,11 @@
   --lt-bg-elevated: #111214;
 
   --lt-surface: #151518;
-  --lt-surface-soft: rgba(255, 255, 255, 0.045);
+  --lt-surface-soft: var(--lt-fill);
+  --lt-fill-subtle: rgba(var(--lt-accent-rgb), .04);
+  --lt-fill: rgba(var(--lt-accent-rgb), .07);
+  --lt-fill-hover: rgba(var(--lt-accent-rgb), .10);
+  --lt-fill-selected: rgba(var(--lt-accent-rgb), .14);
   --lt-surface-raised: rgba(255, 255, 255, 0.075);
 
   --lt-text: #ffffff;

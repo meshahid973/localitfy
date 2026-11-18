@@ -1,28 +1,30 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import type { Song } from "../library/song.types";
 import { toCssUrl } from "../../shared/utils/format";
 import { hexToRgbString, normalizeHexColor } from "../settings/theme.utils";
 import { pixelArtForSong } from "./cover.runtime";
 import { runtimePixelArtImageUrl } from "./pixelArt";
-import { extractArtworkPalette, PaletteCache, rgbHex, SAMPLE_SIZE, type ArtworkPalette } from "./artworkPalette";
+import { extractArtworkPalette, PaletteCache, rgbFromHex, rgbHex, safeAtmosphere, SAMPLE_SIZE, type ArtworkPalette } from "./artworkPalette";
 export function getAmbientStyle(coverUrl?:string|null):CSSProperties|undefined{return coverUrl?{"--cover-url":toCssUrl(coverUrl),"--cover-art-url":toCssUrl(coverUrl)} as CSSProperties:undefined;}
 export function isRendererSafeImageUrl(value?:string|null){return Boolean(value&&/^(?:data:image\/|blob:|https?:\/\/|localtify-media:\/\/|\/|pixelart\/)/i.test(String(value).trim()));}
 export function getRendererSafeImageUrl(value?:string|null){const source=String(value||"").trim();return isRendererSafeImageUrl(source)?source:"";}
 export function getSongAmbientSource(song?:Song|null){if(!song)return"";return getRendererSafeImageUrl(song.coverThumbUrl)||getRendererSafeImageUrl(song.coverThumbnailUrl)||getRendererSafeImageUrl(song.thumbnailUrl)||getRendererSafeImageUrl(song.coverUrl)||getRendererSafeImageUrl(song.coverPath)||getRendererSafeImageUrl(song.coverFullUrl)||runtimePixelArtImageUrl(pixelArtForSong(song));}
 export type CoverAverageStyle = CSSProperties & {
   "--cover-rgb"?: string; "--player-ambient-rgb"?: string; "--active-cover-rgb"?: string;
-  "--cover-average"?: string; "--cover-palette-a"?: string; "--cover-palette-b"?: string; "--cover-palette-c"?: string;
+  "--cover-average"?: string; "--cover-palette-state"?: "pending" | "ready" | "failed"; "--cover-palette-a"?: string; "--cover-palette-b"?: string; "--cover-palette-c"?: string;
 };
 const cache = new PaletteCache<CoverAverageStyle>();
 const EMPTY_COVER_STYLE: CoverAverageStyle = {};
+const PENDING_COVER_STYLE: CoverAverageStyle = { "--cover-palette-state": "pending" };
+const FAILED_COVER_STYLE: CoverAverageStyle = { "--cover-palette-state": "failed" };
 export function buildCoverAverageStyle(hex: string): CoverAverageStyle {
   const safe = normalizeHexColor(hex, "#8dffce"), rgb = hexToRgbString(safe, "#8dffce");
   return { "--cover-rgb": rgb, "--player-ambient-rgb": rgb, "--active-cover-rgb": rgb, "--cover-average": safe } as CoverAverageStyle;
 }
 function paletteStyle(palette: ArtworkPalette): CoverAverageStyle {
   return { ...buildCoverAverageStyle(rgbHex(palette[0])),
-    "--cover-palette-a": rgbHex(palette[0]), "--cover-palette-b": rgbHex(palette[1]), "--cover-palette-c": rgbHex(palette[2]) };
+    "--cover-palette-state": "ready", "--cover-palette-a": rgbHex(palette[0]), "--cover-palette-b": rgbHex(palette[1]), "--cover-palette-c": rgbHex(palette[2]) };
 }
 
 /** Read only a small, CPU-side thumbnail. Cancellation also drops decode
@@ -65,6 +67,20 @@ export function decodeArtwork(source: string, signal: AbortSignal, samplePixels 
   });
 }
 
+/** Mix artwork shares the same 512-entry sample cache as the player. */
+export async function readArtworkPalette(source: string, signal: AbortSignal): Promise<ArtworkPalette | null> {
+  if (!source || signal.aborted) return null;
+  const cached = cache.get(source);
+  if (cached) {
+    const a = rgbFromHex(cached["--cover-palette-a"] ?? ""), b = rgbFromHex(cached["--cover-palette-b"] ?? ""), c = rgbFromHex(cached["--cover-palette-c"] ?? "");
+    if (a && b && c) return [a, b, c];
+  }
+  const result = await decodeArtwork(source, signal, true);
+  if (signal.aborted || !result || result === true) return null;
+  cache.set(source, paletteStyle(result));
+  return result;
+}
+
 export function useCoverAverageStyle(source: string, enabled: boolean, visible = true) {
   const coverSource = enabled ? source.trim() : "";
   const [sample, setSample] = useState<{ source: string; style: CoverAverageStyle } | null>(null);
@@ -76,17 +92,30 @@ export function useCoverAverageStyle(source: string, enabled: boolean, visible =
     const timer = window.setTimeout(() => {
       void decodeArtwork(coverSource, controller.signal, true).then(result => {
         if (controller.signal.aborted) return;
-        const style = result && result !== true ? paletteStyle(result) : EMPTY_COVER_STYLE;
+        const style = result && result !== true ? paletteStyle(result) : FAILED_COVER_STYLE;
         if (result && result !== true) cache.set(coverSource, style);
         setSample({ source: coverSource, style });
       });
     }, 60);
     return () => { window.clearTimeout(timer); controller.abort(); };
   }, [coverSource, visible]);
-  return coverSource && sample?.source === coverSource ? sample.style : EMPTY_COVER_STYLE;
+  if (!coverSource || !visible) return EMPTY_COVER_STYLE;
+  return sample?.source === coverSource ? sample.style : PENDING_COVER_STYLE;
 }
 
-/** Compatibility for the existing shell until it consumes the full palette. */
-export function useWorkspaceCoverColor(style: CSSProperties, songId: string | undefined, enabled: boolean) {
-  return enabled && songId ? (style as CoverAverageStyle)["--cover-average"] : undefined;
+/** Keep the last decoded palette while a new sample is pending. */
+export function useWorkspacePalette(style: CSSProperties, enabled: boolean, light: boolean, strength: number) {
+  const sample = style as CoverAverageStyle;
+  const one = sample["--cover-palette-a"], two = sample["--cover-palette-b"], three = sample["--cover-palette-c"];
+  const status = sample["--cover-palette-state"];
+  const current = useMemo<ArtworkPalette | null>(() => {
+    const a = rgbFromHex(one ?? ""), b = rgbFromHex(two ?? ""), c = rgbFromHex(three ?? "");
+    return a && b && c ? [a, b, c] : null;
+  }, [one, two, three]);
+  const [last, setLast] = useState<ArtworkPalette | null>(null);
+  useEffect(() => {
+    if (!enabled || status !== "pending") setLast(enabled ? current : null);
+  }, [enabled, status, current]);
+  const palette = enabled ? current ?? (status === "pending" ? last : null) : null;
+  return useMemo(() => palette ? safeAtmosphere(palette, light, strength).map(rgbHex) : undefined, [palette, light, strength]);
 }

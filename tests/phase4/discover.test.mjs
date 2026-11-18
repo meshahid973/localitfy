@@ -378,7 +378,7 @@ test("artwork lookup respects opt-in", async () => {
   registerDiscoverIpc({handle:(channel,handler)=>handlers.set(channel,handler)},{getSongs:()=>[],getSettings:()=>settings,musicBrainzClient:{searchRecordings:()=>{calls++;return new Promise(resolve=>{finish=resolve;});}}});
   const request=()=>handlers.get("discover:get")({}, {artwork:{title:"Track",artist:"Artist"}});
   assert.equal((await request()).status,"off"); assert.equal(calls,0);
-  settings.discoverEnabled=true; const pending=request(); await Promise.resolve();
+  settings.discoverEnabled=true; const pending=request(); for (let attempts=0; !finish && attempts<20; attempts++) await Promise.resolve(); assert.equal(typeof finish,"function");
   settings.discoverEnabled=false; finish([]);
   assert.equal((await pending).status,"off");
 });
@@ -394,13 +394,27 @@ test("Discover lazy renderer modules parse as TSX", () => {
     assert.deepEqual(errors.map(d => ts.flattenDiagnosticMessageText(d.messageText, " ")), [], file);
   }
 });
-test("removed analytics cannot load PostHog extensions", () => {
-  const manifest = JSON.parse(fs.readFileSync("package.json", "utf8"));
-  const entry = fs.readFileSync("src/main.tsx", "utf8");
-  const html = fs.readFileSync("index.html", "utf8");
+test("external telemetry SDK stays removed and scripts remain restricted", () => {
   assert.equal(fs.existsSync("src/analytics.ts"), false);
-  assert.equal(manifest.dependencies?.["posthog-js"], undefined);
-  assert.equal(manifest.devDependencies?.["posthog-js"], undefined);
+  const entry = fs.readFileSync("src/main.tsx", "utf8");
   assert.doesNotMatch(entry, /posthog|["']\.\/analytics["']/i);
+  const manifest = JSON.parse(fs.readFileSync("package.json", "utf8"));
+  const lock = JSON.parse(fs.readFileSync("package-lock.json", "utf8"));
+  assert.ok(!manifest.dependencies?.["posthog-js"] && !manifest.devDependencies?.["posthog-js"]);
+  assert.ok(!Object.keys(lock.packages).some(name => /(?:^|\/)posthog-js$|@posthog\//.test(name)));
+  const html = fs.readFileSync("index.html", "utf8");
   assert.match(html, /script-src 'self';/);
+});
+
+test("Discover uses verified Last.fm track art and tries multiple valid releases", async () => {
+  const { lastfmArtwork, catalogArtwork, createArtworkLookup } = require("../../electron/discover/artwork.cjs");
+  const image="https://lastfm.freetls.fastly.net/i/u/300x300/123456789abcdef0123456789abcdef0.png";
+  const track={name:"Song",artist:{name:"Artist"},album:{image:[{"#text":image}]}};
+  assert.equal(lastfmArtwork(track,"song","artist").coverUrl,image);
+  assert.deepEqual(lastfmArtwork(track,"wrong","artist"),{});
+  assert.deepEqual(lastfmArtwork({...track,album:{image:[{"#text":image.replace("123456789abcdef0123456789abcdef0","2a96cbd8b46e442fc41c2b86b821562f")} ]}},"song","artist"),{});
+  const lookup=createArtworkLookup({searchRecordings:async()=>{throw Error("unneeded");}},Date.now,async()=>track);
+  assert.equal((await lookup("song","artist")).coverUrl,image);
+  const art=catalogArtwork("recording",{releases:[{id:"12345678-1234-1234-1234-123456789abc"},{id:"22345678-1234-1234-1234-123456789abc"}]});
+  assert.equal(art.coverAlternatives.length,2);
 });

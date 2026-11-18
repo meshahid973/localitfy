@@ -1,9 +1,8 @@
 import "./home.css";
 import { Fragment, lazy, Suspense, useCallback, useMemo, useState, type CSSProperties, type ReactNode } from "react";
-import { Maximize2, Minimize2, Play, Shuffle, SlidersHorizontal, Smartphone } from "lucide-react";
+import { AudioLines, Maximize2, Minimize2, Play, Shuffle, SlidersHorizontal, Smartphone } from "lucide-react";
 import { isAndroidApp } from "../../app/platform";
 import { Cover } from "../covers/Cover";
-import { ArtworkBackdrop } from "../covers/ArtworkBackdrop";
 import { MascotStateArt } from "../../shared/ui/LocaltifyViewUi";
 import { prettyMeta, prettyTitle } from "../search/search.utils";
 import type { Song } from "../library/song.types";
@@ -14,12 +13,10 @@ import { HomeDailyMixRail, HomeSongRail } from "./HomeShelves";
 import { useHomeDay } from "./useHomeDay";
 import type { SimilarSeedRequest } from "../analysis/similarSeed";
 import { useAppActions } from "../shell/appActions";
-import { pickLikedSongs, pickMostPlayedSongs, pickNotPlayedYet, pickRecentlyPlayed, pickRediscover } from "./homeShelfPicks";
+import { diversifyHomeRecommendations, pickLikedSongs, pickMostPlayedSongs, pickNotPlayedYet, pickRecentlyPlayed, pickRediscover } from "./homeShelfPicks";
 
 export type HomeViewProps = {
   ambientStyle: CSSProperties;
-  artworkAmbient?: boolean;
-  bannerType?: Settings["homeBannerType"];
   currentId: string | null;
   currentSong: Song | null;
   heroDisplayArtist: string;
@@ -50,8 +47,6 @@ export type HomeViewProps = {
 export default function HomeView(props: HomeViewProps) {
   const {
     ambientStyle,
-    artworkAmbient = true,
-    bannerType = "dynamic",
     currentId,
     currentSong,
     heroDisplayArtist,
@@ -82,15 +77,15 @@ export default function HomeView(props: HomeViewProps) {
   const day = useHomeDay();
   const android = isAndroidApp();
   const needsPhoneSync = android && songs.length === 0;
-  const showAtmosphere = artworkAmbient && Boolean(currentSong) && (bannerType === "dynamic" || bannerType === "albumCover");
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const closeCustomize = useCallback(() => setCustomizeOpen(false), []);
 
-  const listenNowSongs = homeListenNowSongs.slice(0, android ? 4 : 8);
-  const recentlyAddedSongs = homeFreshShelfSongs.slice(0, 10);
+  const listenNowSongs = useMemo(() => homeListenNowSongs.slice(0, android ? 4 : 8), [homeListenNowSongs, android]);
+  const recentlyAddedSongs = useMemo(() => homeFreshShelfSongs.slice(0, 10), [homeFreshShelfSongs]);
   const visibleSections = visibleHomeSections(settings.homeSectionOrder, settings.homeHiddenSections);
   const showing = (id: HomeSectionId) => visibleSections.includes(id);
   const showMostListened = showing("mostListened");
+  const showingListenNow = showing("listenNow");
   const mostPlayedSongs = useMemo(() => showMostListened ? pickMostPlayedSongs(songs) : [], [showMostListened, songs]);
 
   // Only work out the shelves that are on screen; a hidden shelf costs nothing.
@@ -98,8 +93,8 @@ export default function HomeView(props: HomeViewProps) {
   const showRediscover = showing("rediscover"), showUnplayed = showing("notPlayedYet"), showMixes = showing("dailyMixes");
   const recentlyPlayedSongs = useMemo(() => (showRecent ? pickRecentlyPlayed(songs) : []), [showRecent, songs]);
   const likedSongs = useMemo(() => (showLiked ? pickLikedSongs(songs) : []), [showLiked, songs]);
-  const rediscoverSongs = useMemo(() => (showRediscover ? pickRediscover(songs, new Date()) : []), [showRediscover, songs, day]);
-  const notPlayedSongs = useMemo(() => (showUnplayed ? pickNotPlayedYet(songs, new Date(day + "T00:00:00")) : []), [showUnplayed, songs, day]);
+  const rediscoverSongs = useMemo(() => showRediscover ? diversifyHomeRecommendations(pickRediscover(songs, new Date(), 32), showingListenNow ? listenNowSongs : []) : [], [showRediscover, songs, day, showingListenNow, listenNowSongs]);
+  const notPlayedSongs = useMemo(() => showUnplayed ? diversifyHomeRecommendations(pickNotPlayedYet(songs, new Date(day + "T00:00:00"), 32), [...(showingListenNow ? listenNowSongs : []), ...rediscoverSongs]) : [], [showUnplayed, songs, day, showingListenNow, listenNowSongs, rediscoverSongs]);
   const songsById = useMemo(() => (showMixes ? new Map(songs.map((song) => [song.id, song])) : new Map<string, Song>()), [showMixes, songs]);
 
   const startListening = () => {
@@ -121,7 +116,7 @@ export default function HomeView(props: HomeViewProps) {
         </div> : null}
         <div className={`homeJumpCopy nowPlayingCopySwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
           {currentSong ? <span className="homeFeatureLabel">Jump back in</span> : null}
-          <h2 className={heroTitleClass} title={currentSong?.title || (needsPhoneSync ? "Sync your music" : "drop in your music")}>{needsPhoneSync ? "Sync your music" : heroDisplayTitle}</h2>
+          <h2 className={heroTitleClass} title={currentSong?.title || (needsPhoneSync ? "Sync your music" : "drop in your music")}>{needsPhoneSync ? "Sync your music" : currentSong?.title || heroDisplayTitle}</h2>
           <p>{needsPhoneSync ? "Pair with your computer in Settings → Library." : heroDisplayArtist}</p>
 
           {playerError ? <div className="homeInlineNotice error">{playerError}</div> : null}
@@ -158,13 +153,14 @@ export default function HomeView(props: HomeViewProps) {
                   onClick={() => void selectSong(song.id, true)}
                   onContextMenu={(event) => void actions.openSongMenu(event, song)}
                   title={`play ${song.title}`}
+                  aria-current={active ? "true" : undefined}
                 >
                   <Cover song={song} className="homeListenCover" preferThumbnail />
                   <span className="homeListenCopy">
-                    <strong>{prettyTitle(song.title, 6)}</strong>
+                    <strong>{song.title || prettyTitle(song.title, 6)}</strong>
                     <small>{prettyMeta(song.artist)}</small>
                   </span>
-                  <span className="homeListenPlay" aria-hidden="true"><Play size={12} fill="currentColor" /></span>
+                  <span className="homeListenPlay" aria-hidden="true">{active && isPlaying ? <AudioLines size={16} /> : <Play size={14} fill="currentColor" />}</span>
                 </button>
               );
             })}
@@ -188,7 +184,6 @@ export default function HomeView(props: HomeViewProps) {
 
   return (
     <div className="homePage" style={ambientStyle}>
-      {showAtmosphere ? <div className="homeAtmosphere" aria-hidden="true"><ArtworkBackdrop song={currentSong} /></div> : null}
       <header className="homeTopBar">
         <h1>Home</h1>
         <button
@@ -196,11 +191,11 @@ export default function HomeView(props: HomeViewProps) {
           type="button"
           onClick={() => setCustomizeOpen((open) => !open)}
           aria-label="Customize Home"
+          title="Customize Home"
           aria-expanded={customizeOpen}
           aria-controls="home-customize-panel"
         >
-          <SlidersHorizontal size={13} strokeWidth={2.1} aria-hidden="true" />
-          <span>Customize Home</span>
+          <SlidersHorizontal size={19} strokeWidth={1.9} aria-hidden="true" />
         </button>
         {customizeOpen ? (
           <Suspense fallback={null}>

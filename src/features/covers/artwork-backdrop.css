@@ -39,13 +39,11 @@
 }
 
 /* Extended page ambience uses the same thumbnail, never an extra live blur. */
-.homeAtmosphere .artworkBackdrop .artworkBackdropCover,
 .collectionPage > .artworkBackdrop .artworkBackdropCover,
 .playlistDetailPage > .artworkBackdrop .artworkBackdropCover {
   opacity: .36;
   filter: blur(32px) saturate(1.05);
 }
-.homeAtmosphere .artworkBackdrop::after,
 .collectionPage > .artworkBackdrop::after,
 .playlistDetailPage > .artworkBackdrop::after {
   background: linear-gradient(180deg, color-mix(in srgb, var(--lt-bg) 52%, transparent), var(--lt-bg));

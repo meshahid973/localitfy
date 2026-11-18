@@ -5,7 +5,11 @@
   --surface-2: #19191c;
   --surface-3: #232326;
   --lt-bg-elevated: #111214;
-  --lt-surface-soft: rgba(255, 255, 255, .055);
+  --lt-surface-soft: var(--lt-fill);
+  --lt-fill-subtle: rgba(var(--lt-accent-rgb), .04);
+  --lt-fill: rgba(var(--lt-accent-rgb), .07);
+  --lt-fill-hover: rgba(var(--lt-accent-rgb), .10);
+  --lt-fill-selected: rgba(var(--lt-accent-rgb), .14);
   --lt-surface-raised: #19191c;
   --lt-danger: #ff8095;
   --text: #ffffff;
@@ -31,7 +35,11 @@
   --surface-2: #e7e7eb;
   --surface-3: #dedee3;
   --lt-bg-elevated: #ffffff;
-  --lt-surface-soft: rgba(24, 24, 27, .055);
+  --lt-surface-soft: var(--lt-fill);
+  --lt-fill-subtle: rgba(var(--lt-accent-rgb), .03);
+  --lt-fill: rgba(var(--lt-accent-rgb), .05);
+  --lt-fill-hover: rgba(var(--lt-accent-rgb), .08);
+  --lt-fill-selected: rgba(var(--lt-accent-rgb), .10);
   --lt-surface-raised: #e7e7eb;
   --lt-danger: #b42343;
   --text: #18181b;

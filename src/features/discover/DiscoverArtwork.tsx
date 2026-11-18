@@ -32,18 +32,21 @@ function cachedArtwork(key: string) {
   cache.set(key, hit);
   return hit.value;
 }
-const safeCover = (value?: string) => value && /^https:\/\/coverartarchive\.org\/(release|release-group)\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/front-250$/i.test(value) ? value : undefined;
+const safeCover = (value?: string) => value && (/^https:\/\/coverartarchive\.org\/(release|release-group)\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/front-250$/i.test(value) || (/^https:\/\/(?:lastfm\.freetls\.fastly\.net|lastfm-img2\.akamaized\.net)\/i\/u\/(?:[0-9]+x[0-9]+|[0-9]+s)\/[a-f0-9]{32}\.(?:png|jpe?g|webp)$/i.test(value) && !/2a96cbd8b46e442fc41c2b86b821562f|4128a6eb29f94943c9d206c08e625904/i.test(value))) ? value : undefined;
 export function DiscoverCover({ title, artist, artwork, lookup = false, person = false }: {
   title: string; artist: string; artwork?: DiscoverArtwork; lookup?: boolean; person?: boolean;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const key = JSON.stringify([title, artist]);
   const [resolved, setResolved] = useState<{ key: string; value: DiscoverArtwork }>();
-  const [failed, setFailed] = useState<string[]>([]);
-  const cover = artwork?.coverUrl ? artwork : resolved?.key === key ? resolved.value : undefined;
-  const src = [safeCover(cover?.coverUrl), safeCover(cover?.fallbackCoverUrl)].find(url => url && !failed.includes(url));
+  const [failure, setFailure] = useState<{key:string; urls:string[]}>({key:"",urls:[]});
+  const cover = resolved?.key === key ? resolved.value : undefined;
+  const failed = failure.key === key ? failure.urls : [];
+  const directUrls = [artwork?.coverUrl, artwork?.fallbackCoverUrl, ...(artwork?.coverAlternatives ?? []).slice(0,6)].map(safeCover).filter(Boolean);
+  const src = [...directUrls, safeCover(cover?.coverUrl), safeCover(cover?.fallbackCoverUrl), ...(cover?.coverAlternatives ?? []).slice(0,6).map(safeCover)].find(url => url && !failed.includes(url));
+  const needsLookup = lookup && !directUrls.some(url => url && !failed.includes(url));
   useEffect(() => {
-    if (!lookup || artwork?.coverUrl || !artist || !title || !ref.current) return;
+    if (!needsLookup || !artist || !title || !ref.current) return;
     let live = true, requested = false;
     let cancelQueued: (() => boolean) | undefined;
     const start = () => {
@@ -82,9 +85,9 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
     }, { rootMargin: "80px" });
     observer.observe(ref.current);
     return () => { live = false; observer.disconnect(); stop(); };
-  }, [key, title, artist, lookup, artwork?.coverUrl]);
+  }, [key, title, artist, needsLookup]);
   return <span ref={ref} className="discoverCover" aria-hidden="true">
     {src ? <img key={src} src={src} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer"
-      onError={() => setFailed(current => [...current, src])} /> : person ? <UserRound size={24} /> : <Disc3 size={24} />}
+      onError={() => setFailure(current => ({key,urls:[...(current.key === key ? current.urls : []),src]}))} /> : person ? <UserRound size={24} /> : <Disc3 size={24} />}
   </span>;
 }
