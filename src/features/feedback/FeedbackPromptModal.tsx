@@ -16,7 +16,7 @@ type Props = {
   closeFeedbackPrompt: () => void;
   submitFeedbackPrompt: () => Promise<void>;
 };
-export default function FeedbackPrompt({reducedMotion, feedbackCategory, setFeedbackCategory, feedbackMessage, setFeedbackMessage, feedbackStatus, setFeedbackStatus, feedbackSendBusy, closeFeedbackPrompt, submitFeedbackPrompt}: Props) {
+export default function FeedbackPromptModal({reducedMotion, feedbackCategory, setFeedbackCategory, feedbackMessage, setFeedbackMessage, feedbackStatus, setFeedbackStatus, feedbackSendBusy, closeFeedbackPrompt, submitFeedbackPrompt}: Props) {
     const remaining = FEEDBACK_MESSAGE_MAX_LENGTH - feedbackMessage.length;
     const feedbackReady = feedbackMessage.trim().length >= 4;
 

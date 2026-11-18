@@ -19,10 +19,11 @@ test("lockfile pins the valid asynckit tarball", () => {
 test("local validation is owned by deterministic package scripts", () => {
   const pkg = JSON.parse(read("package.json"));
   const scripts = pkg.scripts || {};
-  assert.match(String(scripts.check || ""), /bridge:check/);
-  assert.match(String(scripts.check || ""), /boundaries:check/);
+  assert.match(String(scripts.check || ""), /npm run check:quick/);
+  assert.match(String(scripts["check:quick"] || ""), /bridge:check/);
+  assert.match(String(scripts["check:quick"] || ""), /boundaries:check/);
   assert.match(String(scripts.check || ""), /css:dedup:check/);
-  assert.match(String(scripts.check || ""), /typecheck/);
+  assert.match(String(scripts["check:quick"] || ""), /typecheck/);
   assert.match(String(scripts.check || ""), /build/);
   assert.match(String(scripts["hardening:check"] || ""), /performance:check/);
   assert.doesNotMatch(JSON.stringify(scripts), /package-lock=false|npm install --ignore-scripts/);

@@ -174,7 +174,7 @@ import { usePlaybackConnect } from "./features/connect/usePlaybackConnect";
 import { useDevToolsShortcut } from "./features/shell/useDevToolsShortcut";
 
 const Onboarding = lazy(() => import("./Onboarding"));
-const FeedbackPrompt = lazy(() => import("./features/feedback/FeedbackPrompt"));
+const FeedbackPrompt = lazy(() => import("./features/feedback/FeedbackPromptModal"));
 const SettingsCategoryContent = lazy(() => import("./features/settings/SettingsCategoryContent"));
 
 

@@ -69,7 +69,7 @@ const requiredOwners = [
   ["src/features/artists/ArtistsView.tsx", './artists.css'],
   ["src/features/genres/GenresView.tsx", './genres.css'],
   ["src/Onboarding.tsx", './features/onboarding/onboarding.css'],
-  ["src/features/feedback/FeedbackPrompt.tsx", './feedback-prompt.css'],
+  ["src/features/feedback/FeedbackPromptModal.tsx", './feedback-prompt.css'],
   ["src/features/shell/ScreensaverOverlay.tsx", './screensaver.css'],
   ["src/features/player/components/PlayerBar.tsx", '../player.css'],
   ["src/features/settings/SettingsView.tsx", './settings.css'],
