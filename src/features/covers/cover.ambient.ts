@@ -67,6 +67,20 @@ export function decodeArtwork(source: string, signal: AbortSignal, samplePixels 
   });
 }
 
+/** Mix artwork shares the same 512-entry sample cache as the player. */
+export async function readArtworkPalette(source: string, signal: AbortSignal): Promise<ArtworkPalette | null> {
+  if (!source || signal.aborted) return null;
+  const cached = cache.get(source);
+  if (cached) {
+    const a = rgbFromHex(cached["--cover-palette-a"] ?? ""), b = rgbFromHex(cached["--cover-palette-b"] ?? ""), c = rgbFromHex(cached["--cover-palette-c"] ?? "");
+    if (a && b && c) return [a, b, c];
+  }
+  const result = await decodeArtwork(source, signal, true);
+  if (signal.aborted || !result || result === true) return null;
+  cache.set(source, paletteStyle(result));
+  return result;
+}
+
 export function useCoverAverageStyle(source: string, enabled: boolean, visible = true) {
   const coverSource = enabled ? source.trim() : "";
   const [sample, setSample] = useState<{ source: string; style: CoverAverageStyle } | null>(null);

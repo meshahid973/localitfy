@@ -99,3 +99,26 @@ export function advanceArtworkFrame(frame: ArtworkFrame, source: string, decoded
   if (!source || !decoded) return { current: "", previous: "" };
   return frame.current === source ? frame : { current: source, previous: frame.current };
 }
+
+/** Deterministic, readable generated cover colors. Each stop has enough
+ * darkness for white typography even if the original images are very bright. */
+export function mixArtworkPalette(samples: readonly ArtworkPalette[], seed: string): ArtworkPalette {
+  let hash = 2166136261;
+  for (let i = 0; i < seed.length; i++) hash = Math.imul(hash ^ seed.charCodeAt(i), 16777619);
+  const fallback: ArtworkPalette = [
+    [48 + ((hash >>> 3) & 63), 35 + ((hash >>> 11) & 63), 68 + ((hash >>> 19) & 63)],
+    [45 + ((hash >>> 17) & 63), 52 + ((hash >>> 5) & 63), 65 + ((hash >>> 23) & 31)],
+    [65 + ((hash >>> 7) & 63), 38 + ((hash >>> 13) & 63), 55 + ((hash >>> 2) & 63)]
+  ];
+  const chosen = samples.length ? [samples[0][0], (samples[1] ?? samples[0])[1], (samples[2] ?? samples[1] ?? samples[0])[2]] : fallback;
+  const darken = (color: RGB): RGB => {
+    let amount = 1;
+    let next = color;
+    while (contrastRatio([255,255,255], next) < 4.5 && amount > .05) {
+      amount *= .9;
+      next = [Math.round(color[0]*amount), Math.round(color[1]*amount), Math.round(color[2]*amount)];
+    }
+    return next;
+  };
+  return [darken(chosen[0]), darken(chosen[1]), darken(chosen[2])];
+}

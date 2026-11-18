@@ -5,7 +5,7 @@ import { prettyMeta, prettyTitle } from "../search/search.utils";
 import type { Song } from "../library/song.types";
 import { CollectionLoading } from "../../shared/ui/CollectionLoading";
 import { useHomeDailyMixes } from "./useHomeDailyMixes";
-import { pickHomeMixArtwork } from "./homeShelfPicks";
+import { HomeMixArtwork } from "./HomeMixArtwork";
 import { MediaCard } from "../../shared/ui/MediaCard";
 import { mixTarget, useAppActions } from "../shell/appActions";
 import { isAndroidApp } from "../../app/platform";
@@ -102,7 +102,7 @@ type DailyMixRailProps = {
   openAnalysisSettings: () => unknown;
 };
 
-/** Today's daily mixes as cover collages. Clicking a mix opens it, the round button plays it; "See all" opens the full shelf in Playlists. */
+/** Today's daily mixes with locally generated artwork. Clicking a mix opens it, the round button plays it; "See all" opens the full shelf in Playlists. */
 export function HomeDailyMixRail({ day, songsById, openDailyMixes, openAnalysisSettings }: DailyMixRailProps) {
   const actions = useAppActions();
   const { result, failed } = useHomeDailyMixes(day);
@@ -127,15 +127,14 @@ export function HomeDailyMixRail({ day, songsById, openDailyMixes, openAnalysisS
       />
       {mixes.length ? (
         <div className="homeReleaseRail homeMixRail" tabIndex={0} role="region" aria-labelledby="home-daily-mixes-title">
-          {mixes.map((mix) => {
+          {mixes.map((mix, index) => {
             const artists = [...new Set(mix.songs.map((song) => song.artist).filter(Boolean))];
             const target = mixTarget(mix, mix.songs);
-            const artwork = pickHomeMixArtwork(mix.songs);
             return (
               <MediaCard key={mix.id} className="homeReleaseCard" openLabel={`open ${mix.name}`} playLabel={`play ${mix.name}`}
                 onOpen={() => actions.openCollection(target)} onPlay={() => actions.playCollection(target)}
                 onContextMenu={(event) => actions.openCollectionMenu(event, target)}
-                cover={<span className="homeReleaseCoverWrap homeMixCollage" data-count={artwork.length}>{artwork.map((song) => <Cover key={song.id} song={song} className="homeReleaseCover" preferThumbnail />)}</span>}>
+                cover={<HomeMixArtwork id={mix.id} name={mix.name} songs={mix.songs} ordinal={index + 1} />}>
                 <span className="homeReleaseCopy">
                   <strong>{mix.name}</strong>
                   <small>{artists.slice(0, 2).map((artist) => prettyMeta(artist)).join(", ") || `${mix.songs.length} tracks`}</small>

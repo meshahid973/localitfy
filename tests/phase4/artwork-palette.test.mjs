@@ -4,7 +4,7 @@ import fs from "node:fs";
 import ts from "typescript";
 const source = fs.readFileSync(new URL("../../src/features/covers/artworkPalette.ts", import.meta.url), "utf8");
 const js = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
-const { extractArtworkPalette, PaletteCache, safeAtmosphere, contrastRatio, rgbHex, advanceArtworkFrame } = await import("data:text/javascript;base64," + Buffer.from(js).toString("base64"));
+const { extractArtworkPalette, PaletteCache, safeAtmosphere, contrastRatio, rgbHex, advanceArtworkFrame, mixArtworkPalette } = await import("data:text/javascript;base64," + Buffer.from(js).toString("base64"));
 
 test("palette detects distinct hues and ignores transparent pixels", () => {
   const data = new Uint8ClampedArray([...Array(100)].flatMap(() => [240, 20, 90, 255, 20, 180, 240, 255, 90, 20, 180, 255, 255, 255, 255, 0]));
@@ -44,4 +44,13 @@ test("decoded frames retain only the current and preceding source; failures clea
     assert.equal(advanceArtworkFrame(frame,source,true),frame);
   }
   assert.deepEqual(advanceArtworkFrame(frame,"broken",false),{current:"",previous:""});
+});
+
+test("mix artwork is deterministic, cover-derived and keeps white type readable", () => {
+  const sample = [[255,200,100],[30,255,255],[255,0,180]];
+  const colors = mixArtworkPalette([sample], "test");
+  assert.deepEqual(colors,mixArtworkPalette([sample],"test"));
+  assert.ok(colors.every(color => contrastRatio([255,255,255],color)>=4.5));
+  assert.deepEqual(mixArtworkPalette([], "missing"),mixArtworkPalette([], "missing"));
+  assert.notDeepEqual(mixArtworkPalette([], "missing"),mixArtworkPalette([], "another"));
 });
