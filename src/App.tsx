@@ -623,6 +623,7 @@ function MainModeApp() {
     startRenamePlaylist,
     cancelRenamePlaylist,
     savePlaylistRename,
+    setPlaylistArtwork,
     duplicatePlaylist,
     openPlaylistPicker: openPlaylistPickerCore,
     addSongToPlaylist,
@@ -7386,6 +7387,7 @@ function MainModeApp() {
       renamingPlaylistName,
 
       savePlaylistRename,
+      setPlaylistArtwork,
       selectPlaylistSongAction,
       selectedPlaylist,
       selectedPlaylistDuration,

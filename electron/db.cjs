@@ -12,7 +12,7 @@ const path = require("node:path");
 const packageMetadata = require("../package.json");
 
 const APP_VERSION = String(packageMetadata?.version || "0.0.0");
-const SCHEMA_VERSION = 21;
+const SCHEMA_VERSION = 22;
 const BACKUP_KEEP_LIMIT = 8;
 
 let db = null;
@@ -65,7 +65,8 @@ const PLAYLIST_COLUMNS = {
   name: "TEXT NOT NULL DEFAULT 'playlist'",
   createdAt: "INTEGER NOT NULL DEFAULT 0",
   sortOrder: "INTEGER NOT NULL DEFAULT 0",
-  rules: "TEXT"
+  rules: "TEXT",
+  coverArtwork: "TEXT"
 };
 
 const PLAYLIST_SONG_COLUMNS = {
@@ -217,7 +218,8 @@ function createPlaylistsTables(database) {
       name TEXT NOT NULL DEFAULT 'playlist',
       createdAt INTEGER NOT NULL DEFAULT 0,
       sortOrder INTEGER NOT NULL DEFAULT 0,
-      rules TEXT
+      rules TEXT,
+      coverArtwork TEXT
     );
 
     CREATE TABLE IF NOT EXISTS playlist_songs (
@@ -368,6 +370,7 @@ function playlistRulesJson(value) {
   } catch { return null; }
 }
 
+function cleanPlaylistArtwork(value) { return typeof value === "string" && value.length <= 24576 && /^data:image\/jpeg;base64,\/9j\/[A-Za-z0-9+/]*={0,2}$/.test(value) ? value : null; }
 function normalizePlaylist(input, fallbackIndex = 0) {
   if (!input || typeof input !== "object") return null;
 
@@ -394,7 +397,8 @@ function normalizePlaylist(input, fallbackIndex = 0) {
     songIds,
     createdAt,
     sortOrder: Math.max(0, Math.floor(asNumber(input.sortOrder, fallbackIndex))),
-    rules: playlistRulesJson(input.rules)
+    rules: playlistRulesJson(input.rules),
+    coverArtwork: cleanPlaylistArtwork(input.coverArtwork)
   };
 }
 
@@ -406,6 +410,7 @@ function rowToPlaylist(row, songIds = []) {
       createdAt: row?.createdAt,
       sortOrder: row?.sortOrder,
       rules: row?.rules,
+      coverArtwork: row?.coverArtwork,
       songIds
     },
     Math.max(0, Math.floor(asNumber(row?.sortOrder, 0)))
@@ -418,7 +423,8 @@ function rowToPlaylist(row, songIds = []) {
     name: playlist.name,
     songIds: playlist.songIds,
     createdAt: playlist.createdAt,
-    ...(playlist.rules ? { rules: JSON.parse(playlist.rules) } : {})
+    ...(playlist.rules ? { rules: JSON.parse(playlist.rules) } : {}),
+    ...(playlist.coverArtwork ? { coverArtwork: playlist.coverArtwork } : {})
   };
 }
 
@@ -1019,13 +1025,14 @@ function savePlaylists(playlists) {
     .filter(Boolean);
 
   const insertPlaylist = database.prepare(`
-    INSERT INTO playlists (id, name, createdAt, sortOrder, rules)
-    VALUES (@id, @name, @createdAt, @sortOrder, @rules)
+    INSERT INTO playlists (id, name, createdAt, sortOrder, rules, coverArtwork)
+    VALUES (@id, @name, @createdAt, @sortOrder, @rules, @coverArtwork)
     ON CONFLICT(id) DO UPDATE SET
       name = excluded.name,
       createdAt = excluded.createdAt,
       sortOrder = excluded.sortOrder,
-      rules = excluded.rules
+      rules = excluded.rules,
+      coverArtwork = excluded.coverArtwork
   `);
 
   const insertPlaylistSong = database.prepare(`
@@ -1046,7 +1053,8 @@ function savePlaylists(playlists) {
         name: playlist.name,
         createdAt: playlist.createdAt,
         sortOrder: playlistIndex,
-        rules: playlist.rules
+        rules: playlist.rules,
+        coverArtwork: playlist.coverArtwork
       });
 
       playlist.songIds.forEach((songId, songIndex) => {

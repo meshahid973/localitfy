@@ -42,7 +42,7 @@ export default function PlaylistPickerModal({
             const previewSongs = playlist.songIds.slice(0, 4).map((songId) => songsById.get(songId)).filter((item): item is Song => Boolean(item));
             return (
               <button key={playlist.id} className={`playlistPickerItem ${added ? "active" : ""}`} type="button" disabled={added} onClick={() => addSongToPlaylist(playlist.id, song.id)}>
-                <PlaylistCoverCollage songs={previewSongs} className="playlistPickerCollage playlistCoverCollage" />
+                <PlaylistCoverCollage songs={previewSongs} coverArtwork={playlist.coverArtwork} className="playlistPickerCollage playlistCoverCollage" />
                 <span><strong>{playlist.name}</strong><small>{added ? "already added" : `${playlist.songIds.length} song${playlist.songIds.length === 1 ? "" : "s"}`}</small></span>
                 <em>{added ? "added" : "add"}</em>
               </button>

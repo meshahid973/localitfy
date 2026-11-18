@@ -8,7 +8,7 @@ import { makeLocalId, readLocalJson, writeLocalJson } from "../../shared/storage
 import { PLAYLIST_STORAGE_KEY } from "./playlist.constants";
 import type { Playlist } from "./playlist.types";
 import { prepareGeneratedPlaylist } from "./generatedPlaylist";
-import { cleanPlaylistList } from "./playlist.utils";
+import { cleanPlaylistArtwork, cleanPlaylistList } from "./playlist.utils";
 import { cleanSmartRules, evaluateSmartRules, type ListeningCounts, type SmartRules } from "./smartPlaylist";
 
 export type PlaylistsControllerOptions = {
@@ -280,6 +280,12 @@ export function usePlaylistsController({
     showAppToast("playlist renamed", "success");
   }, [playlists, renamingPlaylistName, setStatusText, showAppToast]);
 
+  const setPlaylistArtwork = useCallback((id: string, value: string | null) => {
+    const coverArtwork = cleanPlaylistArtwork(value);
+    if (value && !coverArtwork) return;
+    setPlaylists(items => items.map(item => item.id === id ? { ...item, coverArtwork: coverArtwork || undefined } : item));
+  }, []);
+
   const duplicatePlaylist = useCallback((playlistId: string) => {
     const source = playlists.find((playlist) => playlist.id === playlistId);
     if (!source) return;
@@ -292,7 +298,7 @@ export function usePlaylistsController({
       index += 1;
     }
 
-    const copy: Playlist = { id: makeLocalId("playlist"), name, songIds: [...source.songIds], createdAt: Date.now(), ...(source.rules ? { rules: source.rules } : {}) };
+    const copy: Playlist = { id: makeLocalId("playlist"), name, songIds: [...source.songIds], createdAt: Date.now(), ...(source.rules ? { rules: source.rules } : {}), ...(source.coverArtwork ? { coverArtwork: source.coverArtwork } : {}) };
     setPlaylists((items) => [copy, ...items]);
     setSelectedPlaylistId(copy.id);
     setStatusText(`duplicated ${source.name}`);
@@ -382,6 +388,7 @@ export function usePlaylistsController({
     cancelRenamePlaylist,
     savePlaylistRename,
     duplicatePlaylist,
+    setPlaylistArtwork,
     openPlaylist,
     openPlaylistPicker,
     addSongToPlaylist,

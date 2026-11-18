@@ -1,8 +1,8 @@
 import "./playlists.css";
 import { isAndroidApp } from "../../app/platform";
 import DailyMixesShelf, { type DailyMixesShelfProps } from "../analysis/DailyMixesShelf";
-import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties } from "react";
-import { Check, Copy, Pencil, Plus, Radio, SlidersHorizontal, Sparkles, Trash2, WandSparkles, X } from "lucide-react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { Check, Copy, ImagePlus, Pencil, Plus, Radio, SlidersHorizontal, Sparkles, Trash2, WandSparkles, X } from "lucide-react";
 import type { SimilarSeedRequest } from "../analysis/similarSeed";
 import { notForMeTest, type NotForMeMarks } from "../analysis/notForMe";
 import PlaylistRecommendations from "./components/PlaylistRecommendations";
@@ -11,6 +11,7 @@ import { PageHeader } from "../../shared/ui/PageHeader";
 import { LocaltifyStateCard, MetaDividerDot } from "../../shared/ui/LocaltifyViewUi";
 import { VirtualPlaylistTrackList } from "./components/VirtualPlaylistTrackList";
 import PlaylistCoverCollage from "./components/PlaylistCoverCollage";
+import { preparePlaylistArtwork } from "./playlistArtwork";
 import { formatTime } from "../../shared/utils/format";
 import type { Playlist } from "./playlist.types";
 import type { Song } from "../library/song.types";
@@ -52,6 +53,7 @@ export type PlaylistsViewProps = {
   renamingPlaylistId: any;
   renamingPlaylistName: any;
   savePlaylistRename: any;
+  setPlaylistArtwork: (id: string, value: string | null) => void;
   selectPlaylistSongAction: any;
   selectedPlaylist: any;
   selectedPlaylistDuration: any;
@@ -109,6 +111,9 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
   const [smartEditing, setSmartEditing] = useState<Playlist | null | undefined>(undefined);
   const [prompting, setPrompting] = useState(false);
   const [playlistQuery, setPlaylistQuery] = useState("");
+  const [coverBusy, setCoverBusy] = useState(false);
+  const [coverError, setCoverError] = useState("");
+  const coverInput = useRef<HTMLInputElement>(null);
   const visiblePlaylists = useMemo(() => playlistSummaries.filter((summary: { playlist: Playlist }) =>
     summary.playlist.name.toLocaleLowerCase().includes(playlistQuery.trim().toLocaleLowerCase())), [playlistSummaries, playlistQuery]);
   const hidden = useMemo(() => notForMeTest(props.notForMe.marks), [props.notForMe.marks]);
@@ -156,7 +161,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
         <CollectionHero
           typeLabel={detailPlaylist.rules ? "smart playlist" : "playlist"}
           title={detailPlaylist.name}
-          cover={<PlaylistCoverCollage songs={detailSongs} className="collectionHeroCover playlistCoverCollage" />}
+          cover={<PlaylistCoverCollage songs={detailSongs} coverArtwork={detailPlaylist.coverArtwork} className="collectionHeroCover playlistCoverCollage" />}
           coverSong={target.coverSong}
           byline={detailPlaylist.rules ? <span className="smartPlaylistSummary">{describeSmartRules(detailPlaylist.rules)}</span> : undefined}
           stats={`${detailSongs.length} song${detailSongs.length === 1 ? "" : "s"} · ${formatTime(detailSongs.reduce((total, song) => total + (Number(song.duration) || 0), 0))}`}
@@ -170,12 +175,24 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
             disabled={detailSongs.length === 0} aria-label="more like this playlist" title="Find songs in your library that sound like this playlist">
             <Radio size={16} strokeWidth={2.2} aria-hidden="true" />
           </button>
+          <input ref={coverInput} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={async event => {
+            const file = event.currentTarget.files?.[0];
+            event.currentTarget.value = "";
+            if (!file) return;
+            setCoverError(""); setCoverBusy(true);
+            try { props.setPlaylistArtwork(detailPlaylist.id, await preparePlaylistArtwork(file)); }
+            catch { setCoverError("Could not load that image. Choose a JPG, PNG or WebP under 12 MB."); }
+            finally { setCoverBusy(false); }
+          }} />
+          <button className="collectionIconButton" type="button" disabled={coverBusy} aria-label="Upload playlist artwork" title="Upload playlist artwork" onClick={() => coverInput.current?.click()}><ImagePlus size={16} /></button>
+          {detailPlaylist.coverArtwork ? <button className="collectionIconButton" type="button" disabled={coverBusy} aria-label="Reset playlist artwork" title="Reset playlist artwork" onClick={() => props.setPlaylistArtwork(detailPlaylist.id, null)}><X size={16} /></button> : null}
           {detailPlaylist.rules ? (
             <button className="collectionIconButton" type="button" onClick={() => setSmartEditing(detailPlaylist)} aria-label="edit rules" title="Edit rules">
               <SlidersHorizontal size={16} strokeWidth={2.2} aria-hidden="true" />
             </button>
           ) : null}
         </CollectionHero>
+        {coverError ? <p role="alert">{coverError}</p> : null}
 
         <section className="playlistTracksPanel">
           <div className="panelHead playlistTracksHead">
@@ -296,7 +313,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
                 onDragLeave={(event) => handlePlaylistShelfDragLeave(event, playlist.id)}
                 onDrop={(event) => handlePlaylistShelfDrop(event, playlist.id)}
                 title="drop a song here to add it"
-                cover={<PlaylistCoverCollage songs={previewSongs} />}
+                cover={<PlaylistCoverCollage songs={previewSongs} coverArtwork={playlist.coverArtwork} />}
               >
                 <span className="playlistShelfMeta">
                   <strong>{playlist.name}</strong>

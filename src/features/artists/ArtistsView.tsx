@@ -65,8 +65,9 @@ export default function ArtistsView({ songs }: ArtistsViewProps) {
   const visibleArtists = useMemo(() => {
     const needle = deferredQuery.trim().toLocaleLowerCase();
     const matches = needle ? artists.filter(artist => artist.name.toLocaleLowerCase().includes(needle)) : artists;
-    if (sort === "name") return matches;
-    return [...matches].sort((a,b) => (sort === "tracks" ? b.songs.length-a.songs.length : b.playCount-a.playCount) || a.name.localeCompare(b.name));
+    const exact = (artist: ArtistEntry) => Number(artist.name.toLocaleLowerCase() === needle);
+    const ordered = sort === "name" ? matches : [...matches].sort((a,b) => (sort === "tracks" ? b.songs.length-a.songs.length : b.playCount-a.playCount) || a.name.localeCompare(b.name));
+    return needle ? [...ordered].sort((a,b) => exact(b)-exact(a)) : ordered;
   }, [artists, deferredQuery, sort]);
 
   useEffect(() => setArtistLimit(150), [deferredQuery, sort]);
