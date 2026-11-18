@@ -40,7 +40,18 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
   let saved = null;
   let running = null;
   let catalogRunning = null;
-  const lookupArtwork = createArtworkLookup(musicBrainzClient, now);
+  let artworkClient = null, artworkKey = "";
+  const lookupArtwork = createArtworkLookup(musicBrainzClient, now, async (title, artist) => {
+    const settings = getSettings();
+    const apiKey = apiKeyFor(settings);
+    if (settings.discoverEnabled !== true || !/^[0-9a-f]{32}$/i.test(apiKey)) return null;
+    if (!artworkClient || artworkKey !== apiKey) {
+      artworkKey = apiKey;
+      artworkClient = createLastfmClient({ apiKey, cacheFile: cacheFile ? cacheFile + ".artwork" : "", fetch, now });
+    }
+    const client = artworkClient;
+    try { return await client.trackInfo(title, artist); } finally { client.flush(); }
+  });
   router.handle("discover:get", async (_event, payload = {}) => {
     const settings = getSettings();
     if (settings.discoverEnabled !== true) return { status: "off" };

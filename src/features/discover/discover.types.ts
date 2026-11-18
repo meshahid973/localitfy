@@ -1,4 +1,4 @@
-export type DiscoverArtwork = { coverUrl?: string; fallbackCoverUrl?: string; durationMs?: number };
+export type DiscoverArtwork = { coverUrl?: string; fallbackCoverUrl?: string; coverAlternatives?: string[]; durationMs?: number };
 export type DiscoverTrack = { title: string; artist: string; url: string } & DiscoverArtwork;
 export type DiscoverArtist = { name: string; url: string; because: string[]; seedCount: number; topTracks: DiscoverTrack[] };
 export type CatalogKind = "recording" | "artist";

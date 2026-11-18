@@ -97,7 +97,7 @@ function createLastfmClient({ apiKey, cacheFile, fetch = globalThis.fetch, now =
     const slot = Math.max(now(), nextSlot);
     nextSlot = slot + REQUEST_SPACING_MS;
     if (slot > now()) await wait(slot - now());
-    const url = `${API_URL}?${new URLSearchParams({ method, ...params, api_key: apiKey, format: "json", autocorrect: "1" })}`;
+    const url = `${API_URL}?${new URLSearchParams({ method, ...params, api_key: apiKey, format: "json", autocorrect: params.autocorrect ?? "1" })}`;
     let response;
     try {
       response = await fetch(url, { headers: { "User-Agent": "localtify" }, signal: AbortSignal.timeout(TIMEOUT_MS) });
@@ -126,6 +126,9 @@ function createLastfmClient({ apiKey, cacheFile, fetch = globalThis.fetch, now =
       const body = await call("artist.gettoptracks", { artist, limit: String(limit) });
       return list(body?.toptracks?.track).map((item) => ({ title: String(item?.name || "").trim(), artist: artistName(item) || artist, url: item?.url || "" }))
         .filter((item) => item.title).slice(0, limit);
+    },
+    async trackInfo(title, artist) {
+      return (await call("track.getinfo", { track: title, artist, autocorrect: "0" }))?.track || null;
     },
     async artistInfo(artist) {
       const info = (await call("artist.getinfo", { artist }))?.artist;

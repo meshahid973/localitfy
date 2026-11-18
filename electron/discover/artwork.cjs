@@ -10,13 +10,20 @@ function catalogArtwork(kind, item) {
   const releases = (Array.isArray(item?.releases) ? item.releases : []).filter(r => validId(r?.id) && (!r.status || r.status === "Official"));
   releases.sort((a,b) => Number(b["cover-art-archive"]?.front === true) - Number(a["cover-art-archive"]?.front === true) || String(a.date || "9999").localeCompare(String(b.date || "9999")));
   const release = releases[0];
-  return {...(release ? {coverUrl:url("release",release.id),fallbackCoverUrl:url("release-group",release["release-group"]?.id)} : {}), ...(Number.isFinite(item.length) && item.length > 0 ? {durationMs:item.length} : {})};
+  const alternatives = [...new Set(releases.flatMap(r => [url("release",r.id),url("release-group",r["release-group"]?.id)]).filter(Boolean))].slice(0,6);
+  return {...(release ? {coverUrl:url("release",release.id),fallbackCoverUrl:url("release-group",release["release-group"]?.id),coverAlternatives:alternatives} : {}), ...(Number.isFinite(item.length) && item.length > 0 ? {durationMs:item.length} : {})};
 }
 function matchRecordingArtwork(items,title,artist) {
   const matches = (Array.isArray(items) ? items : []).filter(item => norm(item?.title) === norm(title) && norm(credit(item)) === norm(artist));
   return matches.length === 1 ? catalogArtwork("recording",matches[0]) : {};
 }
-function createArtworkLookup(client,now=Date.now) {
+function lastfmArtwork(track,title,artist) {
+  if (norm(track?.name)!==norm(title) || norm(track?.artist?.name)!==norm(artist)) return {};
+  const images = Array.isArray(track?.album?.image) ? track.album.image : [];
+  const coverUrl = images.slice().reverse().map(i=>i?.["#text"]).find(value=>typeof value==="string" && /^https:\/\/(?:lastfm\.freetls\.fastly\.net|lastfm-img2\.akamaized\.net)\/i\/u\/(?:[0-9]+x[0-9]+|[0-9]+s)\/[a-f0-9]{32}\.(?:png|jpe?g|webp)$/i.test(value) && !/2a96cbd8b46e442fc41c2b86b821562f|4128a6eb29f94943c9d206c08e625904/i.test(value));
+  return coverUrl ? {coverUrl} : {};
+}
+function createArtworkLookup(client,now=Date.now,trackInfo) {
   const cache=new Map(), pending=new Map();
   return async (title,artist) => {
     const key=JSON.stringify([norm(title),norm(artist)]), hit=cache.get(key);
@@ -26,9 +33,17 @@ function createArtworkLookup(client,now=Date.now) {
     }
     cache.delete(key);
     if(pending.has(key)) return pending.get(key);
-    if(pending.size>=4 || !client?.searchRecordings) return {};
-    const task=Promise.resolve().then(()=>client.searchRecordings(title,artist,{background:true})).then(items=>{
-      const value=matchRecordingArtwork(items,title,artist);
+    if(pending.size>=4) throw new Error("Artwork queue busy");
+    const task=Promise.resolve().then(async()=>{
+      const track = trackInfo ? await trackInfo(title,artist).catch(()=>null) : null;
+      const primary = lastfmArtwork(track,title,artist);
+      if (primary.coverUrl) return primary;
+      if (!client?.searchRecordings) return {};
+      const items=await client.searchRecordings(title,artist,{background:true});
+      const exact=(Array.isArray(items)?items:[]).filter(item=>norm(item?.title)===norm(title)&&norm(credit(item))===norm(artist));
+      const identified=validId(track?.mbid)&&norm(track?.name)===norm(title)&&norm(track?.artist?.name)===norm(artist) ? exact.find(item=>item.id===track.mbid) : null;
+      return identified ? catalogArtwork("recording",identified) : matchRecordingArtwork(items,title,artist);
+    }).then(value=>{
       cache.set(key,{at:now(),value});
       while(cache.size>512) cache.delete(cache.keys().next().value);
       return value;
@@ -37,4 +52,4 @@ function createArtworkLookup(client,now=Date.now) {
     return task;
   };
 }
-module.exports={catalogArtwork,matchRecordingArtwork,createArtworkLookup};
+module.exports={catalogArtwork,matchRecordingArtwork,createArtworkLookup,lastfmArtwork};
