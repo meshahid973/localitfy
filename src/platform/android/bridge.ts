@@ -8,7 +8,7 @@ import { computerName } from "../../app/platform";
 import { phoneLibrary } from "./library";
 import { fromMac, fromMacOrKept } from "./macFeatures";
 import { LocaltifyNative } from "./native";
-import { writeValues } from "./store";
+import { readValue, writeValues } from "./store";
 import { setLibraryChangedHandler } from "./sync";
 import { onLiveEvent, sendLike, sendLive } from "./live";
 import type { SyncPlaylist } from "./syncMerge";
@@ -116,7 +116,13 @@ export function createAndroidBridge(): Bridge {
     searchLyrics: (payload) => fromMac("lyrics:search", payload, 15000),
     selectLyricsMatch: (payload) => keepLyrics(payload.id, fromMac("lyrics:select-match", payload, 15000)),
     clearLyricsMatch: (payload) => keepLyrics(payload.id, fromMac("lyrics:clear-selection", payload, 15000)),
-    setLyricsOffset: (payload) => fromMac("lyrics:set-offset", payload),
+    setLyricsOffset: async (payload) => {
+      const saved = await fromMac<{ offsetMs: number }>("lyrics:set-offset", payload);
+      const key = `mac:lyrics:${payload.id}`;
+      const kept = await readValue<LyricsResult | null>(key, null).catch(() => null);
+      if (kept) await writeValues({ [key]: { ...kept, offsetMs: saved.offsetMs } }).catch(() => undefined);
+      return saved;
+    },
     getDiscoveries: (payload) => (payload?.catalog || payload?.artwork) ? fromMac<DiscoverResult>("discover:get", payload, 60000) : fromMacOrKept<DiscoverResult>("discover:get", payload ?? {}, "mac:discover", { status: "off" }),
     getArtistBio: async (artist: string) => {
       if (phoneLibrary.effectiveSettings().discoverEnabled !== true) return { status: "off" };

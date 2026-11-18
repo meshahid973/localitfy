@@ -572,3 +572,14 @@ test("public catalog searches use escaped MusicBrainz queries and the shared cac
   assert.equal(calls[0].agent, "localtify-test");
   assert.throws(() => client.searchCatalog("invalid", "Album"), /Unsupported/);
 });
+
+test("MusicBrainz successful responses expire without disabling request coalescing", async () => {
+  let calls = 0;
+  const client = createMusicBrainzClient({ userAgent: "test", minIntervalMs: 0, cacheTtlMs: 0,
+    fetchImpl: async () => { calls++; return { ok: true, status: 200, json: async () => ({ releases: [] }) }; }
+  });
+  await Promise.all([client.searchReleases("Same", ""), client.searchReleases("Same", "")]);
+  assert.equal(calls, 1);
+  await client.searchReleases("Same", "");
+  assert.equal(calls, 2);
+});

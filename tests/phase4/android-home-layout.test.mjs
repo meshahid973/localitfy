@@ -27,6 +27,7 @@ function home(android, songs, hidden = [], artworkAmbient = true) {
     "../../shared/ui/LocaltifyViewUi": { MascotStateArt: () => null },
     "../search/search.utils": { prettyMeta: String, prettyTitle: String },
     "./homeLayout": layout,
+    "./useHomeDay": { useHomeDay: () => "2026-11-18" },
     "./HomeShelves": { HomeAlbumRail: () => null, HomeDailyMixRail: () => null, HomeSongRail: () => null },
     "../../shared/ui/MediaCard": { MediaCard: ({ children }) => React.createElement("div", null, children) },
     "../artists/artistCredits": { splitArtistCredits: (name) => [name] },

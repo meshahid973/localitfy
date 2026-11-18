@@ -6,6 +6,8 @@ import { readValue, writeValues } from "./store";
 /** After a failed attempt (away from home), answer from the phone's copies for a while instead of waiting on the network. */
 const RETRY_AFTER_MS = 60_000;
 let unreachableUntil = 0;
+let unreachablePair: { url: string; token: string } | null = null;
+const samePair = (a: { url: string; token: string } | null, b: { url: string; token: string } | null) => !!a && !!b && a.url === b.url && a.token === b.token;
 
 type MacAnswer<T> = { ok: boolean; result?: T; error?: string };
 
@@ -15,7 +17,8 @@ type MacAnswer<T> = { ok: boolean; result?: T; error?: string };
  */
 export async function callMac<T>(channel: string, payload: unknown, timeoutMs = 5000): Promise<MacAnswer<T>> {
   const pairing = phoneLibrary.pairing;
-  if (!pairing || Date.now() < unreachableUntil) return { ok: false };
+  if (!pairing || (samePair(unreachablePair, pairing) && Date.now() < unreachableUntil)) return { ok: false };
+  const stillPaired = () => samePair(pairing, phoneLibrary.pairing);
   let response: { status: number; body: string };
   try {
     response = await LocaltifyNative.request({
@@ -26,10 +29,12 @@ export async function callMac<T>(channel: string, payload: unknown, timeoutMs = 
       timeoutMs
     });
   } catch {
-    unreachableUntil = Date.now() + RETRY_AFTER_MS;
+    if (stillPaired()) { unreachablePair = pairing; unreachableUntil = Date.now() + RETRY_AFTER_MS; }
     return { ok: false };
   }
+  if (!stillPaired()) return { ok: false };
   unreachableUntil = 0;
+  unreachablePair = null;
   let body: { result?: T; error?: string } = {};
   try { body = JSON.parse(response.body || "{}"); } catch { /* non-JSON error page */ }
   if (response.status >= 400) return { ok: false, error: body.error || `Your ${computerName()} answered with error ${response.status}` };
@@ -39,6 +44,7 @@ export async function callMac<T>(channel: string, payload: unknown, timeoutMs = 
 /** A sync that just reached the Mac means it is worth asking again straight away. */
 export function markMacReachable() {
   unreachableUntil = 0;
+  unreachablePair = null;
 }
 
 /** The Mac's answer when it can be reached (kept for offline use), otherwise the last kept answer, otherwise `fallback`. */

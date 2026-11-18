@@ -232,7 +232,8 @@ test("cache misses expire sooner, and the renderer never pins them for the whole
   assert.equal((await service.get(song)).status, "missing");
   assert.ok(calls > baseline, "recheck after miss TTL");
   const view = fs.readFileSync(path.join(root, "src/features/lyrics/LyricsView.tsx"), "utf8");
-  assert.match(view, /next.status === "synced" \|\| next.status === "plain" \|\| next.status === "instrumental"/);
+  assert.doesNotMatch(view, /sessionCache/);
+  assert.match(view, /requestGeneration.current === generation/);
 });
 
 test("skip invalid durations in exact metadata queries", async () => {

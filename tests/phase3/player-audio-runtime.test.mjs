@@ -93,7 +93,9 @@ test("suspended Web Audio must not intercept audible HTML audio before resuming"
     { AudioContext: FakeAudioContext }
   );
   const runtime = new exports.AudioEffectRuntime();
-  const audio = { playbackRate: 1 };
+  let pitchWrites = 0;
+  let pitch = true;
+  const audio = { playbackRate: 1, get preservesPitch() { return pitch; }, set preservesPitch(value) { pitchWrites++; pitch = value; } };
   const profile = { mode: "daycore", baseRate: 1, reverbAmount: 40 };
   runtime.apply(audio, profile);
   assert.equal(sourceConnections, 0, "a suspended context must not intercept sound");
@@ -102,6 +104,7 @@ test("suspended Web Audio must not intercept audible HTML audio before resuming"
   assert.equal(sourceConnections, 1, "once resumed, the effects graph connects exactly once");
   runtime.apply(audio, profile);
   assert.equal(sourceConnections, 1, "reusing effects does not create another media source");
+  assert.equal(pitchWrites, 1, "unchanged pitch must not reconfigure the audio pipeline");
   runtime.dispose();
 });
 
@@ -120,7 +123,9 @@ test("stale media pause/play events are ignored when current element state disag
 
 test("focus repair does not resurrect audio after a newer pause or track switch", () => {
   const app = read("src/App.tsx");
-  assert.match(app, /const repairGeneration = playbackTransitionRef\.current\.snapshot\(\)\.generation;/);
-  assert.match(app, /generation !== repairGeneration/);
-  assert.match(app, /phase === "paused"\) audio\.pause\(\)/);
+  const repair = app.slice(app.indexOf("function repairPlaybackAfterAppReturns"), app.indexOf("useAppLifecycleRuntime({"));
+  assert.match(repair, /!audio.paused/);
+  assert.match(repair, /isCurrent\(repairGeneration, song.id\)/);
+  assert.match(repair, /phase === "paused"\) audio\.pause\(\)/);
+  assert.doesNotMatch(repair, /applyPlaybackRateSettings|setAudioElementVolume|syncAudioEffectGraph|currentTime\s*=/);
 });

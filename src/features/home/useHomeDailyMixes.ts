@@ -7,14 +7,14 @@ let lastMixes: DailyMixesResult | null = null;
 
 /** Today's daily mixes for the Home shelf. `result` stays `null` until the first answer arrives. */
 export function useHomeDailyMixes(day: string) {
-  const [result, setResult] = useState<DailyMixesResult | null>(() => (lastMixes?.day === day ? lastMixes : null));
+  const [answer, setAnswer] = useState<{ requestedDay: string; result: DailyMixesResult } | null>(() => (lastMixes?.day === day ? { requestedDay: day, result: lastMixes } : null));
   const [failedDay, setFailedDay] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
     window.localitfy.getDailyMixes({ refresh: false })
       .then((next) => {
-        if (active) { lastMixes = next; setResult(next); setFailedDay(null); }
+        if (active) { lastMixes = next; setAnswer({ requestedDay: day, result: next }); setFailedDay(null); }
       })
       .catch(() => {
         if (active) setFailedDay(day);
@@ -22,5 +22,6 @@ export function useHomeDailyMixes(day: string) {
     return () => { active = false; };
   }, [day]);
 
-  return { result: result?.day === day ? result : null, failed: failedDay === day };
+  // Android may intentionally return a kept offline mix or an empty fallback.
+  return { result: answer?.requestedDay === day ? answer.result : null, failed: failedDay === day };
 }

@@ -16,6 +16,7 @@ import CollectionContextMenu from "../library/components/CollectionContextMenu";
 import { AppActionsContext, playableIds } from "./appActions";
 import { useCollectionActions } from "./useCollectionActions";
 import { CollectionLoading } from "../../shared/ui/CollectionLoading";
+import { PageErrorBoundary } from "./PageErrorBoundary";
 import { MascotStateArt, UpdateStatusIcon, WindowCloseIcon } from "../../shared/ui/LocaltifyViewUi";
 import type { MascotStateKey } from "../../shared/ui/LocaltifyViewUi";
 import WhatsNewModal from "../updates/WhatsNewModal";
@@ -359,6 +360,7 @@ export default function AppShell(props: AppShellProps) {
               className={`pageTransition pageTransition-${view}`}
               data-view={view}
             >
+              <PageErrorBoundary key={view + ":" + (detail?.id ?? "")}>
               {view === "home" ? <HomeView {...home} artworkAmbient={effectiveAmbient && !isAppBackgrounded} bannerType={homeBanner} /> : null}
 
               <Suspense fallback={<CollectionLoading label="Loading page…" />}>
@@ -378,6 +380,7 @@ export default function AppShell(props: AppShellProps) {
                 {view === "settings" ? <SettingsView {...settingsView} /> : null}
                 {view === "downloads" ? <DownloadsView {...downloads} /> : null}
               </Suspense>
+              </PageErrorBoundary>
             </div>
           </section>
 

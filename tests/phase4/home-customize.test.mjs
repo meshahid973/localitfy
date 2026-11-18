@@ -142,9 +142,10 @@ test("Daily mix artwork is distinct, ordered, and limited to four covers", () =>
     song("fourth", { coverPath: "/fourth.png" }),
     song("fifth", { coverUrl: "/fifth.png" })
   ];
-  assert.deepEqual(ids(picks.pickHomeMixArtwork(tracks)), ["first", "fallback", "third", "fourth"]);
+  assert.deepEqual(ids(picks.pickHomeMixArtwork(tracks)), ["first", "third", "fourth", "fifth"]);
   assert.deepEqual(ids(picks.pickHomeMixArtwork([])), []);
   assert.deepEqual(ids(picks.pickHomeMixArtwork([tracks[0], tracks[1]])), ["first"]);
+  assert.deepEqual(ids(picks.pickHomeMixArtwork(tracks.slice(0, 3))), ["first", "fallback"]);
   assert.equal(tracks.length, 6);
 });
 
