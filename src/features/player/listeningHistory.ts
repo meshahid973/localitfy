@@ -87,7 +87,7 @@ export class ListeningHistory {
 
   private checkpoint(outcome: ListeningOutcome = "active") {
     if (!this.event) return;
-    const updatedAt = Math.max(this.event.updatedAt, this.event.startedAt + Math.floor(this.listened), this.now());
+    const updatedAt = Math.max(this.event.updatedAt, this.now());
     this.event = { ...this.event, updatedAt, msListened: Math.min(Math.floor(this.listened), updatedAt - this.event.startedAt),
       outcome, endedAt: outcome === "active" ? null : updatedAt };
     this.lastWrite = this.monotonic();

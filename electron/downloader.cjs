@@ -412,6 +412,7 @@ function convertOneToMp3(inputPath, outputDirectory, bitrate = 192, onProgress, 
     const baseName = sanitizeFilename(path.parse(inputPath).name);
     const outputPath = uniquePath(outputDirectory, `${baseName}.mp3`);
     const durationSeconds = await probeMediaDurationSeconds(inputPath);
+    if (activeBatch && activeDownloadCancelled) return resolve({ ok: false, error: "Conversion cancelled" });
     const safeBitrate = Math.max(64, Math.min(320, Number(bitrate) || 192));
     let lastPercent = -1;
 
@@ -441,7 +442,7 @@ function convertOneToMp3(inputPath, outputDirectory, bitrate = 192, onProgress, 
     });
     proc.on("close", (code) => {
       activeDownloadProcesses.delete(proc);
-      if (code !== 0 || !fs.existsSync(outputPath)) {
+      if ((activeBatch && activeDownloadCancelled) || code !== 0 || !fs.existsSync(outputPath)) {
         try { fs.rmSync(outputPath, { force: true }); } catch {}
         resolve({ ok: false, error: `FFmpeg exited with code ${code}` });
         return;

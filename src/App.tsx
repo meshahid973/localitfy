@@ -2161,8 +2161,8 @@ function MainModeApp() {
           status: payload.status || (nextProgress >= 100 ? "done" : "downloading"),
           progress: nextProgress,
           message: nextMessage,
-          speed: payload.speed || previous?.speed,
-          eta: payload.eta || previous?.eta,
+          speed: payload.speed ?? undefined,
+          eta: payload.eta ?? undefined,
           filename: payload.filename || previous?.filename,
           error: payload.error || previous?.error
         };
@@ -2181,6 +2181,7 @@ function MainModeApp() {
           previous?.status === merged.status &&
           previous?.message === merged.message &&
           previous?.title === merged.title &&
+          previous?.speed === merged.speed && previous?.eta === merged.eta &&
           previous?.filename === merged.filename &&
           previous?.error === merged.error;
 
@@ -4664,11 +4665,10 @@ function MainModeApp() {
   async function cancelCurrentDownload() {
     try {
       await window.localitfy.cancelDownload?.();
-      setDownloadBusy(false);
-      setStatusText("download cancelled");
+      setStatusText("Cancelling downloads…");
       setDownloadQueue((current) => current.map((item) => (
         item.status === "queued" || item.status === "downloading" || item.status === "converting"
-          ? { ...item, status: "cancelled", progress: item.progress || 100, message: "Download cancelled" }
+          ? { ...item, status: "cancelled", progress: item.progress, message: "Download cancelled" }
           : item
       )));
     } catch (error) {

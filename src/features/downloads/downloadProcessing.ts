@@ -2,7 +2,16 @@ import type { Song } from "../library/song.types";
 import type { DownloadQueueItem, DownloadResult } from "./download.types";
 
 export function parseDownloadUrls(text: string) {
-  return [...new Set(text.split(/\r?\n|,/).map(url => url.trim()).filter(Boolean))];
+  const urls = text.split(/\r?\n|,/).map(url => url.trim()).filter(Boolean);
+  return [...new Set(urls.map(url => {
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== "https:" || parsed.username || parsed.password || parsed.port) return url;
+      const host = parsed.hostname.toLowerCase();
+      const id = host === "youtu.be" ? parsed.pathname.slice(1).split("/")[0] : ["youtube.com","www.youtube.com","m.youtube.com","music.youtube.com"].includes(host) ? (parsed.searchParams.get("v") || parsed.pathname.match(/^\/(?:shorts|live|embed)\/([^/]+)$/)?.[1]) : null;
+      return id && /^[\w-]{11}$/.test(id) ? `https://www.youtube.com/watch?v=${id}` : url;
+    } catch { return url; }
+  }))];
 }
 
 export function makeQueuedDownloads(urls: string[]): DownloadQueueItem[] {
