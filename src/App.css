@@ -867,7 +867,7 @@ body.isResizingSidebar{
   flex-direction: column !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   border-radius: 26px !important;
-  background: rgba(7, 7, 7, 0.88) !important;
+  background: var(--lt-surface-raised, var(--lt-surface)) !important;
   box-shadow: 0 32px 120px rgba(0, 0, 0, 0.62),
     0 0 0 1px rgba(var(--lt-accent-rgb), 0.08) inset !important;
   backdrop-filter: blur(26px) saturate(145%) !important;
@@ -2479,12 +2479,6 @@ body.localtifyIdle .app:not(.songDragActive) :where( .secretLayer, .coverSpark){
 .songCard{
   content-visibility: auto;
   contain-intrinsic-size: 1px 280px;
-}
-
-.editorModal{
-  background:
-    radial-gradient(circle at 50% 100%, rgba(var(--lt-accent-rgb), 0.09), transparent 42%),
-    #000 !important;
 }
 
 html,
