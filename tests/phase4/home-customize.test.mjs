@@ -156,3 +156,10 @@ test("Most played shelves rank real listening history and exclude unplayed or mi
   assert.deepEqual(ids(picks.pickMostPlayedSongs(source, 1)), ["recent"]);
   assert.deepEqual(ids(picks.pickMostPlayedSongs(source, 0)), []);
 });
+
+test("recently added uses bounded stable newest-first selection", () => {
+  const tracks = [song("old", {dateAdded: "2024-01-01"}), song("new", {dateAdded: "2026-01-01"}), song("tie", {dateAdded: "2026-01-01"}), song("invalid", {dateAdded: ""})];
+  assert.deepEqual(ids(picks.pickRecentlyAdded(tracks, 2)), ["new", "tie"]);
+  assert.deepEqual(ids(picks.pickRecentlyAdded(tracks, 4)), ["new", "tie", "old", "invalid"]);
+  assert.deepEqual(ids(picks.pickRecentlyAdded(tracks, 0)), []);
+});

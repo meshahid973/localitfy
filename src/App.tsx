@@ -68,6 +68,7 @@ import { VirtualHomeSongCards, VirtualSongRows } from "./features/library/compon
 import { useLibraryController } from "./features/library";
 import { subscribeWatchedFoldersChange } from "./features/library/watchedFolderBridge";
 import { reconcileLibraryIndex, patchLibrarySong, replaceLibrarySong } from "./features/search/incrementalLibraryIndex";
+import { pickRecentlyAdded } from "./features/home/homeShelfPicks";
 import { createMetadataCleanPreview } from "./features/library/metadataCleanPreview";
 import {
   getPlayableUniqueSongIds, getRepeatPreview, getSourceLoopRestart, getSourcePreviousStep,
@@ -246,6 +247,7 @@ function MainModeApp() {
   const analyticsViewRef = useRef<View>("home");
   const librarySnapshotSignatureRef = useRef("");
   const libraryOrderSaveTimerRef = useRef<number | null>(null);
+  const lastSavedOrderRef = useRef<string[]>([]);
   const rememberCurrentSongTimerRef = useRef<number | null>(null);
   const latestRememberedSongIdRef = useRef("");
   const selectSongBurstTimerRef = useRef<number | null>(null);
@@ -715,26 +717,23 @@ function MainModeApp() {
   }, [visualCurrentSong?.id, visualCurrentSong?.filePath, visualCurrentSong?.title, visualCurrentSong?.artist, visualCurrentSong?.coverUrl]);
 
   useEffect(() => {
-    if (!ready || !songs.length) return undefined;
-
-    if (libraryOrderSaveTimerRef.current !== null) {
-      window.clearTimeout(libraryOrderSaveTimerRef.current);
-    }
-
+    if (!ready) return;
+    const lastOrder = lastSavedOrderRef.current;
+    if (lastOrder.length === songs.length && songs.every((song, i) => song.id === lastOrder[i])) return;
+    let cancelIdle: (() => void) | undefined;
     libraryOrderSaveTimerRef.current = window.setTimeout(() => {
       libraryOrderSaveTimerRef.current = null;
-      const snapshot = songs;
-
-      runLocaltifyIdleTask(() => {
-        saveLibraryOrder(snapshot);
+      cancelIdle = runLocaltifyIdleTask(() => {
+        saveLibraryOrder(songs);
+        lastSavedOrderRef.current = songs.map(song => song.id);
       }, 1600);
     }, 520);
-
     return () => {
       if (libraryOrderSaveTimerRef.current !== null) {
         window.clearTimeout(libraryOrderSaveTimerRef.current);
         libraryOrderSaveTimerRef.current = null;
       }
+      cancelIdle?.();
     };
   }, [ready, songs]);
 
@@ -1297,11 +1296,6 @@ function MainModeApp() {
   const longestSongDuration = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "longest_song_duration");
   const longestSongTitle = localtifyAnalyticsString(analyticsAudienceSnapshot, "longest_song_title", "");
 
-  const neverPlayedSongs = useMemo(() => {
-    if (neverPlayedCount <= 0) return [] as Song[];
-    return new Array(neverPlayedCount).fill(null) as Song[];
-  }, [neverPlayedCount]);
-
   const listenedTimeLabel = formatAnalyticsDuration(totalListenedSeconds);
   const libraryLengthLabel = formatAnalyticsDuration(totalLibrarySeconds);
 
@@ -1316,11 +1310,7 @@ function MainModeApp() {
     } as Song;
   }, [longestSongTitle, longestSongDuration]);
 
-  const recentlyAdded = useMemo(() => {
-    return [...songs]
-      .sort((a, b) => new Date(b.dateAdded || 0).getTime() - new Date(a.dateAdded || 0).getTime())
-      .slice(0, 12);
-  }, [songs]);
+  const recentlyAdded = useMemo(() => pickRecentlyAdded(songs, 12), [songs]);
 
   const homeListenNowSongs = useMemo(() => {
     const picked: Song[] = [];
@@ -2791,7 +2781,10 @@ function MainModeApp() {
 
       progressLoopTimeoutRef.current = window.setTimeout(() => {
         progressLoopTimeoutRef.current = null;
-        animationFrameRef.current = window.requestAnimationFrame(tick);
+        // Hidden windows may suspend animation frames. Continue position
+        // checkpoints without painting progress UI.
+        if (document.hidden) tick(performance.now());
+        else animationFrameRef.current = window.requestAnimationFrame(tick);
       }, delayMs);
     };
 
@@ -2837,9 +2830,6 @@ function MainModeApp() {
             .catch(() => undefined);
         }
 
-        if (!backgroundMode && !busyUi && settings.gaplessPlayback && nextDuration > 0 && nextDuration - nextTime < 20) {
-          window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 2200), 900);
-        }
       }
 
       scheduleProgressTick(backgroundMode ? 1800 : busyUi ? 520 : 180);
@@ -3156,7 +3146,6 @@ function MainModeApp() {
         setCurrentDuration(currentSong.duration || 0);
         setPlayerError("");
         setStatusText(`playing ${prettyTitle(currentSong.title, 5)}`);
-        window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 1800), 650);
         return;
       }
 
@@ -3176,7 +3165,6 @@ function MainModeApp() {
         setCurrentDuration(currentSong.duration || 0);
         setPlayerError("");
         setStatusText(`loaded ${prettyTitle(currentSong.title, 5)}`);
-        window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 1800), 650);
       }
     });
 
@@ -3226,26 +3214,37 @@ function MainModeApp() {
     return next ?? null;
   }
 
-  function primeNextAudioCache() {
-    if (!settings.gaplessPlayback) return;
+  // One cancellable warmup per playback/queue change, not per progress tick.
+  useEffect(() => {
+    if (!isPlaying || !settings.gaplessPlayback || !currentSong) return;
+    const owner = currentSong.id;
     const nextSong = getNextPlayableSongForCache();
-    if (!nextSong || !getSongPlaybackSourceKey(nextSong)) return;
-
-    void resolvePlaybackUrl(nextSong).then((result) => {
-      if (!result.ok || !result.url || result.fileExists === false) return;
-
-      if (!nextAudioRef.current) {
-        nextAudioRef.current = new Audio();
-        nextAudioRef.current.crossOrigin = "anonymous";
-        nextAudioRef.current.preload = "auto";
-      }
-
-      if (nextAudioRef.current.src !== result.url) {
-        nextAudioRef.current.src = result.url;
-        nextAudioRef.current.load();
-      }
-    });
-  }
+    if (!nextSong || nextSong.id === owner || !getSongPlaybackSourceKey(nextSong)) return;
+    let cancelled = false;
+    let cancelIdle: (() => void) | undefined;
+    const allowed = () => !cancelled && playingRef.current && songRef.current?.id === owner &&
+      settingsRef.current.gaplessPlayback && !crossfadeAutoStartedRef.current &&
+      !crossfadeHandoffRef.current && !crossfadeMainPauseGuardRef.current;
+    const timer = window.setTimeout(() => {
+      cancelIdle = runLocaltifyIdleTask(() => {
+        if (!allowed()) return;
+        void resolvePlaybackUrl(nextSong).then(result => {
+          if (!allowed() || !result.ok || !result.url || result.fileExists === false) return;
+          if (!nextAudioRef.current) {
+            nextAudioRef.current = new Audio();
+            nextAudioRef.current.crossOrigin = "anonymous";
+            nextAudioRef.current.preload = "auto";
+          }
+          const nextAudio = nextAudioRef.current;
+          if (!nextAudio.paused || nextAudio.src === result.url) return;
+          nextAudio.src = result.url;
+          nextAudio.load();
+        }).catch(() => undefined);
+      }, 1800);
+    }, 650);
+    return () => { cancelled = true; window.clearTimeout(timer); cancelIdle?.(); };
+  }, [isPlaying, settings.gaplessPlayback, currentSong?.id, playQueue, repeatMode, repeatPlaylist,
+    activePlaylist, activePlaylistSongs, playableSongs, songsById, isShuffle, playbackSource, resolvePlaybackUrl]);
 
   function getAutoCrossfadeSeconds() {
     return clamp(Math.max(3, Number(settings.crossfadeSeconds || 3)), 3, 6);
@@ -3614,7 +3613,6 @@ function MainModeApp() {
           crossfadeAutoTargetRef.current = "";
 
           void takeOverMainAudioFromCrossfade(target, nextAudio, safeVolume);
-          window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 1800), 650);
         }
       }, 16);
     } catch {
@@ -3848,7 +3846,6 @@ function MainModeApp() {
         clearCrossfadeHandoffSoon(song.id, 650);
       }
 
-      window.setTimeout(() => runLocaltifyIdleTask(() => primeNextAudioCache(), 1800), 650);
 
       setIsPlaying(true);
       setPlayerError("");
@@ -7940,7 +7937,7 @@ function MainModeApp() {
       likedPercent,
       longestSong,
       missingFileCount: effectiveMissingFileCount,
-      neverPlayedSongs,
+      neverPlayedCount,
       playedPercent,
       recentImportWeekCount,
       songs

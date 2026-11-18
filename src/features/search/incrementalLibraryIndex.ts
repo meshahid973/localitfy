@@ -96,6 +96,8 @@ export function patchLibrarySong(
 ): Song[] {
   const index = resolveSongIndex(songs, id, expectedIndex);
   if (index < 0) return songs as Song[];
+  const keys = Object.keys(patch) as (keyof Song)[];
+  if (keys.every(key => Object.prototype.hasOwnProperty.call(songs[index], key) && Object.is(songs[index][key], patch[key]))) return songs as Song[];
   const next = songs.slice();
   next[index] = { ...next[index], ...patch };
   return next;
@@ -106,6 +108,10 @@ export function replaceLibrarySong(
 ): Song[] {
   const index = resolveSongIndex(songs, updated.id, expectedIndex);
   if (index < 0 || songs[index] === updated) return songs as Song[];
+  const previous = songs[index];
+  const keys = Object.keys(updated) as (keyof Song)[];
+  if (keys.length === Object.keys(previous).length && keys.every(key =>
+    Object.prototype.hasOwnProperty.call(previous, key) && Object.is(previous[key], updated[key]))) return songs as Song[];
   const next = songs.slice();
   next[index] = updated;
   return next;

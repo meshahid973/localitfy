@@ -20,7 +20,7 @@ export type AnalyticsViewProps = {
   likedPercent: number;
   longestSong: Song | null;
   missingFileCount: number;
-  neverPlayedSongs: Song[];
+  neverPlayedCount: number;
   playedPercent: number;
   recentImportWeekCount: number;
   songs: Song[];
@@ -38,7 +38,7 @@ export default function AnalyticsView(props: AnalyticsViewProps) {
     likedPercent,
     longestSong,
     missingFileCount,
-    neverPlayedSongs,
+    neverPlayedCount,
     playedPercent,
     recentImportWeekCount,
     songs
@@ -140,8 +140,8 @@ export default function AnalyticsView(props: AnalyticsViewProps) {
 
         <div className="analyticsMiniCardV339">
           <span>needs attention</span>
-          <strong>{(missingFileCount + neverPlayedSongs.length).toLocaleString()}</strong>
-          <small>{missingFileCount ? `${missingFileCount} missing file${missingFileCount === 1 ? "" : "s"}` : `${neverPlayedSongs.length} never played`}</small>
+          <strong>{(missingFileCount + neverPlayedCount).toLocaleString()}</strong>
+          <small>{missingFileCount ? `${missingFileCount} missing file${missingFileCount === 1 ? "" : "s"}` : `${neverPlayedCount} never played`}</small>
         </div>
 
         <div className="analyticsMiniCardV339">

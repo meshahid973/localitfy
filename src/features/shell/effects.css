@@ -669,7 +669,6 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within 
 }
 
 
-
 /* Explicitly keep these blur/tint systems alive. */
 .app .heroAmbiencePulse{
   backface-visibility: hidden;

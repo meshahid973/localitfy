@@ -60,6 +60,11 @@ function takeBest<T>(
   return best.map((entry) => entry.value);
 }
 
+/** Bounded top-K import selection, preserving stable order on equal dates. */
+export function pickRecentlyAdded(songs: readonly Song[], limit = 12): Song[] {
+  return takeBest(songs, limit, song => ({ value: song, primary: time(song.dateAdded), secondary: 0 }));
+}
+
 export function pickRecentlyPlayed(songs: readonly Song[], limit = 10): Song[] {
   return takeBest(songs, limit, (song) => {
     if (!playable(song)) return null;
