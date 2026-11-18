@@ -59,12 +59,17 @@ main.app.app > .appShell > .sidebar {
   --rail-row-pad: 8px;
   --rail-row-gap: 8px;
   --rail-import-size: 100%;
+  grid-column: 1;
+  grid-row: 1;
+  min-height: 0;
+  box-sizing: border-box;
   position: relative !important;
   z-index: 120 !important;
   width: 100% !important;
   min-width: 0 !important;
   max-width: none !important;
-  height: 100%;
+  height: auto;
+  align-self: stretch;
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
@@ -177,10 +182,14 @@ main.app.app > .appShell > .sidebar .navItem:hover,
 main.app.app > .appShell > .sidebar .navItem:focus-visible {
   color: var(--lt-text) !important;
   background: var(--lt-fill-hover) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 main.app.app > .appShell > .sidebar .navItem.active {
   color: var(--lt-text) !important;
   background: var(--lt-fill-selected) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 main.app.app > .appShell > .sidebar .navItem::before,
 main.app.app > .appShell > .sidebar .navItem::after {
@@ -206,8 +215,12 @@ main.app.app > .appShell > .sidebar .navLucideIcon {
   display: block !important;
   width: 20px !important;
   height: 20px !important;
+  margin: 0 !important;
   color: currentColor !important;
   stroke: currentColor !important;
+  stroke-width: 1.9 !important;
+  fill: none !important;
+  filter: none !important;
   animation: none !important;
   transform: none !important;
 }
@@ -250,6 +263,7 @@ main.app.app > .appShell > .sidebar .sidebarBottom {
   place-items: center !important;
   gap: 0 !important;
   border-top: 0 !important;
+  min-height: 0;
 }
 main.app.app > .appShell > .sidebar .importMainAction {
   display: inline-flex !important;
@@ -269,7 +283,8 @@ main.app.app > .appShell > .sidebar .importMainAction {
   box-shadow: none !important;
   transform: none !important;
 }
-main.app.app > .appShell > .sidebar .importMainAction:hover { background: var(--lt-fill-hover) !important; }
+main.app.app > .appShell > .sidebar .importMainAction:hover { background: var(--lt-fill-hover) !important; box-shadow: none !important; }
+main.app.app > .appShell > .sidebar .importMainAction .buttonInlineIcon { width: 20px; height: 20px; flex: 0 0 auto; stroke-width: 1.9; }
 main.app.app > .appShell > .sidebar .importMainAction .buttonLabel {
   display: var(--rail-label) !important;
   font-size: var(--lt-text-sm) !important;

@@ -26,3 +26,9 @@ test("mobile navigation remains a visible 64px rail regardless of desktop mode",
     assert.ok(mobile.includes('data-sidebar-behavior="' + behavior + '"'));
   }
 });
+
+test("desktop rail never spans the full-width playback row", () => {
+  const view = file("src/styles/view-shell.css");
+  assert.match(view, /main\.app\.app > \.appShell > \.sidebar \{[^}]*grid-row: 1;/);
+  for (const name of ["src/App.css","src/features/shell/app-core.css"]) assert.doesNotMatch(file(name), /\.sidebar[^{]*\{[^}]*grid-row: 1 \/ 3;/);
+});

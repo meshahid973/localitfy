@@ -126,7 +126,7 @@ button:disabled{
 }
 
 .sidebar{
-  grid-row: 1 / 3;
+  grid-row: 1;
   min-height: 0;
 
   display: flex;

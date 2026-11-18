@@ -353,8 +353,13 @@
 }
 
 .homeListenGrid > .homeListenRow:last-child:nth-child(odd) { grid-column: 1 / -1; }
-.homeListenRow:hover { background:var(--lt-surface-raised); }
-.homeListenRow.active { background:color-mix(in srgb, var(--lt-text) 10%, transparent); }
+.app .homeListenRow:hover,
+.app .homeListenRow:focus-visible {
+  background: var(--lt-fill-hover);
+  box-shadow: none !important;
+  transform: none !important;
+}
+.app .homeListenRow.active { background: var(--lt-fill-selected); }
 
 .homeListenCover,
 .homeListenCover .coverImage {
@@ -369,11 +374,12 @@
 .homeListenCopy small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .homeListenCopy strong { color:var(--lt-text); font-size:14px; font-weight:600; }
 .homeListenCopy small { color:var(--lt-muted); font-size:var(--lt-text-base); font-weight:500; }
-.homeListenPlay { position:absolute; right:11px; width:26px; height:26px; display:grid; place-items:center; border-radius:50%; color:var(--accent-contrast, var(--lt-bg)); background:var(--lt-accent); box-shadow:0 6px 16px rgba(0,0,0,.36); opacity:0; transition:opacity 120ms ease; }
-.homeListenPlay svg { margin-left:1px; }
+.homeListenPlay { position:absolute; right:11px; width:26px; height:26px; display:grid; place-items:center; border-radius:50%; color:var(--lt-text); background:var(--lt-fill-selected); box-shadow:none; opacity:0; transition:opacity 120ms ease; }
+.homeListenPlay svg { width: 14px; height: 14px; margin-left: 1px; stroke: currentColor; fill: currentColor; stroke-width: 1.7; }
 .homeListenRow:hover .homeListenPlay,
 .homeListenRow:focus-visible .homeListenPlay,
 .homeListenRow.playing .homeListenPlay { opacity:1; }
+@media (hover: none), (pointer: coarse) { .homeListenPlay { opacity: 1; } }
 
 .homeReleaseCard {
   min-width:0;

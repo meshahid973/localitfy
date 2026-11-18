@@ -736,7 +736,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   background-image: none !important;
   border: 0 !important;
   box-shadow: none !important;
-  filter: drop-shadow(0 0 8px rgba(var(--accent-rgb),0.24)) !important;
+  filter: none !important;
   transform: translateY(-1px) scale(1.04) translateZ(0) !important;
 }
 
@@ -1451,12 +1451,12 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 
 .playerBar .controlRow > .circleButton[aria-label="previous song"] > .playerControlIcon,
 .playerBar .controlRow > .circleButton[aria-label="previous song"] > svg{
-  transform: translateX(-2px) !important;
+  transform: none !important;
 }
 
 .playerBar .controlRow > .circleButton[aria-label="next song"] > .playerControlIcon,
 .playerBar .controlRow > .circleButton[aria-label="next song"] > svg{
-  transform: translateX(2px) !important;
+  transform: none !important;
 }
 
 .playerBar .controlRow > .circleButton.main > .playerControlIcon,
@@ -1742,7 +1742,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   background-color: transparent !important;
   background-image: none !important;
   box-shadow: none !important;
-  filter: brightness(1.18) !important;
+  filter: none !important;
 }
 
 .playerBar .controlRow > .circleButton.main{
@@ -1903,16 +1903,12 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 .playerBar .circleButton.active,
 .playerBar .repeatButton.active{
   color: rgb(var(--accent-rgb)) !important;
-  filter:
-    drop-shadow(0 0 8px rgba(var(--accent-rgb),0.28))
-    drop-shadow(0 0 18px rgba(var(--accent-rgb),0.12)) !important;
+  filter: none !important;
 }
 
 .playerBar .circleButton.active:hover,
 .playerBar .repeatButton.active:hover{
-  filter:
-    drop-shadow(0 0 10px rgba(var(--accent-rgb),0.34))
-    drop-shadow(0 0 22px rgba(var(--accent-rgb),0.16)) !important;
+  filter: none !important;
 }
 
 .playerBar .repeatStateMark{
@@ -1926,9 +1922,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   color: var(--button-text-on-accent) !important;
   font-size: 8px !important;
   font-weight: 950 !important;
-  box-shadow:
-    0 0 0 2px rgba(0,0,0,0.42),
-    0 0 12px rgba(var(--accent-rgb),0.34) !important;
+  box-shadow: none !important;
 }
 
 /* Pause expensive player decoration during interaction. */

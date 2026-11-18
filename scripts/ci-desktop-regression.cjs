@@ -86,6 +86,8 @@ server.listen(5173,async()=>{
           theme:app.dataset.theme,
           retired:!!sidebar.querySelector('[data-nav-id="liked"],[data-nav-id="albums"]'),
           pinned:inside(pinned,sidebar),
+          importVisible:inside(sidebar.querySelector('.importMainAction'),sidebar),
+          sidebarClearOfPlayer:rect(sidebar).bottom<=rect(app.querySelector('.playerBar')).top+1,
           homeVisible:inside(home,scroll),
           prev:prev?rgba(style(prev).color):null,
           panel:panel?rgba(style(panel).backgroundColor):null,
@@ -109,7 +111,8 @@ server.listen(5173,async()=>{
       })()`);
       assert.equal(chrome.mode,"slim");
       assert.equal(chrome.retired,false,"retired sidebar destinations");
-      assert.ok(chrome.pinned&&chrome.homeVisible,"Settings and Home must remain visible: "+JSON.stringify(chrome));
+      assert.ok(chrome.pinned&&chrome.homeVisible&&chrome.importVisible,"Settings, Home and Import must remain visible: "+JSON.stringify(chrome));
+      assert.ok(chrome.sidebarClearOfPlayer,"sidebar must end above the full-width playback bar: "+JSON.stringify(chrome));
       if(chrome.theme==="light"){
         if(chrome.prev)assert.ok(Math.max(...chrome.prev.slice(0,3))<170,"light-mode previous glyph must not be white");
         if(chrome.panel)assert.ok(chrome.panel[3]<72||Math.min(...chrome.panel.slice(0,3))>=180,"light-mode settings panel must use a light or softly translucent fill");

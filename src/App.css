@@ -3979,7 +3979,7 @@ body,
 .sidebar,
 .app .sidebar {
   grid-column: 1;
-  grid-row: 1 / 3;
+  grid-row: 1;
   position: relative;
   z-index: 20;
   width: var(--workspace-sidebar-current, 236px);
