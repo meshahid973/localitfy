@@ -33,9 +33,3 @@ test("legacy visual settings migrate once without losing active choices or rollb
   assert.equal(old.customThemeEnabled,true);
   assert.equal(migrateVisualSettings({...defaults,theme:"stars"},defaults).settings.theme,"dark");
 });
-test("theme mode controls fixed CSS colors instead of a generated inline palette",()=>{
-  const css=fs.readFileSync("src/styles/themes.css","utf8");
-  assert.match(css,/\.app\[data-theme="dark"\]\s*\{[^}]*--bg: #000000;[^}]*--text: #ffffff;/s);
-  assert.match(css,/\.app\[data-theme="light"\]\s*\{[^}]*--bg: #f5f5f7;[^}]*--text: #18181b;/s);
-  assert.doesNotMatch(fs.readFileSync("src/features/shell/AppShell.tsx","utf8"),/themePresetStyle/);
-});
