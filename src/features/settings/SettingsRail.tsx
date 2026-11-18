@@ -1,3 +1,4 @@
+import { IconButton } from "../../shared/ui/IconButton";
 import { Search, X } from "lucide-react";
 import type { SettingsCategory } from "./settings.types";
 import type { settingsCategoryTabs } from "./settings.constants";
@@ -31,10 +32,11 @@ export default function SettingsRail({
           <Search size={15} strokeWidth={2} aria-hidden="true" />
           <input id="settings-section-search" type="search" value={search}
             onChange={(event) => onSearchChange(event.currentTarget.value)}
+            onKeyDown={(event) => { if (event.key === "Escape" && search) { event.preventDefault(); event.stopPropagation(); onSearchChange(""); } }}
             placeholder="Find a setting..." />
-          {search ? <button type="button" className="settingsSearchClear" onClick={() => onSearchChange("")} aria-label="Clear settings search">
+          {search ? <IconButton type="button" className="settingsSearchClear" onClick={() => { onSearchChange(""); document.getElementById("settings-section-search")?.focus(); }} aria-label="Clear settings search">
             <X size={14} strokeWidth={2} aria-hidden="true" />
-          </button> : null}
+          </IconButton> : null}
         </div>
       </div>
       {search.trim() ? <p className="settingsSearchHintV027" role="status">{resultLabel}</p> : null}

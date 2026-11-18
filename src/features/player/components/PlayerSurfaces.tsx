@@ -30,7 +30,10 @@ function PlayerSurfaces({ player, queue, lyrics, contentRef, backgroundStyle, ba
   useLayoutEffect(() => {
     if (immersive || !restoreFocus.current) return;
     restoreFocus.current = false;
-    document.querySelector<HTMLButtonElement>(".immersiveEntry")?.focus({ preventScroll: true });
+    const entry = document.querySelector<HTMLButtonElement>(".immersiveEntry");
+    const target = entry?.getClientRects().length ? entry : Array.from(document.querySelectorAll<HTMLButtonElement>(".playerBar button:not(:disabled)"))
+      .find(button => button.getClientRects().length > 0);
+    target?.focus({ preventScroll: true });
   }, [immersive]);
 
   function dismissOverlays() {

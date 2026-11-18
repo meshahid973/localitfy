@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { IconButton } from "../../../shared/ui/IconButton";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Dispatch, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent, SetStateAction } from "react";
 import { GripVertical, ListX, Repeat, Repeat1, X } from "lucide-react";
 import { Cover } from "../../covers/Cover";
@@ -66,6 +67,8 @@ export default function QueuePanel({
   }
   const [renderLimit, setRenderLimit] = useState(QUEUE_RENDER_STEP);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
+  const pendingFocus = useRef<number | null>(null);
+  const [announcement, setAnnouncement] = useState("");
 
   useEffect(() => {
     if (!open) return;
@@ -104,6 +107,11 @@ export default function QueuePanel({
     () => open ? buildQueueEntries(queue, songsById) : [],
     [open, queue, songsById]
   );
+  useLayoutEffect(() => {
+    if (pendingFocus.current === null) return;
+    panelRef.current?.querySelector<HTMLButtonElement>(`[data-queue-index="${pendingFocus.current}"] .queuePanelRowMain`)?.focus({ preventScroll: true });
+    pendingFocus.current = null;
+  }, [entries]);
   if (!open) return null;
   const removeQueueItem = (index: number) => setQueue((current) => current.filter((_, itemIndex) => itemIndex !== index));
   const clearQueue = () => setQueue([]);
@@ -139,13 +147,14 @@ export default function QueuePanel({
               <span>clear</span>
             </button>
           ) : null}
-          <button type="button" className="queuePanelIconButton" onClick={closeAndRestoreFocus} aria-label="close queue">
+          <IconButton type="button" className="queuePanelIconButton" onClick={closeAndRestoreFocus} aria-label="close queue">
             <X size={16} strokeWidth={2.4} aria-hidden="true" />
-          </button>
+          </IconButton>
         </div>
       </header>
 
       <div className="queuePanelBody">
+        <span className="queuePanelAnnouncement" role="status">{announcement}</span>
         <section aria-label="now playing">
           <p className="queuePanelLabel">
             now playing{contextLabel ? <small> · {contextLabel}</small> : null}
@@ -178,8 +187,19 @@ export default function QueuePanel({
               {entries.slice(0, renderLimit).map(({ song, index }) => (
                 <li
                   key={`${song.id}-${index}`}
+                  data-queue-index={index}
                   className={`queuePanelRow ${dropIndex === index ? "isDropTarget" : ""} ${unavailable?.ids.has(song.id) ? "isUnavailable" : ""}`}
                   draggable
+                  onKeyDown={(event) => {
+                    if (!event.altKey || !["ArrowUp", "ArrowDown"].includes(event.key)) return;
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const destination = index + (event.key === "ArrowUp" ? -1 : 1);
+                    if (destination < 0 || destination >= queue.length) return;
+                    pendingFocus.current = destination;
+                    setQueue(current => moveQueueItem(current, index, destination));
+                    setAnnouncement(`${song.title} moved to position ${destination + 1}`);
+                  }}
                   onDragStart={(event) => {
                     event.stopPropagation();
                     event.dataTransfer.effectAllowed = "move";
@@ -192,7 +212,7 @@ export default function QueuePanel({
                 >
                   <GripVertical className="queuePanelGrip" size={14} strokeWidth={2.2} aria-hidden="true" />
                   <button type="button" className="queuePanelRowMain" onClick={() => playQueueItem(index)} disabled={unavailable?.ids.has(song.id)}
-                    title={unavailable?.ids.has(song.id) ? unavailable.label : "play now"}>
+                    title={unavailable?.ids.has(song.id) ? unavailable.label : "Play now · Alt + ↑/↓ to reorder"}>
                     <Cover song={song} className="queuePanelCover" />
                     <span className="queuePanelCopy">
                       <strong>{prettyTitle(song.title, 8)}</strong>
@@ -203,9 +223,9 @@ export default function QueuePanel({
                     </span>
                   </button>
                   <span className="queuePanelDuration">{formatTime(song.duration || 0)}</span>
-                  <button type="button" className="queuePanelIconButton" onClick={() => removeQueueItem(index)} aria-label={`remove ${song.title} from queue`} title="remove from queue">
+                  <IconButton type="button" className="queuePanelIconButton" onClick={() => removeQueueItem(index)} aria-label={`remove ${song.title} from queue`} title="remove from queue">
                     <X size={14} strokeWidth={2.4} aria-hidden="true" />
-                  </button>
+                  </IconButton>
                 </li>
               ))}
             </ol>

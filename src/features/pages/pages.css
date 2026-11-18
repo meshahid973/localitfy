@@ -14,7 +14,7 @@
   isolation: isolate;
   min-width: 0;
   display: grid;
-  grid-template-columns: clamp(168px, 18vw, 272px) minmax(0, 1fr);
+  grid-template-columns: clamp(144px, 16vw, 208px) minmax(0, 1fr);
   grid-template-areas: "art copy" "art actions";
   align-items: end;
   column-gap: clamp(18px, 3vw, 40px);
@@ -45,9 +45,9 @@
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   color: var(--lt-text);
-  font-size: clamp(26px, 3vw, 48px);
+  font-size: clamp(26px, 3vw, 36px);
   font-weight: 650;
   line-height: 1.12;
   letter-spacing: -.03em;
@@ -147,7 +147,7 @@
   cursor: pointer;
 }
 .trackList.withCover .trackRow { --track-columns: var(--lt-control-height) 40px minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
-.trackRow:hover { background: var(--lt-fill-hover); }
+.trackRow:hover, .trackRow:focus-within { background: var(--lt-fill-hover); }
 .trackRow.active { background: var(--lt-fill-selected); }
 .trackRow.missing { cursor: default; opacity: .5; }
 
@@ -187,11 +187,24 @@
 .app .collectionPage .trackRow > .iconAction { border-color: transparent !important; background: transparent !important; box-shadow: none !important; }
 .trackRowAdd { opacity: 0; }
 .trackRow:hover .trackRowAdd,
+.trackRow:focus-within .trackRowAdd,
 .trackRowAdd:focus-visible { opacity: 1; }
 
 @media (max-width: 760px) {
-  .collectionHero { grid-template-columns: 100px minmax(0, 1fr); column-gap: 16px; padding: 18px 16px; }
+  .collectionHero { grid-template-columns: 100px minmax(0, 1fr); column-gap: var(--lt-space-4); padding: var(--lt-space-2) 0; }
   .collectionHeroCopy h1 { font-size: 26px; }
+}
+
+@media (max-width: 480px) {
+  .collectionHero { grid-template-areas: "art copy" "actions actions"; align-items: center; }
+  .collectionHeroActions { gap: var(--lt-space-2); }
+  .collectionHeroActions > .collectionPlayButton { flex-basis: 100%; justify-content: center; }
+  .trackRowDuration { display: none; }
+  .trackRow { --track-columns: var(--lt-control-height) minmax(0, 1fr) var(--lt-control-height) var(--lt-control-height); }
+  .trackList.withCover .trackRow { --track-columns: 40px minmax(0, 1fr) var(--lt-control-height) var(--lt-control-height); }
+  .trackList.withCover .trackRowIndex { grid-column: 1; grid-row: 1; z-index: 1; }
+  .trackList.withCover .trackRowCover { grid-column: 1; grid-row: 1; }
+  .trackList.withCover .trackRowNumber { visibility: hidden; }
 }
 
 @media (hover: none), (pointer: coarse) {

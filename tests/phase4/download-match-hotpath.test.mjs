@@ -93,7 +93,7 @@ test("first-match semantics hold with duplicate file paths and IDs", () => {
 
 test("queue view only rebuilds derived entries when its inputs change", () => {
   const queue = read("src/features/player/components/QueuePanel.tsx");
-  assert.match(queue, /import \{ useEffect, useMemo, useRef, useState \} from "react"/);
+  assert.match(queue, /const entries = useMemo\(/);
   assert.match(queue, /\(\) => open \? buildQueueEntries\(queue, songsById\) : \[\]/);
   assert.match(queue, /\[open, queue, songsById\]/);
 });

@@ -1,7 +1,8 @@
+import { IconButton } from "../../../shared/ui/IconButton";
 import { Fragment, lazy, memo, Suspense, useRef, useState } from "react";
 import { Eye, EyeOff, Heart, ListMusic, Minimize2, MicVocal, Repeat2, Shuffle, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { Cover } from "../../covers/Cover";
-import { ArtworkBackdrop } from "../../covers/ArtworkBackdrop";
+import { ArtworkBackdrop, ArtworkAmbientContext } from "../../covers/ArtworkBackdrop";
 import { splitArtistCredits } from "../../artists/artistCredits";
 import { prettyMeta, prettyTitle } from "../../search/search.utils";
 import { formatTime } from "../../../shared/utils/format";
@@ -67,18 +68,19 @@ export default function ImmersivePlayer({ player, song, queue, lyrics, backgroun
       else if (lyrics.open) closeLyrics();
       else onClose();
     }}>
-    {showBackdrop ? <ListeningBackdrop song={song} /> : null}
+    {showBackdrop ? <ArtworkAmbientContext.Provider value={true}><ListeningBackdrop song={song} /></ArtworkAmbientContext.Provider> : null}
     <header className="immersiveTop">
-      <button type="button" className="immersiveIcon" aria-label="Close immersive player" title="Exit immersive player (Esc)" onClick={onClose}><Minimize2 size={20} aria-hidden="true" /></button>
+      <IconButton type="button" className="immersiveIcon" aria-label="Close immersive player" title="Exit immersive player (Esc)" onClick={onClose}><Minimize2 size={20} aria-hidden="true" /></IconButton>
       <div className="immersiveContext"><small>Now playing</small><strong>{nowPlayingContextLabel || "Your library"}</strong></div>
-      <button type="button" className="immersiveIcon" aria-label={minimal ? "Show extra controls" : "Hide extra controls"}
-        aria-pressed={minimal} title="Distraction-free mode" onClick={toggleMinimal}>{minimal ? <Eye size={20} aria-hidden="true" /> : <EyeOff size={20} aria-hidden="true" />}</button>
+      <IconButton type="button" className="immersiveIcon" aria-label={minimal ? "Show extra controls" : "Hide extra controls"}
+        aria-pressed={minimal} title="Distraction-free mode" onClick={toggleMinimal}>{minimal ? <Eye size={20} aria-hidden="true" /> : <EyeOff size={20} aria-hidden="true" />}</IconButton>
     </header>
 
-    <div className="immersiveStage" ref={stage}>
-      {lyrics.open ? <Suspense fallback={<span role="status">Loading lyrics…</span>}>
+    <div className="immersiveStage" ref={stage} data-lyrics={lyrics.open ? "true" : "false"}>
+      <ListeningArtwork song={song} className="immersiveArtwork" priority="high" />
+      {lyrics.open ? <div className="immersiveLyrics"><Suspense fallback={<span role="status">Loading lyrics…</span>}>
         <LyricsView {...lyrics} anchorRef={stage} embedded onClose={closeLyrics} openSettings={() => { onClose(); lyrics.openSettings(); }} />
-      </Suspense> : <ListeningArtwork song={song} className="immersiveArtwork" priority="high" />}
+      </Suspense></div> : null}
     </div>
 
     <div className="immersiveBottom">
@@ -89,9 +91,9 @@ export default function ImmersivePlayer({ player, song, queue, lyrics, backgroun
             {index ? ", " : null}<button type="button" onClick={() => { onClose(); player.openArtistPage(artist); }}>{prettyMeta(artist)}</button>
           </Fragment>)}</p>
         </div>
-        <button type="button" className="immersiveIcon" aria-label={song.liked ? "Unlike song" : "Like song"} aria-pressed={Boolean(song.liked)} onClick={() => toggleLike(song.id)}>
+        <IconButton type="button" className="immersiveIcon" aria-label={song.liked ? "Unlike song" : "Like song"} aria-pressed={Boolean(song.liked)} onClick={() => toggleLike(song.id)}>
           <Heart size={22} fill={song.liked ? "currentColor" : "none"} aria-hidden="true" />
-        </button>
+        </IconButton>
       </div>
 
       <div className="immersiveSeek" key={player.nowPlayingTransitionKey}>
@@ -112,19 +114,19 @@ export default function ImmersivePlayer({ player, song, queue, lyrics, backgroun
       </div>
 
       <div className="immersiveTransport">
-        <button type="button" className="immersiveIcon" aria-label="Shuffle" aria-pressed={isShuffle} onClick={() => setIsShuffle(value => !value)}><Shuffle size={20} aria-hidden="true" /></button>
-        <button type="button" className="immersiveIcon" aria-label="Previous song" onClick={playPrevious}><SkipBack size={26} aria-hidden="true" /></button>
-        <button type="button" className="immersivePlay" aria-label={isPlaying ? "Pause" : "Play"} onClick={togglePlay}><PlayerPlayPauseMorphIcon playing={isPlaying} /></button>
-        <button type="button" className="immersiveIcon" aria-label="Next song" onClick={() => playNext(true)}><SkipForward size={26} aria-hidden="true" /></button>
-        <button type="button" className="immersiveIcon" aria-label={repeatButtonAriaLabel} aria-pressed={repeatMode !== "off"} onClick={toggleRepeat}>
+        <IconButton type="button" className="immersiveIcon" aria-label="Shuffle" aria-pressed={isShuffle} onClick={() => setIsShuffle(value => !value)}><Shuffle size={20} aria-hidden="true" /></IconButton>
+        <IconButton type="button" className="immersiveIcon" aria-label="Previous song" onClick={playPrevious}><SkipBack size={26} aria-hidden="true" /></IconButton>
+        <IconButton type="button" className="immersivePlay" aria-label={isPlaying ? "Pause" : "Play"} onClick={togglePlay}><PlayerPlayPauseMorphIcon playing={isPlaying} /></IconButton>
+        <IconButton type="button" className="immersiveIcon" aria-label="Next song" onClick={() => playNext(true)}><SkipForward size={26} aria-hidden="true" /></IconButton>
+        <IconButton type="button" className="immersiveIcon" aria-label={repeatButtonAriaLabel} aria-pressed={repeatMode !== "off"} onClick={toggleRepeat}>
           <Repeat2 size={20} aria-hidden="true" />{repeatButtonStateText ? <span className="immersiveRepeatMark" aria-hidden="true">{repeatButtonStateText}</span> : null}
-        </button>
+        </IconButton>
       </div>
 
       <div className="immersiveTools" hidden={minimal}>
         <div className="immersiveVolume">
-          <button type="button" className="immersiveIcon" onClick={toggleMute}
-            aria-label={settings.volume > 0 ? "Mute volume" : "Restore volume"}>{settings.volume > 0 ? <Volume2 size={18} aria-hidden="true" /> : <VolumeX size={18} aria-hidden="true" />}</button>
+          <IconButton type="button" className="immersiveIcon" onClick={toggleMute}
+            aria-label={settings.volume > 0 ? "Mute volume" : "Restore volume"}>{settings.volume > 0 ? <Volume2 size={18} aria-hidden="true" /> : <VolumeX size={18} aria-hidden="true" />}</IconButton>
           <input type="range" min="0" max="100" step="1" value={volumeDraft} style={volumeRangeStyle} aria-label="Volume level"
             onPointerDown={event => { event.currentTarget.setPointerCapture?.(event.pointerId); volumeDraftRef.current = Number(event.currentTarget.value); setIsVolumeDragging(true); previewVolume(event.currentTarget.value, event.currentTarget); }}
             onInput={event => previewVolume(event.currentTarget.value, event.currentTarget)}
@@ -136,9 +138,9 @@ export default function ImmersivePlayer({ player, song, queue, lyrics, backgroun
         </div>
         <div className="immersiveActions">
           {connect && !minimal ? <DevicePicker controls={connect} variant="bar" /> : null}
-          {lyricsOpen !== undefined ? <button ref={lyricsTrigger} type="button" className="immersiveIcon" aria-label="Lyrics" aria-pressed={lyricsOpen} onClick={toggleLyrics}><MicVocal size={20} aria-hidden="true" /></button> : null}
-          <button ref={queueTrigger} type="button" className="immersiveIcon" data-queue-trigger aria-label="Play queue"
-            aria-expanded={queuePanelOpen} aria-controls={queuePanelOpen ? "localtify-play-queue" : undefined} aria-haspopup="dialog" onClick={toggleQueuePanel}><ListMusic size={20} aria-hidden="true" /></button>
+          {lyricsOpen !== undefined ? <IconButton ref={lyricsTrigger} type="button" className="immersiveIcon" aria-label="Lyrics" aria-pressed={lyricsOpen} onClick={toggleLyrics}><MicVocal size={20} aria-hidden="true" /></IconButton> : null}
+          <IconButton ref={queueTrigger} type="button" className="immersiveIcon" data-queue-trigger aria-label="Play queue"
+            aria-expanded={queuePanelOpen} aria-controls={queuePanelOpen ? "localtify-play-queue" : undefined} aria-haspopup="dialog" onClick={toggleQueuePanel}><ListMusic size={20} aria-hidden="true" /></IconButton>
         </div>
       </div>
     </div>

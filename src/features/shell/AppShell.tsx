@@ -5,7 +5,7 @@ import type { CSSProperties } from "react";
 import { FolderPlus } from "lucide-react";
 import TitleBar from "./TitleBar";
 import HomeViewComponent from "../home/HomeView";
-import { Cover } from "../covers/Cover";
+import { ImportProgress } from "../library/ImportProgress";
 import { ArtworkAmbientContext } from "../covers/ArtworkBackdrop";
 import { PageAtmosphereContext, pageArtworkSources, usePagePalette, type PageAtmosphereRegistration } from "../covers/pageAtmosphere";
 import PlayerSurfaces from "../player/components/PlayerSurfaces";
@@ -20,7 +20,6 @@ import { MascotStateArt, UpdateStatusIcon, WindowCloseIcon } from "../../shared/
 import type { MascotStateKey } from "../../shared/ui/LocaltifyViewUi";
 import WhatsNewModal from "../updates/WhatsNewModal";
 import { clamp } from "../../shared/utils/format";
-import { prettyTitle } from "../search";
 import type { AppShellProps } from "./appShell.contract";
 import type { Song } from "../library/song.types";
 import { useDownloadTagPrompt } from "../tagging/useDownloadTagPrompt";
@@ -215,56 +214,7 @@ export default function AppShell(props: AppShellProps) {
 
       {appToast ? <div className="appToast error" key={appToast.id} role="alert">{appToast.message}</div> : null}
 
-      {importAnimation.active ? (
-        <div className={`importOverlay importPhase-${importAnimation.phase}`} role="status" aria-live="polite">
-          <div className="importPanel">
-            <div className="importScanStage" aria-hidden="true">
-              <span className="importScannerLine" />
-              <span className="importScannerGlow" />
-              <span className="importScannerOrb" />
-            </div>
-
-            <div className="importPanelHead importPanelHeadMascotV496">
-              <MascotStateArt
-                state={importAnimation.phase === "success" ? "happy" : importAnimation.phase === "error" ? "error" : "loading"}
-                className="importMascotV496"
-              />
-              <p className="eyebrow">local import</p>
-              <h3>{importAnimation.phase === "success" ? importAnimation.message : "scanning your music"}</h3>
-              <span>{importAnimation.phase === "error" ? "safe rollback" : importAnimation.message}</span>
-            </div>
-
-            <div className="importCounter">
-              <strong>{importAnimation.count}</strong>
-              <span>{importAnimation.count === 1 ? "song found" : "songs found"}</span>
-            </div>
-
-            <div className="importCoverGrid">
-              {(importAnimation.preview.length ? importAnimation.preview : Array.from({ length: 10 }, () => null)).map((song, index) => (
-                <div
-                  className={song ? "importCoverTile" : "importCoverTile importCoverPlaceholder"}
-                  key={song ? `${song.id}-${index}` : `import-placeholder-${index}`}
-                  style={{ "--tile-delay": `${index * 42}ms` } as CSSProperties}
-                >
-                  {song ? <Cover song={song} className="importCoverArt" /> : <span className="importCoverSkeleton" />}
-                  <small>{song ? prettyTitle(song.title, 4) : "scanning..."}</small>
-                </div>
-              ))}
-            </div>
-
-            <div className="importLogList" aria-hidden="true">
-              {(importAnimation.preview.length
-                ? importAnimation.preview.slice(0, 5).map((song) => prettyTitle(song.title, 5))
-                : ["opening file picker", "reading audio tags", "matching cover art", "building search index", "saving library order"]
-              ).map((line, index) => (
-                <span key={`${line}-${index}`} style={{ "--log-delay": `${index * 70}ms` } as CSSProperties}>
-                  {line}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <ImportProgress state={importAnimation} />
 
       <div className="appShell">
           {isAndroidApp() ? (

@@ -74,12 +74,12 @@
   height: 34px;
   flex: none;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: var(--lt-radius-item);
 }
 
 .lyricsTextButton{
   padding: 8px 14px;
-  border-radius: 999px;
+  border-radius: var(--lt-radius-item);
   font-size: 13px;
   font-weight: 550;
 }

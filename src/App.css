@@ -227,15 +227,14 @@
   position: relative;
   width: min(760px, calc(100vw - 38px));
   overflow: hidden;
-  border-radius: 28px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background:
-    linear-gradient(180deg, rgba(17, 17, 18, 0.94), rgba(4, 4, 5, 0.98)),
-    radial-gradient(circle at 80% 0%, rgba(var(--lt-accent-rgb), 0.22), transparent 38%);
-  box-shadow:
-    0 34px 100px rgba(0, 0, 0, 0.66),
-    0 0 0 1px rgba(var(--lt-accent-rgb), 0.09),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: var(--lt-radius-md);
+  border: 0;
+  color: var(--lt-text);
+  background: var(--lt-bg-elevated);
+  box-shadow: var(--lt-shadow-menu);
   padding: 24px;
   animation: localitfyImportPanelPop 410ms var(--cinematic-ease) both;
 }
@@ -263,15 +262,15 @@
 
 .importPanelHead h3{
   margin: 0;
-  color: #fff;
-  font-size: clamp(26px, 3.4vw, 42px);
-  letter-spacing: -0.055em;
-  line-height: 0.95;
+  color: var(--lt-text);
+  font-size: clamp(22px, 2.6vw, 30px);
+  letter-spacing: -.03em;
+  line-height: 1.15;
 }
 
 .importPanelHead span{
   max-width: 530px;
-  color: rgba(255, 255, 255, 0.64);
+  color: var(--lt-muted);
   font-size: 13px;
 }
 
@@ -285,16 +284,16 @@
 }
 
 .importCounter strong{
-  color: #fff;
-  font-size: clamp(38px, 5vw, 62px);
+  color: var(--lt-text);
+  font-size: clamp(28px, 4vw, 42px);
   line-height: 0.84;
-  letter-spacing: -0.075em;
+  letter-spacing: -.03em;
   text-shadow: 0 0 28px rgba(var(--lt-accent-rgb), 0.28);
   animation: localitfyCounterRoll 580ms var(--cinematic-pop) both;
 }
 
 .importCounter span{
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--lt-muted);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -381,7 +380,7 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  color: rgba(255, 255, 255, 0.62);
+  color: var(--lt-muted);
   font-size: 11px;
   line-height: 1.2;
 }
@@ -408,26 +407,14 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  color: rgba(255, 255, 255, 0.66);
-  background: rgba(255, 255, 255, 0.065);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--lt-muted);
+  background: var(--lt-fill);
+  border: 0;
   font-size: 11px;
   opacity: 0;
   transform: translate3d(0, 8px, 0);
   animation: localitfyImportLogIn 360ms var(--cinematic-ease) both;
   animation-delay: var(--log-delay, 0ms);
-}
-
-.importPhase-success .importPanel{
-  border-color: rgba(var(--lt-accent-rgb), 0.25);
-  box-shadow:
-    0 34px 100px rgba(0, 0, 0, 0.66),
-    0 0 54px rgba(var(--lt-accent-rgb), 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-.importPhase-error .importPanel{
-  border-color: rgba(255, 90, 90, 0.28);
 }
 
 .importPhase-error .importScannerLine{
@@ -846,17 +833,15 @@ body.isResizingSidebar{
 }
 
 .editorModal{
-  width: min(940px, calc(100vw - 72px)) !important;
+  width: min(940px, 100%) !important;
   max-height: min(82vh, 730px) !important;
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-radius: 26px !important;
-  background: var(--lt-surface-raised, var(--lt-surface)) !important;
-  box-shadow: 0 32px 120px rgba(0, 0, 0, 0.62),
-    0 0 0 1px rgba(var(--lt-accent-rgb), 0.08) inset !important;
-  backdrop-filter: blur(26px) saturate(145%) !important;
+  border: 0 !important;
+  border-radius: var(--lt-radius-md) !important;
+  background: var(--lt-bg-elevated) !important;
+  box-shadow: var(--lt-shadow-menu) !important;
 }
 
 .editorModalHead{
@@ -1118,11 +1103,7 @@ body.isResizingSidebar{
 }
 
 .deleteModal{
-  border-color: rgba(var(--lt-accent-rgb), 0.20) !important;
-  background:
-    radial-gradient(circle at 18% 0%, rgba(var(--lt-accent-rgb), 0.085), transparent 36%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02)),
-    rgba(5, 5, 6, 0.96) !important;
+  background: var(--lt-bg-elevated) !important;
 }
 
 ::-webkit-scrollbar-track{

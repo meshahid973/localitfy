@@ -284,6 +284,58 @@ server.listen(5173,async()=>{
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=settings]').click()");
       await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.settingsModeButton').length===2").catch(()=>false),"appearance navigation");
     }
+    // Exercise shared menu navigation, queue editing and both listening layouts.
+    await win.webContents.executeJavaScript("document.querySelector('.playerBar [aria-label=pause]')?.click()");
+    await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=home]').click()");
+    await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.homeListenRow').length>=4"),"Home queue fixtures");
+    for(const index of [1,2,3]) {
+      await win.webContents.executeJavaScript(`(()=>{const row=document.querySelectorAll('.homeListenRow')[${index}];const r=row.getBoundingClientRect();row.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,clientX:r.x+12,clientY:r.y+12}));})()`);
+      await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.songContextMenu')"),"song context menu");
+      const typed=await win.webContents.executeJavaScript(`(()=>{const menu=document.querySelector('.songContextMenu');menu.dispatchEvent(new KeyboardEvent('keydown',{key:'a',bubbles:true}));return document.activeElement.textContent.trim()})()`);
+      assert.equal(typed,"add to queue","typeahead should focus the next matching menu action");
+      await win.webContents.executeJavaScript("document.activeElement.click()");
+      await until(()=>win.webContents.executeJavaScript("!document.querySelector('.songContextMenu')"),"close song menu");
+    }
+    await win.webContents.executeJavaScript("document.querySelector('.playerBar [data-queue-trigger]').click()");
+    await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.queuePanelList [data-queue-index]').length>=3"),"editable queue");
+    const oldOrder=await win.webContents.executeJavaScript("[...document.querySelectorAll('[data-queue-index] .queuePanelCopy strong')].map(e=>e.textContent)");
+    await win.webContents.executeJavaScript("(()=>{const b=document.querySelector('[data-queue-index] .queuePanelRowMain');b.focus();b.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowDown',altKey:true,bubbles:true}))})()");
+    await until(()=>win.webContents.executeJavaScript("document.querySelector('.queuePanelAnnouncement').textContent.includes('position 2')"),"keyboard queue reorder");
+    const reordered=await win.webContents.executeJavaScript("({titles:[...document.querySelectorAll('[data-queue-index] .queuePanelCopy strong')].map(e=>e.textContent),focus:document.activeElement.closest('[data-queue-index]')?.dataset.queueIndex})");
+    assert.deepEqual(reordered.titles.slice(0,2),[oldOrder[1],oldOrder[0]],"keyboard reorder preserves queue entries");
+    assert.equal(reordered.focus,"1","focus follows the moved song");
+    await screenshot(win,"queue-keyboard");
+    await win.webContents.executeJavaScript("document.querySelector('.queuePanel [aria-label=\"close queue\"]').click()");
+    await until(()=>win.webContents.executeJavaScript("!document.querySelector('.queuePanel')"),"queue dismissed");
+    await win.webContents.executeJavaScript("document.querySelector('.immersiveEntry').click()");
+    await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.immersivePlayer .artworkBackdropLayer[data-visible=true]')"),"independent immersive artwork");
+    await win.webContents.executeJavaScript("document.querySelector('.immersiveActions [aria-label=Lyrics]').click()");
+    await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.immersiveLyrics .lyricsLine')"),"embedded local lyrics");
+    const lyricTime=await win.webContents.executeJavaScript("document.querySelector('audio').currentTime");
+    await win.webContents.executeJavaScript("document.querySelector('.immersiveLyrics .lyricsScroller').dispatchEvent(new WheelEvent('wheel',{deltaY:120,bubbles:true}))");
+    await until(()=>win.webContents.executeJavaScript("[...document.querySelectorAll('.lyricsHeadActions button')].some(b=>b.textContent==='Follow lyrics')"),"manual lyric browsing");
+    await win.webContents.executeJavaScript("[...document.querySelectorAll('.lyricsHeadActions button')].find(b=>b.textContent==='Follow lyrics').click()");
+    await until(()=>win.webContents.executeJavaScript("![...document.querySelectorAll('.lyricsHeadActions button')].some(b=>b.textContent==='Follow lyrics')"),"resume lyric following");
+    assert.ok(Math.abs(await win.webContents.executeJavaScript("document.querySelector('audio').currentTime")-lyricTime)<.1,"following lyrics must not seek paused playback");
+    const split=await win.webContents.executeJavaScript("(()=>{const a=document.querySelector('.immersiveArtwork'),l=document.querySelector('.immersiveLyrics');return {shown:getComputedStyle(a).display!=='none',right:a.getBoundingClientRect().right,left:l.getBoundingClientRect().left}})()");
+    assert.ok(split.shown&&split.left>=split.right,"wide listening keeps cover beside lyrics: "+JSON.stringify(split));
+    await sleep(250);
+    await screenshot(win,"immersive-wide-lyrics");
+    win.setMinimumSize(320,480);win.setSize(390,844);
+    await until(()=>win.webContents.executeJavaScript("window.innerWidth===390"),"narrow listening viewport");
+    const narrow=await win.webContents.executeJavaScript("(()=>{const a=document.querySelector('.immersiveArtwork'),s=document.querySelector('.immersivePlayer'),l=document.querySelector('.immersiveLyrics');return {hidden:getComputedStyle(a).display==='none',overflow:s.scrollWidth>s.clientWidth+2,lyrics:l.clientWidth}})()");
+    assert.ok(narrow.hidden&&!narrow.overflow&&narrow.lyrics>200,"narrow listening keeps lyrics readable: "+JSON.stringify(narrow));
+    await screenshot(win,"immersive-narrow-lyrics");
+    await win.webContents.executeJavaScript("document.querySelector('[aria-label=\"Close immersive player\"]').click()");
+    await until(()=>win.webContents.executeJavaScript("!document.querySelector('.immersivePlayer')&&document.querySelector('.playerBar').contains(document.activeElement)&&document.activeElement.getClientRects().length>0"),"immersive trigger focus restored");
+    await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=artists]').click()");
+    await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.artistCard .mediaCardOpen')"),"narrow artist cards");
+    await win.webContents.executeJavaScript("document.querySelector('.artistCard .mediaCardOpen').click()");
+    await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.collectionHero')&&!!document.querySelector('.trackRow')"),"narrow collection details");
+    const collection=await win.webContents.executeJavaScript("(()=>{const h=document.querySelector('.collectionHero'),p=document.querySelector('.trackRowIndex'),r=document.querySelector('.trackRow');return {hero:h.scrollWidth<=h.clientWidth+2,row:r.scrollWidth<=r.clientWidth+2,play:p.getClientRects().length>0}})()");
+    assert.ok(collection.hero&&collection.row&&collection.play,"compact collections retain keyboard playback: "+JSON.stringify(collection));
+    await screenshot(win,"collection-narrow");
+    win.setSize(1280,800);
     const result={startupMs,reloadMs,startupDefinition:"desktop entry to first rendered screen (onboarding or shell); excludes fixture creation and Electron process spawn",metrics:[idle,playing],memoryDefinition:"sum of Electron process working sets; may double count shared pages",platform:process.platform,fixtureSongs:songs.length,layouts,artworkTransitionLayers:samples};
     fs.writeFileSync(path.join(output,"desktop-runtime.json"),JSON.stringify(result,null,2));console.log("[desktop-qa]",JSON.stringify(result));
     clearTimeout(watchdog);server.close();app.exit(0);
