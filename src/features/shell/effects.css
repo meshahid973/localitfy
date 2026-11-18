@@ -366,7 +366,7 @@
   transition: none !important;
 }
 
-.app.localtifyInteractionBusy :is(.nowPlayingCopySwap, .nowPlayingArtSwap, .simpleHeroArtSwap, .songRow, .playlistSongRow){
+.app.localtifyInteractionBusy :is(.nowPlayingCopySwap, .nowPlayingArtSwap, .songRow, .playlistSongRow){
   animation: none !important;
   transition-duration: 0ms !important;
 }
@@ -809,8 +809,7 @@ main.app.app > .appShell > .sidebar .navItemAnimatedV468 .navIconMotionV468{
   height: calc(100vh - var(--linux-titlebar-height)) !important;
 }
 
-.app[data-platform="linux"] .content,
-.app[data-platform="linux"] .simpleShell{
+.app[data-platform="linux"] .content{
   scrollbar-gutter: stable !important;
 }
 

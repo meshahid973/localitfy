@@ -167,7 +167,7 @@ export const SongRowItem = memo(function SongRowItem({
   );
 });
 
-export type HomeAlbumCardItemProps = SongInteractionHandlers & {
+export type LibrarySongCardItemProps = SongInteractionHandlers & {
   song: Song;
   index: number;
   active: boolean;
@@ -178,7 +178,7 @@ export type HomeAlbumCardItemProps = SongInteractionHandlers & {
   draggedSongTitle: string;
 };
 
-export const HomeAlbumCardItem = memo(function HomeAlbumCardItem({
+export const LibrarySongCardItem = memo(function LibrarySongCardItem({
   song,
   index,
   active,
@@ -199,7 +199,7 @@ export const HomeAlbumCardItem = memo(function HomeAlbumCardItem({
   onDragLeaveSong,
   onDropSong,
   onDragEnd
-}: HomeAlbumCardItemProps) {
+}: LibrarySongCardItemProps) {
   const rankLabel = index < 9 ? `0${index + 1}` : String(index + 1);
   const cardCoverCssUrl = getCardCoverCssUrl(song);
 
@@ -417,7 +417,7 @@ export const VirtualSongRows = memo(function VirtualSongRows({
   );
 });
 
-export type VirtualHomeSongCardsProps = SongInteractionHandlers & {
+export type VirtualLibrarySongCardsProps = SongInteractionHandlers & {
   list: Song[];
   className: string;
   currentId: string;
@@ -431,7 +431,7 @@ export type VirtualHomeSongCardsProps = SongInteractionHandlers & {
   onAreaDrop: (event: DragEvent<HTMLDivElement>) => void;
 };
 
-export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
+export const VirtualLibrarySongCards = memo(function VirtualLibrarySongCards({
   list,
   className,
   currentId,
@@ -455,10 +455,9 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
   onDragLeaveSong,
   onDropSong,
   onDragEnd
-}: VirtualHomeSongCardsProps) {
+}: VirtualLibrarySongCardsProps) {
   const [viewportWidth, setViewportWidth] = useState(0);
-  const isSimpleGrid = className.includes("simpleAlbumGrid");
-  const minColumnWidth = isSimpleGrid ? 156 : 168;
+  const minColumnWidth = 168;
   const gridGap = 14;
   const columns = Math.max(1, Math.floor(((viewportWidth || minColumnWidth) + gridGap) / (minColumnWidth + gridGap)));
   const rowCount = Math.max(1, Math.ceil(list.length / columns));
@@ -506,7 +505,7 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
       >
         <div className="emptyState homeAlbumEmpty">
           <strong>import songs to fill this area</strong>
-          <p>import some music and this expanded area turns into a proper home library.</p>
+          <p>import some music to start your library.</p>
         </div>
       </div>
     );
@@ -548,7 +547,7 @@ export const VirtualHomeSongCards = memo(function VirtualHomeSongCards({
                 const isDropTarget = Boolean(draggedSongId && draggedSongId !== song.id && libraryDragOverSongId === song.id);
 
                 return (
-                  <HomeAlbumCardItem
+                  <LibrarySongCardItem
                     key={song.id}
                     song={song}
                     index={index}

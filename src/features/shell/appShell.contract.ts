@@ -1,4 +1,4 @@
-import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode, RefObject } from "react";
+import type { CSSProperties, PointerEvent as ReactPointerEvent, RefObject } from "react";
 import type { HomeViewProps } from "../home/HomeView";
 import type { LibraryViewProps } from "../library/LibraryView";
 import type { ArtistsViewProps } from "../artists/ArtistsView";
@@ -55,14 +55,14 @@ export type ShellScreensaverContract = {
 };
 
 export type ShellEffectsContract = {
-  secretMode: SecretMode; secretBurst: number; secretToast: string; starParticleStyles: CSSProperties[];
+  secretMode: SecretMode; secretBurst: number; secretToast: string;
   appToast: AppToastState; importAnimation: ImportAnimationState;
 };
 
 export type ShellOnboardingContract = Omit<OnboardingProps, "appVersion"> & { open: boolean };
 
 export type ShellNavigationContract = {
-  effectiveSimpleMode: boolean; simpleModeView: ReactNode; view: View;
+  view: View;
   changeView: (view: View, source?: string) => unknown; importSongs: () => unknown;
   startSidebarResize: (event: ReactPointerEvent<HTMLButtonElement>) => unknown;
   contentRef: RefObject<HTMLElement | null>;

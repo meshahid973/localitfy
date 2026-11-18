@@ -9,7 +9,6 @@ import {
   X,
   Send
 } from "lucide-react";
-import { useProximityMotion } from "./features/shell/useProximityMotion";
 import { HtmlAudioEngine } from "./features/player/engine/htmlAudioEngine";
 import { createPlayerController } from "./features/player/engine/playerController";
 import { useNativeMediaSession } from "./features/player/useNativeMediaSession";
@@ -64,7 +63,7 @@ import { updateStatusLabel, useUpdatesController } from "./features/updates";
 import { useSettingsController } from "./features/settings";
 import { Cover } from "./features/covers/Cover";
 import { useCoversController } from "./features/covers";
-import { VirtualHomeSongCards, VirtualSongRows } from "./features/library/components/SongRows";
+import { VirtualLibrarySongCards, VirtualSongRows } from "./features/library/components/SongRows";
 import { useLibraryController } from "./features/library";
 import { subscribeWatchedFoldersChange } from "./features/library/watchedFolderBridge";
 import { reconcileLibraryIndex, patchLibrarySong, replaceLibrarySong } from "./features/search/incrementalLibraryIndex";
@@ -204,7 +203,7 @@ function MainModeApp() {
     listeningHistoryRef, audioRef, playerEngineRef, playerControllerRef, playbackTransitionRef,
     crossfadeIntervalRef, crossfadeAutoStartedRef, crossfadeAutoTargetRef, crossfadeMainPauseGuardRef,
     crossfadeLastStartAtRef, crossfadeHandoffClearTimerRef, crossfadeHandoffRef, fadeIntervalRef,
-    animationFrameRef, progressLoopTimeoutRef, backgroundAudioRepairTimerRef, playerResizeFrameRef,
+    animationFrameRef, progressLoopTimeoutRef, playerResizeFrameRef,
     pendingPlayRef, countPlayRef, playCountSongIdRef, playCountListenedRef, playCountLastTimeRef,
     sleepTimerRef, positionSaveRef, nextAudioRef, playbackUrlCacheRef, playbackUrlPendingRef,
     lastQueueHistoryRef, songRef, timeRef, durationRef, playingRef, volumeRef, effectiveVolumeRef, lastNonZeroVolumeRef,
@@ -216,7 +215,7 @@ function MainModeApp() {
     currentTime, setCurrentTime, currentDuration, setCurrentDuration, isSeeking, setIsSeeking,
     seekDraftPercent, setSeekDraftPercent, seekDraftPercentRef, isSeekingRef, seekDraftFrameRef,
     progressInputRefs, progressTimeLabelRefs, progressDurationLabelRefs, lastProgressUiPaintRef,
-    lastProgressStatePaintRef, statusText, setStatusText, playerError, setPlayerError,
+    statusText, setStatusText, playerError, setPlayerError,
     crossfadePreviewSongId, setCrossfadePreviewSongId, nowPlayingTransitionKey, setNowPlayingTransitionKey,
     playQueue, setPlayQueue, setQueueHistory, repeatPlaylist,
     queueDropHot, setQueueDropHot, queueDropHotRef
@@ -882,27 +881,10 @@ function MainModeApp() {
     };
   }, []);
 
-  const effectiveSimpleMode = false;
   const effectiveTheme = normalizeThemeId(settings.theme);
   const currentTheme = themes.find(theme => theme.id === effectiveTheme) ?? themes[1];
   const themePresetStyle = useMemo<CSSProperties>(() => makeThemePresetStyle(effectiveTheme), [effectiveTheme]);
   useEffect(() => { setThemeMotionReady(true); }, [setThemeMotionReady]);
-
-  const shouldSuspendProximityMotion = false;
-
-  useProximityMotion({
-    rootRef: appRootRef,
-    disabled: settings.reducedMotion,
-    suspended:
-      isAppBackgrounded ||
-      !themeMotionReady ||
-      shouldSuspendProximityMotion ||
-      isSeeking ||
-      isVolumeDragging ||
-      Boolean(draggedSongId) ||
-      isViewSwitching,
-    resetKey: `${effectiveTheme}:${view}:${settingsCategory}:${themeMotionReady ? "ready" : "boot"}:${isPlaying ? "playing" : "idle"}`
-  });
 
   const platformInfo = useMemo(() => getLocaltifyPlatformInfo(), []);
 
@@ -1143,7 +1125,6 @@ function MainModeApp() {
     setHeroExpanded(!settings.heroExpanded);
   }
 
-  const starParticleStyles = useMemo<CSSProperties[]>(() => [], []);
 
   const libraryIndexRef = useRef<ReturnType<typeof reconcileLibraryIndex> | null>(null);
   const libraryIndex = useMemo(() => {
@@ -1774,7 +1755,6 @@ function MainModeApp() {
         root.querySelectorAll<HTMLElement>(
           [
             ".playerBar .smallArt",
-            ".simpleHero .simpleHeroArtSwap",
             ".hero.heroPremium .heroArtWrap"
           ].join(",")
         )
@@ -1957,15 +1937,13 @@ function MainModeApp() {
     return true;
   }
   const triggerSecret = useCallback((mode: SecretTriggerMode, message: string) => {
-    const allowedMode: SecretTriggerMode | null = mode === "yukari" ? mode : null;
-    if (!allowedMode) return;
 
     if (secretTimeoutRef.current) {
       window.clearTimeout(secretTimeoutRef.current);
       secretTimeoutRef.current = null;
     }
 
-    setSecretMode(allowedMode);
+    setSecretMode(mode);
     setSecretToast(message);
     setSecretBurst((value) => value + 1);
 
@@ -1975,7 +1953,7 @@ function MainModeApp() {
       setSecretToast("");
       secretTimeoutRef.current = null;
     }, duration);
-  }, [secretMode]);
+  }, []);
 
   function triggerPlayButtonSecret() {
     setPlayButtonBurst((value) => value + 1);
@@ -2519,10 +2497,6 @@ function MainModeApp() {
         window.clearTimeout(saveSettingsTimerRef.current);
       }
 
-      if (backgroundAudioRepairTimerRef.current !== null) {
-        window.clearTimeout(backgroundAudioRepairTimerRef.current);
-        backgroundAudioRepairTimerRef.current = null;
-      }
 
       if (sleepTimerRef.current !== null) {
         window.clearTimeout(sleepTimerRef.current);
@@ -2805,13 +2779,6 @@ function MainModeApp() {
         if (!backgroundMode && !isSeekingRef.current && clock - lastProgressUiPaintRef.current > uiPaintEveryMs) {
           lastProgressUiPaintRef.current = clock;
           syncProgressDom(nextTime, nextDuration);
-        }
-
-        // Keep playback progress out of React's hot path. The DOM progress gets
-        // painted directly; React state only changes for actual duration changes,
-        // manual seeks, song switches, or hard resets.
-        if (!isSeekingRef.current && clock - lastProgressStatePaintRef.current > 20000) {
-          lastProgressStatePaintRef.current = clock;
         }
 
         if (!backgroundMode && Number.isFinite(nextDuration) && nextDuration > 0 && Math.abs(nextDuration - lastPaintedDuration) > 0.5) {
@@ -6508,7 +6475,6 @@ function MainModeApp() {
     else audio.currentTime = nextTime;
     timeRef.current = nextTime;
     lastProgressUiPaintRef.current = 0;
-    lastProgressStatePaintRef.current = 0;
     syncProgressDom(nextTime, duration, true);
     setCurrentTime(nextTime);
     playbackTransitionRef.current.seekFinished();
@@ -6985,9 +6951,9 @@ function MainModeApp() {
   }
 
 
-  function renderHomeSongCards(list: Song[], className: string) {
+  function renderLibrarySongCards(list: Song[], className: string) {
     return (
-      <VirtualHomeSongCards
+      <VirtualLibrarySongCards
         list={list}
         className={className}
         currentId={currentId}
@@ -7291,129 +7257,6 @@ function MainModeApp() {
       : nowPlayingMotionNonce % 2 === 0
         ? "nowPlayingSongEven"
         : "nowPlayingSongOdd";
-
-
-  const simpleModeView = (
-    <section className="simpleShell">
-      <header className="simpleTopbar">
-        <div className="simpleBrand">
-          <div className="simpleBrandLogo"><img className="loadingLogoImage" src={localtifyLogo} alt="" aria-hidden="true" /></div>
-          <div>
-            <strong>localtify</strong>
-            <small>simple mode</small>
-          </div>
-        </div>
-
-        <div className="simpleTopActions">
-          <button className="simpleAction iconTextButton" onClick={importSongs}>
-            <FolderPlus className="buttonInlineIcon" size={17} strokeWidth={2.1} aria-hidden="true" />
-            add audio
-          </button>
-
-          <button type="button" className="simpleGhost" onClick={() => openSettingsPanel()}>
-            settings
-          </button>
-        </div>
-      </header>
-
-      <section
-        className={`simpleHero ambientSurface heroLayoutMotion ${settings.heroExpanded ? "simpleHeroExpanded" : "simpleHeroCompact"}`}
-        style={ambientStyle}
-      >
-        <div className="heroAmbiencePulse" aria-hidden="true" />
-        <div
-          className={`simpleHeroArtSwap nowPlayingArtSwap ${nowPlayingSongMotionClass}`}
-          data-song-motion-key={nowPlayingTransitionKey}
-        >
-          <Cover song={currentSong} className="simpleHeroArt" />
-        </div>
-
-        <div className={`simpleHeroText nowPlayingCopySwap ${nowPlayingSongMotionClass}`} data-song-motion-key={nowPlayingTransitionKey}>
-          <small className={`nowPlayingEyebrowSwap ${nowPlayingSongMotionClass}`} title={currentNowPlayingLabel}>{currentNowPlayingLabel}</small>
-          <h2 className={`nowPlayingTitleSwap ${nowPlayingSongMotionClass}`}>{currentSong ? prettyTitle(currentSong.title, 7) : "nothing playing"}</h2>
-          <p className={`nowPlayingArtistSwap ${nowPlayingSongMotionClass}`}>{currentSong ? prettyMeta(currentSong.artist) : "import a song to begin"}</p>
-
-          <div className="simpleControls">
-            <button className="circleButton" onClick={playPrevious} aria-label="previous song">
-              <SkipBack className="playerControlIcon" size={17} strokeWidth={2.15} aria-hidden="true" />
-            </button>
-            <button className={`circleButton main ${playButtonBurst ? `playButtonBurst playButtonBurst${playButtonBurst % 2}` : ""}`} onClick={togglePlay} aria-label={isPlaying ? "pause" : "play"}>
-              <PlayerPlayPauseMorphIcon playing={isPlaying} />
-            </button>
-            <button className="circleButton" onClick={() => playNext(true)} aria-label="next song">
-              <SkipForward className="playerControlIcon" size={17} strokeWidth={2.15} aria-hidden="true" />
-            </button>
-            <button
-              className={`circleButton repeatButton ${repeatMode !== "off" ? `active repeat-${repeatMode}` : ""}`}
-              onClick={toggleRepeat}
-              type="button"
-              aria-label={repeatButtonAriaLabel}
-              aria-pressed={repeatMode !== "off"}
-              title={repeatButtonTitle}
-              data-repeat-mode={repeatMode}
-            >
-              <Repeat2 className="playerControlIcon" size={16} strokeWidth={2.15} aria-hidden="true" />
-              {repeatButtonStateText ? <span className="repeatStateMark" aria-hidden="true">{repeatButtonStateText}</span> : null}
-            </button>
-          </div>
-
-          <div className="simpleProgress">
-            <span ref={(node) => { progressTimeLabelRefs.current[0] = node; }}>{formatTime(displayedTime)}</span>
-            <input
-              ref={(node) => { progressInputRefs.current[0] = node; }}
-              type="range"
-              min="0"
-              max="100"
-              step="0.1"
-              defaultValue={displayedProgress}
-              style={progressRangeStyle}
-              onPointerDown={(event) => {
-                event.currentTarget.setPointerCapture?.(event.pointerId);
-                startSeekPreview(event.currentTarget.value, event.currentTarget);
-              }}
-              onInput={(event) => previewSeek(event.currentTarget.value, event.currentTarget)}
-              onChange={(event) => previewSeek(event.currentTarget.value, event.currentTarget)}
-              onPointerUp={(event) => {
-                event.currentTarget.releasePointerCapture?.(event.pointerId);
-                commitSeek(event.currentTarget.value);
-              }}
-              onPointerCancel={(event) => commitSeek(event.currentTarget.value)}
-              onKeyUp={(event) => commitSeek(event.currentTarget.value)}
-              onBlur={(event) => isSeeking && commitSeek(event.currentTarget.value)}
-            />
-            <span ref={(node) => { progressDurationLabelRefs.current[0] = node; }}>{formatTime(currentDuration || currentSong?.duration || 0)}</span>
-          </div>
-
-          <div className="heroQuickActions simpleHeroActions">
-            <button className="heroTinyButton" type="button" onClick={toggleHeroExpanded}>
-              {settings.heroExpanded ? "compact player" : "expand player"}
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section className="simpleLibraryPanel">
-        <div className="simpleLibraryHead">
-          <div className="simpleLibraryTitle">
-            <strong>library</strong>
-            <small>{songs.length} song{songs.length === 1 ? "" : "s"}</small>
-          </div>
-
-          <div className="simpleLibraryControls">
-            <input
-              className="simpleSearch"
-              value={query}
-              onChange={(event) => handleSearchInput(event.currentTarget.value)}
-              placeholder="search songs... try /feedback"
-            />
-          </div>
-        </div>
-
-        {renderSongRows(filteredSongs, "songList simpleList")}
-      </section>
-    </section>
-  );
-
 
 
   function renderFeedbackSettingsCard() {
@@ -7765,7 +7608,6 @@ function MainModeApp() {
       secretMode,
       secretBurst,
       secretToast,
-      starParticleStyles,
       appToast,
       importAnimation
     },
@@ -7782,8 +7624,6 @@ function MainModeApp() {
       onSkip: skipOnboarding
     },
     navigation: {
-      effectiveSimpleMode,
-      simpleModeView,
       view,
       changeView,
       importSongs,
@@ -7836,7 +7676,7 @@ function MainModeApp() {
       missingFileCount: effectiveMissingFileCount,
       query,
       removeMissingSongs,
-      renderHomeSongCards,
+      renderLibrarySongCards,
       renderSongRows,
       setLibraryFilterMode,
       setLibrarySortMode,

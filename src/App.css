@@ -82,20 +82,6 @@
   border-radius: 18px !important;
 }
 
-.secretLayer.stars{
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 85 !important;
-  pointer-events: none !important;
-  overflow: hidden !important;
-
-}
-
-.secretLayer .starParticleLarge::before{
-  content: "✧" !important;
-  color: var(--lt-accent) !important;
-}
-
 .secretRibbon{
   backdrop-filter: blur(14px) saturate(125%) !important;
   -webkit-backdrop-filter: blur(14px) saturate(125%) !important;
@@ -1270,13 +1256,11 @@ body{
 .app .songArt,
 .app .panel,
 .app .hero,
-.app .simpleHero,
 .app .circleButton:not(.playerBar *),
 .app .iconAction,
 .app .mainAction,
 .app .softButton,
-.app .heroGhost,
-.app .simpleGhost {
+.app .heroGhost{
   transition: none !important;
   animation: none !important;
   transform: none !important;
@@ -1734,44 +1718,6 @@ html{
   opacity: 0.16;
 }
 
-.secretLayer.stars{
-  background: transparent !important;
-  mix-blend-mode: normal !important;
-}
-
-.secretLayer.stars::before,
-.secretLayer.stars::after {
-  display: none !important;
-  opacity: 0 !important;
-  background: transparent !important;
-  animation: none !important;
-}
-
-.secretLayer.stars .starParticle{
-  left: var(--x) !important;
-  top: var(--y) !important;
-  color: rgba(255, 255, 255, var(--alpha, .74)) !important;
-  filter: none !important;
-  animation: localtifyWhiteStarFloat var(--duration, 22s) ease-in-out var(--delay, 0ms) infinite alternate !important;
-}
-
-.secretLayer.stars .starParticle::before,
-.secretLayer.stars .starParticleLarge::before{
-  content: "✦" !important;
-  color: rgba(255, 255, 255, var(--alpha, .74)) !important;
-  text-shadow:
-    0 0 8px rgba(255, 255, 255, .36),
-    0 0 18px rgba(255, 255, 255, .14) !important;
-}
-
-.secretLayer.stars .starParticle:nth-child(3n)::before{
-  content: "·" !important;
-}
-
-.secretLayer.stars .starParticle:nth-child(5n)::before{
-  content: "✧" !important;
-}
-
 @keyframes localtifyWhiteStarFloat{
   0%{
     transform: translate3d(0, 0, 0) scale(.74);
@@ -1796,40 +1742,6 @@ html{
   0%{ opacity: 0; transform: translate3d(-50%, -12px, 0) scale(.94); }
   62%{ opacity: 1; transform: translate3d(-50%, 2px, 0) scale(1.025); }
   100%{ opacity: 1; transform: translate3d(-50%, 0, 0) scale(1); }
-}
-
-.app .secretLayer.stars::before,
-.app .secretLayer.stars::after {
-  animation: none !important;
-}
-
-.app .secretLayer.stars .starParticle,
-.app .secretLayer.stars span.starParticle{
-  position: absolute !important;
-  left: var(--x) !important;
-  top: var(--y) !important;
-  width: var(--size, 12px) !important;
-  height: var(--size, 12px) !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  opacity: var(--alpha, .72) !important;
-  filter: none !important;
-  transform: translate3d(0,0,0) scale(.9) !important;
-  animation: localtifyWhiteStarDriftWorking var(--duration, 22s) ease-in-out var(--delay, 0ms) infinite alternate !important;
-}
-
-.app .secretLayer.stars .starParticle::before,
-.app .secretLayer.stars .starParticleLarge::before{
-  content: "✦" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  display: grid !important;
-  place-items: center !important;
-  color: rgba(255, 255, 255, var(--alpha, .72)) !important;
-  font-size: var(--size, 12px) !important;
-  line-height: 1 !important;
-  text-shadow: 0 0 8px rgba(255,255,255,.42), 0 0 18px rgba(255,255,255,.16) !important;
 }
 
 @keyframes localtifyWhiteStarDriftWorking{
@@ -1979,56 +1891,6 @@ html{
   from{ transform: translate3d(-42px, 0, 0); }
   to{ transform: translate3d(42px, 0, 0); }
 }
-
-.app .secretLayer.stars{
-  background: transparent !important;
-  opacity: 1 !important;
-  mix-blend-mode: normal !important;
-}
-
-.app .secretLayer.stars::before,
-.app .secretLayer.stars::after{
-  display: none !important;
-  opacity: 0 !important;
-  background: transparent !important;
-}
-
-.app .secretLayer.stars .starParticle{
-  position: absolute !important;
-  left: var(--x) !important;
-  top: var(--y) !important;
-  width: var(--size, 10px) !important;
-  height: var(--size, 10px) !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: var(--alpha, .72) !important;
-  background: transparent !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  filter: none !important;
-  transform: translate3d(0,0,0) scale(.86) !important;
-  animation: localtifyStarDriftTwinkle var(--duration, 22s) ease-in-out var(--delay, 0ms) infinite alternate !important;
-}
-
-.app .secretLayer.stars .starParticle::before{
-  content: "✦" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  display: grid !important;
-  place-items: center !important;
-  color: rgba(255, 255, 255, var(--alpha, .72)) !important;
-  font-size: var(--size, 10px) !important;
-  line-height: 1 !important;
-  text-shadow:
-    0 0 7px rgba(255, 255, 255, .48),
-    0 0 16px rgba(255, 255, 255, .18) !important;
-  animation: localtifyStarTwinkle 2.6s ease-in-out var(--delay, 0ms) infinite alternate !important;
-}
-
-.app .secretLayer.stars .starParticle:nth-of-type(3n)::before{ content: "·" !important; }
-.app .secretLayer.stars .starParticle:nth-of-type(5n)::before{ content: "✧" !important; }
-.app .secretLayer.stars .starParticleLarge::before{ font-size: calc(var(--size, 10px) * 1.35) !important; }
 
 @keyframes localtifyStarDriftTwinkle{
   0%{ transform: translate3d(0, 0, 0) scale(.72); opacity: calc(var(--alpha, .72) * .46); }
@@ -2355,21 +2217,16 @@ body.localitfyThemePainting .app .ambientSurface::after{
 }
 
 .app,
-.simpleShell,
-.page,
-.simpleLibraryPanel {
+.page{
   background-size: auto !important;
 }
 
-.app,
-.simpleShell {
+.app{
   background-image: none !important;
 }
 
 .app::before,
-.app::after,
-.simpleShell::before,
-.simpleShell::after {
+.app::after{
   background-image: none !important;
   background-size: auto !important;
   animation: none !important;
@@ -4117,16 +3974,6 @@ the last imported CSS layer. */
   transform: none !important;
   box-shadow: inherit !important;
   background-image: inherit !important;
-}
-.app .secretLayer.stars,
-.app .secretLayer.stars .secretRibbon,
-.app .secretLayer.stars .starParticle,
-.app .secretLayer.stars .starParticle::before,
-.app .secretLayer.stars .starParticle::after {
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  animation: none !important;
 }
 
 .app::before,

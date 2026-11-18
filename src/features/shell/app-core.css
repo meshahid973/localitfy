@@ -1213,16 +1213,6 @@ button:active,
   animation: localitfyStageLights 1.35s ease-in-out infinite alternate;
 }
 
-.secretLayer.stars::before{
-  opacity: .58;
-  background-image: radial-gradient(circle at 10% 20%, rgba(255,255,255,.95) 0 1px, transparent 2px),
-    radial-gradient(circle at 35% 75%, rgba(var(--accent-rgb),.95) 0 1px, transparent 2px),
-    radial-gradient(circle at 60% 35%, rgba(255,255,255,.8) 0 1px, transparent 2px),
-    radial-gradient(circle at 82% 68%, rgba(var(--accent-rgb),.75) 0 1px, transparent 2px);
-  background-size: 170px 170px;
-  animation: localitfyStarDrift 4s linear infinite;
-}
-
 .secretLayer.pulse::before{
   opacity: .65;
   background: repeating-linear-gradient(90deg, transparent 0 24px, rgba(var(--accent-rgb), .25) 24px 27px, transparent 27px 62px);
@@ -1709,8 +1699,7 @@ button{
 
 .app,
 .appShell,
-.content,
-.simpleShell{
+.content{
   background-image: none !important;
   background-size: auto !important;
 }
@@ -1721,8 +1710,6 @@ button{
 .appShell::after,
 .content::before,
 .content::after,
-.simpleShell::before,
-.simpleShell::after,
 .app,
 .content,
 .editorModal,

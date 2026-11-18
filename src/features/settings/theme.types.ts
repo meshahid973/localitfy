@@ -7,6 +7,6 @@ export type ThemeId =
   | "vanilla" | "vaporwave" | "ultraviolet" | "terminal" | "candyCloud" | "rainstorm" | "lavaLamp"
   | "softSky" | "stars" | "arcadeGhost";
 
-export type SecretMode = "none" | "stars" | "yukari";
+export type SecretMode = "none" | "yukari";
 export type SecretTriggerMode = Exclude<SecretMode, "none">;
 export type CoverColorSyncMode = "off" | "subtle" | "normal" | "strong";

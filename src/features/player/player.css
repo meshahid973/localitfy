@@ -1862,8 +1862,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 .playerBar .circleButton.main .playerMorphIcon,
-.playerBar .playPauseButton .playerMorphIcon,
-.simpleControls .circleButton.main .playerMorphIcon{
+.playerBar .playPauseButton .playerMorphIcon{
   color: var(--button-text-on-accent) !important;
 }
 
@@ -1872,13 +1871,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   height: 25px !important;
 }
 
-.simpleControls .circleButton.main .playerMorphIcon{
-  width: 19px !important;
-  height: 19px !important;
-}
-
-.playerBar .circleButton.main:active .playerMorphIcon,
-.simpleControls .circleButton.main:active .playerMorphIcon{
+.playerBar .circleButton.main:active .playerMorphIcon{
   transform: scale(0.94) translateZ(0) !important;
 }
 

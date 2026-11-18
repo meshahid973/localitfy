@@ -79,11 +79,11 @@ export default function AppShell(props: AppShellProps) {
     visualSource: screensaverVisualSource
   } = screensaver;
   const {
-    secretMode, secretBurst, secretToast, starParticleStyles, appToast, importAnimation
+    secretMode, secretBurst, secretToast, appToast, importAnimation
   } = effects;
   const { open: onboardingOpen, ...onboardingProps } = onboarding;
   const {
-    effectiveSimpleMode, simpleModeView, view, importSongs, startSidebarResize,
+    view, importSongs, startSidebarResize,
     contentRef, updateSidebarLayout, openSidebarSettings, history: nav
   } = navigation;
   const detail = nav.detail;
@@ -164,7 +164,7 @@ export default function AppShell(props: AppShellProps) {
       data-drag-title={draggedSongTitle}
     >
 
-      <TitleBar showWindowButtons={platformId !== "mac"} history={effectiveSimpleMode ? undefined : nav}>
+      <TitleBar showWindowButtons={platformId !== "mac"} history={nav}>
         <UpdateIsland
           show={showTopUpdateRibbon}
           updatePrompt={updatePrompt}
@@ -216,15 +216,6 @@ export default function AppShell(props: AppShellProps) {
         <div className={`secretLayer ${secretMode}`} key={`${secretMode}-${secretBurst}`} aria-hidden="true">
           {secretToast ? <div className="secretRibbon">{secretToast}</div> : null}
           {secretMode === "yukari" ? <img className="yukariSecretPeek" src={yukariUpdateImage} alt="" width={260} height={260} loading="lazy" decoding="async" fetchPriority="low" draggable={false} aria-hidden="true" /> : null}
-          {secretMode === "stars"
-            ? starParticleStyles.map((style, index) => (
-                <span
-                  key={`star-${index}`}
-                  className={index % 5 === 0 ? "secretParticle starParticle starParticleLarge" : "secretParticle starParticle"}
-                  style={style}
-                />
-              ))
-            : null}
         </div>
       ) : null}
 
@@ -287,10 +278,7 @@ export default function AppShell(props: AppShellProps) {
         </Suspense>
       ) : null}
 
-      {effectiveSimpleMode ? (
-        simpleModeView
-      ) : (
-        <div className="appShell">
+      <div className="appShell">
           {isAndroidApp() ? (
             <Suspense fallback={null}>
               <PhoneTabBar view={view} changeView={nav.go} sidebarNavOrder={settings.sidebarNavOrder}
@@ -386,8 +374,7 @@ export default function AppShell(props: AppShellProps) {
 
           <PlayerSurfaces player={playerBar} queue={modals.queuePanel} lyrics={modals.lyrics}
             contentRef={contentRef} backgroundStyle={playerBackground} backgrounded={isAppBackgrounded} />
-        </div>
-      )}
+      </div>
 
       <SongContextMenu {...modals.songContextMenu} findOnMusicBrainz={settings.musicbrainzTagging ? setTagSearchSong : undefined} />
       <CollectionContextMenu state={collectionMenu} onClose={closeCollectionMenu} open={actions.openCollection} play={actions.playCollection} queue={actions.queueCollection}

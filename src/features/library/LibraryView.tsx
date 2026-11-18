@@ -32,7 +32,7 @@ export type LibraryViewProps = {
   missingFileCount: number;
   query: string;
   removeMissingSongs: () => Promise<unknown> | unknown;
-  renderHomeSongCards: (songs: Song[], className?: string) => ReactNode;
+  renderLibrarySongCards: (songs: Song[], className?: string) => ReactNode;
   renderSongRows: (songs: Song[], className?: string) => ReactNode;
   setLibraryFilterMode?: (mode: "all" | "missing") => unknown;
   setLibrarySortMode: (mode: LibrarySortMode) => unknown;
@@ -60,7 +60,7 @@ export default function LibraryView(props: LibraryViewProps) {
     missingFileCount,
     query,
     removeMissingSongs,
-    renderHomeSongCards,
+    renderLibrarySongCards,
     renderSongRows,
     setLibraryFilterMode,
     setLibrarySortMode,
@@ -160,7 +160,7 @@ export default function LibraryView(props: LibraryViewProps) {
         {visibleSongs.length ? (
           grid ? (
             <div className="libraryTrackSurface libraryCoverCards">
-              {renderHomeSongCards(visibleSongs, "libraryCoverCardsGridV321")}
+              {renderLibrarySongCards(visibleSongs, "libraryCoverCardsGridV321")}
             </div>
           ) : (
             <div
