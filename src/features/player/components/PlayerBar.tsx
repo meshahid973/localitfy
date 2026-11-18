@@ -67,6 +67,7 @@ export type PlayerBarProps = {
   togglePlay: () => unknown;
   toggleQueuePanel: () => unknown;
   toggleRepeat: () => unknown;
+  toggleMute: () => unknown;
   updateSetting: (key: "volume", value: number, persist?: boolean) => unknown;
   volumeDraft: number;
   volumeDraftRef: MutableRefObject<number>;
@@ -129,7 +130,7 @@ export default function PlayerBar(props: PlayerBarProps) {
     togglePlay,
     toggleQueuePanel,
     toggleRepeat,
-    updateSetting,
+    toggleMute,
     volumeDraft,
     volumeDraftRef,
     volumeRangeStyle,
@@ -317,7 +318,7 @@ export default function PlayerBar(props: PlayerBarProps) {
                   <button
                     type="button"
                     className="volumeIconButton"
-                    onClick={() => updateSetting("volume", settings.volume > 0 ? 0 : 0.72, true)}
+                    onClick={toggleMute}
                     aria-label={settings.volume > 0 ? "mute volume" : "restore volume"}
                     title={settings.volume > 0 ? "Mute volume" : "Restore volume"}
                   >

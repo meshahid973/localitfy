@@ -43,7 +43,7 @@ export default function ImmersivePlayer({ player, song, queue, lyrics, backgroun
     displayedProgress, displayedTime, currentDuration, progressInputRefs, progressTimeLabelRefs, progressDurationLabelRefs,
     progressRangeStyle, startSeekPreview, previewSeek, commitSeek, isSeeking,
     volumeDraft, volumeDraftRef, setIsVolumeDragging, isVolumeDragging, previewVolume, commitVolume, volumeRangeStyle,
-    settings, updateSetting, connect, ambientStyle, effectiveAmbient, nowPlayingContextLabel, queuePanelOpen, toggleQueuePanel,
+    settings, toggleMute, connect, ambientStyle, effectiveAmbient, nowPlayingContextLabel, queuePanelOpen, toggleQueuePanel,
     lyricsOpen, toggleLyrics
   } = player;
   const duration = currentDuration || song.duration || 0;
@@ -123,7 +123,7 @@ export default function ImmersivePlayer({ player, song, queue, lyrics, backgroun
 
       <div className="immersiveTools" hidden={minimal}>
         <div className="immersiveVolume">
-          <button type="button" className="immersiveIcon" onClick={() => updateSetting("volume", settings.volume > 0 ? 0 : 0.72, true)}
+          <button type="button" className="immersiveIcon" onClick={toggleMute}
             aria-label={settings.volume > 0 ? "Mute volume" : "Restore volume"}>{settings.volume > 0 ? <Volume2 size={18} aria-hidden="true" /> : <VolumeX size={18} aria-hidden="true" />}</button>
           <input type="range" min="0" max="100" step="1" value={volumeDraft} style={volumeRangeStyle} aria-label="Volume level"
             onPointerDown={event => { event.currentTarget.setPointerCapture?.(event.pointerId); volumeDraftRef.current = Number(event.currentTarget.value); setIsVolumeDragging(true); previewVolume(event.currentTarget.value, event.currentTarget); }}

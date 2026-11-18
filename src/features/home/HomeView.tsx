@@ -11,6 +11,7 @@ import type { Settings } from "../settings/settings.types";
 const HomeCustomizePanel = lazy(() => import("./HomeCustomizePanel"));
 import { visibleHomeSections, type HomeLayoutPatch, type HomeSectionId } from "./homeLayout";
 import { HomeDailyMixRail, HomeSongRail } from "./HomeShelves";
+import { useHomeDay } from "./useHomeDay";
 import type { SimilarSeedRequest } from "../analysis/similarSeed";
 import { useAppActions } from "../shell/appActions";
 import { pickLikedSongs, pickMostPlayedSongs, pickNotPlayedYet, pickRecentlyPlayed, pickRediscover } from "./homeShelfPicks";
@@ -78,6 +79,7 @@ export default function HomeView(props: HomeViewProps) {
   } = props;
 
   const actions = useAppActions();
+  const day = useHomeDay();
   const android = isAndroidApp();
   const needsPhoneSync = android && songs.length === 0;
   const showAtmosphere = artworkAmbient && Boolean(currentSong) && (bannerType === "dynamic" || bannerType === "albumCover");
@@ -96,8 +98,8 @@ export default function HomeView(props: HomeViewProps) {
   const showRediscover = showing("rediscover"), showUnplayed = showing("notPlayedYet"), showMixes = showing("dailyMixes");
   const recentlyPlayedSongs = useMemo(() => (showRecent ? pickRecentlyPlayed(songs) : []), [showRecent, songs]);
   const likedSongs = useMemo(() => (showLiked ? pickLikedSongs(songs) : []), [showLiked, songs]);
-  const rediscoverSongs = useMemo(() => (showRediscover ? pickRediscover(songs, new Date()) : []), [showRediscover, songs]);
-  const notPlayedSongs = useMemo(() => (showUnplayed ? pickNotPlayedYet(songs, new Date()) : []), [showUnplayed, songs]);
+  const rediscoverSongs = useMemo(() => (showRediscover ? pickRediscover(songs, new Date(day + "T00:00:00")) : []), [showRediscover, songs, day]);
+  const notPlayedSongs = useMemo(() => (showUnplayed ? pickNotPlayedYet(songs, new Date(day + "T00:00:00")) : []), [showUnplayed, songs, day]);
   const songsById = useMemo(() => (showMixes ? new Map(songs.map((song) => [song.id, song])) : new Map<string, Song>()), [showMixes, songs]);
 
   const startListening = () => {
@@ -176,12 +178,12 @@ export default function HomeView(props: HomeViewProps) {
       </section>
     ),
     mostListened: <HomeSongRail id="most-listened" title="Most listened of all time" songs={mostPlayedSongs} currentId={currentId} selectSong={selectSong} playSongs={playSongs} />,
-    dailyMixes: <HomeDailyMixRail songsById={songsById} openDailyMixes={openDailyMixes} openAnalysisSettings={openAnalysisSettings} />,
+    dailyMixes: <HomeDailyMixRail day={day} songsById={songsById} openDailyMixes={openDailyMixes} openAnalysisSettings={openAnalysisSettings} />,
     recentlyPlayed: <HomeSongRail id="recently-played" title="Recently played" songs={recentlyPlayedSongs} currentId={currentId} selectSong={selectSong} playSongs={playSongs} emptyText={android ? undefined : "Songs you play will show up here."} findSimilar={() => props.openSimilarSongs({ kind: "recent" })} />,
     newReleases: <HomeSongRail id="releases" title="Recently added" songs={recentlyAddedSongs} currentId={currentId} selectSong={selectSong} />,
     likedSongs: <HomeSongRail id="liked" title="Liked songs" songs={likedSongs} currentId={currentId} selectSong={selectSong} playSongs={playSongs} emptyText="Tap the heart on a song to keep it here." />,
     rediscover: <HomeSongRail id="rediscover" title="Rediscover" songs={rediscoverSongs} currentId={currentId} selectSong={selectSong} playSongs={playSongs} emptyText="Songs you played a lot but not in the last month will come back here." />,
-    notPlayedYet: <HomeSongRail id="not-played" title="Not played yet" songs={notPlayedSongs} currentId={currentId} selectSong={selectSong} playSongs={playSongs} emptyText="You have played every song in your library." />
+    notPlayedYet: <HomeSongRail id="not-played" title="Not played yet" songs={notPlayedSongs} currentId={currentId} selectSong={selectSong} playSongs={playSongs} emptyText={playableSongCount === 0 ? "Add playable music to your library first." : "You have played every available song in your library."} />
   };
 
   return (

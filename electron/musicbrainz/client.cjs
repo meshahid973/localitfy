@@ -18,7 +18,7 @@ const phrase = (value) => `"${String(value || "").replace(/[\\"]/g, "\\$&")}"`;
  * MusicBrainz asks clients to identify themselves and stay at one request per second.
  * Requests are queued, so concurrent callers share the limit.
  */
-function createMusicBrainzClient({ userAgent, fetchImpl = fetch, minIntervalMs = 1100, timeoutMs = 15000, maxCacheEntries = 256, sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)) }) {
+function createMusicBrainzClient({ userAgent, fetchImpl = fetch, minIntervalMs = 1100, timeoutMs = 15000, maxCacheEntries = 256, cacheTtlMs = 24 * 60 * 60 * 1000, sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)) }) {
   let queue = Promise.resolve();
   let lastAt = 0;
   const cache = new Map();
@@ -27,7 +27,13 @@ function createMusicBrainzClient({ userAgent, fetchImpl = fetch, minIntervalMs =
     const url = new URL(pathname, API);
     for (const [key, value] of Object.entries({ ...params, fmt: "json" })) url.searchParams.set(key, value);
     const key = url.href;
-    if (cache.has(key)) return cache.get(key);
+    const hit = cache.get(key);
+    if (hit && hit.expiresAt > Date.now()) {
+      cache.delete(key);
+      cache.set(key, hit);
+      return hit.promise;
+    }
+    cache.delete(key);
     const run = queue.then(async () => {
       for (let attempt = 0; ; attempt += 1) {
         const wait = lastAt + minIntervalMs - Date.now();
@@ -41,9 +47,11 @@ function createMusicBrainzClient({ userAgent, fetchImpl = fetch, minIntervalMs =
       }
     });
     queue = run.catch(() => undefined);
-    cache.set(key, run);
+    const entry = { promise: run, expiresAt: Infinity };
+    cache.set(key, entry);
     while (cache.size > Math.max(1, maxCacheEntries)) cache.delete(cache.keys().next().value);
-    run.catch(() => { if (cache.get(key) === run) cache.delete(key); });
+    run.then(() => { entry.expiresAt = Date.now() + Math.max(0, cacheTtlMs); },
+      () => { if (cache.get(key) === entry) cache.delete(key); });
     return run;
   }
 

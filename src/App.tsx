@@ -102,13 +102,10 @@ import {
   restoreCustomThemeAfterUpdate
 } from "./features/settings/customThemePersistence";
 import {
-  BOOT_MIN_VISIBLE_MS,
-  BOOT_STEPS,
   INITIAL_LIBRARY_RENDER_LIMIT,
   LIBRARY_RENDER_BATCH_SIZE,
   START_WITH_WINDOWS_DEFAULT_KEY,
   V013_DEFAULTS_KEY,
-  loadingScreenGif,
   localtifyLogo,
   screensaverImage
 } from "./core/app.constants";
@@ -260,8 +257,6 @@ function MainModeApp() {
   const [bootError, setBootError] = useState<string | null>(null);
   const [bootLogCopied, setBootLogCopied] = useState(false);
   const [bootRetryKey, setBootRetryKey] = useState(0);
-  const [bootStepIndex, setBootStepIndex] = useState(0);
-  const [bootStage, setBootStage] = useState("starting localtify...");
   const [songs, setSongs] = useState<Song[]>([]);
   const {
     settings, setSettings, settingsRef,
@@ -406,35 +401,31 @@ function MainModeApp() {
 
   function repairPlaybackAfterAppReturns(reason: "focus" | "visibility" | "background-tick") {
     const audio = audioRef.current;
-    if (!audio) return;
+    const song = songRef.current;
+    if (!audio || !song || !playingRef.current) return;
 
+    // Focus is not a transport command. Never reapply gain, pitch or graph
+    // parameters, reload a source or interfere with a healthy crossfade.
     resumeAudioContextSafely();
+    const state = playbackTransitionRef.current.snapshot();
+    if (!audio.paused || audio.ended || audio.error || audio.seeking || pendingPlayRef.current ||
+        state.phase !== "playing" || state.sourceId !== song.id || state.targetId ||
+        crossfadeHandoffRef.current || crossfadeMainPauseGuardRef.current) return;
+    if (reason === "background-tick" && !document.hidden) return;
 
-    if (!playingRef.current && !pendingPlayRef.current) return;
-    if (!songRef.current) return;
-
-    applyPlaybackRateSettings(audio);
-    const repairedVolume = getTargetAudioVolume(songRef.current);
-    setAudioElementVolume(audio, repairedVolume);
-    effectiveVolumeRef.current = repairedVolume;
-    syncAudioEffectGraph(audio);
-
-    if (!audio.paused) return;
-
-    const canRepair = reason !== "background-tick" || document.hidden;
-    if (!canRepair) return;
-
-    const repairGeneration = playbackTransitionRef.current.snapshot().generation;
+    pendingPlayRef.current = true;
+    const repairGeneration = state.generation;
     void audio.play()
       .then(() => {
-        if (playbackTransitionRef.current.snapshot().generation !== repairGeneration) {
-          if (playbackTransitionRef.current.snapshot().phase === "paused") audio.pause();
+        if (audioRef.current !== audio || !playbackTransitionRef.current.isCurrent(repairGeneration, song.id)) {
+          if (audioRef.current === audio && playbackTransitionRef.current.snapshot().phase === "paused") audio.pause();
           return;
         }
         pendingPlayRef.current = false;
-        if (!playingRef.current) setIsPlaying(true);
       })
-      .catch(() => undefined);
+      .catch(() => {
+        if (audioRef.current === audio && playbackTransitionRef.current.isCurrent(repairGeneration, song.id)) pendingPlayRef.current = false;
+      });
   }
 
   useAppLifecycleRuntime({
@@ -2202,43 +2193,15 @@ function MainModeApp() {
 
   useEffect(() => {
     let mounted = true;
-    let bootStepTimer: number | null = null;
-    const bootStartedAt = typeof performance !== "undefined" ? performance.now() : Date.now();
-
-    const setBootStep = (index: number, stage?: string) => {
-      if (!mounted) return;
-      setBootStepIndex(Math.max(0, Math.min(index, BOOT_STEPS.length - 1)));
-      if (stage) setBootStage(stage);
-    };
-
-    const waitForMinimumBoot = () => {
-      const now = typeof performance !== "undefined" ? performance.now() : Date.now();
-      // V251: keep the loading screen visible for polish, but do not force a long wait
-      // after the real bootstrap work has already finished.
-      const fastBootMinimumMs = Math.min(BOOT_MIN_VISIBLE_MS, 520);
-      const remaining = Math.max(0, fastBootMinimumMs - (now - bootStartedAt));
-      if (remaining <= 0) return Promise.resolve();
-      return new Promise<void>((resolve) => {
-        window.setTimeout(resolve, remaining);
-      });
-    };
-
     setReady(false);
     setBootError(null);
     setBootLogCopied(false);
-    setBootStepIndex(0);
-    setBootStage("starting localtify...");
-
-    bootStepTimer = window.setInterval(() => {
-      setBootStepIndex((step) => Math.min(step + 1, BOOT_STEPS.length - 1));
-    }, 240);
 
     devPerfStart("bootstrap:ipc");
     window.localitfy.bootstrap().then(async (payload) => {
       if (!mounted) return;
       devPerfEnd("bootstrap:ipc", `${payload.songs?.length ?? 0} songs`);
 
-      setBootStep(0, "loading settings and theme...");
 
       const storedSettings = (payload.settings || {}) as Partial<Settings>;
       const shouldApplyV013Defaults = window.localStorage.getItem(V013_DEFAULTS_KEY) !== "true";
@@ -2309,16 +2272,13 @@ function MainModeApp() {
         window.localStorage.setItem(sidebarMigrationKey, "true");
       }
 
-      setBootStep(1, "loading your library...");
       const nextSongs = applyLibraryOrder(sanitizeSongList(payload.songs || []));
       const validBootSongIds = new Set(nextSongs.map((song) => song.id));
 
-      setBootStep(2, "loading playlists...");
       const localPlaylists = cleanPlaylistList(readLocalJson<Playlist[]>(PLAYLIST_STORAGE_KEY, []), validBootSongIds);
       const databasePlaylists = cleanPlaylistList(payload.playlists || [], validBootSongIds);
       const initialPlaylists = databasePlaylists.length ? databasePlaylists : localPlaylists;
 
-      setBootStep(3, "preparing covers and visuals...");
       const initialSongId =
         nextSettings.rememberLastSong &&
         nextSettings.lastSongId &&
@@ -2334,16 +2294,7 @@ function MainModeApp() {
           ? { songId: initialSongId, time: savedTime }
           : null;
 
-      setBootStep(4, "warming up the player...");
-      await waitForMinimumBoot();
-      if (!mounted) return;
 
-      if (bootStepTimer) {
-        window.clearInterval(bootStepTimer);
-        bootStepTimer = null;
-      }
-
-      setBootStep(5, "opening localtify...");
       setSongs(nextSongs);
       setPlaylists(initialPlaylists);
       setSettings(nextSettings);
@@ -2363,22 +2314,16 @@ function MainModeApp() {
       bootedRef.current = true;
     }).catch((error) => {
       if (!mounted) return;
-      if (bootStepTimer) {
-        window.clearInterval(bootStepTimer);
-        bootStepTimer = null;
-      }
 
       const message = error instanceof Error ? error.message : String(error || "Unknown startup error");
       console.error("localtify startup failed", error);
       setBootError(message);
       setReady(false);
-      setBootStage("startup failed");
       trackError("startup_bootstrap_failed", message, { category: "startup" });
     });
 
     return () => {
       mounted = false;
-      if (bootStepTimer) window.clearInterval(bootStepTimer);
     };
   }, [loadPixelArtAssets, bootRetryKey]);
   // Heavy automatic late-night secret effects were removed in V215.
@@ -2468,9 +2413,10 @@ function MainModeApp() {
   }
 
   function toggleMuteFromNative() {
-    const currentVolume = clamp(Number(volumeRef.current) || 0, 0, 1);
-    const nextVolume = currentVolume > 0.01 ? 0 : clamp(lastNonZeroVolumeRef.current || defaultSettings.volume, 0.05, 1);
-    updateVolumeFast(nextVolume);
+    const currentVolume = clamp(Number(settingsRef.current.volume) || 0, 0, 1);
+    if (currentVolume > 0) lastNonZeroVolumeRef.current = currentVolume;
+    const nextVolume = currentVolume > 0 ? 0 : clamp(lastNonZeroVolumeRef.current || defaultSettings.volume, 0, 1);
+    void updateSetting("volume", nextVolume, true);
   }
 
   useEffect(() => {
@@ -8106,6 +8052,7 @@ function MainModeApp() {
       togglePlay,
       toggleQueuePanel: () => setQueuePanelOpen((open) => !open),
       toggleRepeat,
+      toggleMute: toggleMuteFromNative,
       updateSetting,
       volumeDraft,
       volumeDraftRef,
@@ -8232,73 +8179,27 @@ function MainModeApp() {
     }
   };
 
+  // Hydrate the persisted library before enabling actions. No splash screen,
+  // fake progress, or minimum display time.
   if (!ready) {
-    const isBootError = Boolean(bootError);
-
-    if (onboardingOpen && !onboardingDevPreview && !isBootError) {
-      return (
-        <main className="onboardingBootBlank" aria-label="localtify is preparing onboarding">
-          <span>localtify</span>
-        </main>
-      );
-    }
-
-    const bootArtSrc = `${loadingScreenGif}#boot-${bootRetryKey}`;
-
+    if (!bootError) return null;
     return (
-      <main className={`loadingScreen bootScreen ${isBootError ? "bootScreenError" : ""}`} aria-label="localtify is loading">
-        <div className="bootGlow" aria-hidden="true" />
-
-        <section className="bootCard" role={isBootError ? "alert" : "status"} aria-live={isBootError ? "assertive" : "polite"}>
-          <div className="bootArtWrap" aria-hidden="true">
-            <img key={`boot-art-${bootRetryKey}`} className="bootArt" src={bootArtSrc} alt="" loading="eager" decoding="async" />
-            <span className="bootArtAura" />
-          </div>
-
+      <main className="loadingScreen bootScreen bootScreenError" aria-label="Localtify startup error">
+        <section className="bootCard" role="alert">
           <div className="bootCopy">
-            <div className="bootBrandRow">
-              <img className="bootLogo" src={localtifyLogo} alt="" aria-hidden="true" />
-              <span>localtify</span>
+            <h1>Localtify had trouble starting</h1>
+            <p>{bootError}</p>
+            <div className="bootActions">
+              <button type="button" className="bootButton bootButtonPrimary" onClick={retryStartup}>Retry</button>
+              <button type="button" className="bootButton" onClick={copyStartupLog}>
+                {bootLogCopied ? "Copied error" : "Copy error"}
+              </button>
             </div>
-
-            {isBootError ? (
-              <>
-                <h1>localtify had trouble starting</h1>
-                <p>{bootError}</p>
-                <div className="bootActions">
-                  <button type="button" className="bootButton bootButtonPrimary" onClick={retryStartup}>Retry</button>
-                  <button type="button" className="bootButton" onClick={copyStartupLog}>
-                    {bootLogCopied ? "Copied error" : "Open logs"}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <h1>loading your library...</h1>
-                <p>{bootStage}</p>
-                <ul className="bootAssetList" aria-label="startup assets">
-                  {BOOT_STEPS.map((step, index) => {
-                    const state = index < bootStepIndex ? "done" : index === bootStepIndex ? "active" : "waiting";
-                    return (
-                      <li key={step.label} className={`bootAssetItem ${state}`}>
-                        <span className="bootAssetDot" aria-hidden="true" />
-                        <span className="bootAssetText">
-                          <strong>{step.label}</strong>
-                          <small>{step.detail}</small>
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-                <div className="bootProgress" aria-hidden="true"><span /></div>
-              </>
-            )}
           </div>
         </section>
       </main>
     );
   }
-
 
   if (onboardingOpen || onboardingDevPreview) {
     return (

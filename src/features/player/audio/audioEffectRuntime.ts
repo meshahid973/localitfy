@@ -87,6 +87,7 @@ export class AudioEffectRuntime {
   private filter: BiquadFilterNode | null = null;
   private graphConnected = false;
   private analyserConnected = false;
+  private readonly parameterTargets = new WeakMap<AudioParam, number>();
 
   apply(audio: HTMLAudioElement | null | undefined, input: AudioEffectProfileInput) {
     if (!audio) return getAudioEffectProfile(input);
@@ -247,13 +248,14 @@ export class AudioEffectRuntime {
   }
 
   private setAudioParam(param: AudioParam | null | undefined, value: number, now: number) {
-    if (!param || !Number.isFinite(value)) return;
+    if (!param || !Number.isFinite(value) || this.parameterTargets.get(param) === value) return;
     try {
       param.cancelScheduledValues(now);
       param.setTargetAtTime(value, now, 0.018);
     } catch {
       param.value = value;
     }
+    this.parameterTargets.set(param, value);
   }
 
   private applyMediaElementRate(audio: HTMLAudioElement, profile: AudioEffectProfile) {
@@ -262,9 +264,8 @@ export class AudioEffectRuntime {
     }
 
     try {
-      (audio as HTMLAudioElement & { preservesPitch?: boolean }).preservesPitch = profile.preservesPitch;
-      (audio as HTMLAudioElement & { mozPreservesPitch?: boolean }).mozPreservesPitch = profile.preservesPitch;
-      (audio as HTMLAudioElement & { webkitPreservesPitch?: boolean }).webkitPreservesPitch = profile.preservesPitch;
+      // Reassigning pitch flags can reconfigure Chromium's audio pipeline.
+      if (audio.preservesPitch !== profile.preservesPitch) audio.preservesPitch = profile.preservesPitch;
     } catch {
       // Older Chromium builds can ignore pitch flags safely.
     }

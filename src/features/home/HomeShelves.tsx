@@ -96,17 +96,18 @@ export function HomeSongRail({ id, title, songs, currentId, selectSong, playSong
 }
 
 type DailyMixRailProps = {
+  day: string;
   songsById: ReadonlyMap<string, Song>;
   openDailyMixes: () => unknown;
   openAnalysisSettings: () => unknown;
 };
 
 /** Today's daily mixes as cover collages. Clicking a mix opens it, the round button plays it; "See all" opens the full shelf in Playlists. */
-export function HomeDailyMixRail({ songsById, openDailyMixes, openAnalysisSettings }: DailyMixRailProps) {
+export function HomeDailyMixRail({ day, songsById, openDailyMixes, openAnalysisSettings }: DailyMixRailProps) {
   const actions = useAppActions();
-  const { result, failed } = useHomeDailyMixes();
+  const { result, failed } = useHomeDailyMixes(day);
   const mixes = useMemo(() => (result?.mixes ?? [])
-    .map((mix) => ({ ...mix, songs: mix.songIds.flatMap((id) => { const song = songsById.get(id); return song && song.fileExists !== false ? [song] : []; }) }))
+    .map((mix) => ({ ...mix, songs: mix.songIds.flatMap((id) => { const song = songsById.get(id); return song && (song.filePath || song.url) && song.fileExists !== false ? [song] : []; }) }))
     .filter((mix) => mix.songs.length), [result, songsById]);
   if (!result) return <section className="homeSection homeReleasesSection homeMixesSection" aria-labelledby="home-daily-mixes-title">
     <HomeSectionHead id="home-daily-mixes-title" title="Daily mixes" />

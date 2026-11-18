@@ -105,13 +105,15 @@ export function pickNotPlayedYet(songs: readonly Song[], now: Date, limit = 10):
 export function pickHomeMixArtwork(songs: readonly Song[]): Song[] {
   const seen = new Set<string>();
   const artwork: Song[] = [];
+  const fallback: Song[] = [];
   for (const song of songs) {
     const source = song.coverThumbUrl || song.coverThumbnailUrl || song.thumbnailUrl || song.coverUrl || song.coverPath || song.coverFullUrl;
     const key = source ? "cover:" + source : "song:" + song.id;
     if (seen.has(key)) continue;
     seen.add(key);
-    artwork.push(song);
+    if (source) artwork.push(song);
+    else if (fallback.length < 4) fallback.push(song);
     if (artwork.length === 4) break;
   }
-  return artwork;
+  return [...artwork, ...fallback.slice(0, 4 - artwork.length)];
 }

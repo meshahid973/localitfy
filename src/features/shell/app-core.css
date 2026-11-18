@@ -1995,23 +1995,6 @@ body,
   box-shadow: none !important;
 }
 
-@media (max-width: 900px){
-  .appShell{
-    grid-template-columns: minmax(0, 1fr) !important;
-  }
-
-  .app .sidebar,
-.app .sidebarResizeHandle{
-    display: none !important;
-  }
-
-  .app .content{
-    grid-column: 1 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-}
-
 :root{
   --localtify-window-radius: 9px;
   --localtify-content-x: clamp(18px, 2vw, 30px);

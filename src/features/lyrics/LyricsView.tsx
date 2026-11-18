@@ -27,7 +27,6 @@ export type LyricsViewProps = {
 const LEAD_SECONDS = 0.2;
 const MANUAL_SCROLL_HOLD_MS = 3500;
 const VIEW_GAP = 12;
-const sessionCache = new Map<string, LyricsResult>();
 
 export default function LyricsView({ open, onClose, song, isPlaying, getTime, seekTo, openSettings, anchorRef, embedded = false }: LyricsViewProps) {
   const viewRef = useRef<HTMLElement | null>(null);
@@ -41,28 +40,32 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
   const [box, setBox] = useState<CSSProperties>({ top: 0, left: 0 });
   const songId = song?.id || "";
   const currentSongId = useRef(songId);
+  const requestGeneration = useRef(0);
+  const openRef = useRef(open);
   currentSongId.current = songId;
+  openRef.current = open;
   useEffect(() => { setMatcherOpen(false); }, [songId]);
 
   const load = useCallback((refresh: boolean) => {
-    if (!songId) { setResult(null); return () => undefined; }
-    let cancelled = false;
-    const cached = refresh ? null : sessionCache.get(songId);
-    setResult(cached || null);
+    const generation = ++requestGeneration.current;
+    setResult(null);
     setActiveIndex(-1);
-    if (cached) return () => undefined;
+    if (!songId) return;
+    const isCurrent = () => openRef.current && currentSongId.current === songId && requestGeneration.current === generation;
+    // The backend owns the disk/offline cache and its invalidation.
     window.localitfy.getLyrics({ id: songId, refresh })
-      .then((next) => { if (next.status === "synced" || next.status === "plain" || next.status === "instrumental") sessionCache.set(songId, next); else sessionCache.delete(songId); if (!cancelled) setResult(next); })
-      .catch(() => { if (!cancelled) setResult({ status: "error", source: "none", lines: [], error: "lyrics lookup failed" }); });
-    return () => { cancelled = true; };
+      .then((next) => { if (isCurrent()) setResult(next); })
+      .catch(() => { if (isCurrent()) setResult({ status: "error", source: "none", lines: [], error: "lyrics lookup failed" }); });
   }, [songId]);
 
-  useEffect(() => (open ? load(false) : undefined), [open, load]);
+  useEffect(() => {
+    if (open) load(false);
+    return () => { requestGeneration.current++; };
+  }, [open, load]);
 
   const adoptLyrics = (expectedId: string, next: LyricsResult) => {
-    if (next.status === "synced" || next.status === "plain" || next.status === "instrumental") sessionCache.set(expectedId, next);
-    else sessionCache.delete(expectedId);
-    if (currentSongId.current !== expectedId) return;
+    if (!openRef.current || currentSongId.current !== expectedId) return;
+    requestGeneration.current++;
     setResult(next);
     setMatcherOpen(false);
     setActiveIndex(-1);
@@ -88,7 +91,6 @@ export default function LyricsView({ open, onClose, song, isPlaying, getTime, se
         setResult(previous => {
           if (!previous) return previous;
           const next = { ...previous, offsetMs: saved.offsetMs };
-          sessionCache.set(expected, next);
           return next;
         });
       }

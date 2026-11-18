@@ -117,10 +117,19 @@ server.listen(5173,async()=>{
     // Exercise actual rendered library navigation and playback.
     const clicked=await win.webContents.executeJavaScript("(()=>{const b=document.querySelector('.sidebar [data-nav-id=library]');if(!b)return false;b.click();return true})()");
     assert.ok(clicked,"library navigation missing");
-    await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.sidebar [data-nav-id=library].active') && (!!document.querySelector('.songButton') || !!document.querySelector('.homeAlbumPlayZone'))").catch(()=>false),"library tracks");
+    await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.sidebar [data-nav-id=library].active') && !!document.querySelector('.songButton')").catch(()=>false),"library tracks");
     await screenshot(win,"desktop-library");
-    await win.webContents.executeJavaScript("(document.querySelector('.songButton')||document.querySelector('.homeAlbumPlayZone')).click()");
+    await win.webContents.executeJavaScript("document.querySelector('.songButton').click()");
     await until(()=>win.webContents.executeJavaScript("[...document.querySelectorAll('audio')].some(a=>!a.paused&&a.currentTime>0)").catch(()=>false),"audio playing");
+    // Focus changes must not reload, seek or pause a healthy audio element.
+    await win.webContents.executeJavaScript(`(()=>{const audio=document.querySelector('audio');const q={start:audio.currentTime,src:audio.src,events:[]};window.qaFocusAudio=q;for(const type of ['pause','seeking','loadstart']) audio.addEventListener(type,()=>q.events.push(type),{once:true});window.dispatchEvent(new Event('blur'));})()`);
+    win.blur();
+    await sleep(300);
+    win.focus();
+    await win.webContents.executeJavaScript("window.dispatchEvent(new Event('focus'))");
+    await sleep(700);
+    const focusAudio=await win.webContents.executeJavaScript(`(()=>{const a=document.querySelector('audio'), q=window.qaFocusAudio;return {events:q.events,paused:a.paused,sameSource:a.src===q.src,advanced:a.currentTime-q.start}})()`);
+    assert.ok(!focusAudio.paused && focusAudio.sameSource && focusAudio.advanced>0.3 && focusAudio.events.length===0,"focus interrupted playback: "+JSON.stringify(focusAudio));
     await screenshot(win,"desktop-playing");
     assert.equal(await win.webContents.executeJavaScript("typeof window.localitfy.onWatchedFoldersChange"), "function", "current preload exposes watched-folder events");
     assert.equal(await win.webContents.executeJavaScript("document.querySelector(\".app\")?.dataset.appVersion"), version, "renderer version matches package");
