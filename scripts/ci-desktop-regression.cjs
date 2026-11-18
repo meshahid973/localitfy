@@ -195,7 +195,7 @@ server.listen(5173,async()=>{
     await until(()=>win.webContents.executeJavaScript("document.querySelector('.app').dataset.workspaceArtwork==='on' && getComputedStyle(document.querySelector('.app')).backgroundImage.includes('radial-gradient')").catch(()=>false),"settled artwork transition",5000);
     await screenshot(win,"home-next-track");
     await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=settings]').click()");
-    await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.settingsModeButton').length===2 && document.querySelector('.app').dataset.workspaceArtwork==='off'").catch(()=>false),"two appearance modes");
+    await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.settingsModeButton').length===2 && document.querySelector('.app').dataset.workspaceArtwork==='on'").catch(()=>false),"two appearance modes");
     for(const mode of ["light","dark"]){
       await win.webContents.executeJavaScript(`document.querySelector('.settingsModeButton:has([data-preview-mode="${mode}"])').click()`);
       // Compare the actual resolved color, not the spelling of a minified CSS token

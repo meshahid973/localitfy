@@ -100,9 +100,8 @@ export default function AppShell(props: AppShellProps) {
   const playerBackground = effectiveTheme === "light" && settings.playerBackgroundStyle === "oledBlack" ? "flat" : settings.playerBackgroundStyle || "coverBlur";
   const homeBanner = effectiveTheme === "light" && settings.homeBannerType === "cleanBlack" ? "none" : settings.homeBannerType || "dynamic";
   const cardBackground = effectiveTheme === "light" && settings.mediaCardBackground === "oledFlat" ? "solid" : settings.mediaCardBackground || "glassy";
-  const artworkEnabled = view === "home" && !!home.currentSong &&
-    (homeBanner === "dynamic" || homeBanner === "albumCover") &&
-    effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded;
+  // Playback atmosphere belongs to the workspace, not the route or Home layout.
+  const artworkEnabled = !!home.currentSong && effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded;
   const strength = effectiveCoverColorSyncMode === "strong" ? .52 : effectiveCoverColorSyncMode === "subtle" ? .19 : .38;
   const workspacePalette = useWorkspacePalette(home.ambientStyle, artworkEnabled, effectiveTheme === "light", strength);
   const { actions, menu } = useCollectionActions(nav, collections, modals.queuePanel.openSongContextMenu);

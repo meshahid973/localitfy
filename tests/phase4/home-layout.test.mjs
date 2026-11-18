@@ -163,3 +163,9 @@ test("Home 3.1 keeps Listen Now on the workspace atmosphere and generated mixes 
   assert.match(artwork, /controller.abort\(\)/);
   assert.match(css, /\.homeReleaseCoverWrap\.homeMixArtwork \{[^}]*radial-gradient/);
 });
+
+test("workspace artwork follows playback independently of the open route", () => {
+  const shell = read("src/features/shell/AppShell.tsx");
+  assert.match(shell, /const artworkEnabled = !!home.currentSong && effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded/);
+  assert.doesNotMatch(shell, /const artworkEnabled = view === "home"/);
+});

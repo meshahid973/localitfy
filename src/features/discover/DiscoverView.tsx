@@ -181,7 +181,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       {catalog?.status === "error" ? <p role="alert">{catalog.error}</p> : null}
       {catalog?.status === "catalog" ? catalog.items.length ? <ul className="discoverSongList" aria-label="Search results">
         {catalog.items.map(item => <li key={item.id}>
-          <DiscoverCover title={item.title} artist={item.artist} artwork={item} lookup={catalog.kind === "recording" && !item.coverUrl} person={catalog.kind === "artist"} />
+          <DiscoverCover title={item.title} artist={item.artist} artwork={item} lookup={catalog.kind === "recording"} person={catalog.kind === "artist"} />
           <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => openLink(item.url)} title={item.title}>{item.title}</button><small title={item.subtitle}>{item.subtitle}</small></span>
           {catalog.kind === "recording" ? <><span className="discoverDuration">{duration(item.durationMs)}</span>{pickButton(item)}</> : null}
         </li>)}
