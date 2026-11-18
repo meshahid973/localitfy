@@ -78,7 +78,7 @@ function SongGroupBody({ kind, name, members, loading, currentId, isPlaying, tog
 
   return (
     <section data-page-section={kind} className="collectionPage songGroupPage" aria-label={`${name} ${kind}`}>
-      <PageAtmosphere songs={members} />
+      <PageAtmosphere songs={members} custom={target.coverSong?.coverThumbUrl || target.coverSong?.coverThumbnailUrl || target.coverSong?.thumbnailUrl || target.coverSong?.coverUrl || target.coverSong?.coverPath || target.coverSong?.coverFullUrl} />
       <CollectionHero
         typeLabel={kind}
         title={name}
@@ -106,7 +106,7 @@ function SongGroupBody({ kind, name, members, loading, currentId, isPlaying, tog
         </div>
         {!shown.length ? <p role="status">No matching tracks.</p> : null}
         <TrackList songs={shown} currentId={currentId} isPlaying={isPlaying} hideArtist={kind === "artist" ? name : undefined}
-          playFrom={(songId) => actions.playCollection({ ...target, songs: popular }, { startId: songId })}
+          playFrom={(songId) => actions.playCollection({ ...target, songs: filtered }, { startId: songId })}
           toggleLike={toggleLike} openPlaylistPicker={openPlaylistPicker} />
         {!query.trim() && popular.length > TOP_SONGS ? (
           <button className="collectionTextButton collectionShowAll" type="button" onClick={() => setShowAll((value) => !value)}>

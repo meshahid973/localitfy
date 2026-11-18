@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { CollectionArtwork } from "../covers/CollectionArtwork";
 import type { Song } from "../library/song.types";
 import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
@@ -30,6 +30,7 @@ function readChoice<T extends string>(key: string, allowed: readonly T[], fallba
 export default function GenresView({ songs }: GenresViewProps) {
   const actions = useAppActions();
   const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(query);
   const [genreLimit, setGenreLimit] = useState(150);
   const tagged = useGenreTaggedSongs(songs);
   const loadingTags = tagged.loading;
@@ -40,10 +41,10 @@ export default function GenresView({ songs }: GenresViewProps) {
     const counts = countGenresByMinTracks(genres);
     return GENRE_MIN_TRACKS.map((min) => ({ value: min, label: min === "1" ? `all genres (${counts[min]})` : `${min}+ tracks (${counts[min]})` }));
   }, [genres]);
-  const visibleGenres = useMemo(() => filterAndSortGenres(genres, query, sortMode, minTracks), [genres, query, sortMode, minTracks]);
+  const visibleGenres = useMemo(() => filterAndSortGenres(genres, deferredQuery, sortMode, minTracks), [genres, deferredQuery, sortMode, minTracks]);
   const hiddenBySize = minTracks !== "1" && genres.length > 0;
 
-  useEffect(() => setGenreLimit(150), [query, sortMode, minTracks]);
+  useEffect(() => setGenreLimit(150), [deferredQuery, sortMode, minTracks]);
   useEffect(() => writeLocalJson(SORT_STORAGE_KEY, sortMode), [sortMode]);
   useEffect(() => writeLocalJson(MIN_TRACKS_STORAGE_KEY, minTracks), [minTracks]);
 

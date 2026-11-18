@@ -44,15 +44,11 @@ export function shouldSwapDisplayTitleArtistV444(song: Pick<Song, "title" | "art
 }
 
 export function displaySongTitleV444(song: Pick<Song, "title" | "artist"> & { album?: string | null }, maxWords = 7) {
-  return shouldSwapDisplayTitleArtistV444(song)
-    ? prettyTitle(song.artist, maxWords)
-    : prettyTitle(song.title, maxWords);
+  return prettyTitle(song.title, maxWords);
 }
 
 export function displaySongArtistV444(song: Pick<Song, "title" | "artist"> & { album?: string | null }) {
-  return shouldSwapDisplayTitleArtistV444(song)
-    ? prettyMeta(song.title)
-    : prettyMeta(song.artist);
+  return prettyMeta(song.artist);
 }
 
 export function displaySongPickerSublineV444(song: Pick<Song, "title" | "artist"> & { album?: string | null }) {
@@ -86,6 +82,8 @@ export type SongRowItemProps = SongInteractionHandlers & {
   isDropTarget: boolean;
   libraryDropSide: LibraryDropSide;
   draggedSongTitle: string;
+  selected?: boolean;
+  onToggleSelection?: (id: string) => void;
 };
 
 
@@ -98,6 +96,8 @@ export const SongRowItem = memo(function SongRowItem({
   isDropTarget,
   libraryDropSide,
   draggedSongTitle,
+  selected,
+  onToggleSelection,
   onSelectSong,
   onToggleLike,
   onOpenPlaylistPicker,
@@ -112,11 +112,11 @@ export const SongRowItem = memo(function SongRowItem({
 
   return (
     <article
-      className={`songRow ${active ? "active" : ""} ${active && isPlaying ? "playing" : ""} ${isDragging ? "songDragging" : ""} ${isDropTarget ? "songDropTarget" : ""} ${isMissingFile ? "songMissingFileV039" : ""}`}
+      className={`songRow ${selected ? "selected" : ""} ${active ? "active" : ""} ${active && isPlaying ? "playing" : ""} ${isDragging ? "songDragging" : ""} ${isDropTarget ? "songDropTarget" : ""} ${isMissingFile ? "songMissingFileV039" : ""}`}
       data-library-song-id={song.id}
       data-file-exists={isMissingFile ? "false" : "true"}
       data-drop-side={isDropTarget ? libraryDropSide : undefined}
-      draggable
+      draggable={!onToggleSelection}
       onDragStart={(event) => onStartSongDrag(event, song.id)}
       onDragOver={(event) => onDragOverSong(event, song.id)}
       onDragLeave={(event) => onDragLeaveSong(event, song.id)}
@@ -127,8 +127,8 @@ export const SongRowItem = memo(function SongRowItem({
       title={isMissingFile ? "Local audio file missing" : draggedSongTitle ? `dragging ${draggedSongTitle}` : undefined}
       style={{ "--stagger": `${Math.min(index, 20) * 18}ms` } as CSSProperties}
     >
-      <button className="songButton" onClick={() => onSelectSong(song.id, true)}>
-        <span className="songIndex">{active && isPlaying ? <PlayingBarsIcon /> : index + 1}</span>
+      <button className="songButton" type="button" disabled={isMissingFile && !onToggleSelection} aria-pressed={onToggleSelection ? Boolean(selected) : undefined} aria-current={!onToggleSelection && active ? "true" : undefined} aria-label={`${onToggleSelection ? (selected ? "Deselect" : "Select") : "Play"} ${song.title}`} onClick={() => onToggleSelection ? onToggleSelection(song.id) : onSelectSong(song.id, true)}>
+        <span className="songIndex">{onToggleSelection ? (selected ? "✓" : "○") : active && isPlaying ? <PlayingBarsIcon /> : index + 1}</span>
 
         <Cover song={song} className="songArt" />
 
@@ -306,6 +306,8 @@ export type VirtualSongRowsProps = SongInteractionHandlers & {
   libraryDragOverSongId: string;
   libraryDropSide: LibraryDropSide;
   draggedSongTitle: string;
+  selectedIds?: ReadonlySet<string>;
+  onToggleSelection?: (id: string) => void;
   onAreaDragOver: (event: DragEvent<HTMLDivElement>) => void;
   onAreaDragLeave: (event: DragEvent<HTMLDivElement>) => void;
   onAreaDrop: (event: DragEvent<HTMLDivElement>) => void;
@@ -320,6 +322,8 @@ export const VirtualSongRows = memo(function VirtualSongRows({
   libraryDragOverSongId,
   libraryDropSide,
   draggedSongTitle,
+  selectedIds,
+  onToggleSelection,
   onAreaDragOver,
   onAreaDragLeave,
   onAreaDrop,
@@ -391,6 +395,8 @@ export const VirtualSongRows = memo(function VirtualSongRows({
             >
               <SongRowItem
                 song={song}
+                selected={selectedIds?.has(song.id)}
+                onToggleSelection={onToggleSelection}
                 index={virtualRow.index}
                 active={active}
                 isPlaying={isPlaying}

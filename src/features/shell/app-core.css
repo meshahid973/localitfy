@@ -1562,13 +1562,7 @@ body.isResizingPlayer{
   transition: opacity 520ms ease;
 }
 
-button{
-  transition: transform 190ms cubic-bezier(0.16, 1, 0.3, 1),
-    background-color 190ms ease,
-    border-color 190ms ease,
-    opacity 190ms ease,
-    box-shadow 190ms ease !important;
-}
+button { transition: color var(--lt-control-motion) ease, background-color var(--lt-control-motion) ease, border-color var(--lt-control-motion) ease; }
 
 .circleButton:not(.playerBar *){
 

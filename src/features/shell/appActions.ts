@@ -39,7 +39,14 @@ export function useAppActions() {
 }
 
 export const playableIds = (songs: readonly Song[]) => songs.filter((song) => song.fileExists !== false).map((song) => song.id);
-const firstCover = (songs: readonly Song[]) => songs.find((song) => Boolean(song.coverUrl || song.coverPath || song.coverThumbnailUrl)) || songs[0] || null;
+export function firstCover(songs: readonly Song[]): Song | null {
+  let best: Song | null = null;
+  for (const song of songs) {
+    if (!song.coverUrl && !song.coverPath && !song.coverThumbnailUrl && !song.coverThumbUrl && !song.coverFullUrl && !song.thumbnailUrl) continue;
+    if (!best || (Number(song.playCount) || 0) > (Number(best.playCount) || 0)) best = song;
+  }
+  return best ?? songs[0] ?? null;
+}
 const trackCount = (count: number) => `${count} track${count === 1 ? "" : "s"}`;
 
 export function artistTarget(name: string, songs: readonly Song[]): CollectionTarget {

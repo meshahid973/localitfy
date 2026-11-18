@@ -111,6 +111,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
   const [smartEditing, setSmartEditing] = useState<Playlist | null | undefined>(undefined);
   const [prompting, setPrompting] = useState(false);
   const [playlistQuery, setPlaylistQuery] = useState("");
+  const [trackQuery, setTrackQuery] = useState("");
   const [coverBusy, setCoverBusy] = useState(false);
   const [coverError, setCoverError] = useState("");
   const coverInput = useRef<HTMLInputElement>(null);
@@ -126,6 +127,8 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
   useEffect(() => { if (detailId && selectedPlaylist?.id !== detailId) setSelectedPlaylistId(detailId); }, [detailId, selectedPlaylist?.id]);
   const detailPlaylist: Playlist | null = detailId ? playlistSummaries.find((summary: { playlist: Playlist }) => summary.playlist.id === detailId)?.playlist ?? null : null;
   const detailSongs = useMemo(() => detailPlaylist?.songIds.flatMap((id) => songsById.get(id) ?? []) ?? [], [detailPlaylist, songsById]);
+  useEffect(() => { setTrackQuery(""); setCoverError(""); }, [detailId]);
+  const filteredDetailSongs = useMemo(() => { const q = trackQuery.trim().toLocaleLowerCase(); return q ? detailSongs.filter(song => [song.title,song.artist,song.album].some(value => (value || "").toLocaleLowerCase().includes(q))) : detailSongs; }, [detailSongs, trackQuery]);
   const smartDialog = smartEditing !== undefined ? (
     <Suspense fallback={null}>
       <SmartPlaylistDialog playlist={smartEditing} songs={songs} listeningCounts={props.listeningCounts}
@@ -211,6 +214,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
                     onKeyDown={(event) => {
                       if (event.key === "Escape") cancelRenamePlaylist();
                     }}
+                    aria-label="Playlist name"
                     placeholder="playlist name"
                     autoFocus
                   />
@@ -223,26 +227,28 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
             </div>
 
             <div className="playlistManageActions">
+              <input type="search" className="pageHeaderSearch" aria-label="Search playlist tracks" placeholder="Search tracks" value={trackQuery} onChange={event => setTrackQuery(event.currentTarget.value)} />
               <button className="settingsTinyButton" type="button" onClick={() => startRenamePlaylist(detailPlaylist)}><ActionLabel icon={Pencil}>rename</ActionLabel></button>
               <button className="settingsTinyButton" type="button" onClick={() => duplicatePlaylist(detailPlaylist.id)}><ActionLabel icon={Copy}>duplicate</ActionLabel></button>
-              <button className="settingsTinyButton danger" type="button" onClick={() => { removePlaylist(detailPlaylist.id); actions.nav.back(); }}><ActionLabel icon={Trash2}>remove</ActionLabel></button>
+              <button className="settingsTinyButton danger" type="button" onClick={() => { removePlaylist(detailPlaylist.id); actions.nav.go("playlists"); }}><ActionLabel icon={Trash2}>remove</ActionLabel></button>
             </div>
           </div>
 
-          <VirtualPlaylistTrackList
+          {trackQuery.trim() && !filteredDetailSongs.length ? <p role="status">No matching tracks.</p> : <VirtualPlaylistTrackList
             selectedPlaylistId={detailPlaylist.id}
-            list={detailSongs}
+            list={filteredDetailSongs}
+            editable={!detailPlaylist.rules && !trackQuery.trim()}
             currentId={currentId}
             isPlaying={isPlaying}
             draggedSongId={draggedSongId}
-            onSelectSong={selectPlaylistSongAction}
+            onSelectSong={(id) => actions.playCollection(target, {startId:id})}
             onStartSongDrag={startPlaylistSongDragAction}
             onDropSong={dropPlaylistSongAction}
             onAppendSong={appendPlaylistSongAction}
             onDragEnd={endPlaylistSongDragAction}
             onOpenContextMenu={openPlaylistSongContextMenuAction}
             onRemoveSong={removePlaylistSongAction}
-          />
+          />}
           {!detailPlaylist.rules && detailSongs.length > 0 ? (
             <PlaylistRecommendations playlist={detailPlaylist} songs={songs as Song[]} playlists={playlists} currentId={currentId} hidden={hidden}
               addSongToPlaylist={props.addSongToPlaylist} selectSong={props.selectSong} />

@@ -1,11 +1,12 @@
 import { isAndroidApp, computerName } from "../../app/platform";
 import "./library.css";
-import { lazy, Suspense, useMemo, useState, type DragEventHandler } from "react";
+import { lazy, Suspense, useCallback, useMemo, useState, type DragEventHandler } from "react";
 import { VirtualLibrarySongCards, VirtualSongRows, type VirtualSongRowsProps } from "./components/SongRows";
 import { Copy, FileWarning, FolderInput, ListMusic, Radio, Shuffle, Trash2, Grid2X2, List, Heart, Users } from "lucide-react";
 import type { SimilarSeedRequest } from "../analysis/similarSeed";
 import type { DuplicatesMergeResult } from "./duplicates/DuplicatesDialog";
 import { ActionLabel } from "../../shared/ui/ActionLabel";
+import { useAppActions, mixTarget } from "../shell/appActions";
 import { PageHeader } from "../../shared/ui/PageHeader";
 import { ArcDropdownMenu } from "../../shared/ui/ArcDropdownMenu";
 import { LocaltifyStateCard, MascotStateArt } from "../../shared/ui/LocaltifyViewUi";
@@ -71,17 +72,23 @@ export default function LibraryView(props: LibraryViewProps) {
     visibleSongs
   } = props;
   const [duplicatesOpen, setDuplicatesOpen] = useState(false);
+  const actions = useAppActions();
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selection, setSelection] = useState<Set<string>>(() => new Set());
+  const selectedSongs = useMemo(() => visibleSongs.filter(song => selection.has(song.id)), [visibleSongs, selection]);
+  const toggleSelection = useCallback((id: string) => setSelection(old => { const next = new Set(old); if (next.has(id)) next.delete(id); else next.add(id); return next; }), []);
+  const exitSelection = () => { setSelectionMode(false); setSelection(new Set()); };
 
   const likedCount = useMemo(() => songs.reduce((count, song) => count + Number(Boolean(song.liked)), 0), [songs]);
   const isLiked = view === "liked";
-  const grid = settings.libraryRowStyle === "coverCards";
+  const grid = !selectionMode && settings.libraryRowStyle === "coverCards";
   const shownLabel = showingMissingFiles ? "missing files" : isLiked ? "tracks" : "all tracks";
 
   return (
     <section data-page-section="library" className={`libraryPage ${isLiked ? "libraryPageLiked" : ""}`}>
       <PageHeader title={isLiked ? "Liked songs" : "Library"}>
         <nav className="libraryNavigation" aria-label="Library collections">
-          {([{ id: "library", title: "Songs" }, { id: "liked", title: "Liked" }, { id: "playlists", title: "Playlists" }, { id: "artists", title: "Artists" }] as const).map(item => <button key={item.id} type="button" aria-current={view === item.id ? "page" : undefined} onClick={() => changeView(item.id, "library-navigation")}>{item.title}</button>)}
+          {([{ id: "library", title: "Songs" }, { id: "liked", title: "Liked" }, { id: "playlists", title: "Playlists" }, { id: "artists", title: "Artists" }, { id: "genres", title: "Genres" }] as const).map(item => <button key={item.id} type="button" aria-current={view === item.id ? "page" : undefined} onClick={() => changeView(item.id, "library-navigation")}>{item.title}</button>)}
         </nav>
         <input
           className="pageHeaderSearch librarySearch"
@@ -98,9 +105,10 @@ export default function LibraryView(props: LibraryViewProps) {
           onValueChange={setLibrarySortMode}
         />
         <div className="libraryViewMode" role="group" aria-label="Library layout">
-          <button type="button" aria-pressed={grid} title="Grid view" aria-label="Grid view" onClick={() => props.setLibraryRowStyle("coverCards")}><Grid2X2 size={16}/></button>
+          <button type="button" aria-pressed={grid} title="Grid view" aria-label="Grid view" onClick={() => { exitSelection(); props.setLibraryRowStyle("coverCards"); }}><Grid2X2 size={16}/></button>
           <button type="button" aria-pressed={!grid} title="List view" aria-label="List view" onClick={() => props.setLibraryRowStyle("comfyRows")}><List size={18}/></button>
         </div>
+        <button className="libraryAction" type="button" aria-pressed={selectionMode} onClick={() => selectionMode ? exitSelection() : setSelectionMode(true)} disabled={!visibleSongs.length && !selectionMode}>{selectionMode ? "Done" : "Select tracks"}</button>
         {!isLiked ? (
           <>
             <button className="libraryAction" type="button" onClick={shuffleLibrarySongsAction} disabled={songs.length < 2}>
@@ -149,6 +157,7 @@ export default function LibraryView(props: LibraryViewProps) {
         </div>
       ) : null}
 
+      {selectionMode ? <div className="librarySelectionTools" role="group" aria-label="Selected tracks"><span className="pageHeaderCount" aria-live="polite">{selectedSongs.length} selected in view</span><button className="softButton" type="button" onClick={() => setSelection(new Set(visibleSongs.map(song => song.id)))}>Select all visible</button><button className="softButton" type="button" onClick={() => setSelection(new Set())}>Clear</button><button className="softButton" type="button" disabled={!selectedSongs.some(song => song.fileExists !== false)} onClick={() => actions.queueCollection(mixTarget({id:"library-selection",name:"Selected tracks"},selectedSongs))}>Add to queue</button></div> : null}
       <section className="libraryTracks" aria-labelledby="library-tracks-title">
         <div className="libraryTracksHead">
           <div>
@@ -169,7 +178,7 @@ export default function LibraryView(props: LibraryViewProps) {
               onDragLeave={handleLibraryAreaDragLeave}
               onDrop={handleLibraryAreaDrop}
             >
-              <VirtualSongRows {...rows} list={visibleSongs} className="libraryFullListV025" />
+              <VirtualSongRows {...rows} selectedIds={selectionMode ? selection : undefined} onToggleSelection={selectionMode ? toggleSelection : undefined} list={visibleSongs} className="libraryFullListV025" />
             </div>
           )
         ) : (

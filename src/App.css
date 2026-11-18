@@ -700,10 +700,7 @@ body.isResizingSidebar{
 }
 .app button{
   transition:
-    border-color 150ms ease,
-    background-color 150ms ease,
-    color 150ms ease,
-    opacity 150ms ease !important;
+    border-color var(--lt-control-motion) ease, background-color var(--lt-control-motion) ease, color var(--lt-control-motion) ease, opacity var(--lt-control-motion) ease;
 }
 
 .app.themeSettling{

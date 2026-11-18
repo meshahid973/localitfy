@@ -138,7 +138,7 @@ export function usePlaylistsController({
     }
 
     setPlaylists((items) => items.map((item) =>
-      item.id === playlistId ? { ...item, songIds: [...item.songIds, songId] } : item
+      item.id === playlistId && !item.rules && !item.songIds.includes(songId) ? { ...item, songIds: [...item.songIds, songId] } : item
     ));
     setSelectedPlaylistId(playlistId);
     setStatusText(`added ${prettyTitle(song.title, 4)} to ${playlist.name}`);
@@ -347,7 +347,7 @@ export function usePlaylistsController({
     if (nextIds.length === playlist.songIds.length && nextIds.every((id, index) => id === playlist.songIds[index])) return;
 
     setPlaylists((items) => items.map((item) =>
-      item.id === playlistId ? { ...item, songIds: nextIds } : item
+      item.id === playlistId && !item.rules && item.songIds.includes(targetSongId) ? { ...item, songIds: item.songIds.includes(songId) ? reorderIdList(item.songIds, songId, targetSongId, side) : insertIdNearTarget(item.songIds, songId, targetSongId, side) } : item
     ));
     setSelectedPlaylistId(playlistId);
     const reordering = playlist.songIds.includes(songId);

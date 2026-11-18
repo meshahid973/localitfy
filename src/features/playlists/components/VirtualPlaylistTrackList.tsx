@@ -24,6 +24,7 @@ function getPlaylistDropSide(event: DragEvent<HTMLElement>): LibraryDropSide {
 
 export type VirtualPlaylistTrackListProps = {
   selectedPlaylistId: string;
+  editable?: boolean;
   list: Song[];
   currentId: string;
   isPlaying: boolean;
@@ -39,6 +40,7 @@ export type VirtualPlaylistTrackListProps = {
 
 export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
   selectedPlaylistId,
+  editable = true,
   list,
   currentId,
   isPlaying,
@@ -66,23 +68,23 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
 
   const handleEmptyDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
     const songId = readPlaylistDraggedSongId(event, draggedSongId);
-    if (!selectedPlaylistId || !songId) return;
+    if (!editable || !selectedPlaylistId || !songId) return;
 
     event.preventDefault();
     event.stopPropagation();
     event.dataTransfer.dropEffect = "copy";
-  }, [draggedSongId, selectedPlaylistId]);
+  }, [draggedSongId, selectedPlaylistId, editable]);
 
   const handleEmptyDrop = useCallback((event: DragEvent<HTMLDivElement>) => {
     const songId = readPlaylistDraggedSongId(event, draggedSongId);
-    if (!selectedPlaylistId || !songId) return;
+    if (!editable || !selectedPlaylistId || !songId) return;
 
     event.preventDefault();
     event.stopPropagation();
     onAppendSong(selectedPlaylistId, songId);
     clearLocalDropTarget();
     onDragEnd();
-  }, [clearLocalDropTarget, draggedSongId, onAppendSong, onDragEnd, selectedPlaylistId]);
+  }, [clearLocalDropTarget, draggedSongId, onAppendSong, onDragEnd, selectedPlaylistId, editable]);
 
   if (!selectedPlaylistId || !list.length) {
     return (
@@ -122,11 +124,11 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
                 "--playlist-row-y": `${virtualRow.start - scrollMargin}px`,
                 "--playlist-stagger": Math.min(virtualRow.index, 12)
               } as CSSProperties}
-              draggable
+              draggable={editable}
               onDragStart={(event) => onStartSongDrag(event, song.id)}
               onDragOver={(event) => {
                 const incomingSongId = readPlaylistDraggedSongId(event, draggedSongId);
-                if (!incomingSongId || incomingSongId === song.id) return;
+                if (!editable || !incomingSongId || incomingSongId === song.id) return;
 
                 event.preventDefault();
                 event.stopPropagation();
@@ -146,7 +148,7 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
               }}
               onDrop={(event) => {
                 const incomingSongId = readPlaylistDraggedSongId(event, draggedSongId);
-                if (!incomingSongId || incomingSongId === song.id) return;
+                if (!editable || !incomingSongId || incomingSongId === song.id) return;
 
                 event.preventDefault();
                 event.stopPropagation();
@@ -161,7 +163,7 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
               }}
               onContextMenu={(event) => onOpenContextMenu(event, song)}
             >
-              <span className="playlistTrackGrip"><GripVertical size={14} strokeWidth={2.25} /></span>
+              <span className="playlistTrackGrip">{editable ? <GripVertical size={14} strokeWidth={2.25} /> : null}</span>
               <button className="playlistTrackMain" type="button" disabled={song.fileExists === false} aria-current={active ? "true" : undefined} onClick={() => onSelectSong(song.id)}>
                 <span className="playlistTrackIndex">{active && isPlaying ? <PlayingBarsIcon /> : virtualRow.index + 1}</span>
                 <Cover song={song} className="playlistTrackCover" preferThumbnail />
@@ -171,7 +173,7 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
                 </span>
               </button>
               <span className="playlistTrackDuration">{formatTime(song.duration)}</span>
-              <button className="iconAction iconActionSvg" type="button" onClick={() => onRemoveSong(selectedPlaylistId, song.id)} aria-label="remove from playlist">
+              <button className="iconAction iconActionSvg" type="button" disabled={!editable} onClick={() => onRemoveSong(selectedPlaylistId, song.id)} aria-label={`Remove ${song.title} from playlist`}>
                 <X size={16} strokeWidth={2.5} />
               </button>
             </article>

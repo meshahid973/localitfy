@@ -6,7 +6,7 @@ import { MediaCard } from "../../shared/ui/MediaCard";
 import { PageHeader } from "../../shared/ui/PageHeader";
 import { ArcDropdownMenu } from "../../shared/ui/ArcDropdownMenu";
 import { prettyMeta } from "../search/search.utils";
-import { artistTarget, useAppActions } from "../shell/appActions";
+import { artistTarget, useAppActions, firstCover } from "../shell/appActions";
 import { splitArtistCredits } from "./artistCredits";
 import "../../shared/ui/collection-layout.css";
 import "./artists.css";
@@ -29,7 +29,7 @@ function buildArtists(songs: Song[]): ArtistEntry[] {
       const group = groups.get(id) || { name, songs: [], albums: new Set<string>() };
       group.songs.push(song);
       const album = song.album?.trim().toLocaleLowerCase();
-      if (album) group.albums.add(album);
+      if (album && !["unknown","unknown album","local files"].includes(album)) group.albums.add(album);
       groups.set(id, group);
     }
   }
@@ -41,11 +41,7 @@ function buildArtists(songs: Song[]): ArtistEntry[] {
       songs: group.songs,
       albumCount: group.albums.size,
       playCount: group.songs.reduce((sum, song) => sum + Math.max(0, Number(song.playCount) || 0), 0),
-      coverSong: group.songs.reduce((best, song) => {
-        const hasCover = (s: Song) => Boolean(s.coverUrl || s.coverPath || s.coverThumbnailUrl || s.coverThumbUrl || s.coverFullUrl);
-        if (!hasCover(song)) return best;
-        return !hasCover(best) || (Number(song.playCount) || 0) > (Number(best.playCount) || 0) ? song : best;
-      }, group.songs[0])
+      coverSong: firstCover(group.songs) ?? group.songs[0]
     }))
     .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
 }
