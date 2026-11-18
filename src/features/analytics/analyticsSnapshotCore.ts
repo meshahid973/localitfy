@@ -113,14 +113,14 @@ export function computeLocaltifyAnalyticsSnapshot(input: LocaltifyAnalyticsSnaps
   let audienceSegment = "new_local_music_user";
   if (playlistCount > 0 && settings.discordEnabled) audienceSegment = "playlist_social_listener";
   else if (settings.discordEnabled) audienceSegment = "discord_presence_listener";
-  else if (settings.customThemeEnabled || settings.coverColorSyncMode !== "off") audienceSegment = "visual_customizer";
+  else if (settings.coverColorSyncMode !== "off") audienceSegment = "visual_customizer";
   else if (playlistCount > 0) audienceSegment = "playlist_builder";
   else if (songCount >= 75) audienceSegment = "large_library_listener";
   else if (songCount > 0) audienceSegment = "casual_local_listener";
 
   let primaryAdAngle = "local_music_no_account";
   if (settings.discordEnabled) primaryAdAngle = "discord_rich_presence";
-  else if (settings.customThemeEnabled || settings.coverColorSyncMode !== "off") primaryAdAngle = "custom_themes_and_covers";
+  else if (settings.coverColorSyncMode !== "off") primaryAdAngle = "custom_themes_and_covers";
   else if (playlistCount > 0) primaryAdAngle = "premium_playlists";
   else if (songCount >= 75) primaryAdAngle = "large_library_player";
 
@@ -169,11 +169,11 @@ export function computeLocaltifyAnalyticsSnapshot(input: LocaltifyAnalyticsSnaps
     discord_activity_style: String(settings.discordActivityStyle || "normal"),
     start_with_windows_enabled: Boolean(settings.startWithWindows),
     minimize_to_tray_enabled: Boolean(settings.minimizeToTray),
-    custom_theme_enabled: Boolean(settings.customThemeEnabled),
-    theme_id: settings.customThemeEnabled ? "custom" : String(settings.theme || "default"),
+    custom_theme_enabled: false,
+    theme_id: String(settings.theme || "default"),
     cover_color_sync_mode: String(settings.coverColorSyncMode || "normal"),
     compact_player_enabled: Boolean(settings.compactPlayer),
-    simple_mode_enabled: Boolean(settings.simpleMode),
+    simple_mode_enabled: false,
     reduced_motion_enabled: Boolean(settings.reducedMotion),
     crossfade_enabled: Boolean(settings.crossfadeEnabled),
     gapless_enabled: Boolean(settings.gaplessPlayback),

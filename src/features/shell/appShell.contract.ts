@@ -39,7 +39,6 @@ export type ShellFrameContract = {
   themeMotionReady: boolean; showTopUpdateRibbon: boolean; isViewSwitching: boolean;
   heroMotion: "idle" | "expanding" | "compacting"; heroMotionAppClass: string; homeEntranceSettledClass: string;
   isAppBackgrounded: boolean; scrollBusyRef: RefObject<boolean>; themeSettling: boolean;
-  themePresetStyle: CSSProperties;
   effectiveTheme: string; effectiveAmbient: boolean; effectiveCoverColorSyncMode: CoverColorSyncMode;
   effectiveNotes: boolean; statusText: string; draggedSongTitle: string;
 };

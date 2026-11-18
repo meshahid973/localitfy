@@ -69,7 +69,7 @@ export default function AppShell(props: AppShellProps) {
   const {
     appRootRef, settings, platformInfo, themeMotionReady, showTopUpdateRibbon, isViewSwitching,
     heroMotion, heroMotionAppClass, homeEntranceSettledClass, isAppBackgrounded, scrollBusyRef,
-    themeSettling, themePresetStyle, effectiveTheme,
+    themeSettling, effectiveTheme,
     effectiveAmbient, effectiveCoverColorSyncMode, effectiveNotes, statusText, draggedSongTitle
   } = frame;
   const { updatePrompt, askUpdaterToDownload, askUpdaterToInstall, manualUpdateCheck, setUpdatePrompt } = updates;
@@ -131,7 +131,6 @@ export default function AppShell(props: AppShellProps) {
           "--home-hero-cover-contrast": String(homeHeroCoverContrast),
           "--home-hero-cover-saturation": String(homeHeroCoverSaturation),
           "--home-hero-cover-glow-brightness": String(homeHeroCoverGlowBrightness),
-          ...themePresetStyle,
           "--workspace-cover-color": workspaceCoverColor
         } as CSSProperties
       }

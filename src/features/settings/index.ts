@@ -4,6 +4,5 @@ export * from "./settings.constants";
 export * from "./settings.search";
 export * from "./theme.constants";
 export * from "./theme.utils";
-export * from "./themePresetStyle";
 
 export { useSettingsController } from "./useSettingsController";

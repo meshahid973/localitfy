@@ -1,6 +1,76 @@
-/* Two modes only. Palette values are provided by themePresetStyle.ts.
-   Component geometry is owned by the feature stylesheets. */
+/* Fixed palettes are CSS-owned. Runtime state selects only data-theme. */
+.app[data-theme="dark"] {
+  --bg: #000000;
+  --surface: #151518;
+  --surface-2: #19191c;
+  --surface-3: #232326;
+  --lt-bg-elevated: #111214;
+  --lt-surface-soft: rgba(255, 255, 255, .055);
+  --lt-surface-raised: #19191c;
+  --lt-danger: #ff8095;
+  --text: #ffffff;
+  --text-2: rgba(255, 255, 255, .78);
+  --muted: #b5b5bd;
+  --faint: #94949e;
+  --line: rgba(255, 255, 255, .10);
+  --line-2: rgba(255, 255, 255, .18);
+  --accent: #ffffff;
+  --button-text-on-accent: #000000;
+  --accent-2: #d4d4d8;
+  --accent-rgb: 255, 255, 255;
+  --accent-2-rgb: 212, 212, 216;
+  --localtify-sidebar-bg: rgba(0, 0, 0, .98);
+  --localtify-sidebar-bg-2: rgba(21, 21, 24, .72);
+  --localtify-panel-bg: rgba(21, 21, 24, .52);
+  --localtify-panel-bg-2: rgba(0, 0, 0, .74);
+  color-scheme: dark;
+}
+.app[data-theme="light"] {
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --surface-2: #e7e7eb;
+  --surface-3: #dedee3;
+  --lt-bg-elevated: #ffffff;
+  --lt-surface-soft: rgba(24, 24, 27, .055);
+  --lt-surface-raised: #e7e7eb;
+  --lt-danger: #b42343;
+  --text: #18181b;
+  --text-2: rgba(24, 24, 27, .78);
+  --muted: #55555f;
+  --faint: #696972;
+  --line: rgba(24, 24, 27, .10);
+  --line-2: rgba(24, 24, 27, .18);
+  --accent: #18181b;
+  --button-text-on-accent: #ffffff;
+  --accent-2: #52525b;
+  --accent-rgb: 24, 24, 27;
+  --accent-2-rgb: 82, 82, 91;
+  --localtify-sidebar-bg: rgba(245, 245, 247, .98);
+  --localtify-sidebar-bg-2: rgba(255, 255, 255, .72);
+  --localtify-panel-bg: rgba(255, 255, 255, .52);
+  --localtify-panel-bg-2: rgba(245, 245, 247, .74);
+  color-scheme: light;
+}
 .app[data-theme] {
+  --bg-2: var(--bg);
+  --bg-3: var(--surface);
+  --panel: var(--surface);
+  --highlight: var(--accent);
+  --progress: var(--accent);
+  --highlight-rgb: var(--accent-rgb);
+  --progress-rgb: var(--accent-rgb);
+  --accent-soft: rgba(var(--accent-rgb), .14);
+  --accent-line: rgba(var(--accent-rgb), .34);
+  --theme-accent: var(--accent);
+  --theme-accent-2: var(--accent-2);
+  --theme-highlight: var(--highlight);
+  --theme-progress: var(--progress);
+  --theme-card-glass: rgba(var(--accent-rgb), .045);
+  --theme-card-border: rgba(var(--accent-rgb), .16);
+  --theme-hover-glass: rgba(var(--accent-rgb), .09);
+  --theme-hover-border: rgba(var(--accent-rgb), .32);
+  --card-rgb: var(--accent-rgb);
+  --localtify-line-soft: rgba(var(--accent-rgb), .16);
   --lt-bg: var(--bg);
   --lt-surface: var(--surface);
   --lt-text: var(--text);
@@ -12,7 +82,5 @@
   --lt-border-strong: var(--line-2);
   --lt-accent: var(--accent);
   --lt-accent-rgb: var(--accent-rgb);
-  color-scheme: dark;
 }
-.app[data-theme="light"] { color-scheme: light; }
 .app[data-theme] :is(select, option) { color: var(--lt-text); background-color: var(--lt-bg-elevated); }

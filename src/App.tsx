@@ -84,7 +84,7 @@ import { runLocaltifyIdleTask } from "./app/runtime/idle";
 import { useBodyRuntimeClasses } from "./app/runtime/useBodyRuntimeClasses";
 import { useAppLifecycleRuntime } from "./app/runtime/useAppLifecycleRuntime";
 import { formatAnalyticsDuration, localtifyAnalyticsNumber, localtifyAnalyticsString } from "./features/analytics/formatters";
-import { applyVisualCustomizationDefaults, VISUAL_CUSTOMIZATION_DEFAULTS } from "./features/settings/visualCustomization";
+import { applyVisualCustomizationDefaults, migrateVisualSettings, VISUAL_CUSTOMIZATION_DEFAULTS } from "./features/settings/visualCustomization";
 import { getLocaltifyPlatformInfo } from "./app/platform";
 import {
   FEEDBACK_CATEGORY_OPTIONS,
@@ -98,9 +98,6 @@ import {
   resetOnboardingForThisRelease,
   shouldOpenOnboardingForThisRelease
 } from "./features/onboarding/onboardingRelease";
-import {
-  restoreCustomThemeAfterUpdate
-} from "./features/settings/customThemePersistence";
 import {
   INITIAL_LIBRARY_RENDER_LIMIT,
   LIBRARY_RENDER_BATCH_SIZE,
@@ -166,7 +163,6 @@ import {
   useCoverAverageStyle
 } from "./features/covers";
 import {
-  makeThemePresetStyle,
   normalizeCoverColorSyncMode,
   normalizeThemeId
 } from "./features/settings";
@@ -883,7 +879,6 @@ function MainModeApp() {
 
   const effectiveTheme = normalizeThemeId(settings.theme);
   const currentTheme = themes.find(theme => theme.id === effectiveTheme) ?? themes[1];
-  const themePresetStyle = useMemo<CSSProperties>(() => makeThemePresetStyle(effectiveTheme), [effectiveTheme]);
   useEffect(() => { setThemeMotionReady(true); }, [setThemeMotionReady]);
 
   const platformInfo = useMemo(() => getLocaltifyPlatformInfo(), []);
@@ -2171,16 +2166,14 @@ function MainModeApp() {
       devPerfEnd("bootstrap:ipc", `${payload.songs?.length ?? 0} songs`);
 
 
-      const storedSettings = (payload.settings || {}) as Partial<Settings>;
+      const storedSettings = payload.settings || {};
       const shouldApplyV013Defaults = window.localStorage.getItem(V013_DEFAULTS_KEY) !== "true";
       const shouldApplyStartWithWindowsDefault = platformInfo.startupSettingSupported && typeof storedSettings.startWithWindows === "undefined";
-      const nextSettings: Settings = applyVisualCustomizationDefaults({
+      const { settings: nextSettings, changed: visualSettingsChanged } = migrateVisualSettings(storedSettings, {
         ...defaultSettings,
-        ...storedSettings,
         ...(shouldApplyV013Defaults ? V013_RELEASE_DEFAULTS : {})
-      } as Settings);
+      }, shouldApplyV013Defaults ? V013_RELEASE_DEFAULTS : undefined);
 
-      const didRestoreCustomThemeAfterUpdate = restoreCustomThemeAfterUpdate(nextSettings, storedSettings);
       // The redesigned desktop opens as an icon rail once. Preserve later explicit
       // choices, and never modify Android navigation or an existing hover layout.
       const sidebarMigrationKey = "localitfy.sidebar-rail-v1";
@@ -2195,40 +2188,9 @@ function MainModeApp() {
         nextSettings.startWithWindows = false;
       }
 
-      const shouldRepairAnimatedVisualSettings = nextSettings.animatedBackgrounds !== true || nextSettings.animeVisuals !== true;
-      nextSettings.animatedBackgrounds = true;
-      nextSettings.animeVisuals = true;
-
-      nextSettings.coverColorSyncMode = normalizeCoverColorSyncMode(
-        storedSettings.coverColorSyncMode ?? (storedSettings.showAmbientGradient === false ? "off" : nextSettings.coverColorSyncMode)
-      );
-      nextSettings.showAmbientGradient = nextSettings.coverColorSyncMode !== "off";
-
-      // Simple Mode was removed in v0.2.8. Keep old installs from booting into it.
-      nextSettings.simpleMode = false;
-
-      const normalizedBootTheme = normalizeThemeId(nextSettings.theme);
-      const shouldRepairBootTheme = normalizedBootTheme !== storedSettings.theme;
-      nextSettings.theme = normalizedBootTheme;
-
-      const shouldPersistVisualCustomizationDefaults =
-        nextSettings.homeBannerType !== storedSettings.homeBannerType ||
-        nextSettings.blurEffects !== storedSettings.blurEffects ||
-        nextSettings.mediaCardBackground !== storedSettings.mediaCardBackground ||
-        nextSettings.homeLayoutMode !== storedSettings.homeLayoutMode ||
-        nextSettings.libraryRowStyle !== storedSettings.libraryRowStyle ||
-        nextSettings.starsIntensity !== storedSettings.starsIntensity ||
-        nextSettings.sidebarBehavior !== storedSettings.sidebarBehavior ||
-        nextSettings.playerBackgroundStyle !== storedSettings.playerBackgroundStyle;
-
       const shouldPersistBootSettings =
-        shouldApplyV013Defaults ||
-        shouldApplyStartWithWindowsDefault ||
-        shouldRepairAnimatedVisualSettings ||
-        shouldRepairBootTheme ||
-        shouldPersistVisualCustomizationDefaults ||
-        didRestoreCustomThemeAfterUpdate ||
-        (platformInfo.startupSettingSupported && typeof storedSettings.startWithWindows === "undefined");
+        shouldApplyV013Defaults || shouldApplyStartWithWindowsDefault ||
+        visualSettingsChanged || (migrateSidebar && nextSettings.sidebarBehavior !== storedSettings.sidebarBehavior);
 
       if (shouldPersistBootSettings) {
         if (shouldApplyV013Defaults) window.localStorage.setItem(V013_DEFAULTS_KEY, "true");
@@ -3978,7 +3940,6 @@ function MainModeApp() {
 
     if (key === "theme") {
       next.theme = normalizeThemeId(value);
-      next.customThemeEnabled = false;
       kickThemeSettle();
     }
 
@@ -3993,15 +3954,11 @@ function MainModeApp() {
       kickThemeSettle();
     }
 
-    if (String(key).startsWith("customTheme")) next.customThemeEnabled = false;
-
     if (
       key === "homeBannerType" ||
-      key === "blurEffects" ||
       key === "mediaCardBackground" ||
       key === "homeLayoutMode" ||
       key === "libraryRowStyle" ||
-      key === "starsIntensity" ||
       key === "sidebarBehavior" ||
       key === "playerBackgroundStyle" ||
       key === "catBuddyEnabled"
@@ -4012,11 +3969,6 @@ function MainModeApp() {
     if (key === "animatedBackgrounds" || key === "animeVisuals") {
       next.animatedBackgrounds = true;
       next.animeVisuals = true;
-    }
-
-    if (key === "simpleMode") {
-      // Simple Mode was removed in v0.2.8. Do not let old UI/state re-enable it.
-      next.simpleMode = false;
     }
 
     await persistSettings(next, debounce, isImmediateSettingsKey(String(key)) ? "immediate" : "transition");
@@ -4048,7 +4000,6 @@ function MainModeApp() {
 
     if (patch.theme) {
       next.theme = normalizeThemeId(patch.theme);
-      next.customThemeEnabled = false;
     }
 
 
@@ -4056,8 +4007,6 @@ function MainModeApp() {
       next.animatedBackgrounds = true;
       next.animeVisuals = true;
     }
-
-    next.customThemeEnabled = false;
     if (patch.theme) kickThemeSettle();
 
     const patchKeys = Object.keys(patch || {});
@@ -4083,15 +4032,12 @@ function MainModeApp() {
   function resetAppearanceSettings() {
     void updateSettingsPatch({
       theme: defaultSettings.theme,
-      themePanelCollapsed: defaultSettings.themePanelCollapsed,
       showAmbientGradient: defaultSettings.showAmbientGradient,
       coverColorSyncMode: defaultSettings.coverColorSyncMode,
       showFloatingNotes: defaultSettings.showFloatingNotes,
       homeBannerType: VISUAL_CUSTOMIZATION_DEFAULTS.homeBannerType,
-      blurEffects: VISUAL_CUSTOMIZATION_DEFAULTS.blurEffects,
       mediaCardBackground: VISUAL_CUSTOMIZATION_DEFAULTS.mediaCardBackground,
       homeLayoutMode: VISUAL_CUSTOMIZATION_DEFAULTS.homeLayoutMode,
-      starsIntensity: VISUAL_CUSTOMIZATION_DEFAULTS.starsIntensity,
       sidebarBehavior: VISUAL_CUSTOMIZATION_DEFAULTS.sidebarBehavior,
       playerBackgroundStyle: VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle,
       animeVisuals: true,
@@ -7581,7 +7527,6 @@ function MainModeApp() {
       isAppBackgrounded,
       scrollBusyRef,
       themeSettling,
-      themePresetStyle,
       effectiveTheme,
       effectiveAmbient,
       effectiveCoverColorSyncMode,

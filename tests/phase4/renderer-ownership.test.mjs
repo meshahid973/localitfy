@@ -12,7 +12,8 @@ test("App delegates platform and policy helpers to owned modules", () => {
   assert.match(app, /from "\.\/app\/platform"/);
   assert.match(app, /from "\.\/features\/settings\/visualCustomization"/);
   assert.match(app, /from "\.\/features\/onboarding\/onboardingRelease"/);
-  assert.match(app, /from "\.\/features\/settings\/customThemePersistence"/);
+  assert.match(app, /migrateVisualSettings\(storedSettings,/);
+  assert.doesNotMatch(app, /makeThemePresetStyle|customThemePersistence/);
   assert.doesNotMatch(app, /function getLocaltifyPlatformInfo/);
   assert.doesNotMatch(app, /const VISUAL_CUSTOMIZATION_DEFAULTS/);
   assert.doesNotMatch(app, /CUSTOM_THEME_UPDATE_BACKUP_KEY/);

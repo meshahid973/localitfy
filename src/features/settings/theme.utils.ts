@@ -7,7 +7,7 @@ export function normalizeThemeId(value: unknown, fallback: ThemeId = "dark"): "d
   const raw = String(value ?? "").trim().toLowerCase();
   if (raw === "light" || raw === "mono") return "light";
   if (raw === "dark" || raw) return "dark";
-  return fallback === "light" || fallback === "mono" ? "light" : "dark";
+  return fallback === "light" ? "light" : "dark";
 }
 export function normalizeHexColor(value: string, fallback = "#8dffce") { const raw = String(value || "").trim(); const withHash = raw.startsWith("#") ? raw : `#${raw}`; const short = /^#([0-9a-f]{3})$/i.exec(withHash); if (short) return `#${short[1].split("").map((part) => `${part}${part}`).join("")}`.toLowerCase(); return /^#[0-9a-f]{6}$/i.test(withHash) ? withHash.toLowerCase() : fallback; }
 export function normalizeCoverColorSyncMode(value: unknown): CoverColorSyncMode { const safe = String(value || "normal").trim() as CoverColorSyncMode; return coverColorSyncOptions.some((option) => option.id === safe) ? safe : "normal"; }
