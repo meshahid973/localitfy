@@ -3,7 +3,7 @@
 .titleHistoryNav {
   display: flex;
   align-items: center;
-  gap: 0;
+  gap: var(--lt-space-1);
   flex: 0 0 auto;
   margin-inline: var(--lt-space-2);
   background: transparent;
@@ -11,7 +11,7 @@
 }
 
 .titleHistoryNav button {
-  width: 32px;
+  width: var(--lt-shell-control);
   height: 30px;
   display: grid;
   place-items: center;
@@ -21,7 +21,7 @@
   color: var(--lt-muted);
   background: transparent;
   cursor: pointer;
-  transition: background-color var(--lt-duration-fast) ease, color var(--lt-duration-fast) ease;
+  transition: background-color var(--lt-control-motion) ease, color var(--lt-control-motion) ease;
 }
 
 .titleHistoryNav button:hover:not(:disabled) { color: var(--lt-text); background: var(--lt-fill-hover); }

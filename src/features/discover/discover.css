@@ -1,7 +1,7 @@
 .discoverPage {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 22px;
+  gap: var(--lt-page-gap);
   min-width: 0;
   font-weight: 500;
   padding-bottom: var(--lt-space-5);
@@ -14,7 +14,7 @@
   display: grid;
   gap: 12px;
   max-width: 720px;
-  padding: 20px 22px;
+  padding: var(--lt-surface-padding);
 }
 
 .discoverSetup p {
@@ -34,7 +34,7 @@
   min-height: 40px;
   padding: 0 12px;
   border: 1px solid var(--lt-border, rgba(255, 255, 255, .14));
-  border-radius: 10px;
+  border-radius: var(--lt-radius-item);
   background: var(--lt-surface-raised);
   color: var(--lt-text);
   font: inherit;
@@ -73,7 +73,7 @@
 
 .discoverHeading {
   margin: 0;
-  font-size: 22px;
+  font-size: var(--lt-text-title);
   font-weight: 650;
   letter-spacing: -.025em;
 }
@@ -153,7 +153,7 @@
   z-index: 5;
   max-width: 100%;
   flex-wrap: wrap;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, .35);
+  box-shadow: var(--lt-shadow-menu);
 }
 
 .discoverCatalog { display: grid; min-width: 0; gap: var(--lt-space-3); }

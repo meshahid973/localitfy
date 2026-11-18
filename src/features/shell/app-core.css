@@ -63,10 +63,10 @@ button:disabled{
 
 .titleDrag{
   height: 100%;
-  padding-left: 14px;
+  padding-left: var(--lt-space-4);
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: var(--lt-gap-control);
 
   font-weight: 760;
 }
@@ -86,14 +86,14 @@ button:disabled{
 }
 
 .windowButtons button{
-  width: 34px;
+  width: var(--lt-shell-control);
   height: 30px;
   border: 0;
   border-radius: var(--lt-radius-item);
   color: var(--lt-muted);
   background: transparent;
-  transition: background-color var(--lt-duration-fast) ease,
-    color var(--lt-duration-fast) ease;
+  transition: background-color var(--lt-control-motion) ease,
+    color var(--lt-control-motion) ease;
 }
 
 .windowButtons button:hover{

@@ -48,6 +48,12 @@
   --lt-radius-item: 8px;
   --lt-radius-panel: 20px;
   --lt-gap-control: var(--lt-space-2);
+  --lt-shell-control: 36px;
+  --lt-nav-height: 40px;
+  --lt-page-gap: var(--lt-space-5);
+  --lt-section-gap: var(--lt-space-4);
+  --lt-surface-padding: var(--lt-space-4);
+  --lt-progress-height: 5px;
   --lt-glass-background: color-mix(in srgb, var(--lt-bg-elevated) 94%, transparent);
   --lt-glass-blur: 12px;
   --lt-duration-fast: 120ms;

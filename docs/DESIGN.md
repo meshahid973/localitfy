@@ -1,6 +1,6 @@
 # Localtify design system
 
-Localtify uses neutral light and dark chrome with artwork-derived page atmosphere. Home uses featured mix covers with a local-library fallback; collection details register their own artwork. Playback and immersive listening own separate artwork. Utility pages stay neutral. Missing or unreadable art must not invent a palette. Cancel obsolete artwork reads and respect window visibility.
+Localtify uses neutral light and dark chrome with a single real cover-image backdrop under the entire shell. The current listening track (including a paused track) has priority, then the active entity or Home's available art, then a neutral fallback. Utility pages keep the current listening ambience. Missing or unreadable art falls through to the next bounded source. Immersive listening retains its own backdrop. Cancel obsolete reads and suspend decorative work while hidden.
 
 ## Shared owners
 

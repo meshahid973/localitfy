@@ -75,7 +75,7 @@ test("Home uses sharp cover art with optional ambient rendering", () => {
   const shell = read("src/features/shell/AppShell.tsx");
   assert.doesNotMatch(source, /homeAtmosphere|<ArtworkBackdrop/);
   assert.match(source, /className="homeFeatureCover" priority="high" preferThumbnail=/);
-  assert.match(shell, /usePagePalette\(route, sources, artworkEnabled/);
+  assert.match(shell, /<WorkspaceArtworkBackdrop sources=\{workspaceSources\}/);
   assert.match(read("src/features/home/HomeShelves.tsx"), /usePageAtmosphere\(atmosphereSources\)/);
   assert.doesNotMatch(css, /\.homePage > \.homeAtmosphere/);
   assert.doesNotMatch(css, /min-height: clamp\(230px|repeat\(10,minmax/);
@@ -105,9 +105,9 @@ test("shared artwork palette follows the existing ambient preference and backgro
   const backdrop = read("src/features/covers/ArtworkBackdrop.tsx");
   const workspace = read("src/styles/view-shell.css");
   const player = read("src/features/player/player.css");
-  assert.match(shell, /<ArtworkAmbientContext.Provider value=\{effectiveAmbient && effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded\}>/);
+  assert.match(shell, /<ArtworkAmbientContext.Provider value=\{artworkEnabled\}>/);
   assert.match(backdrop, /enabled && source \? <CrossfadeArtwork/);
-  assert.match(workspace, /--workspace-cover-color/);
+  assert.match(workspace, /isolation: isolate/);
   assert.match(player, /\.playerBar\[data-ambient\] \{\s*background: transparent !important/);
   assert.match(workspace, /--workspace-sidebar: var\(--lt-fill-subtle\)/);
   assert.match(player, /\.playerBar\[data-ambient\]:hover::before \{\s*display: none !important/);
@@ -136,12 +136,12 @@ test("ambience transitions are bounded and respect reduced motion", () => {
   const backdrop = read("src/features/covers/ArtworkBackdrop.tsx");
   const css = read("src/features/covers/artwork-backdrop.css");
   assert.match(backdrop, /\[frame.previous, frame.current\]\.filter\(Boolean\)/);
-  assert.match(backdrop, /decodeArtwork\(source, controller.signal\)/);
+  assert.match(backdrop, /decodeArtwork\(candidate, controller.signal\)/);
   assert.match(backdrop, /if \(controller.signal.aborted\) return/);
   assert.match(backdrop, /window.clearTimeout\(timer\)/);
   assert.match(css, /transition: opacity 360ms/);
   assert.match(css, /prefers-reduced-motion: reduce/);
-  assert.match(read("src/styles/view-shell.css"), /@property --workspace-cover-color/);
+  assert.match(css, /\.workspaceArtworkBackdrop \.artworkBackdropCover/);
 });
 
 
@@ -165,9 +165,10 @@ test("Home 3.1 keeps Listen Now on the workspace atmosphere and real mix covers 
   assert.match(read("src/features/covers/MixCoverArtwork.tsx"), /<PlaylistCoverCollage/);
 });
 
-test("workspace artwork follows the page instead of playback", () => {
+test("workspace artwork prioritizes current cover then active page", () => {
   const shell = read("src/features/shell/AppShell.tsx");
-  assert.match(shell, /const artworkEnabled = effectiveAmbient && effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded/);
+  assert.match(shell, /const artworkEnabled = effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded/);
+  assert.match(shell, /resolveWorkspaceArtwork\(trackSources, sources\)/);
   assert.match(shell, /pageArtwork\?\.route === route/);
   assert.doesNotMatch(shell, /useWorkspacePalette\(home.ambientStyle/);
   assert.doesNotMatch(shell, /const artworkEnabled = view === "home"/);

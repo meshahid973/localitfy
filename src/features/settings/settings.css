@@ -9,14 +9,12 @@
   --settings-accent: var(--lt-accent);
   display: grid;
   align-content: start;
-  gap: 22px;
+  gap: var(--lt-page-gap);
   min-width: 0;
-  padding: 26px 0 100px;
+  padding: 0 0 var(--lt-space-5);
   color: var(--settings-text);
 }
 .settingsPage *, .settingsPage *::before, .settingsPage *::after { box-sizing: border-box; }
-.settingsPageIntro { padding: 0 0 16px; border-bottom: 1px solid var(--settings-edge); }
-.settingsPageIntro p { margin: 7px 0 0; color: var(--settings-muted); font-size: 14px; }
 .settingsPage .settingsLayout {
   min-width: 0;
   display: grid;
@@ -42,8 +40,8 @@
 .settingsPage .settingsCategoryRail nav { min-width: 0; display: grid; gap: 3px; }
 .settingsPage .settingsSearchBoxV027 { display: grid; gap: 8px; min-width: 0; color: var(--settings-muted); font-size: 12px; font-weight: 650; }
 .settingsPage .settingsSearchBoxV027 input {
-  width: 100%; min-width: 0; min-height: 40px; padding: 9px 12px;
-  border: 1px solid var(--settings-edge); border-radius: 9px;
+  width: 100%; min-width: 0; min-height: var(--lt-control-height); padding: 9px 12px;
+  border: 1px solid var(--settings-edge); border-radius: var(--lt-radius-item);
   color: var(--settings-text); background: var(--lt-bg); outline: none; font-size: 13px;
 }
 .settingsPage input::placeholder, .settingsPage textarea::placeholder { color: var(--settings-muted); }
@@ -51,13 +49,13 @@
 .settingsPage .settingsCategoryButton {
   min-width: 0; width: 100%; min-height: 48px; padding: 9px 10px;
   display: grid; grid-template-columns: 27px minmax(0, 1fr); align-items: center;
-  gap: 10px; border: 1px solid transparent; border-radius: 9px;
+  gap: 10px; border: 1px solid transparent; border-radius: var(--lt-radius-item);
   background: transparent; color: var(--settings-muted); text-align: left; font: inherit; cursor: pointer;
 }
 .settingsPage .settingsCategoryButton:hover { color: var(--settings-text); background: var(--settings-elevated); }
 .settingsPage .settingsCategoryButton[aria-current="page"] {
   color: var(--settings-text); border-color: rgba(var(--lt-accent-rgb), .24);
-  background: rgba(var(--lt-accent-rgb), .11);
+  background: var(--lt-fill-selected);
 }
 .settingsPage .settingsCategoryIcon { display: grid; place-items: center; color: var(--settings-accent); }
 .settingsPage .settingsCategoryCopy { min-width: 0; display: grid; }
@@ -81,7 +79,7 @@
 .settingsPage .settingsCardStack {
   min-width: 0; display: grid; align-content: start; gap: 16px;
   padding: clamp(17px, 2vw, 24px);
-  border: 1px solid var(--settings-edge); border-radius: 14px;
+  border: 1px solid var(--settings-edge); border-radius: var(--lt-radius-panel);
   background: var(--settings-surface);
 }
 .settingsPage .settingsPanelHeader {
@@ -100,8 +98,8 @@
 .settingsPage .settingsResetGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr)); gap: 12px; }
 .settingsPage .settingsSelectField { min-width: 0; display: grid; gap: 7px; color: var(--settings-muted); font-size: 12px; }
 .settingsPage :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="search"]), select, textarea) {
-  min-width: 0; max-width: 100%; min-height: 40px; padding: 9px 12px;
-  border: 1px solid var(--settings-edge); border-radius: 9px;
+  min-width: 0; max-width: 100%; min-height: var(--lt-control-height); padding: 9px 12px;
+  border: 1px solid var(--settings-edge); border-radius: var(--lt-radius-item);
   background: var(--lt-bg); color: var(--settings-text); font: inherit; font-size: 13px; outline: none;
 }
 .settingsPage select { cursor: pointer; color-scheme: inherit; }
@@ -145,7 +143,7 @@
 }
 .settingsPage .settingsDiagnosticCard, .settingsPage .settingsMiniStatusV491 > span {
   min-width: 0; display: grid; gap: 4px; padding: 13px;
-  border: 1px solid var(--settings-edge); border-radius: 9px; background: var(--settings-elevated);
+  border: 1px solid var(--settings-edge); border-radius: var(--lt-radius-item); background: var(--settings-elevated);
 }
 .settingsPage .settingsDiagnosticCard span, .settingsPage .settingsMiniStatusV491 small { color: var(--settings-muted); font-size: 11px; }
 .settingsPage .settingsDiagnosticCard strong, .settingsPage .settingsMiniStatusV491 strong { overflow-wrap: anywhere; font-size: 14px; }
@@ -154,7 +152,7 @@
 .settingsPage .settingsResetButton span { color: var(--settings-muted); font-size: 11px; }
 .settingsPage .settingsHintText { margin: 0; }
 .settingsPage .metadataCleanerPreviewListV425 { display: grid; gap: 8px; }
-.settingsPage .metadataCleanerPreviewItemV425 { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); gap: 12px; min-width: 0; padding: 10px; border: 1px solid var(--settings-edge); border-radius: 9px; }
+.settingsPage .metadataCleanerPreviewItemV425 { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); gap: 12px; min-width: 0; padding: 10px; border: 1px solid var(--settings-edge); border-radius: var(--lt-radius-item); }
 .settingsPage .metadataCleanerPreviewItemV425 > span { min-width: 0; display: grid; gap: 3px; overflow-wrap: anywhere; }
 .settingsPage .metadataCleanerPreviewItemV425 :is(small,em) { color: var(--settings-muted); font-size: 11px; }
 .settingsPage .settingsReleaseList { padding-left: 20px; color: var(--settings-muted); font-size: 12px; line-height: 1.6; }
@@ -186,7 +184,7 @@
 .settingsPage .sidebarTabsGroups { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 14px; }
 .settingsPage .sidebarTabsGroup .eyebrow { margin: 0 0 8px; color: var(--settings-muted); font-size: 11px; letter-spacing: .1em; }
 .settingsPage .sidebarTabsList { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
-.settingsPage .sidebarTabsRow { display: grid; grid-template-columns: 18px minmax(0, 1fr) repeat(3, 30px); align-items: center; gap: 8px; min-height: 40px; padding: 4px 6px 4px 12px; border: 1px solid var(--settings-edge); border-radius: 11px; background: var(--settings-elevated); }
+.settingsPage .sidebarTabsRow { display: grid; grid-template-columns: 18px minmax(0, 1fr) repeat(3, 30px); align-items: center; gap: 8px; min-height: var(--lt-control-height); padding: 4px 6px 4px 12px; border: 1px solid var(--settings-edge); border-radius: 11px; background: var(--settings-elevated); }
 .settingsPage .sidebarTabsRow.isHidden { opacity: .55; }
 .settingsPage .sidebarTabsIcon { color: var(--settings-accent); }
 .settingsPage .sidebarTabsLabel { overflow: hidden; font-size: 13px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }

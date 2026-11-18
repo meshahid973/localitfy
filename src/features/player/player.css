@@ -106,7 +106,7 @@
   overflow: hidden !important;
   display: block !important;
   color: var(--lt-text) !important;
-  font-size: 13.5px !important;
+  font-size: var(--lt-text-label) !important;
   line-height: 1.12 !important;
   font-weight: 820 !important;
   letter-spacing: -0.025em !important;
@@ -312,7 +312,7 @@
 
 .progressRow input[type="range"]::-webkit-slider-runnable-track,
 .volumeWrap input[type="range"]::-webkit-slider-runnable-track{
-  height: 6px !important;
+  height: var(--lt-progress-height) !important;
   border-radius: 999px !important;
   background: transparent !important;
   border: 0 !important;
@@ -346,7 +346,7 @@
 
 .progressRow input[type="range"]::-moz-range-track,
 .volumeWrap input[type="range"]::-moz-range-track{
-  height: 6px !important;
+  height: var(--lt-progress-height) !important;
   border-radius: 999px !important;
   background: var(--player-track-base) !important;
   border: 0 !important;
@@ -354,7 +354,7 @@
 
 .progressRow input[type="range"]::-moz-range-progress,
 .volumeWrap input[type="range"]::-moz-range-progress{
-  height: 6px !important;
+  height: var(--lt-progress-height) !important;
   border-radius: 999px !important;
   background: var(--player-progress-fill) !important;
 }
@@ -1342,7 +1342,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 }
 
 .playerBar .volumeWrap input[type="range"]::-webkit-slider-runnable-track{
-  height: 6px !important;
+  height: var(--lt-progress-height) !important;
   border-radius: 999px !important;
   border: 0 !important;
   background:
@@ -2061,7 +2061,7 @@ body.localtifyWindowBackgrounded .app .playerBar:hover::before,
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--lt-gap-control);
 }
 
 .playerBar .playerRightTools .volumeWrap{
@@ -2071,27 +2071,28 @@ body.localtifyWindowBackgrounded .app .playerBar:hover::before,
 .playerBar .playerQueueButton{
   position: relative;
   flex: 0 0 auto;
-  width: 32px;
-  height: 32px;
+  width: var(--lt-shell-control);
+  height: var(--lt-shell-control);
   display: grid;
   place-items: center;
   padding: 0;
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--lt-radius-item);
   color: var(--lt-muted);
   background: transparent;
   cursor: pointer;
-  transition: color 140ms ease, background-color 140ms ease;
+  transition: color var(--lt-control-motion) ease, background-color var(--lt-control-motion) ease;
 }
 
 .playerBar .playerQueueButton:hover,
 .playerBar .playerQueueButton:focus-visible{
   color: var(--lt-text);
-  background: color-mix(in srgb, var(--lt-text) 7%, transparent);
+  background: var(--lt-fill-hover);
 }
 
 .playerBar .playerQueueButton.active{
-  color: rgb(var(--accent-rgb));
+  color: var(--lt-accent);
+  background: var(--lt-fill-selected);
 }
 
 .playerBar .playerQueueCount{

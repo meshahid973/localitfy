@@ -1,26 +1,7 @@
 /* Workspace atmosphere and navigation geometry have one owner. */
-@property --workspace-cover-color {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: transparent;
-}
-@property --workspace-cover-secondary {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: transparent;
-}
-@property --workspace-cover-tertiary {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: transparent;
-}
 .app {
-  --workspace-cover-color: var(--lt-bg);
-  --workspace-cover-secondary: var(--lt-bg);
-  --workspace-cover-tertiary: var(--lt-bg);
-  --workspace-bg: radial-gradient(ellipse at 12% 5%, var(--workspace-cover-color), transparent 68%),
-    radial-gradient(ellipse at 91% 16%, var(--workspace-cover-secondary), transparent 70%),
-    radial-gradient(ellipse at 48% 100%, var(--workspace-cover-tertiary), transparent 66%), var(--lt-bg);
+  position: relative;
+  isolation: isolate;
   --workspace-sidebar: var(--lt-fill-subtle);
   --workspace-sidebar-expanded: clamp(184px, var(--sidebar-width, 249px), 340px);
   --lt-sidebar-closed: 72px;
@@ -30,14 +11,7 @@
   --workspace-sidebar-rail: var(--lt-sidebar-closed);
   --workspace-sidebar-current: var(--workspace-sidebar-expanded);
 }
-.app[data-theme][data-workspace-artwork] { background: var(--workspace-bg) !important; }
-.app[data-workspace-artwork]:not(.reducedMotion):not(.appBackgrounded):not(.themeSettling) {
-  transition: --workspace-cover-color var(--lt-duration-atmosphere) var(--lt-ease-out), --workspace-cover-secondary var(--lt-duration-atmosphere) var(--lt-ease-out),
-    --workspace-cover-tertiary var(--lt-duration-atmosphere) var(--lt-ease-out) !important;
-}
-@media (prefers-reduced-motion: reduce) {
-  .app[data-workspace-artwork] { transition: none !important; }
-}
+.app[data-theme][data-workspace-artwork] { background: var(--lt-bg) !important; }
 .app[data-sidebar-behavior="slim"],
 .app[data-sidebar-behavior="hover"] { --workspace-sidebar-current: var(--workspace-sidebar-rail); }
 .appShell {
@@ -72,8 +46,8 @@ main.app.app > .appShell > .sidebar {
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
-  padding: 6px 4px !important;
-  gap: 4px !important;
+  padding: var(--lt-space-2) var(--lt-space-1) !important;
+  gap: var(--lt-space-1) !important;
   border-right: 0 !important;
   border-radius: var(--lt-radius-sm) !important;
   background: var(--workspace-sidebar) !important;
@@ -93,7 +67,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar {
   --rail-align: center;
   --rail-row-pad: 0px;
   --rail-row-gap: 0px;
-  --rail-import-size: 40px;
+  --rail-import-size: var(--lt-nav-height);
   width: var(--lt-sidebar-closed) !important;
 }
 @media (min-width: 781px) {
@@ -106,7 +80,7 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar {
     --rail-row-gap: 8px;
     --rail-import-size: 100%;
     width: var(--lt-sidebar-open) !important;
-    background: var(--lt-surface) !important;
+    background: var(--lt-glass-background) !important;
     box-shadow: var(--lt-shadow-menu) !important;
   }
 }
@@ -118,7 +92,7 @@ main.app.app > .appShell > .sidebar .sidebarNavGroupsV467 {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 4px !important;
+  gap: var(--lt-space-1) !important;
   padding: 4px !important;
   overflow-x: hidden;
   overflow-y: auto;
@@ -130,7 +104,7 @@ main.app.app > .appShell > .sidebar .sidebarNavGroupV467 {
   flex-direction: column;
   flex: 0 0 auto;
   min-width: 0;
-  gap: 4px !important;
+  gap: var(--lt-space-1) !important;
   margin-top: 0 !important;
 }
 .sidebarPinnedNav { flex: 0 0 auto; min-width: 0; padding-inline: 4px; }
@@ -151,7 +125,7 @@ main.app.app > .appShell > .sidebar .nav {
   flex: 0 0 auto !important;
   min-width: 0 !important;
   width: 100% !important;
-  gap: 4px !important;
+  gap: var(--lt-space-1) !important;
   padding: 0 !important;
   margin: 0 !important;
 }
@@ -163,8 +137,8 @@ main.app.app > .appShell > .sidebar .navItem {
   justify-items: var(--rail-align) !important;
   width: 100% !important;
   max-width: 100% !important;
-  height: 40px !important;
-  min-height: 40px !important;
+  height: var(--lt-nav-height) !important;
+  min-height: var(--lt-nav-height) !important;
   min-width: 0 !important;
   margin: 0 !important;
   padding: 0 var(--rail-row-pad) !important;
@@ -175,7 +149,7 @@ main.app.app > .appShell > .sidebar .navItem {
   background: transparent !important;
   box-shadow: none !important;
   transform: none !important;
-  transition: color 140ms ease, background-color 140ms ease !important;
+  transition: color var(--lt-control-motion) ease, background-color var(--lt-control-motion) ease !important;
 }
 main.app.app > .appShell > .sidebar .navItem:hover,
 main.app.app > .appShell > .sidebar .navItem:focus-visible {
@@ -271,13 +245,13 @@ main.app.app > .appShell > .sidebar .importMainAction {
   width: var(--rail-import-size) !important;
   min-width: 0 !important;
   max-width: 100% !important;
-  min-height: 40px !important;
-  height: 40px !important;
+  min-height: var(--lt-nav-height) !important;
+  height: var(--lt-nav-height) !important;
   padding: 0 !important;
   gap: 6px !important;
   color: var(--lt-text) !important;
   background: var(--lt-fill) !important;
-  border: 1px solid var(--lt-border) !important;
+  border: 1px solid transparent !important;
   border-radius: var(--lt-radius-item) !important;
   box-shadow: none !important;
   transform: none !important;
