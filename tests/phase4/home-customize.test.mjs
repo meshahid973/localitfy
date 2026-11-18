@@ -165,3 +165,18 @@ test("recently added uses bounded stable newest-first selection", () => {
   assert.deepEqual(ids(picks.pickRecentlyAdded(tracks, 4)), ["new", "tie", "old", "invalid"]);
   assert.deepEqual(ids(picks.pickRecentlyAdded(tracks, 0)), []);
 });
+
+test("Listen Now prioritizes real history, filters missing files and diversifies known artists", () => {
+  const tracks = [song("gone",{fileExists:false,playCount:1000}),song("current",{artist:"other"}),song("favorite",{liked:true,playCount:20,lastPlayed:daysAgo(1)}),song("second",{playCount:19,lastPlayed:daysAgo(2)}),song("third",{playCount:18}),song("other",{artist:"b",playCount:2}),song("favorite",{playCount:100})];
+  const result = ids(picks.pickListenNow(tracks,"current",now,4));
+  assert.equal(result[0],"current");
+  assert.ok(result.includes("favorite") && result.includes("other"));
+  assert.equal(new Set(result).size,result.length);
+  assert.ok(!result.includes("gone"));
+  assert.deepEqual(ids(picks.pickListenNow(tracks,null,now,0)),[]);
+});
+test("recommendations avoid repeated IDs when possible and refill sparse shelves", () => {
+  const a=song("a"), b=song("b"), c=song("c"), missing=song("missing",{fileExists:false});
+  assert.deepEqual(ids(picks.diversifyHomeRecommendations([a,a,b,c,missing],[a],3)),["b","c","a"]);
+  assert.deepEqual(ids(picks.pickRecentlyAdded([missing,a],2)),["a"]);
+});

@@ -36,7 +36,7 @@ import type { VirtualSongRowsProps } from "./features/library/components/SongRow
 import { useLibraryController } from "./features/library";
 import { subscribeWatchedFoldersChange } from "./features/library/watchedFolderBridge";
 import { reconcileLibraryIndex, patchLibrarySong, replaceLibrarySong } from "./features/search/incrementalLibraryIndex";
-import { pickRecentlyAdded } from "./features/home/homeShelfPicks";
+import { pickRecentlyAdded, pickListenNow } from "./features/home/homeShelfPicks";
 import { createMetadataCleanPreview } from "./features/library/metadataCleanPreview";
 import {
   getPlayableUniqueSongIds, getRepeatPreview, getSourceLoopRestart, getSourcePreviousStep,
@@ -1223,20 +1223,7 @@ function MainModeApp() {
 
   const recentlyAdded = useMemo(() => pickRecentlyAdded(songs, 12), [songs]);
 
-  const homeListenNowSongs = useMemo(() => {
-    const picked: Song[] = [];
-    const seen = new Set<string>();
-
-    for (const shelf of [[currentSong], topSongs, recentlyAdded, songs]) {
-      for (const song of shelf) {
-        if (!song || !isPlayableSong(song) || seen.has(song.id)) continue;
-        seen.add(song.id);
-        picked.push(song);
-        if (picked.length === 8) return picked;
-      }
-    }
-    return picked;
-  }, [currentSong, topSongs, recentlyAdded, songs]);
+  const homeListenNowSongs = useMemo(() => pickListenNow(songs, currentSong?.id ?? null, new Date()), [currentSong?.id, songs]);
 
   const homeFreshShelfSongs = useMemo(() => {
     const picked: Song[] = [];

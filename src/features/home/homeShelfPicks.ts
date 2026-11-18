@@ -62,7 +62,7 @@ function takeBest<T>(
 
 /** Bounded top-K import selection, preserving stable order on equal dates. */
 export function pickRecentlyAdded(songs: readonly Song[], limit = 12): Song[] {
-  return takeBest(songs, limit, song => ({ value: song, primary: time(song.dateAdded), secondary: 0 }));
+  return takeBest(songs, limit, song => playable(song) ? ({ value: song, primary: time(song.dateAdded), secondary: 0 }) : null);
 }
 
 export function pickRecentlyPlayed(songs: readonly Song[], limit = 10): Song[] {
@@ -121,4 +121,48 @@ export function pickHomeMixArtwork(songs: readonly Song[]): Song[] {
     if (artwork.length === 4) break;
   }
   return [...artwork, ...fallback.slice(0, 4 - artwork.length)];
+}
+
+/** Rank local listening evidence with bounded candidate selection. Avoid artist
+ * monopolies when alternatives exist, and use only existing playable tracks. */
+export function pickListenNow(songs: readonly Song[], currentId: string | null, now: Date, limit = 8): Song[] {
+  const count = Math.max(0, Math.min(32, Math.floor(limit) || 0));
+  if (!count) return [];
+  const seen = new Set<string>();
+  const ranked = takeBest(songs, count * 4, song => {
+    if (!playable(song) || seen.has(song.id)) return null;
+    seen.add(song.id);
+    const plays = Math.max(0, Number(song.playCount) || 0);
+    const last = time(song.lastPlayed);
+    const age = last ? Math.max(0, (now.getTime() - last) / DAY_MS) : Infinity;
+    const recent = last ? 5 * Math.exp(-age / 14) : 0;
+    const added = time(song.dateAdded);
+    const freshness = added ? Math.max(0, 1 - Math.max(0, now.getTime() - added) / (30 * DAY_MS)) : 0;
+    return { value: song, primary: (song.id === currentId ? 1000 : 0) + (song.liked ? 3 : 0) +
+      Math.log1p(plays) * 1.7 + recent + freshness, secondary: last || added };
+  });
+  const selected: Song[] = [], deferred: Song[] = [];
+  const artists = new Map<string, number>();
+  for (const song of ranked) {
+    const artist = (song.artist || "").trim().toLowerCase();
+    if (artist && artist !== "unknown artist" && (artists.get(artist) || 0) >= 2) { deferred.push(song); continue; }
+    if (artist) artists.set(artist, (artists.get(artist) || 0) + 1);
+    selected.push(song);
+    if (selected.length === count) return selected;
+  }
+  return [...selected, ...deferred].slice(0, count);
+}
+
+/** Suppress repeated recommendation cards, not factual history/favorites.
+ * Refill from the ranked alternatives and retain sparse-library usefulness. */
+export function diversifyHomeRecommendations(candidates: readonly Song[], excluded: readonly Song[], limit = 10): Song[] {
+  const seen = new Set<string>();
+  const avoid = new Set(excluded.map(song => song.id));
+  const preferred: Song[] = [], fallback: Song[] = [];
+  for (const song of candidates) {
+    if (!playable(song) || seen.has(song.id)) continue;
+    seen.add(song.id);
+    (avoid.has(song.id) ? fallback : preferred).push(song);
+  }
+  return [...preferred, ...fallback].slice(0, limit);
 }
