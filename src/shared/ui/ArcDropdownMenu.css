@@ -7,7 +7,7 @@
   height: var(--lt-control-height);
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: var(--lt-gap-control);
   padding: 0 13px;
   border: 1px solid var(--lt-border);
   border-radius: var(--lt-control-radius);
@@ -36,8 +36,8 @@
   padding: 5px;
   border: 1px solid var(--lt-border);
   border-radius: var(--lt-control-radius);
-  background: color-mix(in srgb, var(--lt-bg-elevated) 94%, transparent);
-  backdrop-filter: blur(12px);
+  background: var(--lt-glass-background);
+  backdrop-filter: blur(var(--lt-glass-blur));
   color: var(--lt-text);
   box-shadow: var(--lt-shadow-menu);
   font-size: var(--lt-text-sm);
@@ -50,7 +50,7 @@
   left: 5px;
   height: var(--lt-menu-item-height);
   border-radius: var(--lt-radius-item);
-  background: color-mix(in srgb, var(--lt-text) 7%, transparent);
+  background: var(--lt-fill);
   pointer-events: none;
 }
 .arcDropdownOption {

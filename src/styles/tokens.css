@@ -33,7 +33,10 @@
   --lt-space-3: 12px;
   --lt-space-4: 16px;
   --lt-space-5: 24px;
+  --lt-text-caption: 11px;
   --lt-text-sm: 12px;
+  --lt-text-label: 14px;
+  --lt-text-heading: 18px;
   --lt-text-base: 13px;
   --lt-text-title: 20px;
   --lt-text-page: 28px;
@@ -43,9 +46,14 @@
   --lt-control-radius: 12px;
   --lt-menu-item-height: 36px;
   --lt-radius-item: 8px;
+  --lt-radius-panel: 20px;
+  --lt-gap-control: var(--lt-space-2);
+  --lt-glass-background: color-mix(in srgb, var(--lt-bg-elevated) 94%, transparent);
+  --lt-glass-blur: 12px;
   --lt-duration-fast: 120ms;
   --lt-duration-normal: 180ms;
   --lt-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --lt-duration-atmosphere: 360ms;
   --lt-shadow-menu: 0 12px 32px rgba(0, 0, 0, .28);
 
   --lt-shadow-low: 0 10px 30px rgba(0, 0, 0, 0.24);

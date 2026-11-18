@@ -7,6 +7,7 @@ function cx(...parts: Array<string | false | null | undefined>) {
 
 type SurfaceTone = "neutral" | "accent" | "success" | "warning" | "danger";
 type SurfaceDensity = "compact" | "normal" | "roomy";
+type SurfaceVariant = "transparent" | "fill" | "glass";
 
 type SurfaceProps<T extends ElementType> = {
   as?: T;
@@ -14,6 +15,7 @@ type SurfaceProps<T extends ElementType> = {
   className?: string;
   tone?: SurfaceTone;
   density?: SurfaceDensity;
+  variant?: SurfaceVariant;
   elevated?: boolean;
   interactive?: boolean;
 } & Omit<ComponentPropsWithoutRef<T>, "as" | "className" | "children">;
@@ -24,6 +26,7 @@ export function Surface<T extends ElementType = "section">({
   children,
   tone = "neutral",
   density = "normal",
+  variant = "fill",
   elevated = false,
   interactive = false,
   ...props
@@ -36,6 +39,8 @@ export function Surface<T extends ElementType = "section">({
         "localtifySurface",
         `localtifySurface-${tone}`,
         `localtifySurface-${density}`,
+        variant === "transparent" && "localtifySurface-transparent",
+        variant === "glass" && "localtifySurface-glass",
         elevated && "localtifySurface-elevated",
         interactive && "localtifySurface-interactive",
         className

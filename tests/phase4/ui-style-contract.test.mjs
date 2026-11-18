@@ -137,10 +137,10 @@ test("overlay menus use Localtify theme surfaces and expose keyboard focus", () 
   const queue = read("src/features/player/components/queue-panel.css");
 
   assert.match(dropdown, /\.arcDropdownOption:focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\) !important; outline-offset: -2px !important/);
-  assert.match(context, /\.songContextMenu\{[\s\S]*?background: color-mix\(in srgb, var\(--lt-bg-elevated\) 94%, transparent\)/);
+  assert.match(context, /\.songContextMenu\{[\s\S]*?background: var\(--lt-glass-background\)/);
   assert.match(context, /\.app \.songContextMenuLayer \.songContextMenu button:focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\) !important/);
   assert.match(context, /\.songContextMenu \.songContextMenuIcon\{[^}]*color: var\(--lt-muted\)/);
-  assert.match(queue, /\.queuePanel\{[\s\S]*?background: color-mix\(in srgb, var\(--lt-bg-elevated\) 96%, transparent\)/);
+  assert.match(queue, /\.queuePanel\{[\s\S]*?background: var\(--lt-glass-background\)/);
   assert.match(queue, /\.app \.queuePanel button\.queuePanelRowMain:focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\) !important/);
   assert.doesNotMatch(context, /background: linear-gradient\(180deg, rgba\(20, 20, 20/);
   assert.doesNotMatch(queue, /background: linear-gradient\(180deg, rgba\(20, 20, 24/);
@@ -164,7 +164,7 @@ test("Discover, similar tracks and tagging respect the active accent and UI bord
   assert.doesNotMatch(tagging, /rgba\(163, 193, 198/);
   assert.doesNotMatch(similar, /var\(--lt-surface-soft\)/);
   assert.doesNotMatch(tagging, /var\(--lt-surface-soft\)/);
-  assert.match(context, /\.songContextMenuHead\{[^}]*background: color-mix\(in srgb, var\(--lt-text\) 7%, transparent\)/);
+  assert.match(context, /\.songContextMenuHead\{[^}]*background: var\(--lt-fill\)/);
   assert.match(context, /\.songContextMenu button\.dangerMenuItem\{\s*color: var\(--lt-danger\)/);
   assert.match(queue, /\.queuePanelRow:hover\{\s*background: color-mix\(in srgb, var\(--lt-text\) 7%, transparent\)/);
 });
