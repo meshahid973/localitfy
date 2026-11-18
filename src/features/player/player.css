@@ -1938,17 +1938,6 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
     0 0 12px rgba(var(--accent-rgb),0.34) !important;
 }
 
-.heroGhost.danger.confirmArmed{
-  color: #fff !important;
-  border-color: rgba(255, 92, 137, 0.52) !important;
-  background:
-    radial-gradient(circle at 20% 50%, rgba(255, 92, 137, 0.24), transparent 44%),
-    rgba(255, 92, 137, 0.12) !important;
-  box-shadow:
-    0 0 0 1px rgba(255, 92, 137, 0.14) inset,
-    0 12px 30px rgba(255, 92, 137, 0.10) !important;
-}
-
 /* Pause expensive player decoration during interaction. */
 .app .playerBar{
   --player-perf-blur: 32px;

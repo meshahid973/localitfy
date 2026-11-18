@@ -106,8 +106,7 @@
   cursor: pointer;
 }
 .collectionTextButton:hover { color: var(--lt-text); border-color: var(--lt-border-strong); }
-.collectionTextButton.danger:hover,
-.collectionTextButton.confirmArmed { color: var(--lt-danger); border-color: rgba(255, 107, 138, .45); }
+.collectionTextButton.danger:hover { color: var(--lt-danger); border-color: rgba(255, 107, 138, .45); }
 .collectionShowAll { justify-self: start; margin-top: 4px; }
 
 :is(.collectionPlayButton, .collectionIconButton, .collectionTextButton):disabled { cursor: not-allowed; opacity: .42; }
@@ -147,8 +146,6 @@
   cursor: pointer;
 }
 .trackList.withCover .trackRow { --track-columns: var(--lt-control-height) 40px minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
-.trackList.withAlbum .trackRow { --track-columns: var(--lt-control-height) minmax(0, 1.4fr) minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
-.trackList.withCover.withAlbum .trackRow { --track-columns: var(--lt-control-height) 40px minmax(0, 1.4fr) minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
 .trackRow:hover { background: color-mix(in srgb, var(--lt-text) 6%, transparent); }
 .trackRow.active { background: rgba(var(--lt-accent-rgb), .1); }
 .trackRow.missing { cursor: default; opacity: .5; }
@@ -181,44 +178,19 @@
 
 .trackRowTitle { min-width: 0; display: grid; gap: 3px; }
 .trackRowTitle strong,
-.trackRowTitle small,
-.trackRowAlbum { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trackRowTitle small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .trackRowTitle strong { color: var(--lt-text); font-size: 14px; font-weight: 550; }
 .trackRow.active .trackRowTitle strong { color: var(--lt-accent); }
-.trackRowTitle small,
-.trackRowAlbum { color: var(--lt-muted); font-size: 12px; }
+.trackRowTitle small { color: var(--lt-muted); font-size: 12px; }
 .trackRowDuration { color: var(--lt-muted); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
 .app .collectionPage .trackRow > .iconAction { border-color: transparent !important; background: transparent !important; box-shadow: none !important; }
 .trackRowAdd { opacity: 0; }
 .trackRow:hover .trackRowAdd,
 .trackRowAdd:focus-visible { opacity: 1; }
 
-.collectionCardGrid { min-width: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(156px, 1fr)); gap: 12px; }
-.collectionCard {
-  min-width: 0;
-  display: grid;
-  align-content: start;
-  gap: 8px;
-  padding: 10px;
-  border-radius: 12px;
-  color: var(--lt-text);
-  transition: background-color 140ms ease;
-}
-.collectionCard:hover { background: color-mix(in srgb, var(--lt-text) 6%, transparent); }
-.collectionCardArt,
-.collectionCardArt img { display: block; width: 100%; aspect-ratio: 1; border-radius: 8px; object-fit: cover; }
-.collectionCard strong,
-.collectionCard small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.collectionCard strong { font-size: 13px; font-weight: 700; }
-.collectionCard small { color: var(--lt-muted); font-size: 12px; }
-
 @media (max-width: 760px) {
   .collectionHero { grid-template-columns: 100px minmax(0, 1fr); column-gap: 16px; padding: 18px 16px; }
-  .trackList.withAlbum .trackRow,
-  .trackList.withCover.withAlbum .trackRow { --track-columns: var(--lt-control-height) 40px minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
-  .trackList:not(.withCover).withAlbum .trackRow { --track-columns: var(--lt-control-height) minmax(0, 1fr) var(--lt-control-height) 48px var(--lt-control-height); }
   .collectionHeroCopy h1 { font-size: 26px; }
-  .trackRowAlbum { display: none; }
 }
 
 @media (hover: none), (pointer: coarse) {

@@ -345,5 +345,4 @@ html.platformAndroid .trackRowTitle { grid-area: 1 / 2; }
 html.platformAndroid .trackRowTitle strong { font-size: 14px; }
 html.platformAndroid .trackRow > .iconAction { grid-area: 1 / 3; width: 44px; height: 44px; }
 html.platformAndroid .trackRow > .trackRowAdd { grid-column: 4; }
-html.platformAndroid .trackRowAlbum,
 html.platformAndroid .trackRowDuration { display: none; }
