@@ -94,7 +94,13 @@ function createLibraryWatcher({ isAudioFile, getLibraryPaths, importFiles, onCha
     return importedCount;
   }
 
-  const isWatched = (file) => [...entries.keys()].some((key) => pathKey(file) === key || pathKey(file).startsWith(key.endsWith(path.sep) ? key : key + path.sep));
+  const isWatched = (file) => {
+    const normalized = pathKey(file);
+    for (const key of entries.keys()) {
+      if (normalized === key || normalized.startsWith(key.endsWith(path.sep) ? key : key + path.sep)) return true;
+    }
+    return false;
+  };
 
   async function settledFiles(files, library) {
     const candidates = [];

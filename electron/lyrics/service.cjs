@@ -90,26 +90,78 @@ function retryAfterMs(response, fallbackMs, timestamp = Date.now()) {
 function createLyricsService({
   cacheDir, userAgent, fetchImpl = globalThis.fetch, now = Date.now,
   retryDelayMs = 1000, requestSpacingMs = REQUEST_GAP_MS,
+  maxCacheEntries = 2048, maxCacheBytes = 32 * 1024 * 1024,
   sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 }) {
   const pending = new Map();
+  let cacheGeneration = 0;
+  let cacheTail = Promise.resolve();
+  let inventory = null;
+  let cacheBytes = 0;
+  const entryLimit = Math.min(512 * 1024, maxCacheBytes);
+  function mutateCache(task) {
+    const run = cacheTail.then(task);
+    cacheTail = run.catch(() => undefined);
+    return run;
+  }
   const cacheFile = key => path.join(cacheDir, key + ".json");
   let queue = Promise.resolve();
   let nextRequestAt = 0;
 
   async function readCache(key) {
     try {
-      const entry = JSON.parse(await fs.readFile(cacheFile(key), "utf8"));
+      const file = cacheFile(key);
+      if ((await fs.stat(file)).size > entryLimit) return null;
+      const entry = JSON.parse(await fs.readFile(file, "utf8"));
       if (entry?.result?.status === "missing" && now() - Number(entry.savedAt || 0) > MISS_TTL_MS) return null;
       return entry?.result || null;
     } catch { return null; }
   }
 
-  async function writeCache(key, result) {
+  async function loadInventory() {
+    if (inventory) return;
+    const rows = [];
+    for (const name of await fs.readdir(cacheDir)) {
+      if (!/^[a-f0-9]{40}\.json$/.test(name)) continue;
+      try {
+        const stat = await fs.lstat(path.join(cacheDir, name));
+        if (stat.isFile()) rows.push({ key: name.slice(0, -5), size: stat.size, modified: stat.mtimeMs });
+      } catch { /* removed concurrently */ }
+    }
+    rows.sort((a, b) => a.modified - b.modified);
+    inventory = new Map(rows.map(row => [row.key, row.size]));
+    cacheBytes = rows.reduce((sum, row) => sum + row.size, 0);
+  }
+
+  async function writeCache(key, result, generation) {
+    const data = JSON.stringify({ savedAt: now(), result });
+    const bytes = Buffer.byteLength(data);
+    if (bytes > entryLimit || maxCacheEntries < 1) return;
     try {
-      await fs.mkdir(cacheDir, { recursive: true });
-      await fs.writeFile(cacheFile(key), JSON.stringify({ savedAt: now(), result }));
-    } catch { /* cache is best effort */ }
+      await mutateCache(async () => {
+        if (generation !== cacheGeneration) return;
+        await fs.mkdir(cacheDir, { recursive: true });
+        await loadInventory();
+        if (generation !== cacheGeneration) return;
+        const file = cacheFile(key);
+        const temporary = file + ".tmp";
+        try {
+          await fs.writeFile(temporary, data);
+          await fs.rename(temporary, file);
+        } finally { await fs.rm(temporary, { force: true }).catch(() => undefined); }
+        cacheBytes -= inventory.get(key) || 0;
+        inventory.delete(key);
+        inventory.set(key, bytes);
+        cacheBytes += bytes;
+        // Only evict regenerable, hashed LRCLIB cache entries; never user sidecars or manual matches.
+        while (inventory.size > maxCacheEntries || cacheBytes > maxCacheBytes) {
+          const oldest = inventory.keys().next().value;
+          await fs.rm(cacheFile(oldest), { force: true });
+          cacheBytes -= inventory.get(oldest);
+          inventory.delete(oldest);
+        }
+      });
+    } catch { inventory = null; /* cache is best effort */ }
   }
 
   async function readSidecar(filePath) {
@@ -202,19 +254,22 @@ function createLyricsService({
     const key = crypto.createHash("sha1")
       .update(["v2", cleanTitle(song.title), primaryArtist(song.artist), Math.round(Number(song.duration) || 0)].join("\u0000").toLowerCase())
       .digest("hex");
-    if (!refresh) {
+    const generation = cacheGeneration;
+    await cacheTail;
+    if (!refresh && generation === cacheGeneration) {
       const cached = await readCache(key);
-      if (cached) return cached;
+      if (cached && generation === cacheGeneration) return cached;
     }
-    if (pending.has(key)) return pending.get(key);
+    const pendingKey = `${generation}:${key}`;
+    if (pending.has(pendingKey)) return pending.get(pendingKey);
     const work = lookupOnline(song)
-      .then(async result => { await writeCache(key, result); return result; })
+      .then(async result => { await writeCache(key, result, generation); return result; })
       .catch(error => ({
         status: "error", source: "lrclib", lines: [],
         error: error?.name === "TimeoutError" ? "lyrics lookup timed out" : String(error?.message || error)
       }))
-      .finally(() => pending.delete(key));
-    pending.set(key, work);
+      .finally(() => pending.delete(pendingKey));
+    pending.set(pendingKey, work);
     return work;
   }
 
@@ -252,7 +307,12 @@ function createLyricsService({
   }
 
   async function clearCache() {
-    await fs.rm(cacheDir, { recursive: true, force: true });
+    cacheGeneration++;
+    await mutateCache(async () => {
+      await fs.rm(cacheDir, { recursive: true, force: true });
+      inventory = null;
+      cacheBytes = 0;
+    });
     return true;
   }
 

@@ -583,3 +583,23 @@ test("MusicBrainz successful responses expire without disabling request coalesci
   await client.searchReleases("Same", "");
   assert.equal(calls, 2);
 });
+
+test("foreground metadata search takes priority over waiting artwork requests", async () => {
+  const calls = [];
+  let release, begin;
+  const started = new Promise(resolve=>{begin=resolve});
+  const gate = new Promise(resolve=>{release=resolve});
+  const client = createMusicBrainzClient({userAgent:"test",minIntervalMs:0,maxCacheEntries:1,fetchImpl:async url=>{
+    calls.push(new URL(url).searchParams.get("query"));
+    if (calls.length===1) {begin();await gate;}
+    return {ok:true,status:200,json:async()=>({recordings:[]})};
+  }});
+  const first = client.searchRecordings("First","",{background:true});
+  await started;
+  const second = client.searchRecordings("Second","",{background:true});
+  const duplicate = client.searchRecordings("First","",{background:true});
+  const interactive = client.searchRecordings("Manual","");
+  release();
+  await Promise.all([first,second,duplicate,interactive]);
+  assert.deepEqual(calls,['recording:"First"','recording:"Manual"','recording:"Second"']);
+});

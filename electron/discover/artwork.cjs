@@ -27,7 +27,7 @@ function createArtworkLookup(client,now=Date.now) {
     cache.delete(key);
     if(pending.has(key)) return pending.get(key);
     if(pending.size>=4 || !client?.searchRecordings) return {};
-    const task=Promise.resolve().then(()=>client.searchRecordings(title,artist)).then(items=>{
+    const task=Promise.resolve().then(()=>client.searchRecordings(title,artist,{background:true})).then(items=>{
       const value=matchRecordingArtwork(items,title,artist);
       cache.set(key,{at:now(),value});
       while(cache.size>512) cache.delete(cache.keys().next().value);
