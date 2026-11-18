@@ -1335,26 +1335,28 @@ function MainModeApp() {
     const picked: Song[] = [];
     const seen = new Set<string>();
 
-    [currentSong, ...topSongs, ...recentlyAdded, ...songs].forEach((song) => {
-      if (!song || seen.has(song.id)) return;
-      seen.add(song.id);
-      picked.push(song);
-    });
-
-    return picked.slice(0, 6);
+    for (const shelf of [[currentSong], topSongs, recentlyAdded, songs]) {
+      for (const song of shelf) {
+        if (!song || !isPlayableSong(song) || seen.has(song.id)) continue;
+        seen.add(song.id);
+        picked.push(song);
+        if (picked.length === 8) return picked;
+      }
+    }
+    return picked;
   }, [currentSong, topSongs, recentlyAdded, songs]);
 
   const homeFreshShelfSongs = useMemo(() => {
     const picked: Song[] = [];
     const seen = new Set<string>();
 
-    [...recentlyAdded, ...songs].forEach((song) => {
-      if (!song || seen.has(song.id)) return;
+    for (const song of recentlyAdded) {
+      if (!isPlayableSong(song) || seen.has(song.id)) continue;
       seen.add(song.id);
       picked.push(song);
-    });
-
-    return picked.slice(0, 10);
+      if (picked.length === 10) break;
+    }
+    return picked;
   }, [recentlyAdded, songs]);
 
   const libraryHealthLabel = !songs.length

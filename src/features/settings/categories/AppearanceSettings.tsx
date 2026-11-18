@@ -43,7 +43,7 @@ export default function AppearanceSettings(props: AppearanceSettingsProps) {
       </div>
 
       <div className="settingsPanelCard settingsCoverTintCard">
-        <div className="settingsPanelHeader"><div><strong>Album art tint</strong><span>How much cover art influences the player background.</span></div></div>
+        <div className="settingsPanelHeader"><div><strong>Artwork tint</strong><span>How much cover art influences the player background.</span></div></div>
         <div className="settingsChoiceRowV491" role="group" aria-label="Live cover color strength">
           {props.coverColorSyncOptions.map((option) => {
             const active = props.selectedCoverColorSyncMode === option.id;

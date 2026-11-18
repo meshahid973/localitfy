@@ -68,6 +68,15 @@ export function pickRecentlyPlayed(songs: readonly Song[], limit = 10): Song[] {
   });
 }
 
+export function pickMostPlayedSongs(songs: readonly Song[], limit = 12): Song[] {
+  return takeBest(songs, limit, (song) => {
+    const plays = Number(song.playCount);
+    return playable(song) && Number.isFinite(plays) && plays > 0
+      ? { value: song, primary: plays, secondary: time(song.lastPlayed) }
+      : null;
+  });
+}
+
 export function pickLikedSongs(songs: readonly Song[], limit = 10): Song[] {
   return takeBest(songs, limit, (song) => song.liked && playable(song)
     ? { value: song, primary: song.playCount || 0, secondary: 0 }

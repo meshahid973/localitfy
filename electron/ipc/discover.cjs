@@ -17,7 +17,7 @@ const apiKeyFor = (settings) => String(settings.lastfmApiKey || process.env.LOCA
 const MBID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const cleanText = (value) => typeof value === "string" ? value.trim().slice(0, 300) : "";
 function normalizeCatalog(kind, items) {
-  const endpoint = kind === "album" ? "release-group" : kind;
+  const endpoint = kind;
   const seen = new Set();
   const result = [];
   for (const item of Array.isArray(items) ? items.slice(0, 25) : []) {
@@ -57,7 +57,7 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
       const query = payload.catalog;
       const kind = query?.kind;
       const term = typeof query?.term === "string" ? query.term.trim() : "";
-      if (!["recording", "artist", "album"].includes(kind) || term.length < 2 || term.length > 160)
+      if (!["recording", "artist"].includes(kind) || term.length < 2 || term.length > 160)
         return { status: "error", error: "Enter a search of 2–160 characters." };
       if (!musicBrainzClient) return { status: "error", error: "Public catalog is unavailable. Update the desktop application." };
       const key = JSON.stringify([kind, term.toLowerCase()]);

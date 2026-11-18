@@ -126,7 +126,6 @@ test("collection browsing prioritizes artwork and retains contextual drag target
 
 test("artwork rails retain geometry and scrolling without visible scrollbars", () => {
   const css = read("src/features/home/home.css");
-  assert.match(css, /\.homeArtistCard \.mediaCardCover \{[^}]*width: min\(100%, 116px\); aspect-ratio: 1/);
   assert.match(css, /scrollbar-width: none/);
   assert.match(css, /\.homeReleaseRail::-webkit-scrollbar \{ display: none/);
   assert.match(css, /\.homePage > \.homeAtmosphere \{[^}]*grid-column: auto/);
@@ -147,11 +146,9 @@ test("ambience transitions are bounded and respect reduced motion", () => {
 
 test("Home most-listened work is memoized, bounded, and hidden when unused", () => {
   const home = read("src/features/home/HomeView.tsx");
-  assert.match(home, /const mostListenedArtists = useMemo\(\(\) => \{/);
-  assert.match(home, /if \(!showMostListened\) return \[\];/);
-  assert.match(home, /if \(picked\.size === 10\) break;/);
-  assert.match(home, /\[homeListenNowSongs, homeFreshShelfSongs, showMostListened, songs\]/);
-  const css = read("src/features/home/home.css");
+  assert.match(home, /const mostPlayedSongs = useMemo/);
+  assert.match(home, /showMostListened \? pickMostPlayedSongs\(songs\) : \[\]/);
+  assert.match(home, /title="Most listened of all time"/);
   assert.match(css, /\.homeSection > h3 \{ margin-bottom: 14px; \}/);
   assert.doesNotMatch(css, /\.homeSectionHead > h3 \{ margin:0; \}/);
 });

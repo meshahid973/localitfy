@@ -87,6 +87,8 @@ export default function AppShell(props: AppShellProps) {
   const detail = nav.detail;
   const { isSeeking, isVolumeDragging, draggedSongId, isPlaying } = playerBar;
   const { isThreeAm } = home;
+  const playerBackground = effectiveTheme === "light" && settings.playerBackgroundStyle === "oledBlack" ? "flat" : settings.playerBackgroundStyle || "coverBlur";
+  const homeBanner = effectiveTheme === "light" && settings.homeBannerType === "cleanBlack" ? "none" : settings.homeBannerType || "dynamic";
   const workspaceCoverColor = useWorkspaceCoverColor(home.ambientStyle, home.currentSong?.id, effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded);
   const [tagSearchSong, setTagSearchSong] = useState<Song | null>(null);
   // When a download batch finishes, offer to tag the songs it added.
@@ -140,13 +142,13 @@ export default function AppShell(props: AppShellProps) {
       data-cover-sync={effectiveCoverColorSyncMode}
       data-notes={effectiveNotes ? "on" : "off"}
       data-badge={settings.showHeroBadge ? "on" : "off"}
-      data-home-banner={settings.homeBannerType || "dynamic"}
+      data-home-banner={homeBanner}
       data-blur-effects="normal"
       data-card-background={settings.mediaCardBackground || "glassy"}
       data-home-layout={settings.homeLayoutMode || "balanced"}
       data-library-row-style={settings.libraryRowStyle || "comfyRows"}
       data-sidebar-behavior={settings.sidebarBehavior || "slim"}
-      data-player-background={settings.playerBackgroundStyle || "coverBlur"}
+      data-player-background={playerBackground}
       data-hero-expanded={settings.heroExpanded ? "on" : "off"}
       data-hero-motion={heroMotion}
       data-status={statusText}
@@ -355,9 +357,9 @@ export default function AppShell(props: AppShellProps) {
               className={`pageTransition pageTransition-${view}`}
               data-view={view}
             >
-              {view === "home" ? <HomeView {...home} artworkAmbient={effectiveAmbient && !isAppBackgrounded} bannerType={settings.homeBannerType} /> : null}
+              {view === "home" ? <HomeView {...home} artworkAmbient={effectiveAmbient && !isAppBackgrounded} bannerType={homeBanner} /> : null}
 
-              <Suspense fallback={null}>
+              <Suspense fallback={<div role="status" className="collectionLoading">Loading…</div>}>
                 {(view === "library" || view === "liked") ? <LibraryView {...library} /> : null}
                 {view === "artists" ? (detail?.kind === "artist"
                   ? <ArtistPage key={detail.id} id={detail.id} {...pageProps} openSimilar={openSimilarSongs} />
@@ -378,7 +380,7 @@ export default function AppShell(props: AppShellProps) {
           </section>
 
           <PlayerSurfaces player={playerBar} queue={modals.queuePanel} lyrics={modals.lyrics}
-            contentRef={contentRef} backgroundStyle={settings.playerBackgroundStyle || "coverBlur"} backgrounded={isAppBackgrounded} />
+            contentRef={contentRef} backgroundStyle={playerBackground} backgrounded={isAppBackgrounded} />
         </div>
       )}
 

@@ -14,7 +14,7 @@
 }
 
 .phoneIconButton:active{
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--lt-surface-raised);
 }
 
 .phoneIconButton svg{
@@ -112,7 +112,7 @@
   height: 3px;
   margin: 0;
   border-radius: 3px;
-  background: linear-gradient(90deg, var(--lt-accent) var(--range-progress, 0%), rgba(255, 255, 255, 0.14) var(--range-progress, 0%));
+  background: linear-gradient(90deg, var(--lt-accent) var(--range-progress, 0%), var(--lt-border) var(--range-progress, 0%));
   appearance: none;
   pointer-events: none;
   opacity: 1;
@@ -135,12 +135,12 @@
   padding: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + 8px) max(20px, var(--safe-area-inset-right, env(safe-area-inset-right, 0px))) calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 20px) max(20px, var(--safe-area-inset-left, env(safe-area-inset-left, 0px)));
   overflow-x: hidden;
   overflow-y: auto;
-  color: #fff;
-  background: #07070b;
+  color: var(--lt-text);
+  background: var(--lt-bg);
   animation: phonePlayerRise 260ms cubic-bezier(0.2, 0, 0, 1) both;
 }
 
-.phonePlayerSheet[data-background="oledBlack"]{ background: #000; }
+.phonePlayerSheet[data-background="oledBlack"]{ background: var(--lt-bg); }
 
 @keyframes phonePlayerRise{
   from{ transform: translateY(24px); opacity: 0; }
@@ -159,7 +159,7 @@
 .phonePlayerBackdrop::after{
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(7, 7, 11, 0.2), rgba(7, 7, 11, 0.85) 70%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--lt-bg) 20%, transparent), color-mix(in srgb, var(--lt-bg) 85%, transparent) 70%);
   content: "";
 }
 
@@ -182,7 +182,7 @@
 
 .phonePlayerTop .phoneIconButton,
 .phonePlayerSheet .phoneIconButton{
-  color: #fff;
+  color: var(--lt-text);
 }
 
 .phonePlayerContext{
@@ -192,7 +192,7 @@
 }
 
 .phonePlayerContext small{
-  color: rgba(255, 255, 255, 0.66);
+  color: var(--lt-muted);
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -281,7 +281,7 @@
 
 .phonePlayerTitles small{
   overflow: hidden;
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--lt-muted);
   font-size: 15px;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -326,7 +326,7 @@
 .phonePlayerSeek input[type="range"]::-webkit-slider-runnable-track{
   height: 6px;
   border-radius: 6px;
-  background: linear-gradient(90deg, var(--lt-accent) var(--range-progress, 0%), rgba(255, 255, 255, 0.2) var(--range-progress, 0%));
+  background: linear-gradient(90deg, var(--lt-accent) var(--range-progress, 0%), var(--lt-border) var(--range-progress, 0%));
 }
 
 .phonePlayerSeek input[type="range"]::-webkit-slider-thumb{
@@ -341,7 +341,7 @@
 .phonePlayerTimes{
   display: flex;
   justify-content: space-between;
-  color: rgba(255, 255, 255, 0.66);
+  color: var(--lt-muted);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
@@ -376,7 +376,7 @@
 
 .phoneToggle{
   position: relative;
-  color: rgba(255, 255, 255, 0.72) !important;
+  color: var(--lt-muted) !important;
 }
 
 .phoneToggle.active{
@@ -408,7 +408,7 @@
   border-radius: 28px;
   background: var(--lt-accent);
   color: var(--button-text-on-accent);
-  box-shadow: 0 10px 28px rgba(var(--lt-accent-rgb), 0.35);
+  box-shadow: none;
   transition: border-radius 220ms cubic-bezier(0.2, 0, 0, 1);
 }
 
@@ -436,10 +436,10 @@
   min-width: 0;
   max-width: 100%;
   padding: 0 16px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid var(--lt-border);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
+  background: var(--lt-surface-soft);
+  color: var(--lt-text);
   font-size: 14px;
   font-weight: 600;
 }

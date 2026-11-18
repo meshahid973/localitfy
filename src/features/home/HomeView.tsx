@@ -12,10 +12,8 @@ const HomeCustomizePanel = lazy(() => import("./HomeCustomizePanel"));
 import { visibleHomeSections, type HomeLayoutPatch, type HomeSectionId } from "./homeLayout";
 import { HomeDailyMixRail, HomeSongRail } from "./HomeShelves";
 import type { SimilarSeedRequest } from "../analysis/similarSeed";
-import { MediaCard } from "../../shared/ui/MediaCard";
-import { splitArtistCredits } from "../artists/artistCredits";
-import { artistTarget, useAppActions } from "../shell/appActions";
-import { pickLikedSongs, pickNotPlayedYet, pickRecentlyPlayed, pickRediscover } from "./homeShelfPicks";
+import { useAppActions } from "../shell/appActions";
+import { pickLikedSongs, pickMostPlayedSongs, pickNotPlayedYet, pickRecentlyPlayed, pickRediscover } from "./homeShelfPicks";
 
 export type HomeViewProps = {
   ambientStyle: CSSProperties;
@@ -87,35 +85,11 @@ export default function HomeView(props: HomeViewProps) {
   const closeCustomize = useCallback(() => setCustomizeOpen(false), []);
 
   const listenNowSongs = homeListenNowSongs.slice(0, android ? 4 : 8);
-  const newReleaseSongs = (homeFreshShelfSongs.length ? homeFreshShelfSongs : homeListenNowSongs).slice(0, 10);
+  const recentlyAddedSongs = homeFreshShelfSongs.slice(0, 10);
   const visibleSections = visibleHomeSections(settings.homeSectionOrder, settings.homeHiddenSections);
   const showing = (id: HomeSectionId) => visibleSections.includes(id);
   const showMostListened = showing("mostListened");
-  // One card per artist from your most played shelves; each opens that artist's page.
-  const mostListenedArtists = useMemo(() => {
-    if (!showMostListened) return [];
-    const picked = new Map<string, { name: string; song: Song }>();
-    for (const shelf of [homeListenNowSongs, homeFreshShelfSongs]) {
-      for (const song of shelf) {
-        const name = splitArtistCredits(song.artist)[0];
-        const key = name?.toLocaleLowerCase();
-        if (!key || picked.has(key)) continue;
-        picked.set(key, { name, song });
-        if (picked.size === 10) break;
-      }
-      if (picked.size === 10) break;
-    }
-    const songsByArtist = new Map([...picked.keys()].map((key) => [key, [] as Song[]]));
-    for (const song of songs) {
-      for (const key of new Set(splitArtistCredits(song.artist).map((credit) => credit.toLocaleLowerCase()))) {
-        songsByArtist.get(key)?.push(song);
-      }
-    }
-    return [...picked.entries()].map(([key, { name, song }]) => ({
-      key, song,
-      target: artistTarget(name, songsByArtist.get(key) || [])
-    }));
-  }, [homeListenNowSongs, homeFreshShelfSongs, showMostListened, songs]);
+  const mostPlayedSongs = useMemo(() => showMostListened ? pickMostPlayedSongs(songs) : [], [showMostListened, songs]);
 
   // Only work out the shelves that are on screen; a hidden shelf costs nothing.
   const showRecent = showing("recentlyPlayed"), showLiked = showing("likedSongs");
@@ -201,30 +175,10 @@ export default function HomeView(props: HomeViewProps) {
         )}
       </section>
     ),
-    mostListened: mostListenedArtists.length ? (
-      <section className="homeSection homeArtistsSection" aria-labelledby="home-most-listened-title">
-        <h3 id="home-most-listened-title">Most listened</h3>
-        <div className="homeArtistRail" tabIndex={0} role="region" aria-label="Most listened artists">
-          {mostListenedArtists.map(({ key, song, target }) => (
-            <MediaCard
-              key={key}
-              className="homeArtistCard"
-              openLabel={`open ${target.title}`}
-              playLabel={`play ${target.title}`}
-              onOpen={() => actions.openCollection(target)}
-              onPlay={() => actions.playCollection(target)}
-              onContextMenu={(event) => actions.openCollectionMenu(event, target)}
-              cover={<span className="homeArtistCoverWrap"><Cover song={song} className="homeArtistCover" preferThumbnail /></span>}
-            >
-              <strong>{prettyMeta(target.title)}</strong>
-            </MediaCard>
-          ))}
-        </div>
-      </section>
-    ) : null,
+    mostListened: <HomeSongRail id="most-listened" title="Most listened of all time" songs={mostPlayedSongs} currentId={currentId} selectSong={selectSong} playSongs={playSongs} />,
     dailyMixes: <HomeDailyMixRail songsById={songsById} openDailyMixes={openDailyMixes} openAnalysisSettings={openAnalysisSettings} />,
     recentlyPlayed: <HomeSongRail id="recently-played" title="Recently played" songs={recentlyPlayedSongs} currentId={currentId} selectSong={selectSong} playSongs={playSongs} emptyText={android ? undefined : "Songs you play will show up here."} findSimilar={() => props.openSimilarSongs({ kind: "recent" })} />,
-    newReleases: <HomeSongRail id="releases" title="New Releases" songs={newReleaseSongs} currentId={currentId} selectSong={selectSong} />,
+    newReleases: <HomeSongRail id="releases" title="Recently added" songs={recentlyAddedSongs} currentId={currentId} selectSong={selectSong} />,
     likedSongs: <HomeSongRail id="liked" title="Liked songs" songs={likedSongs} currentId={currentId} selectSong={selectSong} playSongs={playSongs} emptyText="Tap the heart on a song to keep it here." />,
     rediscover: <HomeSongRail id="rediscover" title="Rediscover" songs={rediscoverSongs} currentId={currentId} selectSong={selectSong} playSongs={playSongs} emptyText="Songs you played a lot but not in the last month will come back here." />,
     notPlayedYet: <HomeSongRail id="not-played" title="Not played yet" songs={notPlayedSongs} currentId={currentId} selectSong={selectSong} playSongs={playSongs} emptyText="You have played every song in your library." />
