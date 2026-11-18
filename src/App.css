@@ -2045,7 +2045,6 @@ button {
 }
 
 .titleLogoImage,
-.loadingLogoImage,
 .buttonInlineIcon{
   display: block;
   object-fit: contain;
@@ -2056,12 +2055,6 @@ button {
 
   border-radius: 5px;
   filter: drop-shadow(0 0 9px rgba(var(--lt-accent-rgb), .38));
-}
-
-.loadingLogoImage{
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 11px;
 }
 
 .buttonInlineIcon{
@@ -3954,12 +3947,6 @@ the last imported CSS layer. */
 
 .app .playerBar > :where(.playerLeft, .playerCenter, .playerRight, .controlRow, .progressRow, .volumeWrap){
   contain: layout style !important;
-}
-
-.app :where(.secretLayer.arcadeGhost){
-  display: none !important;
-  animation: none !important;
-  pointer-events: none !important;
 }
 
 .app .secretLayer:not(.stars):not(.yukari){

@@ -1,6 +1,7 @@
 import { isAndroidApp, computerName } from "../../app/platform";
 import "./library.css";
-import { lazy, Suspense, useState, type DragEventHandler, type ReactNode } from "react";
+import { lazy, Suspense, useState, type DragEventHandler } from "react";
+import { VirtualLibrarySongCards, VirtualSongRows, type VirtualSongRowsProps } from "./components/SongRows";
 import { Copy, FileWarning, FolderInput, ListMusic, Radio, Shuffle, Trash2, Grid2X2, List, Heart, Users } from "lucide-react";
 import type { SimilarSeedRequest } from "../analysis/similarSeed";
 import type { DuplicatesMergeResult } from "./duplicates/DuplicatesDialog";
@@ -32,8 +33,7 @@ export type LibraryViewProps = {
   missingFileCount: number;
   query: string;
   removeMissingSongs: () => Promise<unknown> | unknown;
-  renderLibrarySongCards: (songs: Song[], className?: string) => ReactNode;
-  renderSongRows: (songs: Song[], className?: string) => ReactNode;
+  rows: Omit<VirtualSongRowsProps, "list" | "className">;
   setLibraryFilterMode?: (mode: "all" | "missing") => unknown;
   setLibrarySortMode: (mode: LibrarySortMode) => unknown;
   setLibraryRowStyle: (style: Settings["libraryRowStyle"]) => unknown;
@@ -60,8 +60,7 @@ export default function LibraryView(props: LibraryViewProps) {
     missingFileCount,
     query,
     removeMissingSongs,
-    renderLibrarySongCards,
-    renderSongRows,
+    rows,
     setLibraryFilterMode,
     setLibrarySortMode,
     settings,
@@ -160,7 +159,7 @@ export default function LibraryView(props: LibraryViewProps) {
         {visibleSongs.length ? (
           grid ? (
             <div className="libraryTrackSurface libraryCoverCards">
-              {renderLibrarySongCards(visibleSongs, "libraryCoverCardsGridV321")}
+              <VirtualLibrarySongCards {...rows} list={visibleSongs} className="libraryCoverCardsGridV321" />
             </div>
           ) : (
             <div
@@ -169,7 +168,7 @@ export default function LibraryView(props: LibraryViewProps) {
               onDragLeave={handleLibraryAreaDragLeave}
               onDrop={handleLibraryAreaDrop}
             >
-              {renderSongRows(visibleSongs, "libraryFullListV025")}
+              <VirtualSongRows {...rows} list={visibleSongs} className="libraryFullListV025" />
             </div>
           )
         ) : (

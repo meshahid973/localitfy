@@ -19,10 +19,6 @@
   filter: saturate(1.05) contrast(1.02) !important;
 }
 
-.app .heroAmbiencePulse{
-  display: block;
-}
-
 .app :is( .orb){
   display: none !important;
   opacity: 0 !important;
@@ -214,8 +210,7 @@
 }
 
 .app[data-home-banner="cleanBlack"] .hero.ambientSurface::before,
-.app[data-home-banner="cleanBlack"] .hero.ambientSurface::after,
-.app[data-home-banner="cleanBlack"] .heroAmbiencePulse{
+.app[data-home-banner="cleanBlack"] .hero.ambientSurface::after{
   display: none !important;
 }
 
@@ -358,7 +353,6 @@
 }
 
 /* keep audio smooth by sleeping expensive paint while the renderer is busy. */
-.app.localtifyInteractionBusy .heroAmbiencePulse,
 .app.localtifyInteractionBusy :is(.coverAura, .songArt, .playerBar)::before{
   opacity: 0 !important;
   filter: none !important;
@@ -366,7 +360,7 @@
   transition: none !important;
 }
 
-.app.localtifyInteractionBusy :is(.nowPlayingCopySwap, .nowPlayingArtSwap, .songRow, .playlistSongRow){
+.app.localtifyInteractionBusy :is(.nowPlayingCopySwap, .songRow, .playlistSongRow){
   animation: none !important;
   transition-duration: 0ms !important;
 }
@@ -667,13 +661,8 @@ main.app.app[data-sidebar-behavior="hover"] > .appShell > .sidebar:focus-within 
 
   transition-duration: 90ms !important;
 }
-
-
 /* Explicitly keep these blur/tint systems alive. */
-.app .heroAmbiencePulse{
-  backface-visibility: hidden;
-  transform: translateZ(0);
-}
+
 
 /* analytics + compositor polish.
    Keep blur/cover ambience alive while moving row/card motion onto safer composite paths. */

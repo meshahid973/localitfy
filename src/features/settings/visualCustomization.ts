@@ -15,9 +15,8 @@ function normalizeChoice(value: unknown, allowed: readonly string[], fallback: s
 }
 
 export function applyVisualCustomizationDefaults<T extends Record<string, any>>(settings: T): T {
-  // Retired Home Quick Library values remain explicitly false until their final
-  // compatibility fields disappear from Settings. Spreading T first preserves
-  // the caller's concrete settings shape without an unsafe generic cast.
+  // Old fields are inert compatibility data. Preserve saved colors and disable
+  // retired controls without letting them into the active Settings type.
   return {
     ...settings,
     theme: normalizeThemeId(settings.theme),

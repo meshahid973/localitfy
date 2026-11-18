@@ -89,14 +89,10 @@ button:disabled:active {
 .nowPlayingCopySwap,
 .nowPlayingMiniCopySwap,
 .nowPlayingMiniTitleSwap,
-.nowPlayingMiniArtistSwap,
-.nowPlayingTitleSwap,
-.nowPlayingArtistSwap,
-.nowPlayingEyebrowSwap {
+.nowPlayingMiniArtistSwap{
   animation: localtifyCopyIn 300ms var(--motion-ease) both;
 }
 
-.nowPlayingArtSwap,
 .nowPlayingPlayerArtSwap,
 .playerArtSwap{
   animation: localtifyArtIn 360ms var(--motion-pop) both;

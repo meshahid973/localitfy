@@ -1,14 +1,7 @@
 import { lazy, startTransition, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "motion/react";
 import type { CSSProperties, PointerEvent, DragEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
-import {
-  FolderPlus,
-  SkipBack,
-  SkipForward,
-  Repeat2,
-  X,
-  Send
-} from "lucide-react";
+import { X, Send } from "lucide-react";
 import { HtmlAudioEngine } from "./features/player/engine/htmlAudioEngine";
 import { createPlayerController } from "./features/player/engine/playerController";
 import { useNativeMediaSession } from "./features/player/useNativeMediaSession";
@@ -61,9 +54,8 @@ import { usePlaylistsController } from "./features/playlists";
 import { useAppMenuCommands } from "./features/shell/useAppMenuCommands";
 import { updateStatusLabel, useUpdatesController } from "./features/updates";
 import { useSettingsController } from "./features/settings";
-import { Cover } from "./features/covers/Cover";
 import { useCoversController } from "./features/covers";
-import { VirtualLibrarySongCards, VirtualSongRows } from "./features/library/components/SongRows";
+import type { VirtualSongRowsProps } from "./features/library/components/SongRows";
 import { useLibraryController } from "./features/library";
 import { subscribeWatchedFoldersChange } from "./features/library/watchedFolderBridge";
 import { reconcileLibraryIndex, patchLibrarySong, replaceLibrarySong } from "./features/search/incrementalLibraryIndex";
@@ -79,7 +71,6 @@ import { useNavigationHistory } from "./features/shell/useNavigationHistory";
 import { revealSidebarSettingsPanel } from "./features/shell/sidebarLayout";
 import Onboarding from "./Onboarding";
 import CatBuddy from "./CatBuddy";
-import { PlayerPlayPauseMorphIcon } from "./features/player/PlayerPlayPauseMorphIcon";
 import { runLocaltifyIdleTask } from "./app/runtime/idle";
 import { useBodyRuntimeClasses } from "./app/runtime/useBodyRuntimeClasses";
 import { useAppLifecycleRuntime } from "./app/runtime/useAppLifecycleRuntime";
@@ -6867,67 +6858,6 @@ function MainModeApp() {
     await chooseCoverFromPc(editorSong);
   }
 
-  function renderSongRows(list: Song[], className = "songList fullList") {
-    return (
-      <VirtualSongRows
-        list={list}
-        className={className}
-        currentId={currentId}
-        isPlaying={isPlaying}
-        draggedSongId={draggedSongId}
-        libraryDragOverSongId={libraryDragOverSongId}
-        libraryDropSide={libraryDropSide}
-        draggedSongTitle={draggedSongTitle}
-        onAreaDragOver={handleLibraryAreaDragOver}
-        onAreaDragLeave={handleLibraryAreaDragLeave}
-        onAreaDrop={handleLibraryAreaDrop}
-        onSelectSong={selectSongCardAction}
-        onTogglePlay={togglePlayCardAction}
-        onToggleLike={toggleLikeCardAction}
-        onOpenEditor={openEditorCardAction}
-        onOpenPlaylistPicker={openPlaylistPickerCardAction}
-        onOpenSongContextMenu={openSongContextMenuCardAction}
-        onStartSongDrag={startSongDragCardAction}
-        onDragOverSong={dragOverSongCardAction}
-        onDragLeaveSong={dragLeaveSongCardAction}
-        onDropSong={dropSongCardAction}
-        onDragEnd={endSongDragCardAction}
-      />
-    );
-  }
-
-
-  function renderLibrarySongCards(list: Song[], className: string) {
-    return (
-      <VirtualLibrarySongCards
-        list={list}
-        className={className}
-        currentId={currentId}
-        isPlaying={isPlaying}
-        draggedSongId={draggedSongId}
-        libraryDragOverSongId={libraryDragOverSongId}
-        libraryDropSide={libraryDropSide}
-        draggedSongTitle={draggedSongTitle}
-        onAreaDragOver={handleLibraryAreaDragOver}
-        onAreaDragLeave={handleLibraryAreaDragLeave}
-        onAreaDrop={handleLibraryAreaDrop}
-        onSelectSong={selectSongCardAction}
-        onTogglePlay={togglePlayCardAction}
-        onToggleLike={toggleLikeCardAction}
-        onOpenEditor={openEditorCardAction}
-        onOpenPlaylistPicker={openPlaylistPickerCardAction}
-        onOpenSongContextMenu={openSongContextMenuCardAction}
-        onStartSongDrag={startSongDragCardAction}
-        onPointerStartSongDrag={startPointerSongDragCardAction}
-        registerLibrarySongElement={registerLibrarySongElement}
-        onDragOverSong={dragOverSongCardAction}
-        onDragLeaveSong={dragLeaveSongCardAction}
-        onDropSong={dropSongCardAction}
-        onDragEnd={endSongDragCardAction}
-      />
-    );
-  }
-
   function dismissOnboarding() {
     markOnboardingSeenForThisRelease();
 
@@ -7553,6 +7483,25 @@ function MainModeApp() {
   const playerLyricsSeek = useStableCallback((seconds: number) => handleSeek((seconds / (durationRef.current || currentDuration || currentSong?.duration || 1)) * 100));
   const playerLyricsSettings = useStableCallback(() => { setLyricsOpen(false); setSettingsSearch(""); setSettingsCategory("experimental"); changeView("settings"); });
 
+  const libraryAreaDragOver = useStableCallback(handleLibraryAreaDragOver);
+  const libraryAreaDragLeave = useStableCallback(handleLibraryAreaDragLeave);
+  const libraryAreaDrop = useStableCallback(handleLibraryAreaDrop);
+  const libraryRowSettings = useMemo(() => ({libraryRowStyle: settings.libraryRowStyle}), [settings.libraryRowStyle]);
+  const libraryRows = useMemo<Omit<VirtualSongRowsProps, "list" | "className">>(() => ({
+    currentId, isPlaying, draggedSongId, libraryDragOverSongId, libraryDropSide, draggedSongTitle,
+    onAreaDragOver: libraryAreaDragOver, onAreaDragLeave: libraryAreaDragLeave, onAreaDrop: libraryAreaDrop,
+    onSelectSong: selectSongCardAction, onTogglePlay: togglePlayCardAction, onToggleLike: toggleLikeCardAction,
+    onOpenEditor: openEditorCardAction, onOpenPlaylistPicker: openPlaylistPickerCardAction,
+    onOpenSongContextMenu: openSongContextMenuCardAction, onStartSongDrag: startSongDragCardAction,
+    onPointerStartSongDrag: startPointerSongDragCardAction, registerLibrarySongElement,
+    onDragOverSong: dragOverSongCardAction, onDragLeaveSong: dragLeaveSongCardAction,
+    onDropSong: dropSongCardAction, onDragEnd: endSongDragCardAction
+  }), [currentId, isPlaying, draggedSongId, libraryDragOverSongId, libraryDropSide, draggedSongTitle,
+    libraryAreaDragOver, libraryAreaDragLeave, libraryAreaDrop, selectSongCardAction, togglePlayCardAction,
+    toggleLikeCardAction, openEditorCardAction, openPlaylistPickerCardAction, openSongContextMenuCardAction,
+    startSongDragCardAction, startPointerSongDragCardAction, registerLibrarySongElement, dragOverSongCardAction,
+    dragLeaveSongCardAction, dropSongCardAction, endSongDragCardAction]);
+
   const localtifyAppViewProps: AppShellProps = {
     frame: {
       appRootRef,
@@ -7649,9 +7598,9 @@ function MainModeApp() {
     library: {
       changeView,
       deleteBusy,
-      handleLibraryAreaDragLeave,
-      handleLibraryAreaDragOver,
-      handleLibraryAreaDrop,
+      handleLibraryAreaDragLeave: libraryAreaDragLeave,
+      handleLibraryAreaDragOver: libraryAreaDragOver,
+      handleLibraryAreaDrop: libraryAreaDrop,
       handleSearchInput,
       importSongs,
       libraryAlbumCount,
@@ -7661,12 +7610,11 @@ function MainModeApp() {
       missingFileCount: effectiveMissingFileCount,
       query,
       removeMissingSongs,
-      renderLibrarySongCards,
-      renderSongRows,
+      rows: libraryRows,
       setLibraryFilterMode,
       setLibrarySortMode,
       setLibraryRowStyle: (style) => void updateSetting("libraryRowStyle", style),
-      settings,
+      settings: libraryRowSettings,
       showingMissingFiles: view === "library" && libraryFilterMode === "missing",
       shuffleLibrarySongsAction,
       openSimilarSongs: setSimilarRequest,

@@ -7,7 +7,7 @@ test("busy-paint suppression targets valid CSS pseudo-element selectors", () => 
   const css = read("src/features/shell/effects.css");
   assert.doesNotMatch(css, /:is\([^)]*::(?:before|after)/);
   assert.match(css, /\.app\.localtifyInteractionBusy :is\(\.coverAura, \.songArt, \.playerBar\)::before/);
-  assert.match(css, /\.app\.localtifyInteractionBusy \.heroAmbiencePulse/);
+  assert.doesNotMatch(css, /\.heroAmbiencePulse\b/);
 });
 
 test("queue and history controls use Localtify theme tokens and keyboard focus", () => {

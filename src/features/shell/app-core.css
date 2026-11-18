@@ -35,21 +35,6 @@ button:disabled{
 }
 
 .app{
-  --accent: #64f0a4;
-  --accent-rgb: 100, 240, 164;
-  --accent-soft: rgba(100, 240, 164, 0.12);
-  --accent-line: rgba(100, 240, 164, 0.32);
-  --bg: #000;
-  --bg-2: #050505;
-  --bg-3: #090909;
-  --text: #f4f4ee;
-  --text-2: rgba(244, 244, 238, 0.78);
-  --muted: rgba(244, 244, 238, 0.54);
-  --faint: rgba(244, 244, 238, 0.32);
-  --surface-2: rgba(255, 255, 255, 0.055);
-  --surface-3: rgba(255, 255, 255, 0.082);
-  --line: rgba(255, 255, 255, 0.075);
-  --line-2: rgba(255, 255, 255, 0.13);
   --danger: #ff4f73;
   --pill: 999px;
   --shadow: 0 24px 70px rgba(0, 0, 0, 0.58);
@@ -749,7 +734,6 @@ button:disabled{
 .app{
   --radius: 16px;
   --small-radius: 10px;
-  --surface: rgba(255, 255, 255, 0.045);
   --motion-fast: 120ms;
 
   background-image: none;

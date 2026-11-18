@@ -24,7 +24,8 @@ test("App delegates analytics formatting, feedback policy, idle scheduling and p
   assert.match(app, /features\/analytics\/formatters/);
   assert.match(app, /features\/feedback\/feedbackPrompt/);
   assert.match(app, /app\/runtime\/idle/);
-  assert.match(app, /features\/player\/PlayerPlayPauseMorphIcon/);
+  assert.doesNotMatch(app, /PlayerPlayPauseMorphIcon/);
+  assert.match(read("src/features/player/components/PlayerBar.tsx"), /from "\.\.\/PlayerPlayPauseMorphIcon"/);
   assert.doesNotMatch(app, /function localtifyAnalyticsNumber/);
   assert.doesNotMatch(app, /function runLocaltifyIdleTask/);
 });
