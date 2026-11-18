@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import { useModalFocus } from "../../../shared/hooks/useModalFocus";
 import { MascotStateArt } from "../../../shared/ui/LocaltifyViewUi";
-import { displaySongPickerSublineV444, displaySongTitleV444 } from "../../library/components/SongRows";
+import { displaySongPickerSublineV444, displaySongTitleV444 } from "../../library/trackMetadata";
 import type { Song } from "../../library/song.types";
 import type { Playlist } from "../playlist.types";
 import PlaylistCoverCollage from "./PlaylistCoverCollage";

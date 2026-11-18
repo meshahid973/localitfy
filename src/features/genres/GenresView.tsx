@@ -1,6 +1,7 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { CollectionArtwork } from "../covers/CollectionArtwork";
 import type { Song } from "../library/song.types";
+import { CollectionLoading } from "../../shared/ui/CollectionLoading";
 import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
 import { MediaCard } from "../../shared/ui/MediaCard";
 import { PageHeader } from "../../shared/ui/PageHeader";
@@ -85,7 +86,7 @@ export default function GenresView({ songs }: GenresViewProps) {
             <button type="button" className="softButton artistLoadMore" onClick={() => setGenreLimit((limit) => limit + 150)}>show more genres</button>
           ) : null}
         </>
-      ) : (
+      ) : loadingTags && !query ? <CollectionLoading label="Reading genre tags…" /> : (
         <LocaltifyStateCard
           centered
           tone="info"

@@ -1802,8 +1802,6 @@ html{
   display: none !important;
 }
 
-.songRow.active,
-.songRow.playing,
 .songCard.active,
 .songCard.playing,
 .songCard.isPlaying {
@@ -1811,8 +1809,6 @@ html{
   -webkit-text-fill-color: initial !important;
 }
 
-.songRow.active *,
-.songRow.playing *,
 .songCard.active *,
 .songCard.playing *,
 .songCard.isPlaying * {
@@ -1820,8 +1816,6 @@ html{
   -webkit-text-fill-color: currentColor !important;
 }
 
-.songRow.active .songTitle,
-.songRow.playing .songTitle,
 .songCard.active .songTitle,
 .songCard.playing .songTitle,
 .songCard.isPlaying .songTitle,
@@ -1832,8 +1826,6 @@ html{
   -webkit-text-fill-color: #ffffff !important;
 }
 
-.songRow.active .songArtist,
-.songRow.playing .songArtist,
 .songCard.active .songArtist,
 .songCard.playing .songArtist,
 .songCard.isPlaying .songArtist,

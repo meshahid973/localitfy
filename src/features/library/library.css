@@ -258,7 +258,9 @@
   background: var(--lt-fill-selected) !important;
   border-color: color-mix(in srgb, var(--lt-accent) 18%, transparent) !important;
   border-inline-start-color: var(--lt-accent) !important;
-}.libraryPage .songButton {
+}
+
+.libraryPage .songButton {
   min-width: 0 !important;
   padding: 0 !important;
   display: grid !important;
@@ -422,6 +424,6 @@
 .libraryCollectionShortcuts button { border-radius: var(--lt-radius-item); }
 .libraryCollectionShortcuts button:hover .libraryCollectionArtwork { filter: brightness(1.08); }
 .libraryCollectionShortcuts button:hover strong { color: var(--lt-accent); }
-.libraryPage .songRow.selected:not(.songDragging):not(.songDropTarget) { background: var(--lt-fill-selected) !important; outline: 1px solid var(--lt-border-strong); outline-offset: -1px; }
+.libraryPage .songRow.selected:not(.songDragging):not(.songDropTarget) { background: var(--lt-fill-selected) !important; outline: 2px solid var(--lt-border-strong); outline-offset: -2px; }
 .librarySelectionTools { display: flex; flex-wrap: wrap; gap: var(--lt-gap-control); align-items: center; }
 .librarySelectionTools .pageHeaderCount { margin-inline-end: auto; }

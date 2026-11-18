@@ -6,7 +6,7 @@ import type { Song, LibraryDropSide } from "../../library/song.types";
 import { Cover } from "../../covers/Cover";
 import { MascotStateArt, PlayingBarsIcon } from "../../../shared/ui/LocaltifyViewUi";
 import { formatTime } from "../../../shared/utils/format";
-import { displaySongArtistV444, displaySongTitleV444 } from "../../library/components/SongRows";
+import { TrackMetadata } from "../../library/TrackMetadata";
 
 function readPlaylistDraggedSongId(event: DragEvent<HTMLElement>, fallbackSongId = "") {
   return (
@@ -169,10 +169,7 @@ export const VirtualPlaylistTrackList = memo(function VirtualPlaylistTrackList({
               <button className="playlistTrackMain" type="button" disabled={song.fileExists === false} aria-current={active ? "true" : undefined} onClick={() => onSelectSong(song.id)}>
                 <span className="playlistTrackIndex">{active && isPlaying ? <PlayingBarsIcon /> : virtualRow.index + 1}</span>
                 <Cover song={song} className="playlistTrackCover" preferThumbnail />
-                <span className="playlistTrackText">
-                  <strong>{displaySongTitleV444(song, 7)}</strong>
-                  <small>{displaySongArtistV444(song)}</small>
-                </span>
+                <TrackMetadata song={song} className="playlistTrackText" subtitle={song.fileExists === false ? "Missing local file" : undefined} />
               </button>
               <span className="playlistTrackDuration">{formatTime(song.duration)}</span>
               <button className="iconAction iconActionSvg" type="button" disabled={!editable} onClick={() => onRemoveSong(selectedPlaylistId, song.id)} aria-label={`Remove ${song.title} from playlist`}>

@@ -5,57 +5,8 @@ import { usePageVirtualizer } from "../../../shared/hooks/usePageVirtualizer";
 import type { Song, LibraryDropSide } from "../song.types";
 import { Cover, getCardCoverCssUrl } from "../../covers/Cover";
 import { MascotStateArt, PlayingBarsIcon } from "../../../shared/ui/LocaltifyViewUi";
-import { collapseSpaces, formatTime, lower } from "../../../shared/utils/format";
-import { looksUnknownMeta, prettyMeta, prettyTitle } from "../../search/search.utils";
-
-export function displaySongWordCountV444(value: string) {
-  return collapseSpaces(value).split(/\s+/).filter(Boolean).length;
-}
-
-export function looksLikeArtistInTitleSlotV444(title: string) {
-  const value = lower(collapseSpaces(title));
-  if (!value || value === "unknown artist") return false;
-
-  return /^(dj|mc|lil|yung|young|mr|mrs|ms|dr)\b/.test(value)
-    || (/^[a-z0-9_.]+(?:\s+[a-z0-9_.]+)?$/i.test(value) && displaySongWordCountV444(value) <= 2);
-}
-
-export function looksLikeSongInArtistSlotV444(artist: string) {
-  const value = lower(collapseSpaces(artist));
-  if (!value || value === "unknown artist" || value === "unknown") return false;
-
-  return displaySongWordCountV444(value) >= 3
-    || /\b(the|you|your|me|my|love|said|hero|night|ost|collection|theme|song|slowed|remix|edit)\b/.test(value);
-}
-
-export function shouldSwapDisplayTitleArtistV444(song: Pick<Song, "title" | "artist"> & { album?: string | null }) {
-  const rawTitle = collapseSpaces(song.title || "");
-  const rawArtist = collapseSpaces(song.artist || "");
-  if (!rawTitle || !rawArtist) return false;
-
-  // A real album tag means the file was tagged properly, so "The Beatles" stays the artist.
-  const album = lower(collapseSpaces(song.album || ""));
-  if (!looksUnknownMeta(album) && album !== "local files") return false;
-
-  const cleanArtist = lower(rawArtist);
-  if (cleanArtist === "unknown" || cleanArtist === "unknown artist") return false;
-
-  return looksLikeArtistInTitleSlotV444(rawTitle) && looksLikeSongInArtistSlotV444(rawArtist);
-}
-
-export function displaySongTitleV444(song: Pick<Song, "title" | "artist"> & { album?: string | null }, maxWords = 7) {
-  return prettyTitle(song.title, maxWords);
-}
-
-export function displaySongArtistV444(song: Pick<Song, "title" | "artist"> & { album?: string | null }) {
-  return prettyMeta(song.artist);
-}
-
-export function displaySongPickerSublineV444(song: Pick<Song, "title" | "artist"> & { album?: string | null }) {
-  const artist = displaySongArtistV444(song);
-  if (!artist || artist === "unknown artist") return "Pick a playlist or make a new one.";
-  return `${artist} · Pick a playlist or make a new one.`;
-}
+import { formatTime } from "../../../shared/utils/format";
+import { TrackMetadata } from "../TrackMetadata";
 
 export type SongInteractionHandlers = {
   onSelectSong: (songId: string, shouldPlay?: boolean) => void;
@@ -132,10 +83,7 @@ export const SongRowItem = memo(function SongRowItem({
 
         <Cover song={song} className="songArt" />
 
-        <span className="songMeta">
-          <strong title={displaySongTitleV444(song, 12)}>{displaySongTitleV444(song, 7)}</strong>
-          <small>{isMissingFile ? "missing local file · reimport or relink" : displaySongArtistV444(song)}</small>
-        </span>
+        <TrackMetadata song={song} className="songMeta" subtitle={isMissingFile ? "missing local file · reimport or relink" : undefined} />
       </button>
 
       <span className="songInfo songDurationInfo">{isMissingFile ? "missing" : formatTime(song.duration)}</span>
@@ -255,10 +203,7 @@ export const LibrarySongCardItem = memo(function LibrarySongCardItem({
         <span className="homeAlbumRank">{rankLabel}</span>
       </button>
 
-      <div className="homeAlbumMeta">
-        <strong title={song.title}>{prettyTitle(song.title, 7)}</strong>
-        <small>{prettyMeta(song.artist)}</small>
-      </div>
+      <TrackMetadata song={song} className="homeAlbumMeta" />
 
       <div className="homeAlbumStats">
         <span>{formatTime(song.duration)}</span>

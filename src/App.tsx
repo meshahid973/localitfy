@@ -6674,8 +6674,8 @@ function MainModeApp() {
     endSongDrag();
   });
 
-  const selectPlaylistSongAction = useStableCallback((songId: string) => {
-    void playSongFromPlaylist(selectedPlaylist?.id || "", songId, true);
+  const selectPlaylistSongAction = useStableCallback((songId: string, playlistId?: string) => {
+    void playSongFromPlaylist(playlistId || selectedPlaylist?.id || "", songId, true);
   });
 
   const startPlaylistSongDragAction = useStableCallback((event: DragEvent<HTMLElement>, songId: string) => {

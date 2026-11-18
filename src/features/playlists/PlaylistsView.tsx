@@ -54,7 +54,7 @@ export type PlaylistsViewProps = {
   renamingPlaylistName: any;
   savePlaylistRename: any;
   setPlaylistArtwork: (id: string, value: string | null) => void;
-  selectPlaylistSongAction: any;
+  selectPlaylistSongAction: (songId: string, playlistId?: string) => void;
   selectedPlaylist: any;
   selectedPlaylistDuration: any;
   selectedPlaylistSongs: any;
@@ -98,6 +98,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
     renamingPlaylistId,
     renamingPlaylistName,
     savePlaylistRename,
+    selectPlaylistSongAction,
     selectedPlaylist,
     setNewPlaylistName,
     setRenamingPlaylistName,
@@ -241,7 +242,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
             currentId={currentId}
             isPlaying={isPlaying}
             draggedSongId={draggedSongId}
-            onSelectSong={(id) => actions.playCollection(target, {startId:id})}
+            onSelectSong={(id) => selectPlaylistSongAction(id, detailPlaylist.id)}
             onStartSongDrag={startPlaylistSongDragAction}
             onDropSong={dropPlaylistSongAction}
             onAppendSong={appendPlaylistSongAction}

@@ -3,7 +3,8 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Dispatch, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent, SetStateAction } from "react";
 import { GripVertical, ListX, Repeat, Repeat1, X } from "lucide-react";
 import { Cover } from "../../covers/Cover";
-import { prettyMeta, prettyTitle } from "../../search/search.utils";
+import { prettyMeta } from "../../search/search.utils";
+import { TrackMetadata } from "../../library/TrackMetadata";
 import { formatTime } from "../../../shared/utils/format";
 import type { Song } from "../../library/song.types";
 import type { RepeatMode } from "../player.types";
@@ -165,11 +166,8 @@ export default function QueuePanel({
           {currentSong ? (
             <div className="queuePanelRow isCurrent" onContextMenu={(event) => openSongContextMenu(event, currentSong)}>
               <span className="queuePanelRowMain queuePanelRowStatic">
-                <Cover song={currentSong} className="queuePanelCover" />
-                <span className="queuePanelCopy">
-                  <strong>{prettyTitle(currentSong.title, 8)}</strong>
-                  <small>{prettyMeta(currentSong.artist)}</small>
-                </span>
+                <Cover song={currentSong} className="queuePanelCover" preferThumbnail />
+                <TrackMetadata song={currentSong} className="queuePanelCopy" maxWords={8} />
               </span>
               <span className="queuePanelDuration">{formatTime(currentSong.duration || 0)}</span>
             </div>
@@ -213,14 +211,11 @@ export default function QueuePanel({
                   <GripVertical className="queuePanelGrip" size={14} strokeWidth={2.2} aria-hidden="true" />
                   <button type="button" className="queuePanelRowMain" onClick={() => playQueueItem(index)} disabled={unavailable?.ids.has(song.id)}
                     title={unavailable?.ids.has(song.id) ? unavailable.label : "Play now · Alt + ↑/↓ to reorder"}>
-                    <Cover song={song} className="queuePanelCover" />
-                    <span className="queuePanelCopy">
-                      <strong>{prettyTitle(song.title, 8)}</strong>
-                      <small>
+                    <Cover song={song} className="queuePanelCover" preferThumbnail />
+                    <TrackMetadata song={song} className="queuePanelCopy" maxWords={8} subtitle={<>
                         {unavailable?.ids.has(song.id) ? <span className="queuePanelRadioTag">{unavailable.label} · </span> : null}
                         {radioSongIds?.has(song.id) ? <span className="queuePanelRadioTag">radio · </span> : null}{prettyMeta(song.artist)}
-                      </small>
-                    </span>
+                      </>} />
                   </button>
                   <span className="queuePanelDuration">{formatTime(song.duration || 0)}</span>
                   <IconButton type="button" className="queuePanelIconButton" onClick={() => removeQueueItem(index)} aria-label={`remove ${song.title} from queue`} title="remove from queue">
@@ -233,11 +228,8 @@ export default function QueuePanel({
             <>
               <div className="queuePanelRow">
                 <button type="button" className="queuePanelRowMain" onClick={() => void selectSong(autoNextSong.id, true)} title="play now">
-                  <Cover song={autoNextSong} className="queuePanelCover" />
-                  <span className="queuePanelCopy">
-                    <strong>{prettyTitle(autoNextSong.title, 8)}</strong>
-                    <small>{prettyMeta(autoNextSong.artist)}</small>
-                  </span>
+                  <Cover song={autoNextSong} className="queuePanelCover" preferThumbnail />
+                  <TrackMetadata song={autoNextSong} className="queuePanelCopy" maxWords={8} />
                 </button>
                 <span className="queuePanelDuration">{formatTime(autoNextSong.duration || 0)}</span>
               </div>
@@ -263,11 +255,8 @@ export default function QueuePanel({
                   <li key={`${song.id}-${index}`} className="queuePanelRow isRepeatPreview" onContextMenu={(event) => openSongContextMenu(event, song)}>
                     <span className="queuePanelRepeatIndex" aria-hidden="true">{index + 1}</span>
                     <span className="queuePanelRowMain queuePanelRowStatic">
-                      <Cover song={song} className="queuePanelCover" />
-                      <span className="queuePanelCopy">
-                        <strong>{prettyTitle(song.title, 8)}</strong>
-                        <small>{prettyMeta(song.artist)}</small>
-                      </span>
+                      <Cover song={song} className="queuePanelCover" preferThumbnail />
+                      <TrackMetadata song={song} className="queuePanelCopy" maxWords={8} />
                     </span>
                     <span className="queuePanelDuration">{formatTime(song.duration || 0)}</span>
                   </li>
