@@ -204,7 +204,7 @@ function RecordedListening({ songs }: { songs: Song[] }) {
   const dayItems = (result?.byDay || []).map(day => ({ value: day.day, label: `${day.day} · ${formatAnalyticsDuration(day.ms / 1000)}` }));
   const shown = result?.byDay.find(day => day.day === selectedDay);
   return <section className="analyticsRecorded" aria-label="Recorded listening">
-    <div className="analyticsRecordedHeader"><h2>Listening history</h2><ArcDropdownMenu ariaLabel="Listening history period" value={period} items={PERIODS} onValueChange={setPeriod} /><button type="button" className="softButton" disabled={busy} onClick={() => refresh(n=>n+1)}>Refresh</button></div>
+    <div className="analyticsRecordedHeader"><h2>Listening history</h2><ArcDropdownMenu ariaLabel="Listening history period" value={period} items={PERIODS} onValueChange={(value) => { if (value === "7" || value === "30" || value === "90") setPeriod(value); }} /><button type="button" className="softButton" disabled={busy} onClick={() => refresh(n=>n+1)}>Refresh</button></div>
     {busy ? <p role="status">Loading listening history…</p> : failed || !result ? <p role="status">Listening history is unavailable. {isAndroidApp() ? "Connect to your paired computer to retrieve it." : "Try refreshing."}</p> : <>
       <strong>{formatAnalyticsDuration(result.totalMs / 1000)} recorded · {result.sessions.toLocaleString()} listening events</strong>
       <p>Events are counted once and grouped by the UTC day they began. Older unrecorded listening is not estimated.{isAndroidApp() ? " Includes computer history as of the timestamp below; unsynced phone plays are not included." : ""}</p>
