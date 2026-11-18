@@ -11,9 +11,6 @@
   border: 0;
   border-radius: var(--lt-radius-md);
   color: var(--lt-text);
-  background: color-mix(in srgb, var(--lt-bg-elevated) 96%, transparent);
-  backdrop-filter: blur(12px);
-  box-shadow: var(--lt-shadow-menu);
   outline: 0;
   animation: queuePanelIn var(--lt-duration-fast) var(--lt-ease-out) both;
 }
@@ -28,7 +25,7 @@
 }
 
 .queuePanelHead strong{
-  font-size: 15px;
+  font-size: var(--lt-text-label);
   letter-spacing: -0.02em;
 }
 
@@ -50,7 +47,7 @@
 .queuePanelLabel{
   margin: 0 8px 6px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--lt-text-caption);
   font-weight: 650;
   letter-spacing: 0.025em;
 }
@@ -152,7 +149,7 @@
 }
 
 .queuePanelCopy strong{
-  font-size: 14px;
+  font-size: var(--lt-text-label);
   font-weight: 550;
 }
 
@@ -162,7 +159,7 @@
 
 .queuePanelCopy small{
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--lt-text-sm);
 }
 
 .queuePanelDuration{
@@ -280,4 +277,5 @@
   text-align: center;
 }
 .queuePanelRadioTag { color: var(--lt-accent); font-weight: 650; }
+
 .queuePanelAnnouncement { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

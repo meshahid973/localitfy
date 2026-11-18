@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { createPortal } from "react-dom";
+import "./surface.css";
 import { clampContextMenuPosition, type ContextMenuPoint } from "./contextMenuPosition";
 import { useMenuTypeahead } from "../hooks/useMenuTypeahead";
 
@@ -115,7 +116,7 @@ export function ContextMenuLayer({
       onContextMenu={(event) => { event.preventDefault(); onClose(); }}>
       <div
         ref={menuRef}
-        className={`songContextMenu${className ? ` ${className}` : ""}`}
+        className={`songContextMenu ltOverlaySurface${className ? ` ${className}` : ""}`}
         style={{ left: anchor.x, top: anchor.y }}
         role="menu"
         aria-label={label}

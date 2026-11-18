@@ -3,9 +3,9 @@
   --surface-tone-rgb: var(--lt-accent-rgb);
   min-width: 0;
   border: 1px solid var(--lt-border);
-  border-radius: var(--lt-radius-md);
+  border-radius: var(--lt-radius-panel);
   color: var(--lt-text);
-  background: var(--lt-surface);
+  background: var(--lt-fill);
 }
 
 :where(.localtifySurface-accent) {
@@ -51,3 +51,19 @@
 :where(.localtifySurfaceActions-compact) { gap: var(--lt-space-2); }
 :where(.localtifySurfaceHeader-roomy),
 :where(.localtifySurfaceActions-roomy) { gap: 14px; }
+
+:where(.localtifySurface-transparent) { background: transparent; border-color: transparent; }
+:where(.localtifySurface-glass) { background: var(--lt-glass-background); backdrop-filter: blur(var(--lt-glass-blur)); }
+:where(.localtifySurface-interactive) { transition: background-color var(--lt-duration-fast) var(--lt-ease-out); }
+:where(.localtifySurface-interactive:hover) { background: var(--lt-fill-hover); }
+@media (prefers-reduced-motion: reduce) {
+  :where(.localtifySurface-interactive) { transition: none; }
+}
+.app.reducedMotion :where(.localtifySurface-interactive) { transition: none; }
+
+/* Shared top-level overlay skin; menus and the queue own only geometry. */
+.ltOverlaySurface {
+  background: var(--lt-glass-background);
+  backdrop-filter: blur(var(--lt-glass-blur));
+  box-shadow: var(--lt-shadow-menu);
+}

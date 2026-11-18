@@ -13,7 +13,7 @@
   min-width: 0;
   flex: 1 1 320px;
   display: grid;
-  gap: 7px;
+  gap: var(--lt-space-2);
 }
 
 .pageHeaderEyebrow {
@@ -62,7 +62,7 @@
   background: var(--lt-surface-soft);
   font: inherit;
   font-size: var(--lt-text-base);
-  transition: border-color 140ms ease, box-shadow 140ms ease;
+  transition: border-color var(--lt-duration-fast) var(--lt-ease-out), box-shadow var(--lt-duration-fast) var(--lt-ease-out);
 }
 
 .pageHeaderSearch::placeholder { color: var(--lt-muted); }
@@ -75,7 +75,7 @@
 
 .pageHeaderCount {
   color: var(--lt-muted);
-  font-size: 11px;
+  font-size: var(--lt-text-caption);
   font-weight: 700;
   letter-spacing: 0;
   white-space: nowrap;

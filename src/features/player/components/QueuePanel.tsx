@@ -9,6 +9,7 @@ import type { Song } from "../../library/song.types";
 import type { RepeatMode } from "../player.types";
 import { buildQueueEntries, moveQueueItem } from "../playbackSource";
 import "./queue-panel.css";
+import "../../../shared/ui/surface.css";
 
 /** What repeat-all will play again once the queue runs out: listed songs, or a hint when the order isn't fixed. */
 export type QueuePanelRepeatPreview = { label: string; songs: Song[]; hint: string };
@@ -136,7 +137,7 @@ export default function QueuePanel({
   }
 
   return (
-    <aside ref={panelRef} id="localtify-play-queue" className="queuePanel" role="dialog" aria-label="play queue" tabIndex={-1}>
+    <aside ref={panelRef} id="localtify-play-queue" className="queuePanel ltOverlaySurface" role="dialog" aria-label="play queue" tabIndex={-1}>
       <header className="queuePanelHead">
         <strong>queue</strong>
         <div className="queuePanelHeadActions">

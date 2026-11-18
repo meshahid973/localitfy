@@ -5,7 +5,7 @@
   min-width: 0;
   display: grid;
   align-content: start;
-  gap: 22px;
+  gap: var(--lt-space-5);
   padding: var(--lt-space-5) var(--lt-space-5) 40px;
 }
 
@@ -18,7 +18,7 @@
   grid-template-areas: "art copy" "art actions";
   align-items: end;
   column-gap: clamp(18px, 3vw, 40px);
-  row-gap: 16px;
+  row-gap: var(--lt-space-4);
   padding: var(--lt-space-2) 0;
   border: 0;
   background: transparent;
@@ -53,8 +53,8 @@
   letter-spacing: -.03em;
   overflow-wrap: anywhere;
 }
-.collectionHeroByline { min-width: 0; color: var(--lt-text); font-size: 14px; font-weight: 550; }
-.collectionHeroStats { margin: 0; color: var(--lt-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.collectionHeroByline { min-width: 0; color: var(--lt-text); font-size: var(--lt-text-label); font-weight: 550; }
+.collectionHeroStats { margin: 0; color: var(--lt-muted); font-size: var(--lt-text-sm); font-variant-numeric: tabular-nums; }
 
 .collectionHeroActions { grid-area: actions; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .collectionPlayButton {
@@ -85,7 +85,7 @@
   color: var(--lt-muted);
   background: var(--lt-fill);
   cursor: pointer;
-  transition: color 120ms ease, border-color 120ms ease, background-color 120ms ease;
+  transition: color var(--lt-duration-fast) var(--lt-ease-out), border-color var(--lt-duration-fast) var(--lt-ease-out), background-color var(--lt-duration-fast) var(--lt-ease-out);
 }
 .collectionIconButton:hover:not(:disabled) { color: var(--lt-text); border-color: var(--lt-border-strong); background: var(--lt-fill-hover); }
 
@@ -114,7 +114,7 @@
 .collectionSection { min-width: 0; display: grid; gap: 10px; }
 .collectionSectionHead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--lt-space-3); }
 .collectionSectionHead .pageHeaderSearch { flex: 0 1 260px; min-width: min(100%, 160px); }
-.collectionSection h2 { margin: 0; color: var(--lt-text); font-size: 19px; font-weight: 650; letter-spacing: -.02em; }
+.collectionSection h2 { margin: 0; color: var(--lt-text); font-size: var(--lt-text-heading); font-weight: 650; letter-spacing: -.02em; }
 
 .artistAboutText { max-width: 72ch; display: grid; gap: 10px; color: var(--lt-muted); font-size: 13.5px; line-height: 1.6; }
 .artistAboutText p { margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
@@ -180,7 +180,7 @@
 .trackRowTitle { min-width: 0; display: grid; gap: 3px; }
 .trackRowTitle strong,
 .trackRowTitle small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.trackRowTitle strong { color: var(--lt-text); font-size: 14px; font-weight: 550; }
+.trackRowTitle strong { color: var(--lt-text); font-size: var(--lt-text-label); font-weight: 550; }
 .trackRow.active .trackRowTitle strong { color: var(--lt-accent); }
 .trackRowTitle small { color: var(--lt-muted); font-size: 12px; }
 .trackRowDuration { color: var(--lt-muted); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
@@ -191,7 +191,7 @@
 .trackRowAdd:focus-visible { opacity: 1; }
 
 @media (max-width: 760px) {
-  .collectionHero { grid-template-columns: 100px minmax(0, 1fr); column-gap: 16px; padding: var(--lt-space-2) 0; }
+  .collectionHero { grid-template-columns: 100px minmax(0, 1fr); column-gap: var(--lt-space-4); padding: var(--lt-space-2) 0; }
   .collectionHeroCopy h1 { font-size: 26px; }
 }
 
@@ -219,12 +219,6 @@
 }
 
 .playlistsPage.playlistDetailPage { position: relative; isolation: isolate; padding: var(--lt-space-5) var(--lt-space-5) 40px; }
-.collectionPage > .artworkBackdrop,
-.playlistDetailPage > .artworkBackdrop {
-  inset: 0 0 auto;
-  height: min(700px, 85vh);
-  mask-image: linear-gradient(#000 0%, #000 28%, transparent 100%);
-}
 
 @media (max-width: 760px) {
   .collectionPage, .playlistsPage.playlistDetailPage { padding-inline: var(--lt-space-3); }

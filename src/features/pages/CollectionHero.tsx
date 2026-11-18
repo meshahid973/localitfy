@@ -1,7 +1,8 @@
-import { IconButton } from "../../shared/ui/IconButton";
 import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import { ListEnd, MoreHorizontal, Play, Shuffle } from "lucide-react";
 import type { Song } from "../library/song.types";
+import { IconButton } from "../../shared/ui/IconButton";
+import { Surface } from "../../shared/ui/Surface";
 
 export type CollectionHeroProps = {
   typeLabel: string;
@@ -24,7 +25,7 @@ export type CollectionHeroProps = {
 /** Top of every album, artist, genre, playlist and mix page: artwork, title, then play · shuffle · queue · more. */
 export default function CollectionHero({ typeLabel, title, cover, round = false, byline, stats, playable, onPlay, onShuffle, onQueue, onMore, children }: CollectionHeroProps) {
   return (
-    <header className={`collectionHero ${round ? "isRound" : ""}`}>
+    <Surface as="header" variant="transparent" className={`collectionHero ${round ? "isRound" : ""}`}>
       <div className="collectionHeroArt">{cover}</div>
       <div className="collectionHeroCopy">
         <h1 title={title}>{title}</h1>
@@ -47,6 +48,6 @@ export default function CollectionHero({ typeLabel, title, cover, round = false,
           <MoreHorizontal size={18} strokeWidth={2.2} aria-hidden="true" />
         </IconButton>
       </div>
-    </header>
+    </Surface>
   );
 }

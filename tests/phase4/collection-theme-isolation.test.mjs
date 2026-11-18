@@ -22,7 +22,8 @@ test("collection browsing classes cannot collide with artist and genre detail pa
 test("detail collection surfaces adapt to light themes and touch devices", () => {
   const css = read("src/features/pages/pages.css");
   assert.match(css, /\.collectionHero\s*\{[^}]*background: transparent;/);
-  assert.match(css, /\.collectionPage > \.artworkBackdrop/);
+  assert.doesNotMatch(css, /\.collectionPage > \.artworkBackdrop/);
+  for (const file of ["src/features/pages/SongGroupPage.tsx", "src/features/pages/MixPage.tsx", "src/features/playlists/PlaylistsView.tsx"]) assert.match(read(file), /<PageAtmosphere\b/);
   assert.match(css, /\.trackList \{[^}]*background: transparent/);
   assert.match(read("src/features/covers/artwork-backdrop.css"), /color-mix\(in srgb, var\(--lt-surface\)/);
   assert.match(css, /color: var\(--accent-contrast, var\(--lt-bg\)\)/);

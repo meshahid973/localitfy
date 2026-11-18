@@ -122,3 +122,9 @@ export function mixArtworkPalette(samples: readonly ArtworkPalette[], seed: stri
   };
   return [darken(chosen[0]), darken(chosen[1]), darken(chosen[2])];
 }
+
+/** Combine up to three decoded covers without inventing colors for missing artwork. */
+export function combinePagePalettes(samples: readonly ArtworkPalette[]): ArtworkPalette | null {
+  if (!samples.length) return null;
+  return [samples[0][0], (samples[1] ?? samples[0])[1], (samples[2] ?? samples[1] ?? samples[0])[2]];
+}

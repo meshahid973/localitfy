@@ -4,7 +4,7 @@ import fs from "node:fs";
 import ts from "typescript";
 const source = fs.readFileSync(new URL("../../src/features/covers/artworkPalette.ts", import.meta.url), "utf8");
 const js = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
-const { extractArtworkPalette, PaletteCache, safeAtmosphere, contrastRatio, rgbHex, advanceArtworkFrame, mixArtworkPalette } = await import("data:text/javascript;base64," + Buffer.from(js).toString("base64"));
+const { extractArtworkPalette, PaletteCache, safeAtmosphere, contrastRatio, rgbHex, advanceArtworkFrame, mixArtworkPalette, combinePagePalettes } = await import("data:text/javascript;base64," + Buffer.from(js).toString("base64"));
 
 test("palette detects distinct hues and ignores transparent pixels", () => {
   const data = new Uint8ClampedArray([...Array(100)].flatMap(() => [240, 20, 90, 255, 20, 180, 240, 255, 90, 20, 180, 255, 255, 255, 255, 0]));
@@ -53,4 +53,12 @@ test("mix artwork is deterministic, cover-derived and keeps white type readable"
   assert.ok(colors.every(color => contrastRatio([255,255,255],color)>=4.5));
   assert.deepEqual(mixArtworkPalette([], "missing"),mixArtworkPalette([], "missing"));
   assert.notDeepEqual(mixArtworkPalette([], "missing"),mixArtworkPalette([], "another"));
+});
+
+ test("page palettes prefer actual covers and remain neutral for absent artwork", () => {
+  const a = [[100,20,70],[40,50,60],[80,90,20]];
+  const b = [[20,30,40],[90,20,50],[30,50,80]];
+  assert.equal(combinePagePalettes([]), null);
+  assert.deepEqual(combinePagePalettes([a]), a);
+  assert.deepEqual(combinePagePalettes([a,b]), [a[0],b[1],b[2]]);
 });
