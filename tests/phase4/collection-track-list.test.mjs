@@ -19,12 +19,13 @@ function fixture(count){
   '../../shared/ui/LocaltifyViewUi':{PlayingBarsIcon:()=>null},
   '../../shared/utils/format':{formatTime:()=> '2:00'},
   '../search/search.utils':{prettyTitle:String,prettyMeta:String},
+  '../library/TrackMetadata':{TrackMetadata:()=>null},
   '../artists/artistCredits':{splitArtistCredits:()=>['Artist']},
   '../shell/appActions':{useAppActions:()=>({nav:{openArtistPage:name=>calls.push(['artist',name])},openSongMenu:(e,song)=>calls.push(['menu',song.id])})}
  };
  const exports={};runInNewContext(output,{exports,require:n=>dependencies[n]??require(n)});
  const tree=exports.default({songs,currentId:'track-0',isPlaying:true,playFrom:id=>calls.push(['play',id]),toggleLike:id=>calls.push(['like',id]),openPlaylistPicker:song=>calls.push(['playlist',song.id])});
- const flatten=node=>!node||typeof node!=='object'?[]:[node,...[node.props?.children].flat(Infinity).flatMap(flatten)];
+ const flatten=node=>!node||typeof node!=='object'?[]:[node,...[node.props?.children,node.props?.subtitle].flat(Infinity).flatMap(flatten)];
  return {songs,calls,options,nodes:flatten(tree)};
 }
 test('short collections keep all rows, missing files cannot play, and actions keep their targets',()=>{
