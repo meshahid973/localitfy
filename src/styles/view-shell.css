@@ -30,14 +30,13 @@
   --workspace-sidebar-rail: var(--lt-sidebar-closed);
   --workspace-sidebar-current: var(--workspace-sidebar-expanded);
 }
-.app[data-theme][data-workspace-artwork="on"] { background: var(--workspace-bg) !important; }
-.app[data-theme][data-workspace-artwork="off"] { background: var(--lt-bg) !important; }
-.app[data-workspace-artwork="on"]:not(.reducedMotion):not(.appBackgrounded):not(.themeSettling) {
+.app[data-theme][data-workspace-artwork] { background: var(--workspace-bg) !important; }
+.app[data-workspace-artwork]:not(.reducedMotion):not(.appBackgrounded):not(.themeSettling) {
   transition: --workspace-cover-color 360ms ease-out, --workspace-cover-secondary 360ms ease-out,
     --workspace-cover-tertiary 360ms ease-out !important;
 }
 @media (prefers-reduced-motion: reduce) {
-  .app[data-workspace-artwork="on"] { transition: none !important; }
+  .app[data-workspace-artwork] { transition: none !important; }
 }
 .app[data-sidebar-behavior="slim"],
 .app[data-sidebar-behavior="hover"] { --workspace-sidebar-current: var(--workspace-sidebar-rail); }

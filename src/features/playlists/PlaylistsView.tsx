@@ -18,7 +18,7 @@ import type { Song } from "../library/song.types";
 import { describeSmartRules, type ListeningCounts, type SmartRules } from "./smartPlaylist";
 import { MediaCard } from "../../shared/ui/MediaCard";
 import { playlistTarget, playableIds, useAppActions } from "../shell/appActions";
-import { ArtworkBackdrop } from "../covers/ArtworkBackdrop";
+import { PageAtmosphere } from "../covers/pageAtmosphere";
 import CollectionHero from "../pages/CollectionHero";
 
 const SmartPlaylistDialog = lazy(() => import("./components/SmartPlaylistDialog"));
@@ -157,7 +157,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
     const target = playlistTarget(detailPlaylist, detailSongs);
     return (
       <section data-page-section="playlists" className="playlistsPage playlistPageV029 playlistDetailPage">
-      <ArtworkBackdrop song={target.coverSong} />
+      <PageAtmosphere songs={detailSongs} custom={detailPlaylist.coverArtwork} />
         <CollectionHero
           typeLabel={detailPlaylist.rules ? "smart playlist" : "playlist"}
           title={detailPlaylist.name}

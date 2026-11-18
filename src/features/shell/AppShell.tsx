@@ -1,4 +1,4 @@
-import { lazy, memo, Suspense, useEffect, useState, useSyncExternalStore } from "react";
+import { lazy, memo, Suspense, useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useStableCallback } from "../../shared/hooks/useStableCallback";
 import type { CollectionMenuStore } from "./collectionMenuStore";
 import type { CSSProperties } from "react";
@@ -7,7 +7,7 @@ import TitleBar from "./TitleBar";
 import HomeViewComponent from "../home/HomeView";
 import { Cover } from "../covers/Cover";
 import { ArtworkAmbientContext } from "../covers/ArtworkBackdrop";
-import { useWorkspacePalette } from "../covers/cover.ambient";
+import { PageAtmosphereContext, pageArtworkSources, usePagePalette, type PageAtmosphereRegistration } from "../covers/pageAtmosphere";
 import PlayerSurfaces from "../player/components/PlayerSurfaces";
 import PlaybackAudioElement from "../player/components/PlaybackAudioElement";
 import SongContextMenu from "../library/components/SongContextMenu";
@@ -100,10 +100,18 @@ export default function AppShell(props: AppShellProps) {
   const playerBackground = effectiveTheme === "light" && settings.playerBackgroundStyle === "oledBlack" ? "flat" : settings.playerBackgroundStyle || "coverBlur";
   const homeBanner = effectiveTheme === "light" && settings.homeBannerType === "cleanBlack" ? "none" : settings.homeBannerType || "dynamic";
   const cardBackground = effectiveTheme === "light" && settings.mediaCardBackground === "oledFlat" ? "solid" : settings.mediaCardBackground || "glassy";
-  // Playback atmosphere belongs to the workspace, not the route or Home layout.
-  const artworkEnabled = !!home.currentSong && effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded;
+  // Page and listening atmospheres have independent ownership.
+  const route = view + ":" + (detail?.kind ?? "") + ":" + (detail?.id ?? "");
+  const [pageArtwork, setPageArtwork] = useState<PageAtmosphereRegistration | null>(null);
+  const register = useCallback((next: PageAtmosphereRegistration | null, previous?: PageAtmosphereRegistration) => {
+    setPageArtwork(old => previous && old !== previous ? old : next);
+  }, []);
+  const atmosphereContext = useMemo(() => ({ route, register }), [route, register]);
+  const homeSources = useMemo(() => view === "home" ? pageArtworkSources(home.homeFreshShelfSongs.length ? home.homeFreshShelfSongs : home.songs) : [], [view, home.homeFreshShelfSongs, home.songs]);
+  const sources = pageArtwork?.route === route && pageArtwork.sources.length ? pageArtwork.sources : homeSources;
+  const artworkEnabled = effectiveAmbient && effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded;
   const strength = effectiveCoverColorSyncMode === "strong" ? .52 : effectiveCoverColorSyncMode === "subtle" ? .19 : .38;
-  const workspacePalette = useWorkspacePalette(home.ambientStyle, artworkEnabled, effectiveTheme === "light", strength);
+  const workspacePalette = usePagePalette(route, sources, artworkEnabled, effectiveTheme === "light", strength);
   const { actions, menu } = useCollectionActions(nav, collections, modals.queuePanel.openSongContextMenu);
   const pageProps = { songs: library.songs, currentId: home.currentId, isPlaying, toggleLike: modals.songContextMenu.toggleLike, openPlaylistPicker: modals.songContextMenu.openPlaylistPicker };
   const openSimilarSongs = useStableCallback((songIds: string[], key: string, title: string) => {
@@ -122,7 +130,8 @@ export default function AppShell(props: AppShellProps) {
 
   return (
     <AppActionsContext.Provider value={actions}>
-    <ArtworkAmbientContext.Provider value={effectiveAmbient && !isAppBackgrounded && !workspacePalette}>
+    <ArtworkAmbientContext.Provider value={effectiveAmbient && effectiveCoverColorSyncMode !== "off" && !isAppBackgrounded}>
+    <PageAtmosphereContext.Provider value={atmosphereContext}>
     <main
       ref={appRootRef}
       className={`app ${settings.animatedGlow ? "animatedGlow" : ""} ${
@@ -361,6 +370,7 @@ export default function AppShell(props: AppShellProps) {
 
       <PlaybackAudioElement {...playbackAudio} />
     </main>
+    </PageAtmosphereContext.Provider>
     </ArtworkAmbientContext.Provider>
     </AppActionsContext.Provider>
   );
