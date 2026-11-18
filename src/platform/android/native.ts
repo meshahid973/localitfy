@@ -21,7 +21,7 @@ export type MediaUpdate = {
 export interface LocaltifyNativePlugin {
   getPaths(): Promise<{ files: string; mediaPrefix: string; deviceName: string }>;
   request(options: { url: string; method?: string; headers?: Record<string, string>; body?: string; timeoutMs?: number }): Promise<{ status: number; body: string }>;
-  downloadFile(options: { id: string; url: string; path: string; headers?: Record<string, string> }): Promise<{ bytes: number }>;
+  downloadFile(options: { id: string; url: string; path: string; expectedBytes?: number; headers?: Record<string, string> }): Promise<{ bytes: number }>;
   deleteFile(options: { path: string }): Promise<{ deleted: boolean }>;
   setSyncActive(options: { active: boolean }): Promise<void>;
   moveToBackground(): Promise<void>;

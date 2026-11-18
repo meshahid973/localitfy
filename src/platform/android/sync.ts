@@ -87,6 +87,7 @@ async function call<T>(path: string, options: { method?: string; body?: unknown;
 }
 
 export async function pairWithMac(address: string, code: string) {
+  if (running) throw new Error("Wait for the current sync before changing pairing");
   if (phoneLibrary.pendingSync) throw new Error(`Finish the pending sync with your paired ${computerName()} before changing pairing`);
   const base = normalizeMacAddress(address);
   if (!base) throw new Error(`Enter the ${computerName()}'s address, for example 192.168.1.20`);
@@ -99,6 +100,7 @@ export async function pairWithMac(address: string, code: string) {
 }
 
 export async function forgetMac() {
+  if (running) throw new Error("Wait for the current sync before unpairing");
   if (phoneLibrary.pendingSync) throw new Error("Finish the pending sync before unpairing so acknowledged edits are not sent twice");
   phoneLibrary.pairing = null;
   await phoneLibrary.save(["pairing"]);
@@ -211,7 +213,7 @@ async function syncFiles() {
     if (local.audio !== fileKey(song.file)) {
       inFlight.set(song.id, 0);
       try {
-        await LocaltifyNative.downloadFile({ id: song.id, url: `${base}/v1/audio/${encodeURIComponent(song.id)}`, path: phoneLibrary.audioPath(song.id, song.file.ext), headers });
+        await LocaltifyNative.downloadFile({ id: song.id, url: `${base}/v1/audio/${encodeURIComponent(song.id)}`, path: phoneLibrary.audioPath(song.id, song.file.ext), expectedBytes: song.file.size, headers });
       } finally {
         inFlight.delete(song.id);
       }
@@ -224,7 +226,7 @@ async function syncFiles() {
     if (song.cover && local.cover !== fileKey(song.cover)) {
       const coverId = `${song.id}:cover`;
       inFlight.set(coverId, 0);
-      try { await LocaltifyNative.downloadFile({ id: coverId, url: `${base}/v1/cover/${encodeURIComponent(song.id)}`, path: phoneLibrary.coverPath(song.id, song.cover.ext), headers }); }
+      try { await LocaltifyNative.downloadFile({ id: coverId, url: `${base}/v1/cover/${encodeURIComponent(song.id)}`, path: phoneLibrary.coverPath(song.id, song.cover.ext), expectedBytes: song.cover.size, headers }); }
       finally { inFlight.delete(coverId); }
       bytesDone += song.cover.size;
       if (local.coverExt && local.coverExt !== song.cover.ext) await LocaltifyNative.deleteFile({ path: phoneLibrary.coverPath(song.id, local.coverExt) }).catch(() => undefined);

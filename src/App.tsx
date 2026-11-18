@@ -1181,8 +1181,6 @@ function MainModeApp() {
   const totalPlays = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "total_plays");
   const libraryAlbumCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "album_count");
   const libraryArtistCount = libraryIndex.artistCount;
-  const totalListenedSeconds = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "total_listened_seconds");
-  const totalMinutes = Math.floor(totalListenedSeconds / 60);
   const totalLibrarySeconds = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "total_library_seconds");
   const averageSongSeconds = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "average_song_seconds");
   const playedSongCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "played_song_count");
@@ -1208,7 +1206,6 @@ function MainModeApp() {
   const longestSongDuration = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "longest_song_duration");
   const longestSongTitle = localtifyAnalyticsString(analyticsAudienceSnapshot, "longest_song_title", "");
 
-  const listenedTimeLabel = formatAnalyticsDuration(totalListenedSeconds);
   const libraryLengthLabel = formatAnalyticsDuration(totalLibrarySeconds);
 
   const longestSong = useMemo(() => {
@@ -1264,13 +1261,6 @@ function MainModeApp() {
           : "your yearly recap starts with imports",
         meta: `${yearAlbumCount.toLocaleString()} album${yearAlbumCount === 1 ? "" : "s"}`,
         progress: songs.length ? Math.min(100, Math.round((yearImportCount / Math.max(1, songs.length)) * 100)) : 0
-      },
-      {
-        label: "all-time listening",
-        value: listenedTimeLabel,
-        note: `${totalPlays.toLocaleString()} play${totalPlays === 1 ? "" : "s"} • ${formatAnalyticsDuration(totalLibrarySeconds)} library`,
-        meta: mostPlayed ? `top: ${prettyTitle(mostPlayed.title, 7)}` : "play music to build this",
-        progress: playedPercent
       }
     ];
   }, [
@@ -1280,12 +1270,7 @@ function MainModeApp() {
     yearImportCount,
     yearImportSeconds,
     yearAlbumCount,
-    songs.length,
-    listenedTimeLabel,
-    totalPlays,
-    totalLibrarySeconds,
-    mostPlayed,
-    playedPercent
+    songs.length
   ]);
 
   const analyticsStatCards = useMemo(() => ([
@@ -1300,11 +1285,6 @@ function MainModeApp() {
       note: `${playedSongCount.toLocaleString()} played song${playedSongCount === 1 ? "" : "s"} • ${averagePlaysPerSong} avg`
     },
     {
-      label: "listened",
-      value: listenedTimeLabel,
-      note: `${totalMinutes.toLocaleString()} minute${totalMinutes === 1 ? "" : "s"} estimated`
-    },
-    {
       label: "library health",
       value: libraryHealthLabel,
       note: effectiveMissingFileCount > 0 ? `${effectiveMissingFileCount.toLocaleString()} missing file${effectiveMissingFileCount === 1 ? "" : "s"}` : "all files available"
@@ -1316,8 +1296,6 @@ function MainModeApp() {
     totalPlays,
     playedSongCount,
     averagePlaysPerSong,
-    listenedTimeLabel,
-    totalMinutes,
     libraryHealthLabel,
     effectiveMissingFileCount
   ]);
@@ -2262,7 +2240,11 @@ function MainModeApp() {
     onPause: () => { stopCrossfadeAuto(); playbackTransitionRef.current.requestPause(); pendingPlayRef.current = false; setIsPlaying(false); },
     onStop: stopPlaybackFromNative,
     onPrevious: () => playPrevious(),
-    onNext: () => playNext(true)
+    onNext: () => playNext(true),
+    onSeek: (seconds) => {
+      const duration = durationRef.current || audioRef.current?.duration || 0;
+      if (Number.isFinite(duration) && duration > 0) handleSeek(seconds / duration * 100);
+    }
   });
 
   useEffect(() => {
@@ -3736,6 +3718,10 @@ function MainModeApp() {
     if (!bootedRef.current) return;
 
     const saveSerial = ++saveSettingsSerialRef.current;
+    if (saveSettingsTimerRef.current !== null) {
+      window.clearTimeout(saveSettingsTimerRef.current);
+      saveSettingsTimerRef.current = null;
+    }
 
     const runSave = () => {
       if (saveSerial !== saveSettingsSerialRef.current) return;
@@ -6267,8 +6253,18 @@ function MainModeApp() {
   function handleSeek(value: string | number) {
     const audio = audioRef.current;
     const duration = durationRef.current || currentDuration || currentSong?.duration || 0;
-    if (!audio || duration <= 0) return;
+    if (!audio || !Number.isFinite(duration) || duration <= 0 || !Number.isFinite(Number(value))) return;
 
+    if (crossfadeAutoStartedRef.current) {
+      stopCrossfadeAuto();
+      const current = songRef.current;
+      const base = clamp(volumeRef.current, 0, 1);
+      const memory = settingsRef.current.perSongVolumeMemory ? clamp(Number(current?.customVolume ?? 1), 0, 1) : 1;
+      const gain = settingsRef.current.volumeNormalization ? clamp(Number(current?.volumeGain ?? 1), 0.2, 2.4) : 1;
+      const restored = clamp(base * memory * gain, 0, 1);
+      setAudioElementVolume(audio, restored);
+      effectiveVolumeRef.current = restored;
+    }
     playbackTransitionRef.current.seekStarted();
     const safePercent = clamp(Number(value), 0, 100);
     const nextTime = (safePercent / 100) * duration;

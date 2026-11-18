@@ -153,13 +153,13 @@ export default function AnalyticsView(props: AnalyticsViewProps) {
           <p className="eyebrow">recap ready</p>
           <h3>built for monthly or yearly posts</h3>
           <p>
-            Use the recap cards above for a clean localtify wrapped-style summary. These numbers come from local song metadata and saved play counts, so they stay lightweight and private.
+            Share your monthly and yearly import totals. Recorded listening history is shown separately above, using UTC dates.
           </p>
         </div>
         <button
           type="button"
           className="softButton analyticsShareButtonV339"
-          onClick={() => navigator.clipboard?.writeText?.(`localtify recap: ${analyticsRecapCards.map((card) => `${card.label}: ${card.value}`).join(" · ")}`)}
+          onClick={() => navigator.clipboard?.writeText?.(`localtify recap: ${analyticsRecapCards.filter(card => card.label !== "all-time listening").map((card) => `${card.label}: ${card.value}`).join(" · ")}`)}
           disabled={!songs.length}
         >
           copy recap line

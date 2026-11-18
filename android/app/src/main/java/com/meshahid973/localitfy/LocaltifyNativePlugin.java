@@ -146,6 +146,8 @@ public class LocaltifyNativePlugin extends Plugin {
                 int status = connection.getResponseCode();
                 if (status != 200) throw new IOException("HTTP " + status);
                 long total = connection.getContentLengthLong();
+                long expected = call.getData().optLong("expectedBytes", -1);
+                if (expected >= 0 && total >= 0 && total != expected) throw new IOException("file changed since sync snapshot; retry sync");
                 long received = 0;
                 long lastEvent = 0;
                 String id = call.getString("id", "");
@@ -168,6 +170,7 @@ public class LocaltifyNativePlugin extends Plugin {
                     out.getFD().sync();
                 }
                 if (total >= 0 && received != total) throw new IOException("incomplete download");
+                if (expected >= 0 && received != expected) throw new IOException("file size differs from sync snapshot; retry sync");
                 if (!temp.renameTo(target)) throw new IOException("could not save file");
                 JSObject result = new JSObject();
                 result.put("bytes", received);

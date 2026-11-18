@@ -18,15 +18,16 @@ export type NativeMediaSessionOptions = {
   onStop: () => unknown;
   onPrevious: () => unknown;
   onNext: () => unknown;
+  onSeek: (seconds: number) => unknown;
 };
 
 /** Keeps native Windows/media-key ownership independent of App state layout. */
 export function useNativeMediaSession({
   audioRef, song, isPlaying, duration, currentTime, playbackSpeed, timeRef,
-  onPlay, onPause, onStop, onPrevious, onNext
+  onPlay, onPause, onStop, onPrevious, onNext, onSeek
 }: NativeMediaSessionOptions) {
-  const actionsRef = useRef({ onPlay, onPause, onStop, onPrevious, onNext });
-  actionsRef.current = { onPlay, onPause, onStop, onPrevious, onNext };
+  const actionsRef = useRef({ onPlay, onPause, onStop, onPrevious, onNext, onSeek });
+  actionsRef.current = { onPlay, onPause, onStop, onPrevious, onNext, onSeek };
 
   useEffect(() => {
     if (!("mediaSession" in navigator)) return;
@@ -34,14 +35,12 @@ export function useNativeMediaSession({
       const audio = audioRef.current;
       if (!audio) return;
       const limit = duration || audio.duration || 0;
-      audio.currentTime = clamp(audio.currentTime + seconds, 0, limit || Number.MAX_SAFE_INTEGER);
+      actionsRef.current.onSeek(clamp(audio.currentTime + seconds, 0, limit || Number.MAX_SAFE_INTEGER));
     };
     try {
       const mediaArtworkSrc = getRendererSafeImageUrl(song?.coverUrl);
       const artwork = mediaArtworkSrc
-        ? ([96, 128, 192, 256, 512].map(size => ({
-          src: mediaArtworkSrc, sizes: String(size) + "x" + String(size), type: "image/png"
-        })) as MediaImage[])
+        ? ([{ src: mediaArtworkSrc }] as MediaImage[])
         : [];
       navigator.mediaSession.metadata = song
         ? new MediaMetadata({
@@ -61,7 +60,7 @@ export function useNativeMediaSession({
       navigator.mediaSession.setActionHandler("seekforward", () => seekBy(10));
       navigator.mediaSession.setActionHandler("seekto", details => {
         const audio = audioRef.current;
-        if (audio && typeof details.seekTime === "number") audio.currentTime = clamp(details.seekTime, 0, duration || audio.duration || 0);
+        if (audio && typeof details.seekTime === "number" && Number.isFinite(details.seekTime)) actionsRef.current.onSeek(clamp(details.seekTime, 0, duration || audio.duration || 0));
       });
     } catch {
       // Native controls are optional and must never interrupt playback.

@@ -30,7 +30,7 @@ function registerTaggingIpc(router, deps) {
   // Proposals stay in the main process; the renderer only ever sends song IDs back.
   const proposals = new Map();
   const requireEnabled = () => { if (getSettings()?.musicbrainzTagging !== true) throw new Error("Turn on MusicBrainz tagging first"); };
-  const songsFor = (ids) => (Array.isArray(ids) ? ids : []).map((id) => repository.get(String(id))).filter((song) => song?.filePath && fs.existsSync(song.filePath));
+  const songsFor = (ids) => [...new Set((Array.isArray(ids) ? ids : []).map(String))].map((id) => repository.get(id)).filter((song) => song?.filePath && fs.existsSync(song.filePath));
 
   const view = (proposal) => {
     const song = repository.get(proposal.songId);
@@ -118,10 +118,17 @@ function registerTaggingIpc(router, deps) {
     let applied = 0;
     let written = 0;
     const failed = [];
-    for (const song of songsFor(payload.songIds)) {
-      const proposal = proposals.get(song.id);
-      if (!proposal) continue;
+    for (const id of new Set((Array.isArray(payload.songIds) ? payload.songIds : []).map(String))) {
+      const song = repository.get(id);
+      const proposal = proposals.get(id);
+      if (!song?.filePath || !fs.existsSync(song.filePath) || !proposal) {
+        failed.push({ songId: id, title: song?.title || id, error: "Song or matching proposal is no longer available" });
+        continue;
+      }
       try {
+        if (["title", "artist", "album", "genre"].some(key => String(song[key] ?? "") !== String(proposal.current[key] ?? ""))) {
+          throw new Error("Metadata changed since preview; look up the song again before applying");
+        }
         const write = writeFiles && canWriteTags(song.filePath);
         if (write) {
           await writeMusicBrainzTags({ filePath: song.filePath, tags: proposal.tags, ids: proposal.ids, cover: proposal.coverPath, ffmpegPath, parseFile, trashItem: (file) => shell.trashItem(file) });

@@ -292,6 +292,13 @@ server.listen(5173,async()=>{
         for (const view of ["home","library","artists","genres","playlists","discover","downloads","covers","analytics","settings"]) {
           await win.webContents.executeJavaScript(`document.querySelector('.sidebar [data-nav-id="${view}"]').click()`);
           await until(()=>win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return !!page?.firstElementChild&&!page.querySelector('.collectionLoading')&&!document.querySelector('.appCrashBoundary')})()`).catch(()=>false),view+" "+mode+" "+width);
+          if(view==="analytics") {
+            const history=await win.webContents.executeJavaScript("window.localitfy.getListeningSummary({days:7})");
+            assert.ok(history && Number.isFinite(history.totalMs) && history.totalMs>=0,"recorded listening summary");
+            assert.equal(history.byDay.length,7,"seven-day history");
+            assert.equal(history.byDay.reduce((sum,day)=>sum+day.ms,0),history.totalMs,"daily totals equal recorded total");
+            await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.analyticsRecorded')"),"recorded listening UI");
+          }
           const geometry=await win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return {width:page.clientWidth,scroll:page.scrollWidth}})()`);
           assert.ok(geometry.width>0&&geometry.scroll<=geometry.width+3,"page overflow "+view+" "+mode+" "+JSON.stringify(geometry));
           await screenshot(win,view+"-"+mode+"-"+width);
