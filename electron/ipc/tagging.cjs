@@ -56,7 +56,7 @@ function registerTaggingIpc(router, deps) {
   const view = (proposal) => {
     const song = repository.get(proposal.songId);
     return {
-      songId: proposal.songId, groupKey: song ? albumGroupKey(song) : "", confidence: proposal.confidence, current: proposal.current, tags: proposal.tags,
+      songId: proposal.songId, previewId: proposal.previewId, groupKey: song ? albumGroupKey(song) : "", confidence: proposal.confidence, current: proposal.current, tags: proposal.tags,
       coverUrl: proposal.coverPath ? safeMediaUrl(proposal.coverPath) : "",
       musicbrainzUrl: `https://musicbrainz.org/recording/${proposal.ids.recordingId}`,
       writable: MUSICBRAINZ_FILE_WRITES_ENABLED && canWriteTags(song?.filePath)

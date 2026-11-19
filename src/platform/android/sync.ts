@@ -195,46 +195,61 @@ async function syncFiles() {
   let bytesDone = 0;
   let done = 0;
   const inFlight = new Map<string, number>();
+  const expectedBytes = new Map<string, number>();
   const headers = { Authorization: `Bearer ${phoneLibrary.pairing?.token || ""}` };
   const base = phoneLibrary.pairing?.url || "";
   const reportBytes = () => {
     let partial = 0;
     for (const received of inFlight.values()) partial += received;
-    report({ bytesDone: bytesDone + partial });
+    report({ bytesDone: Math.min(bytesTotal, bytesDone + partial) });
   };
   const progressListener = await LocaltifyNative.addListener("downloadProgress", ({ id, received }) => {
     if (!inFlight.has(id)) return;
-    inFlight.set(id, Math.max(0, received));
+    if (!Number.isFinite(received)) return;
+    inFlight.set(id, Math.max(inFlight.get(id) || 0, Math.min(expectedBytes.get(id) ?? 0, received)));
     reportBytes();
   });
 
   const copySong = async (song: RemoteSong) => {
     const local = { ...phoneLibrary.files[song.id] };
     if (local.audio !== fileKey(song.file)) {
+      expectedBytes.set(song.id, song.file.size);
       inFlight.set(song.id, 0);
       try {
         await LocaltifyNative.downloadFile({ id: song.id, url: `${base}/v1/audio/${encodeURIComponent(song.id)}`, path: phoneLibrary.audioPath(song.id, song.file.ext), expectedBytes: song.file.size, headers });
       } finally {
         inFlight.delete(song.id);
+        expectedBytes.delete(song.id);
       }
-      if (local.audioExt && local.audioExt !== song.file.ext) await LocaltifyNative.deleteFile({ path: phoneLibrary.audioPath(song.id, local.audioExt) }).catch(() => undefined);
+      const oldAudioExt = local.audioExt;
       Object.assign(local, { audio: fileKey(song.file), audioExt: song.file.ext });
       bytesDone += song.file.size;
       phoneLibrary.files[song.id] = { ...local }; // Do not retransfer audio if the cover fails.
-      if (song.cover && local.cover !== fileKey(song.cover)) await phoneLibrary.save(["files"]);
+      // Persist the new path before deleting the previously referenced file.
+      if ((oldAudioExt && oldAudioExt !== song.file.ext) || (song.cover && local.cover !== fileKey(song.cover))) await phoneLibrary.save(["files"]);
+      if (oldAudioExt && oldAudioExt !== song.file.ext) await LocaltifyNative.deleteFile({ path: phoneLibrary.audioPath(song.id, oldAudioExt) }).catch(() => undefined);
     }
     if (song.cover && local.cover !== fileKey(song.cover)) {
       const coverId = `${song.id}:cover`;
+      expectedBytes.set(coverId, song.cover.size);
       inFlight.set(coverId, 0);
       try { await LocaltifyNative.downloadFile({ id: coverId, url: `${base}/v1/cover/${encodeURIComponent(song.id)}`, path: phoneLibrary.coverPath(song.id, song.cover.ext), expectedBytes: song.cover.size, headers }); }
-      finally { inFlight.delete(coverId); }
+      finally { inFlight.delete(coverId); expectedBytes.delete(coverId); }
       bytesDone += song.cover.size;
-      if (local.coverExt && local.coverExt !== song.cover.ext) await LocaltifyNative.deleteFile({ path: phoneLibrary.coverPath(song.id, local.coverExt) }).catch(() => undefined);
+      const oldCoverExt = local.coverExt;
       Object.assign(local, { cover: fileKey(song.cover), coverExt: song.cover.ext });
+      if (oldCoverExt && oldCoverExt !== song.cover.ext) {
+        phoneLibrary.files[song.id] = { ...local };
+        await phoneLibrary.save(["files"]);
+        await LocaltifyNative.deleteFile({ path: phoneLibrary.coverPath(song.id, oldCoverExt) }).catch(() => undefined);
+      }
     } else if (!song.cover && local.cover) {
-      if (local.coverExt) await LocaltifyNative.deleteFile({ path: phoneLibrary.coverPath(song.id, local.coverExt) }).catch(() => undefined);
+      const oldCoverExt = local.coverExt;
       delete local.cover;
       delete local.coverExt;
+      phoneLibrary.files[song.id] = { ...local };
+      await phoneLibrary.save(["files"]);
+      if (oldCoverExt) await LocaltifyNative.deleteFile({ path: phoneLibrary.coverPath(song.id, oldCoverExt) }).catch(() => undefined);
     }
     phoneLibrary.files[song.id] = local;
     done += 1;

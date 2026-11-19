@@ -155,6 +155,7 @@ public class LocaltifyNativePlugin extends Plugin {
                     byte[] chunk = new byte[65536];
                     int read;
                     while ((read = in.read(chunk)) != -1) {
+                        if ((expected >= 0 && read > expected - received) || (total >= 0 && read > total - received)) throw new IOException("download exceeds advertised file size; retry sync");
                         out.write(chunk, 0, read);
                         received += read;
                         long now = System.currentTimeMillis();

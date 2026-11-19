@@ -476,11 +476,18 @@ test("IPC: gated by the setting, proposals stay native, and library-only apply u
   settings.musicbrainzTagging = true;
   const { proposals } = await router.invoke("tagging:lookup", { songIds: ["a", "b", "../../etc/passwd"] });
   assert.equal(proposals.length, 2);
+  assert.ok(proposals.every(proposal => typeof proposal.previewId === "string" && proposal.previewId.length > 0));
+  assert.notEqual(proposals[0].previewId, proposals[1].previewId);
   assert.equal(proposals[0].coverUrl, "localtify-media://rel-marrow.jpg", "the preview cover is the downloaded local file");
 
   const pending = await router.invoke("tagging:pending");
   assert.deepEqual(pending.map((proposal) => proposal.songId), ["a", "b"], "finished lookups survive the panel closing");
   assert.equal(pending[0].groupKey, `marrow\0${dir}`);
+  assert.equal(pending[0].previewId, proposals[0].previewId);
+  const stale = await router.invoke("tagging:apply", { songIds: ["a"], previewIds: { a: "stale-preview" } });
+  assert.equal(stale.applied, 0);
+  assert.match(stale.failed[0].error, /Preview changed/);
+  assert.equal(songs.get("a").genre, "");
 
   const result = await router.invoke("tagging:apply", { songIds: ["a", "unknown"], previewIds: Object.fromEntries(proposals.map(proposal => [proposal.songId, proposal.previewId])) });
   assert.ok(result.undoId);
