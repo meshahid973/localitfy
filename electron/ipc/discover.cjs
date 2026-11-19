@@ -5,7 +5,7 @@ const path = require("node:path");
 const { randomUUID } = require("node:crypto");
 const { createLastfmClient } = require("../discover/lastfm.cjs");
 const { discover, withoutOwned } = require("../discover/recommend.cjs");
-const { catalogArtwork, createArtworkLookup, matchArtistArtwork } = require("../discover/artwork.cjs");
+const { catalogArtwork, createArtworkLookup, matchArtistArtwork, matchMusicArtwork } = require("../discover/artwork.cjs");
 const { rankCatalog, searchTerms } = require("../discover/catalog.cjs");
 
 const RESULT_TTL_MS = 12 * 60 * 60 * 1000;
@@ -42,6 +42,16 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
   let running = null;
   let catalogRunning = null;
   let artworkClient = null, artworkKey = "";
+  async function lookupMusicArtwork(title,artist) {
+    const cleanedArtist=artist.replace(/\s+[-–—]\s+Topic$/i,"").trim();
+    const query=(title+" "+cleanedArtist).trim().slice(0,160);
+    if(getSettings().discoverEnabled!==true)return [];
+    const songs=await searchYouTubeArtwork("recording",query,{artwork:true}).catch(()=>[]);
+    if(matchMusicArtwork(songs,title,artist).coverUrl)return songs;
+    if(getSettings().discoverEnabled!==true)return [];
+    const videos=await searchYouTubeArtwork("video",query,{artwork:true}).catch(()=>[]);
+    return [...songs,...videos];
+  }
   const lookupArtwork = createArtworkLookup(musicBrainzClient, now, async (title, artist) => {
     const settings = getSettings();
     const apiKey = apiKeyFor(settings);
@@ -52,7 +62,7 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
     }
     const client = artworkClient;
     try { return await client.trackInfo(title, artist); } finally { client.flush(); }
-  }, lookupAudioDb ? (title, artist) => getSettings().discoverEnabled === true ? lookupAudioDb(title, artist) : Promise.resolve({}) : undefined, searchYouTubeArtwork ? (title, artist) => getSettings().discoverEnabled === true ? searchYouTubeArtwork("recording", `${title} ${artist.replace(/\s+-\s+Topic$/i,"")}`.slice(0,160)) : Promise.resolve([]) : undefined);
+  }, lookupAudioDb ? (title, artist) => getSettings().discoverEnabled === true ? lookupAudioDb(title, artist) : Promise.resolve({}) : undefined, searchYouTubeArtwork ? lookupMusicArtwork : undefined);
   const artistArtworkCache=new Map(), artistArtworkPending=new Map();
   async function lookupArtistArtwork(name) {
     if (!searchYouTubeArtwork) return {};
@@ -61,8 +71,8 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
     if(hit&&now()-hit.at<(hit.value.coverUrl?86400000:60000))return hit.value;
     if(artistArtworkPending.has(key))return artistArtworkPending.get(key);
     if(artistArtworkPending.size>=4)throw Error("Artwork queue busy");
-    const task=Promise.resolve().then(()=>searchYouTubeArtwork("artist",name.slice(0,160)))
-      .then(items=>{const value=matchArtistArtwork(items,name);artistArtworkCache.set(key,{at:now(),value});while(artistArtworkCache.size>256)artistArtworkCache.delete(artistArtworkCache.keys().next().value);return value;})
+    const task=Promise.resolve().then(()=>searchYouTubeArtwork("artist",name.replace(/\s+[-–—]\s+Topic$/i,"").slice(0,160),{artwork:true}))
+      .then(items=>{const value=matchArtistArtwork(items,name);if(value.coverUrl)artistArtworkCache.set(key,{at:now(),value});while(artistArtworkCache.size>256)artistArtworkCache.delete(artistArtworkCache.keys().next().value);return value;})
       .finally(()=>artistArtworkPending.delete(key));
     artistArtworkPending.set(key,task);return task;
   }
@@ -70,11 +80,11 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
     const settings = getSettings();
     if (settings.discoverEnabled !== true) return { status: "off" };
     if (payload?.artwork !== undefined) {
-      const { title, artist, kind = "recording" } = payload.artwork || {};
+      const { title, artist, kind = "recording", fallback = false } = payload.artwork || {};
       if (!["artist","recording"].includes(kind) || typeof title !== "string" || typeof artist !== "string" || !title.trim() || (kind === "recording" && !artist.trim()) || title.length > 300 || artist.length > 300)
         return { status: "error", error: "Invalid artwork lookup." };
       try {
-        const artwork = kind === "artist" ? await lookupArtistArtwork(title.trim()) : await lookupArtwork(title.trim(), artist.trim());
+        const artwork = kind === "artist" ? await lookupArtistArtwork(title.trim()) : await lookupArtwork(title.trim(), artist.trim(), {fallback:fallback===true});
         return getSettings().discoverEnabled === true ? { status: "artwork", ...artwork } : { status: "off" };
       } catch { return { status: "error", error: "Artwork unavailable." }; }
     }

@@ -26,7 +26,8 @@ function lastfmArtwork(track,title,artist) {
 // Reuse the catalog's actual artwork, accounting for formatting differences
 // without stripping version markers (live, remix, slowed, etc.).
 const musicKey = value => norm(value).replace(/[^\p{L}\p{N}\p{M}]+/gu," ").trim();
-const artistKey = value => musicKey(norm(value).replace(/\s+-\s+topic$/i,""));
+const artistKey = value => musicKey(norm(value).replace(/\s+[-–—]\s+topic$/i,""));
+const equivalentArtist=(a,b)=>artistKey(a)===artistKey(b) && Boolean(artistKey(b));
 function matchMusicArtwork(items,title,artist) {
   const {safeThumbnail}=require("./youtube-music.cjs");
   const wantedArtist=artistKey(artist);
@@ -34,7 +35,7 @@ function matchMusicArtwork(items,title,artist) {
   const artistPrefix=norm(title).split(/\s+-\s+/);
   const titleKeys=new Set([wantedTitle]);
   if(artistPrefix.length>1 && artistKey(artistPrefix[0])===wantedArtist) titleKeys.add(musicKey(artistPrefix.slice(1).join(" - ")));
-  const matches=(Array.isArray(items)?items:[]).filter(item=>titleKeys.has(musicKey(item?.title))&&artistKey(item?.artist)===wantedArtist)
+  const matches=(Array.isArray(items)?items:[]).filter(item=>titleKeys.has(musicKey(item?.title))&&equivalentArtist(item?.artist,artist))
     .map(item=>({...item,coverUrl:safeThumbnail(item.coverUrl)})).filter(item=>item.coverUrl);
   if(!wantedArtist||!wantedTitle||!matches.length)return {};
   // Different releases of the same exact song can have valid alternate art.
@@ -57,9 +58,9 @@ function matchArtistArtwork(items,name) {
 }
 function createArtworkLookup(client,now=Date.now,trackInfo,lookupAudioDb,lookupMusic) {
   const cache=new Map(), pending=new Map();
-  return async (title,artist) => {
-    const key=JSON.stringify([norm(title),norm(artist)]), hit=cache.get(key);
-    if(hit && now()-hit.at<(hit.value.coverUrl || hit.value.fallbackCoverUrl ? 86400000 : 600000)) {
+  return async (title,artist,{fallback=false}={}) => {
+    const key=JSON.stringify([norm(title),norm(artist),fallback]), hit=cache.get(key);
+    if(hit && now()-hit.at<(hit.value.coverUrl || hit.value.fallbackCoverUrl ? 86400000 : 30000)) {
       cache.delete(key); cache.set(key,hit);
       return hit.value;
     }
@@ -67,7 +68,7 @@ function createArtworkLookup(client,now=Date.now,trackInfo,lookupAudioDb,lookupM
     if(pending.has(key)) return pending.get(key);
     if(pending.size>=4) throw new Error("Artwork queue busy");
     const task=Promise.resolve().then(async()=>{
-      if (lookupMusic) {
+      if (lookupMusic && !fallback) {
         const direct = matchMusicArtwork(await lookupMusic(title,artist).catch(()=>[]),title,artist);
         if (direct.coverUrl) return direct;
       }
@@ -85,7 +86,7 @@ function createArtworkLookup(client,now=Date.now,trackInfo,lookupAudioDb,lookupM
       const identified=validId(track?.mbid)&&norm(track?.name)===norm(title)&&norm(track?.artist?.name)===norm(artist) ? exact.find(item=>item.id===track.mbid) : null;
       return identified ? catalogArtwork("recording",identified) : matchRecordingArtwork(items,title,artist);
     }).then(value=>{
-      cache.set(key,{at:now(),value});
+      if(value.coverUrl||value.fallbackCoverUrl) cache.set(key,{at:now(),value});
       while(cache.size>512) cache.delete(cache.keys().next().value);
       return value;
     }).finally(()=>pending.delete(key));

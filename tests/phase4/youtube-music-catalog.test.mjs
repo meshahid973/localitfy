@@ -52,3 +52,14 @@ test("radio maps a bounded related-song queue and omits the selected seed",async
   const [a,b]=await Promise.all([radio("abcdefghijk"),radio("abcdefghijk")]);assert.deepEqual(a,b);assert.equal(count,1);
   await assert.rejects(radio("bad-seed"),/Invalid radio seed/);
 });
+
+
+test("top result cards and video uploads are mapped for artwork lookups",()=>{
+ const thumbnail={musicThumbnailRenderer:{thumbnail:{thumbnails:[{url:"https://lh3.googleusercontent.com/abc=w512-h512",width:512,height:512}]}}};
+ const card={title:{runs:[{text:"Indie Song (slowed)"}]},subtitle:{runs:[{text:"Video"},{text:" • "},{text:"Indie Artist"},{text:" • "},{text:"3:12"}]},onTap:{watchEndpoint:{videoId:"abcdefghijk"}},thumbnail};
+ const build=card=>({contents:{tabbedSearchResultsRenderer:{tabs:[{tabRenderer:{content:{sectionListRenderer:{contents:[{musicCardShelfRenderer:card}]}}}}]}}});
+ const tracks=mapSearchResponse(build(card),"video","Indie Song slowed Indie Artist",false);
+ assert.equal(tracks.length,1);assert.equal(tracks[0].artist,"Indie Artist");assert.equal(tracks[0].durationMs,192000);assert.match(tracks[0].coverUrl,/googleusercontent/);
+ const artistCard={title:{runs:[{text:"Indie Artist"}]},onTap:linked("Indie Artist","MUSIC_PAGE_TYPE_ARTIST","UCabcdefghijklmnopqrstuv").navigationEndpoint,thumbnail};
+ assert.equal(mapSearchResponse(build(artistCard),"artist","Indie Artist",false)[0].id,"ytmusic:UCabcdefghijklmnopqrstuv");
+});

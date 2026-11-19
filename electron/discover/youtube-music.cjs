@@ -6,7 +6,7 @@
 // catalog metadata only; no accounts, tokens, playback endpoints or Liner services.
 const origin = "https://music.youtube.com/youtubei/v1/";
 const clientVersion = "1.20260911.08.00";
-const filters = { recording: "EgWKAQIIAWoKEAkQBRAKEAMQBA%3D%3D", artist: "EgWKAQIgAWoKEAkQBRAKEAMQBA%3D%3D" };
+const filters = { video: "EgWKAQIQAWoKEAkQBRAKEAMQBA%3D%3D", recording: "EgWKAQIIAWoKEAkQBRAKEAMQBA%3D%3D", artist: "EgWKAQIgAWoKEAkQBRAKEAMQBA%3D%3D" };
 const videoId = /^[A-Za-z0-9_-]{11}$/;
 const artistId = /^UC[A-Za-z0-9_-]{22}$/;
 const clean = v => typeof v === "string" ? v.trim().slice(0,300) : "";
@@ -55,17 +55,19 @@ function coverFor(row,id) {
 }
 function column(row,index) {return row?.flexColumns?.[index]?.musicResponsiveListItemFlexColumnRenderer?.text;}
 function mapRow(row,kind) {
-  const title=text(column(row,0));
+  const title=text(column(row,0) ?? row.title);
   if(!title)return null;
-  const titleRun=runs(column(row,0))[0];
-  const metadata=runs(column(row,1));
+  const titleRun=runs(column(row,0) ?? row.title)[0];
+  const metadata=runs(column(row,1) ?? row.subtitle);
+  const endpoints=[row.onTap,titleRun?.navigationEndpoint,row.navigationEndpoint,row.thumbnailOverlay?.musicItemThumbnailOverlayRenderer?.content?.musicPlayButtonRenderer?.playNavigationEndpoint,...arr(row.buttons).flatMap(button=>[button?.buttonRenderer?.command,button?.buttonRenderer?.navigationEndpoint])];
   if(kind==="artist"){
-    const id=browse(row)?.browseId||browse(titleRun)?.browseId;
-    const page=kindOf(row)||kindOf(titleRun);
+    const endpoint=endpoints.map(e=>e?.browseEndpoint).find(e=>e?.browseId&&e?.browseEndpointContextSupportedConfigs?.browseEndpointContextMusicConfig?.pageType==="MUSIC_PAGE_TYPE_ARTIST");
+    const id=endpoint?.browseId;
+    const page=endpoint?.browseEndpointContextSupportedConfigs?.browseEndpointContextMusicConfig?.pageType;
     if(page!=="MUSIC_PAGE_TYPE_ARTIST"||!artistId.test(id||""))return null;
     return {id:"ytmusic:"+id,title,artist:"",subtitle:"YouTube Music",url:"https://music.youtube.com/channel/"+id,coverUrl:coverFor(row,id)};
   }
-  const id=row?.playlistItemData?.videoId||titleRun?.navigationEndpoint?.watchEndpoint?.videoId||row?.overlay?.musicItemThumbnailOverlayRenderer?.content?.musicPlayButtonRenderer?.playNavigationEndpoint?.watchEndpoint?.videoId||row?.navigationEndpoint?.watchEndpoint?.videoId;
+  const id=row?.playlistItemData?.videoId||titleRun?.navigationEndpoint?.watchEndpoint?.videoId||row?.overlay?.musicItemThumbnailOverlayRenderer?.content?.musicPlayButtonRenderer?.playNavigationEndpoint?.watchEndpoint?.videoId||endpoints.map(e=>e?.watchEndpoint?.videoId).find(id=>videoId.test(id||""));
   if(!videoId.test(id||""))return null;
   const artists=metadata.filter(r=>["MUSIC_PAGE_TYPE_ARTIST","MUSIC_PAGE_TYPE_USER_CHANNEL"].includes(kindOf(r))).map(r=>clean(r.text)).filter(Boolean);
   const segments=metadata.map(r=>r?.text||"").join("").split("•").map(clean).filter(Boolean);
@@ -77,19 +79,19 @@ function mapRow(row,kind) {
   const durationMs=[...metadata,...fixed].map(r=>duration(clean(r?.text))).find(Boolean);
   return {id:"ytmusic:"+id,title,artist,album,subtitle:[artist,album].filter(Boolean).join(" · "),url:"https://www.youtube.com/watch?v="+id,durationMs,coverUrl:coverFor(row,id)};
 }
-function mapSearchResponse(body,kind,query) {
+function mapSearchResponse(body,kind,query,strictQuery=true) {
   const tabs=arr(body?.contents?.tabbedSearchResultsRenderer?.tabs);
   const sections=tabs.flatMap(t=>arr(t?.tabRenderer?.content?.sectionListRenderer?.contents));
-  const items=sections.flatMap(s=>arr(s?.musicShelfRenderer?.contents).concat(arr(s?.musicCardShelfRenderer?.contents),arr(s?.itemSectionRenderer?.contents)));
+  const items=sections.flatMap(s=>arr(s?.musicShelfRenderer?.contents).concat(s?.musicCardShelfRenderer?[{musicCardShelfRenderer:s.musicCardShelfRenderer},...arr(s.musicCardShelfRenderer.contents)]:[],arr(s?.itemSectionRenderer?.contents)));
   const seen=new Set(), result=[];
   for(const item of items.slice(0,150)){
-    const row=item?.musicResponsiveListItemRenderer;
+    const row=item?.musicResponsiveListItemRenderer ?? item?.musicCardShelfRenderer;
     if(!row)continue;
     const mapped=mapRow(row,kind);
-    if(!mapped||seen.has(mapped.id)||(kind==="recording"&&isJunkVideo(mapped.title,query)))continue;
+    if(!mapped||seen.has(mapped.id)||(kind!=="artist"&&isJunkVideo(mapped.title,query)))continue;
     seen.add(mapped.id);result.push(mapped);
   }
-  return result.filter(v=>matchesQuery(query,v.title,v.artist)).slice(0,25);
+  return result.filter(v=>!strictQuery||matchesQuery(query,v.title,v.artist)).slice(0,25);
 }
 async function requestCatalog(fetchImpl,endpoint,payload) {
   const response=await fetchImpl(origin+endpoint+"?prettyPrint=false",{method:"POST",redirect:"error",credentials:"omit",headers:{"content-type":"application/json",accept:"application/json","x-youtube-client-name":"67","x-youtube-client-version":clientVersion,"x-origin":"https://music.youtube.com"},body:JSON.stringify({...payload,context:{client:{clientName:"WEB_REMIX",clientVersion,hl:"en",gl:"US"}}}),signal:AbortSignal.timeout(6500)});
@@ -105,17 +107,17 @@ async function requestCatalog(fetchImpl,endpoint,payload) {
 }
 function createYouTubeMusicSearch(fetchImpl=globalThis.fetch,now=Date.now,maxPending=2) {
   const cache=new Map(),pending=new Map();
-  return async (kind,query)=>{
+  return async (kind,query,options={})=>{
     if(!Object.hasOwn(filters,kind)||typeof query!=="string"||query.trim().length<2||query.length>160)return [];
-    const key=JSON.stringify([kind,query.normalize("NFKC").trim().toLowerCase()]);
+    const key=JSON.stringify([kind,query.normalize("NFKC").trim().toLowerCase(),options.artwork===true]);
     const hit=cache.get(key);
     if(hit&&now()-hit.at<300000){cache.delete(key);cache.set(key,hit);return hit.items;}
     if(pending.has(key))return pending.get(key);
     if(pending.size>=maxPending)throw Error("Music search busy");
     const task=Promise.resolve().then(async()=>{
       const body=await requestCatalog(fetchImpl,"search",{query:query.trim(),params:filters[kind]});
-      const items=mapSearchResponse(body,kind,query);
-      cache.set(key,{at:now(),items});while(cache.size>128)cache.delete(cache.keys().next().value);
+      const items=mapSearchResponse(body,kind,query,options.artwork!==true);
+      if(items.length) cache.set(key,{at:now(),items});while(cache.size>128)cache.delete(cache.keys().next().value);
       return items;
     }).finally(()=>pending.delete(key));
     pending.set(key,task);return task;

@@ -24,7 +24,7 @@ function enqueueArtwork(job: ArtworkJob) {
 }
 function cachedArtwork(key: string) {
   const hit = cache.get(key);
-  if (!hit || Date.now() - hit.at >= (hit.value.coverUrl || hit.value.fallbackCoverUrl ? 86400000 : 600000)) {
+  if (!hit || Date.now() - hit.at >= (hit.value.coverUrl || hit.value.fallbackCoverUrl ? 86400000 : 30000)) {
     cache.delete(key);
     return undefined;
   }
@@ -61,6 +61,8 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
   const src = [...(failed.length ? resolvedUrls : []), ...directUrls, ...resolvedUrls].find(url => url && !failed.includes(url));
   const needsLookup = lookup && (!directUrls.length || failed.length > 0);
   const imageReady = Boolean(src && loaded?.key === key && loaded.url === src);
+  const exhausted = !src && failed.length > 0 && !person;
+  const requestKey = exhausted ? key + ":fallback" : key;
   useEffect(() => {
     if (!near || !src || imageReady) return;
     const timer = window.setTimeout(() => setFailure(current => ({key,urls:[...new Set([...(current.key === key ? current.urls : []),src])]})), 6500);
@@ -74,20 +76,21 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
     let attempts = 0;
     const start = () => {
       if (!live) return;
-      const cached = cachedArtwork(key);
+      const cached = cachedArtwork(requestKey);
       if (cached) { setResolved({ key, value: cached }); return; }
       cancelQueued = enqueueArtwork(async () => {
         if (!live) return;
-        let value = cachedArtwork(key);
+        let value = cachedArtwork(requestKey);
         if (!value) {
           attempts++;
-          const answer = await window.localitfy.getDiscoveries({ artwork: { title, artist, kind: person ? "artist" : "recording" } }).catch(() => null);
+          const answer = await window.localitfy.getDiscoveries({ artwork: { title, artist, kind: person ? "artist" : "recording", fallback: exhausted } }).catch(() => null);
           if (answer?.status !== "artwork") {
             if (live && attempts < 3 && answer?.status !== "off") retryTimer = window.setTimeout(start, attempts * 900);
             return;
           }
           value = answer;
-          cache.set(key, { at: Date.now(), value });
+          if (!value.coverUrl && !value.fallbackCoverUrl && !value.coverAlternatives?.length) return;
+          cache.set(requestKey, { at: Date.now(), value });
           const oldest = cache.keys().next().value;
           if (cache.size > 512 && oldest !== undefined) cache.delete(oldest);
         }
@@ -96,10 +99,10 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
     };
     start();
     return () => { live = false; cancelQueued?.(); if (retryTimer !== undefined) window.clearTimeout(retryTimer); };
-  }, [key, title, artist, needsLookup, near, person]);
+  }, [key, title, artist, needsLookup, near, person, exhausted, requestKey]);
   return <span ref={ref} className="discoverCover" aria-hidden="true">
     {!imageReady ? (person ? <UserRound size={24} /> : <Disc3 size={24} />) : null}
-    {near && src ? <img key={src} src={src} alt="" loading="eager" decoding="async" fetchPriority="low" referrerPolicy="no-referrer" data-ready={imageReady}
+    {near && src ? <img key={src} src={src} alt="" loading="eager" decoding="async" fetchPriority="auto" referrerPolicy="no-referrer" data-ready={imageReady}
       onLoad={() => setLoaded({key,url:src})}
       onError={() => setFailure(current => ({key,urls:[...new Set([...(current.key === key ? current.urls : []),src])]}))} /> : null}
   </span>;
