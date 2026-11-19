@@ -418,3 +418,92 @@ test("Discover uses verified Last.fm track art and tries multiple valid releases
   const art=catalogArtwork("recording",{releases:[{id:"12345678-1234-1234-1234-123456789abc"},{id:"22345678-1234-1234-1234-123456789abc"}]});
   assert.equal(art.coverAlternatives.length,2);
 });
+
+
+test("direct music catalog is explicit, preferred, and falls back after provider failure", async () => {
+  const handlers = new Map(), settings = { discoverEnabled: false };
+  const directItem = { id: "ytmusic:abcdefghijk", title: "Track", artist: "Artist", url: "https://www.youtube.com/watch?v=abcdefghijk" };
+  const calls=[];
+  let fail=false;
+  registerDiscoverIpc({handle:(channel,handler)=>handlers.set(channel,handler)}, {
+    getSongs:()=>[],getSettings:()=>settings,
+    musicBrainzClient:{searchCatalog:async(kind,term)=>{calls.push(["fallback",kind,term]);return [{id:"12345678-1234-1234-1234-123456789abc",title:"Track","artist-credit":[{name:"Artist"}]}];}},
+    searchYouTubeMusic:async(kind,term)=>{calls.push(["direct",kind,term]);if(fail)throw Error("offline");return [directItem];}
+  });
+  const get=payload=>handlers.get("discover:get")({},payload);
+  assert.equal((await get({catalog:{kind:"recording",term:"Track"}})).status,"off");
+  assert.equal(calls.length,0);
+  settings.discoverEnabled=true;
+  assert.equal((await get({})).status,"needs-key");
+  assert.equal(calls.length,0,"opening discovery does not send local seeds to YouTube");
+  assert.deepEqual((await get({catalog:{kind:"recording",term:"Track"}})).items,[directItem]);
+  assert.deepEqual(calls,[["direct","recording","Track"]]);
+  fail=true;
+  assert.equal((await get({catalog:{kind:"recording",term:"Track"}})).items[0].title,"Track");
+  assert.deepEqual(calls.slice(1),[["direct","recording","Track"],["fallback","recording","Track"]]);
+});
+
+
+test("related music uses an explicit validated seed and observes discovery opt-out",async()=>{
+ const handlers=new Map(),settings={discoverEnabled:false};let calls=0;
+ registerDiscoverIpc({handle:(channel,handler)=>handlers.set(channel,handler)},{getSongs:()=>[],getSettings:()=>settings,musicBrainzClient:{},searchYouTubeMusicRadio:async seed=>{calls++;assert.equal(seed,"abcdefghijk");return [];}});
+ const get=seed=>handlers.get("discover:get")({},{catalog:{kind:"recording",term:"seed",radioSeed:seed}});
+ assert.equal((await get("abcdefghijk")).status,"off");assert.equal(calls,0);
+ settings.discoverEnabled=true;assert.equal((await get("bad")).status,"error");assert.equal(calls,0);
+ assert.equal((await get("abcdefghijk")).status,"catalog");assert.equal(calls,1);
+});
+
+
+test("recommendation artwork uses verified catalog metadata before slower providers",async()=>{
+ const {createArtworkLookup,matchMusicArtwork}=require("../../electron/discover/artwork.cjs");
+ const candidate={title:"Song",artist:"Artist",coverUrl:"https://lh3.googleusercontent.com/abc=w256-h256-l90-rj",durationMs:123000};
+ let calls=0;
+ const lookup=createArtworkLookup({searchRecordings:async()=>{throw Error("unneeded");}},Date.now,async()=>{throw Error("unneeded");},undefined,async()=>{calls++;return [candidate];});
+ const results=await Promise.all([lookup("Song","Artist - Topic"),lookup("Song","Artist - Topic")]);
+ assert.deepEqual(results[0],{coverUrl:candidate.coverUrl,durationMs:123000});assert.deepEqual(results[0],results[1]);assert.equal(calls,1);
+ assert.deepEqual(matchMusicArtwork([candidate],"Wrong","Artist"),{});
+ assert.deepEqual(matchMusicArtwork([candidate,{...candidate,coverUrl:"https://lh3.googleusercontent.com/other=w256-h256-l90-rj",durationMs:190000}],"Song","Artist"),{});
+ assert.equal(matchMusicArtwork([candidate,{...candidate,coverUrl:"https://lh3.googleusercontent.com/other=w256-h256-l90-rj"}],"Song","Artist").coverAlternatives.length,2);
+ assert.equal(matchMusicArtwork([candidate],"Artist - Song","Artist").coverUrl,candidate.coverUrl);
+ assert.deepEqual(matchMusicArtwork([candidate],"Song (slowed)","Artist"),{});
+ assert.equal(matchMusicArtwork([{...candidate,title:"Song (Official Music Video)"}],"Song","Artist").coverUrl,candidate.coverUrl);
+ assert.deepEqual(matchMusicArtwork([{...candidate,title:"Song (Live)"}],"Song","Artist"),{});
+ assert.deepEqual(matchMusicArtwork([{...candidate,coverUrl:"https://evil.test/cover.jpg"}],"Song","Artist"),{});
+});
+
+
+test("recommended artists request exact catalog portraits and cache them",async()=>{
+ const handlers=new Map(),settings={discoverEnabled:false};let calls=0;
+ const coverUrl="https://lh3.googleusercontent.com/portrait=w256-h256-l90-rj";
+ registerDiscoverIpc({handle:(channel,handler)=>handlers.set(channel,handler)},{getSongs:()=>[],getSettings:()=>settings,searchYouTubeArtwork:async(kind,name)=>{calls++;assert.equal(kind,"artist");assert.equal(name,"Artist");return [{id:"ytmusic:UCabcdefghijklmnopqrstuv",title:"Artist",coverUrl}];}});
+ const get=()=>handlers.get("discover:get")({},{artwork:{title:"Artist",artist:"",kind:"artist"}});
+ assert.equal((await get()).status,"off");assert.equal(calls,0);
+ settings.discoverEnabled=true;
+ const result=await Promise.all([get(),get()]);assert.deepEqual(result,[{status:"artwork",coverUrl},{status:"artwork",coverUrl}]);assert.equal(calls,1);
+ assert.deepEqual(await get(),{status:"artwork",coverUrl});assert.equal(calls,1);
+ const {matchArtistArtwork}=require("../../electron/discover/artwork.cjs");
+ assert.deepEqual(matchArtistArtwork([{id:"ytmusic:UCabcdefghijklmnopqrstuv",title:"Different",coverUrl}],"Artist"),{});
+});
+
+
+test("recommendation misses try video catalog and do not suppress subsequent successful requests",async()=>{
+ const handlers=new Map(),settings={discoverEnabled:true};const calls=[];
+ const coverUrl="https://lh3.googleusercontent.com/abc=w256-h256-l90-rj";
+ let available=false;
+ registerDiscoverIpc({handle:(name,handler)=>handlers.set(name,handler)},{getSongs:()=>[],getSettings:()=>settings,searchYouTubeArtwork:async(kind,query,options)=>{calls.push(kind);assert.equal(options.artwork,true);return available&&kind==="video"?[{title:"Indie Song (slowed)",artist:"Artist",coverUrl}]:[];}});
+ const request=()=>handlers.get("discover:get")({},{artwork:{title:"Indie Song (slowed)",artist:"Artist"}});
+ assert.equal((await request()).coverUrl,undefined);
+ available=true;
+ assert.equal((await request()).coverUrl,coverUrl);
+ assert.deepEqual(calls,["recording","video","recording","video"]);
+ assert.equal((await request()).coverUrl,coverUrl);
+ assert.equal(calls.length,4);
+});
+test("failed catalog image may request a separate provider fallback",async()=>{
+ const {createArtworkLookup}=require("../../electron/discover/artwork.cjs");
+ const yt="https://lh3.googleusercontent.com/abc=w256-h256-l90-rj";
+ const alternate="https://www.theaudiodb.com/images/media/album/thumb/example.jpg";
+ const lookup=createArtworkLookup(null,Date.now,undefined,async()=>({coverUrl:alternate}),async()=>[{title:"Song",artist:"Artist",coverUrl:yt}]);
+ assert.equal((await lookup("Song","Artist")).coverUrl,yt);
+ assert.equal((await lookup("Song","Artist",{fallback:true})).coverUrl,alternate);
+});

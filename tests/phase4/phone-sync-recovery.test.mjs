@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import fs from "node:fs";
 import { receiptDatabase, receiptRepository, syncFixture } from "../helpers/phone-sync-fixture.mjs";
 
 const plain = (value) => JSON.parse(JSON.stringify(value));
@@ -209,5 +210,46 @@ test("playlist and non-synced resume edits made during the request survive ackno
     assert.equal(f.phone.songs()[0].playbackPosition, 42);
     assert.equal(f.phone.playlists[0].name, "Later name");
     assert.deepEqual(plain(f.phone.base.playlists), plain(f.repositories.playlists.get()));
+  } finally { await f.close(); }
+});
+
+
+test("changing an audio extension persists the replacement before deleting the old phone file", async () => {
+  const f = await syncFixture();
+  try {
+    const old = f.repositories.songs.get("a").filePath;
+    const replacement = old.replace(/\.mp3$/, ".flac");
+    fs.writeFileSync(replacement, "replacement audio");
+    f.repositories.songs.patch("a", { filePath: replacement });
+    const deleted = [];
+    f.hooks.beforeDelete = ({ path }) => { deleted.push([path, f.persisted.get("files").a.audioExt]); };
+    await f.sync.syncNow();
+    assert.equal(f.sync.getSyncProgress().phase, "done");
+    assert.deepEqual(deleted, [["library/a.mp3", "flac"]]);
+    await f.restartPhone();
+    assert.equal(f.phone.files.a.audioExt, "flac");
+  } finally { await f.close(); }
+});
+
+test("a failed audio transfer keeps the previously persisted file reference", async () => {
+  const f = await syncFixture();
+  try {
+    const cached = plain(f.phone.files);
+    const old = f.repositories.songs.get("a").filePath;
+    const replacement = old.replace(/\.mp3$/, ".flac");
+    fs.writeFileSync(replacement, "replacement audio");
+    f.repositories.songs.patch("a", { filePath: replacement });
+    f.hooks.beforeDownload = () => { throw new Error("connection interrupted"); };
+    let deleted = 0;
+    f.hooks.beforeDelete = () => { deleted += 1; };
+    await f.sync.syncNow();
+    assert.equal(f.sync.getSyncProgress().phase, "error");
+    assert.equal(deleted, 0);
+    await f.restartPhone();
+    assert.deepEqual(plain(f.phone.files), cached);
+    f.hooks.beforeDownload = undefined;
+    await f.sync.syncNow();
+    assert.equal(f.sync.getSyncProgress().phase, "done");
+    assert.equal(f.phone.files.a.audioExt, "flac");
   } finally { await f.close(); }
 });

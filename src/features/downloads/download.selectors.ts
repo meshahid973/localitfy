@@ -3,6 +3,8 @@ import type { Settings } from "../settings/settings.types";
 export function downloadStatusLabel(status: string) {
   if (status === "done") return "done";
   if (status === "failed") return "failed";
+  if (status === "interrupted") return "interrupted";
+  if (status === "importing") return "importing";
   if (status === "cancelled") return "cancelled";
   if (status === "converting") return "converting";
   if (status === "downloading") return "downloading";

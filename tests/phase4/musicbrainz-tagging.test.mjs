@@ -76,6 +76,9 @@ test("titles lose credits and upload noise before searching and matching", () =>
   assert.equal(searchTitle("Heartless (Official Audio)"), "Heartless");
   assert.equal(similarity("Ain't In LA", "Ain’t in LA"), 1);
   assert.equal(similarity("RADIO (feat. Kim Petras)", "RADIO"), 1);
+  assert.equal(similarity("Beyoncé", "Beyonce"), 1);
+  assert.equal(similarity("ガラス", "ｶﾞﾗｽ"), 1);
+  assert.notEqual(similarity("ガラス", "カラス"), 1, "Japanese voiced kana must remain distinct");
   assert.equal(formatGenres([{ name: "hip hop", count: 10 }, { name: "synth-pop", count: 5 }, { name: "jazz", count: 1 }]), "Hip Hop; Synth-Pop");
 });
 
@@ -156,6 +159,17 @@ test("cover downloads reject oversized streaming responses before buffering the 
   const result = await fetchCoverArt({ releaseId: "one", releaseGroupId: "two", userAgent: "localtify/test", maxBytes: 32, fetchImpl });
   assert.equal(cancelled, true, "the oversized stream is cancelled");
   assert.equal(calls, 2, "falls back to another cover instead of buffering oversized input");
+  assert.deepEqual(result.data, JPEG);
+});
+
+test("cover downloads reject invalid image signatures and try another cover", async () => {
+  let calls = 0;
+  const result = await fetchCoverArt({
+    releaseId: "one", releaseGroupId: "two", userAgent: "localtify/test",
+    fetchImpl: async () => ({ ok: true, headers: new Map([["content-type", "image/jpeg"]]),
+      arrayBuffer: async () => ++calls === 1 ? Buffer.from("not a jpeg") : JPEG })
+  });
+  assert.equal(calls, 2);
   assert.deepEqual(result.data, JPEG);
 });
 
@@ -476,28 +490,56 @@ test("IPC: gated by the setting, proposals stay native, and library-only apply u
   settings.musicbrainzTagging = true;
   const { proposals } = await router.invoke("tagging:lookup", { songIds: ["a", "b", "../../etc/passwd"] });
   assert.equal(proposals.length, 2);
+  assert.ok(proposals.every(proposal => typeof proposal.previewId === "string" && proposal.previewId.length > 0));
+  assert.notEqual(proposals[0].previewId, proposals[1].previewId);
   assert.equal(proposals[0].coverUrl, "localtify-media://rel-marrow.jpg", "the preview cover is the downloaded local file");
 
   const pending = await router.invoke("tagging:pending");
   assert.deepEqual(pending.map((proposal) => proposal.songId), ["a", "b"], "finished lookups survive the panel closing");
   assert.equal(pending[0].groupKey, `marrow\0${dir}`);
+  assert.equal(pending[0].previewId, proposals[0].previewId);
+  const stale = await router.invoke("tagging:apply", { songIds: ["a"], previewIds: { a: "stale-preview" } });
+  assert.equal(stale.applied, 0);
+  assert.match(stale.failed[0].error, /Preview changed/);
+  assert.equal(songs.get("a").genre, "");
 
-  const result = await router.invoke("tagging:apply", { songIds: ["a", "unknown"] });
-  assert.deepEqual(result, { applied: 1, written: 0, failed: [] });
+  const result = await router.invoke("tagging:apply", { songIds: ["a", "unknown"], previewIds: Object.fromEntries(proposals.map(proposal => [proposal.songId, proposal.previewId])) });
+  assert.ok(result.undoId);
+  assert.deepEqual({ ...result, undoId: undefined }, { applied: 1, written: 0, failed: [{ songId: "unknown", title: "unknown", error: "Song or matching proposal is no longer available" }], undoId: undefined });
+  assert.deepEqual(await router.invoke("tagging:undo-state"), { id: result.undoId, count: 1 });
   assert.equal(songs.get("a").genre, "Hyperpop; Emo Rap");
   assert.equal(songs.get("a").coverPath, path.join(dir, "musicbrainz-covers", "rel-marrow.jpg"));
   assert.equal(songs.get("a").coverSource, "custom");
   assert.equal(songs.get("b").genre, "", "unselected songs are untouched");
   assert.equal(sent[0][0], "library:watched-change");
   assert.equal(sent[0][1].libraryChanged, true, "tag edits trigger a full library update");
-  assert.deepEqual(await router.invoke("tagging:apply", { songIds: ["a"] }), { applied: 0, written: 0, failed: [] }, "a proposal is used once");
+  assert.deepEqual(await router.invoke("tagging:apply", { songIds: ["a"] }), { applied: 0, written: 0, failed: [{ songId: "a", title: songs.get("a").title, error: "Song or matching proposal is no longer available" }] }, "a proposal is used once and a subsequent apply reports failure");
 
+  assert.deepEqual(await router.invoke("tagging:undo", { id: result.undoId }), { restored: 1, failed: [] });
+  assert.equal(songs.get("a").genre, "");
+  assert.equal(songs.get("a").coverPath, null);
+  assert.equal(await router.invoke("tagging:undo-state"), null);
+  await assert.rejects(async () => router.invoke("tagging:undo", { id: result.undoId }), /no longer available/);
   assert.deepEqual(await router.invoke("tagging:search", { songId: "b", title: "death rolL", artist: "" }), [], "the fake has no recordings to search");
   const chosen = await router.invoke("tagging:choose", { songId: "b", recordingId: "rec-2", releaseId: "rel-marrow" });
   assert.deepEqual([chosen.songId, chosen.tags.trackNumber, chosen.coverUrl], ["b", 2, "localtify-media://rel-marrow.jpg"]);
   assert.deepEqual((await router.invoke("tagging:pending")).map((proposal) => proposal.songId), [], "a hand-picked match stays with its dialog");
+  const originalTitle = songs.get("b").title;
+  songs.get("b").title = "Edited after preview";
+  assert.match((await router.invoke("tagging:apply", { songIds: ["b"], previewIds: { b: chosen.previewId } })).failed[0].error, /Metadata changed since preview/);
+  assert.equal(songs.get("b").title, "Edited after preview");
+  songs.get("b").title = originalTitle;
   settings.musicbrainzWriteFiles = true;
-  assert.deepEqual(await router.invoke("tagging:apply", { songIds: ["b"] }), { applied: 1, written: 0, failed: [] }, "backend file-write gate cannot be overridden by settings");
+  const saved = await router.invoke("tagging:apply", { songIds: ["b"], previewIds: { b: chosen.previewId } });
+  assert.equal(saved.applied, 1);
+  assert.equal(saved.written, 0, "backend file-write gate cannot be overridden by settings");
+  assert.deepEqual(saved.failed, []);
+  songs.get("b").title = "New manual edit";
+  const undoConflict = await router.invoke("tagging:undo", { id: saved.undoId });
+  assert.equal(undoConflict.restored, 0);
+  assert.match(undoConflict.failed[0].error, /newer edits were kept/);
+  assert.equal(songs.get("b").title, "New manual edit");
+  songs.get("b").title = originalTitle;
   await assert.rejects(router.invoke("tagging:search", { songId: "missing", title: "x" }), /could not be found/);
 
   const releases = await router.invoke("tagging:search-album", { songIds: ["a", "b"], album: "marroW", artist: "brakence" });

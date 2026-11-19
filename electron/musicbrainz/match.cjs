@@ -4,7 +4,7 @@
 const NOISE = /[([](?:&|(?:feat\.?|ft\.?|with|prod\.?|official|audio|video|lyrics?|visuali[sz]er|explicit|clean|hq|hd|remaster(?:ed)?)\b)[^)\]]*[)\]]/gi;
 
 function normalize(value) {
-  return String(value || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase()
+  return String(value || "").normalize("NFKD").replace(/(\p{Script=Latin})\p{M}+/gu, "$1").normalize("NFC").toLowerCase()
     .replace(NOISE, " ").replace(/\b(?:feat\.?|ft\.?)\s.*$/, " ").replace(/&/g, " and ").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
 }
 

@@ -22,6 +22,7 @@ export default function TaggingSettings({ settings, songs, updateSetting }: Tagg
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
+  const [undoId, setUndoId] = useState<string | null>(null);
   // The group being looked up now, and the ones still waiting in a "look up all" run.
   const [activeKey, setActiveKey] = useState("");
   const [queued, setQueued] = useState<Set<string>>(new Set());
@@ -29,6 +30,7 @@ export default function TaggingSettings({ settings, songs, updateSetting }: Tagg
   useEffect(() => {
     if (!enabled) return;
     let cancelled = false;
+    void Promise.resolve().then(() => window.localitfy.getMusicBrainzUndo()).then(state => { if (!cancelled) setUndoId(state?.id || null); }).catch(() => undefined);
     // Started inside a promise so a failing bridge call is caught instead of crashing the page.
     void Promise.resolve().then(() => window.localitfy.getPendingMusicBrainzTags()).then(async (pending) => {
       if (cancelled || !pending.length) return;
@@ -60,9 +62,15 @@ export default function TaggingSettings({ settings, songs, updateSetting }: Tagg
       for (const [index, group] of groups.entries()) {
         setActiveKey(group.key);
         setBusy(groups.length > 1 ? `Looking up ${index + 1} of ${groups.length}: ${groupName(group)}` : `Looking up ${groupName(group)}`);
-        const result = await window.localitfy.lookUpMusicBrainzTags(idsOf(group));
+        const requestedIds = idsOf(group);
+        const result = await window.localitfy.lookUpMusicBrainzTags(requestedIds);
         setResults((current) => ({ ...current, [group.key]: result }));
-        setSelected((current) => new Set([...current, ...result.proposals.filter((proposal) => proposal.confidence >= AUTO_SELECT).map((proposal) => proposal.songId)]));
+        setSelected((current) => {
+          const next = new Set(current);
+          for (const id of group.songIds) next.delete(id);
+          for (const proposal of result.proposals) if (proposal.confidence >= AUTO_SELECT) next.add(proposal.songId);
+          return next;
+        });
         setQueued((current) => { const next = new Set(current); next.delete(group.key); return next; });
       }
       if (groups.length > 1) setMessage("Lookup finished. Check the matches, then save the ones you want.");
@@ -70,10 +78,13 @@ export default function TaggingSettings({ settings, songs, updateSetting }: Tagg
   }
 
   async function apply() {
-    const ids = [...selected];
+    const previewIds = Object.fromEntries(Object.values(results).flatMap(result => result.proposals).map(proposal => [proposal.songId, proposal.previewId]));
+    const ids = [...selected].filter(id => Object.hasOwn(previewIds, id));
+    if (!ids.length) { setSelected(new Set()); return; }
     setBusy(`Saving tags for ${plural(ids.length, "song")}…`); setMessage("");
     try {
-      const result = await window.localitfy.applyMusicBrainzTags(ids);
+      const result = await window.localitfy.applyMusicBrainzTags(ids, previewIds);
+      if (result.applied) setUndoId(result.undoId || null);
       const failed = new Set(result.failed.map((failure) => failure.songId));
       const done = new Set(ids.filter((id) => !failed.has(id)));
       setResults((current) => Object.fromEntries(Object.entries(current).map(([key, value]) => [key, { ...value, proposals: value.proposals.filter((proposal) => !done.has(proposal.songId)) }])));
@@ -81,6 +92,17 @@ export default function TaggingSettings({ settings, songs, updateSetting }: Tagg
       const parts = [`Updated ${plural(result.applied, "song")}${result.written ? `, wrote tags into ${plural(result.written, "file")} (originals are in the Trash)` : ""}.`];
       if (result.failed.length) parts.push(`Could not update: ${result.failed.map((failure) => `${failure.title} (${failure.error})`).join(", ")}.`);
       setMessage(parts.join(" "));
+      setAudit(await window.localitfy.auditMusicBrainzTags());
+    } catch (reason) { setMessage(errorText(reason)); } finally { setBusy(""); }
+  }
+
+  async function undo() {
+    if (!undoId) return;
+    setBusy("Restoring previous tags…"); setMessage("");
+    try {
+      const result = await window.localitfy.undoMusicBrainzTags(undoId);
+      setUndoId(null);
+      setMessage(`Restored ${plural(result.restored, "song")}.${result.failed.length ? " Kept newer edits or could not restore: " + result.failed.map(item => item.title + " (" + item.error + ")").join(", ") + "." : ""}`);
       setAudit(await window.localitfy.auditMusicBrainzTags());
     } catch (reason) { setMessage(errorText(reason)); } finally { setBusy(""); }
   }
@@ -105,7 +127,7 @@ export default function TaggingSettings({ settings, songs, updateSetting }: Tagg
         {state}
       </div>
       {result ? <ul className="taggingProposals">
-        {proposals.map((proposal) => <ProposalRow key={proposal.songId} proposal={proposal} checked={selected.has(proposal.songId)} onToggle={() => toggle(proposal.songId)} />)}
+        {proposals.map((proposal) => <ProposalRow key={proposal.songId} proposal={proposal} checked={selected.has(proposal.songId)} disabled={disabled} onToggle={() => toggle(proposal.songId)} />)}
         {result.missed.map((id) => <li key={id} className="taggingMissed">No match found for {titleOf(id)}</li>)}
         {!proposals.length && !result.missed.length ? <li className="taggingMissed">All saved.</li> : null}
       </ul> : null}
@@ -113,7 +135,7 @@ export default function TaggingSettings({ settings, songs, updateSetting }: Tagg
   };
 
   return <div className="settingsPanelCard settingsFocusPanelV491">
-    <div className="settingsPanelHeader"><div><strong>MusicBrainz tagging</strong><span>Looks songs up on MusicBrainz, the open music database, and fills in title, artist, album, genre, track numbers and cover art. You review every change before anything is saved. Lookups send each song’s title, artist, album and length to musicbrainz.org; covers come from the Cover Art Archive and are saved on this device.</span></div></div>
+    <div className="settingsPanelHeader"><div><strong>MusicBrainz tagging</strong><span>Looks songs up on MusicBrainz, the open music database, and fills in title, artist, album, genre and cover art in your library. You review every change before anything is saved. Lookups send each song’s title, artist, album and length to musicbrainz.org; covers come from the Cover Art Archive and are saved on this device.</span></div></div>
     <fieldset className="experimentalControls">
       <ToggleRow label="Use MusicBrainz tagging" help="Off by default. Only looks songs up when you ask it to." checked={enabled} onChange={(value) => void updateSetting("musicbrainzTagging", value)} />
       <p className="settingsHintText" role="note">File writing is temporarily disabled for safety. Saving tags updates your Localtify library only; your original music files are left untouched.</p>
@@ -121,6 +143,7 @@ export default function TaggingSettings({ settings, songs, updateSetting }: Tagg
     <div className="settingsActionRow settingsActionRowCleanV491">
       <button type="button" className="settingsActionButton" disabled={disabled} onClick={() => void checkLibrary()}>{busy === "audit" ? <Spinner /> : <RefreshCw size={14} />} {busy === "audit" ? "Checking tags…" : "Find untagged songs"}</button>
       {audit?.untagged.length ? <button type="button" className="settingsActionButton" disabled={disabled} onClick={() => void lookUp(audit.untagged, (group) => group.untaggedIds)}><Search size={14} /> Look up all untagged</button> : null}
+      {undoId ? <button type="button" className="settingsActionButton" disabled={disabled} onClick={() => void undo()}>Undo last library tag save</button> : null}
       {selected.size ? <button type="button" className="settingsActionButton settingsPrimaryAction" disabled={disabled} onClick={() => void apply()}><Check size={14} /> Save tags for {plural(selected.size, "song")}</button> : null}
     </div>
     {busy || message ? <p className={busy ? "taggingStatus working" : "taggingStatus"} role="status" aria-live="polite">{busy ? <Spinner /> : null}{busy === "audit" ? "Reading tags from your music files…" : busy || message}</p> : null}

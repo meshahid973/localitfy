@@ -61,6 +61,9 @@ try {
     if (!db.recordPlayEvent({ ...event, updatedAt: now, endedAt: now, outcome: "ended", msListened: 8000 })) throw new Error("final event failed");
     if (db.recordPlayEvent(event)) throw new Error("final event reopened");
     if (JSON.stringify(db.getListeningCounts()) !== JSON.stringify([["legacy-song", 1, 0]])) throw new Error("listening counts are wrong");
+    const summary = db.getListeningSummary({ days: 7 });
+    if (summary.totalMs !== 8000 || summary.sessions !== 1 || summary.byDay.reduce((sum, day) => sum + day.ms, 0) !== 8000) throw new Error("recorded listening aggregation changed checkpoint totals");
+    if (summary.comparison.totalMs !== 0 || summary.comparison.changePercent !== null) throw new Error("empty listening comparison fabricated a baseline");
     const rules = { match: "all", rules: [{ field: "liked", op: "is", value: "" }], sort: "random", limit: 50 };
     db.savePlaylists([{ id: "smart", name: "Smart", songIds: ["legacy-song"], createdAt: now, rules },
       { id: "plain", name: "Plain", songIds: [], createdAt: now, rules: "not json" }]);

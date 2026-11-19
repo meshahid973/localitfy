@@ -12,6 +12,7 @@ import { readValue, writeValues } from "./store";
 import { setLibraryChangedHandler } from "./sync";
 import { onLiveEvent, sendLike, sendLive } from "./live";
 import type { SyncPlaylist } from "./syncMerge";
+import { isListeningSummary } from "../../features/analytics/listeningSummary";
 
 type Bridge = Window["localitfy"];
 type Listener = (payload: never) => void;
@@ -75,7 +76,15 @@ export function createAndroidBridge(): Bridge {
     else void LocaltifyNative.moveToBackground();
   });
 
+  const unsupportedDownload = async () => { throw new Error(unavailable()); };
   const implemented: Partial<Bridge> = {
+    downloadAudioUrls: unsupportedDownload,
+    resumeDownloadJob: unsupportedDownload,
+    spotifyDownloadBatch: unsupportedDownload,
+    spotdlDownloadBatch: unsupportedDownload,
+    pickAndConvertMedia: unsupportedDownload,
+    getDownloadJobs: async () => ({ error: "", jobs: [] }),
+    clearDownloadJobs: async () => true,
     bootstrap: async () => {
       await phoneLibrary.load();
       return { songs: phoneLibrary.songs(), settings: phoneLibrary.effectiveSettings(), playlists: phoneLibrary.playlists };
@@ -102,6 +111,7 @@ export function createAndroidBridge(): Bridge {
     onLiveEvent: onLiveEvent as Bridge["onLiveEvent"],
     recordPlayEvent: async (event: PlayEvent) => phoneLibrary.recordPlayEvent(event),
     getListeningCounts: async () => phoneLibrary.listeningCounts,
+    getListeningSummary: (payload) => fromMacOrKept<Awaited<ReturnType<Bridge["getListeningSummary"]>>>("listening:summary", payload, `mac:listening-summary:${payload.days}`, null, result => isListeningSummary(result, payload.days)),
     onWatchedFoldersChange: subscribe("songs") as Bridge["onWatchedFoldersChange"],
     onPlaylistsChanged: subscribe("playlists") as Bridge["onPlaylistsChanged"],
     onAppMenuCommand: subscribe("appMenu") as Bridge["onAppMenuCommand"],

@@ -46,7 +46,8 @@ function fakeLibrary(initial = []) {
 
 test("watched folder lists are absolute, unique and capped", () => {
   const base = path.join(os.tmpdir(), "Music");
-  assert.deepEqual(cleanWatchedFolders([base, `${base}${path.sep}`, base.toUpperCase(), "relative/music", 4, null]), [base]);
+  const expected = process.platform === "win32" ? [base] : [base, base.toUpperCase()];
+  assert.deepEqual(cleanWatchedFolders([base, `${base}${path.sep}`, base.toUpperCase(), "relative/music", 4, null]), expected);
   assert.equal(cleanWatchedFolders(Array.from({ length: 30 }, (_, i) => path.join(base, String(i)))).length, 20);
   assert.deepEqual(cleanWatchedFolders("nope"), []);
 });

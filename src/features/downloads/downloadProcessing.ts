@@ -1,11 +1,72 @@
 import type { Song } from "../library/song.types";
-import type { DownloadQueueItem, DownloadResult } from "./download.types";
+import type { DownloadQueueItem, DownloadResult, DownloadRetryItem, DownloadProgress } from "./download.types";
+
+export function mergeDownloadProgress(current: DownloadQueueItem[], payload: DownloadProgress): DownloadQueueItem[] {
+  const id = payload.id || payload.recoveryId || payload.url;
+  if (!id) return current;
+  const sameRequest = (item: DownloadQueueItem) => Boolean(payload.url && item.url === payload.url || payload.spotifyTrackId && item.spotifyTrackId === payload.spotifyTrackId);
+  let index = current.findIndex(item => item.id === id || Boolean(payload.recoveryId && item.recoveryId === payload.recoveryId));
+  if (index < 0) index = current.findIndex(item => !item.recoveryId && sameRequest(item));
+  const previous = index >= 0 ? current[index] : undefined;
+  const rawProgress = Number(payload.progress ?? payload.percent ?? 0);
+  const progress = Number.isFinite(rawProgress) ? Math.max(0, Math.min(100, rawProgress)) : previous?.progress || 0;
+  const status = payload.status || (progress >= 100 ? "done" : "downloading");
+  const merged: DownloadQueueItem = {
+    ...previous, id, recoveryId: payload.recoveryId || previous?.recoveryId,
+    source: payload.source || previous?.source, spotifyTrackId: payload.spotifyTrackId || previous?.spotifyTrackId,
+    url: previous?.source === "spotify" ? previous.url : payload.url || previous?.url || "",
+    title: payload.file || payload.filename || previous?.title || "download",
+    status, progress, message: payload.message || "working...", speed: payload.speed, eta: payload.eta,
+    filePath: payload.filePath || previous?.filePath,
+    filename: payload.filename || previous?.filename,
+    importedToLibrary: payload.importedToLibrary ?? previous?.importedToLibrary,
+    librarySongId: payload.librarySongId ?? previous?.librarySongId,
+    error: ["failed", "cancelled", "interrupted"].includes(status) ? payload.error || previous?.error : undefined,
+    statusLabel: payload.statusLabel || (status === previous?.status ? previous.statusLabel : undefined)
+  };
+  const placeholder = (item: DownloadQueueItem, position: number) => position !== index && Boolean(merged.recoveryId) && !item.recoveryId && sameRequest(item);
+  const hasPlaceholder = current.some(placeholder);
+  if (previous && !hasPlaceholder && Math.abs(previous.progress - progress) < 0.75 &&
+      previous.status === merged.status && previous.message === merged.message && previous.title === merged.title &&
+      previous.speed === merged.speed && previous.eta === merged.eta && previous.filename === merged.filename &&
+      previous.error === merged.error && previous.recoveryId === merged.recoveryId && previous.source === merged.source && previous.spotifyTrackId === merged.spotifyTrackId &&
+      previous.filePath === merged.filePath && previous.importedToLibrary === merged.importedToLibrary && previous.librarySongId === merged.librarySongId) return current;
+  const next = current.map((item, position) => position === index ? merged : item).filter((item, position) => !placeholder(item, position));
+  if (index < 0) next.push(merged);
+  return next;
+}
+
+export function deduplicateDownloadRetries(items: readonly DownloadRetryItem[]) {
+  const key = (item: DownloadRetryItem) => item.source === "local" ? "local:choose-files" : item.spotifyTrackId ? `spotify:${item.spotifyTrackId}` : parseDownloadUrls(item.url || "")[0] || "";
+  const saved = new Set(items.filter(item => item.recoveryId).map(key));
+  const seen = new Set<string>();
+  return items.filter(item => {
+    if (!item.url && item.source !== "local") return false;
+    const identity = item.recoveryId ? `job:${item.recoveryId}` : `request:${key(item)}`;
+    if (seen.has(identity) || !item.recoveryId && saved.has(key(item))) return false;
+    seen.add(identity);
+    return true;
+  });
+}
+
+export async function retryDownloadsInOrder(items: readonly DownloadRetryItem[], retry: (item: DownloadRetryItem) => Promise<unknown>, signal: AbortSignal) {
+  for (const item of deduplicateDownloadRetries(items)) {
+    if (signal.aborted) return;
+    await retry(item);
+  }
+}
 
 export function parseDownloadUrls(text: string) {
-  return text
-    .split(/\r?\n|,/)
-    .map((url) => url.trim())
-    .filter(Boolean);
+  const urls = text.split(/\r?\n|,/).map(url => url.trim()).filter(Boolean);
+  return [...new Set(urls.map(url => {
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== "https:" || parsed.username || parsed.password || parsed.port) return url;
+      const host = parsed.hostname.toLowerCase();
+      const id = host === "youtu.be" ? /^\/([a-zA-Z0-9_-]{11})\/?$/.exec(parsed.pathname)?.[1] : ["youtube.com","www.youtube.com","m.youtube.com","music.youtube.com"].includes(host) && parsed.pathname === "/watch" ? parsed.searchParams.get("v") : null;
+      return id && /^[\w-]{11}$/.test(id) ? `https://www.youtube.com/watch?v=${id}` : url;
+    } catch { return url; }
+  }))];
 }
 
 export function makeQueuedDownloads(urls: string[]): DownloadQueueItem[] {
@@ -56,27 +117,36 @@ export function friendlyDownloadError(error: unknown, fallback = "Download faile
   return raw.length > 170 ? `${raw.slice(0, 167)}...` : raw;
 }
 
+function downloadPathKey(value: string | undefined) {
+  const text = String(value || "").trim();
+  return /^[a-z]:[\\/]|^\\\\/i.test(text) ? text.replace(/\\/g, "/").toLowerCase() : text;
+}
+
 type DownloadSongLookup = {
   spotifyIds: Map<string, Song>;
   filePaths: Map<string, Song>;
+  basenames: Map<string, Song | null>;
 };
 
 /** Build the two exact-match indexes once for a batch, preserving first-match order. */
 export function buildDownloadSongLookup(librarySongs: readonly Song[]): DownloadSongLookup {
   const spotifyIds = new Map<string, Song>();
   const filePaths = new Map<string, Song>();
+  const basenames = new Map<string, Song | null>();
   for (const song of librarySongs) {
     const spotifyId = String((song as Song & { sourceTrackId?: string }).sourceTrackId || "").trim();
-    const filePath = String(song.filePath || "").trim().toLowerCase();
+    const filePath = downloadPathKey(song.filePath);
     if (spotifyId && !spotifyIds.has(spotifyId)) spotifyIds.set(spotifyId, song);
     if (filePath && !filePaths.has(filePath)) filePaths.set(filePath, song);
+    const name = filePath.split(/[\\/]/).pop();
+    if (name) basenames.set(name, basenames.has(name) ? null : song);
   }
-  return { spotifyIds, filePaths };
+  return { spotifyIds, filePaths, basenames };
 }
 
 export function findDownloadedSongMatch(result: DownloadResult, librarySongs: Song[], lookup?: DownloadSongLookup) {
-  const filePath = String(result.filePath || "").trim().toLowerCase();
-  const filename = String(result.filename || "").trim().toLowerCase();
+  const filePath = downloadPathKey(result.filePath);
+  const filename = String(result.filename || "").trim();
   const spotifyTrackId = String(result.spotifyTrackId || "").trim();
 
   if (spotifyTrackId) {
@@ -89,15 +159,15 @@ export function findDownloadedSongMatch(result: DownloadResult, librarySongs: So
   if (filePath) {
     const exact = lookup
       ? lookup.filePaths.get(filePath)
-      : librarySongs.find((song) => String(song.filePath || "").trim().toLowerCase() === filePath);
+      : librarySongs.find((song) => downloadPathKey(song.filePath) === filePath);
     if (exact) return exact;
   }
 
   if (filename) {
-    return librarySongs.find((song) => {
-      const songPath = String(song.filePath || "").trim().toLowerCase();
-      return songPath.endsWith(filename);
-    }) || null;
+    if (filePath) return null; // An explicit path must not be confused with an unrelated file.
+    if (lookup) return lookup.basenames.get(filename) || null;
+    const matches = librarySongs.filter(song => downloadPathKey(song.filePath).split(/[\\/]/).pop() === filename);
+    return matches.length === 1 ? matches[0] : null;
   }
 
   return null;
@@ -109,18 +179,20 @@ export function enrichDownloadResultsWithLibraryMatches(results: DownloadResult[
   return results.map((result) => {
     const match = result.ok ? findDownloadedSongMatch(result, librarySongs, lookup) : null;
     const importedToLibrary = Boolean(match);
-    const cleanedError = result.ok ? "" : friendlyDownloadError(result.error || result.url || "Download failed.");
+    const cleanedError = result.ok ? "" : result.source === "local"
+      ? String(result.error || "Conversion failed").slice(0, 300)
+      : friendlyDownloadError(result.error || result.url || "Download failed.");
 
     return {
       ...result,
       importedToLibrary,
       librarySongId: match?.id || "",
-      error: cleanedError || result.error,
+      error: result.ok ? undefined : cleanedError || result.error,
       statusLabel: result.ok
         ? importedToLibrary
           ? "Added to library"
           : "Downloaded, not imported"
-        : "Failed — retry available"
+        : result.status === "interrupted" ? "Interrupted — resume available" : "Failed — retry available"
     } satisfies DownloadResult;
   });
 }

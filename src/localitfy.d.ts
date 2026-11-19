@@ -54,10 +54,12 @@ declare global {
   type LocalitfyDownloadProgressPayload = {
     type: string;
     id?: string;
+    recoveryId?: string;
     url?: string;
     index?: number;
     total?: number;
-    status?: "queued" | "downloading" | "converting" | "importing" | "done" | "failed" | "cancelled";
+    status?: "queued" | "downloading" | "converting" | "importing" | "done" | "failed" | "cancelled" | "interrupted";
+    filePath?: string;
     file?: string;
     filename?: string;
     progress?: number;
@@ -88,6 +90,8 @@ declare global {
 
   type LocalitfyDownloadResult = {
     ok: boolean;
+    status?: LocalitfyDownloadProgressPayload["status"];
+    recoveryId?: string;
     url?: string;
     filePath?: string;
     filename?: string;
@@ -527,7 +531,7 @@ declare global {
       /** New files in watched folders were imported, or a library file went missing or came back. */
       onWatchedFoldersChange: (callback: (payload: { importedCount: number; libraryChanged: boolean; songs: Song[] }) => void) => () => void;
       /** Public catalog and optional personalized suggestions. Off until turned on in Discover. */
-      getDiscoveries: (payload?: { refresh?: boolean; catalog?: { kind: CatalogKind; term: string }; artwork?: { title: string; artist: string } }) => Promise<DiscoverResult>;
+      getDiscoveries: (payload?: { refresh?: boolean; catalog?: { kind: CatalogKind; term: string; radioSeed?: string }; artwork?: { title: string; artist: string; kind?: CatalogKind; fallback?: boolean } }) => Promise<DiscoverResult>;
       /** The artist page biography, under the same opt-in as Discover. Saved on this device. */
       getArtistBio?: (artist: string) => Promise<ArtistBio>;
       /** Scrobbling credentials never leave Electron’s main process. */
@@ -553,7 +557,9 @@ declare global {
       auditMusicBrainzTags: () => Promise<import("./features/tagging/tagging.types").TagAudit>;
       getPendingMusicBrainzTags: () => Promise<import("./features/tagging/tagging.types").TagProposal[]>;
       lookUpMusicBrainzTags: (songIds: string[]) => Promise<import("./features/tagging/tagging.types").TagLookupResult>;
-      applyMusicBrainzTags: (songIds: string[]) => Promise<import("./features/tagging/tagging.types").TagApplyResult>;
+      applyMusicBrainzTags: (songIds: string[], previewIds: Record<string, string>) => Promise<import("./features/tagging/tagging.types").TagApplyResult>;
+      getMusicBrainzUndo: () => Promise<{ id: string; count: number } | null>;
+      undoMusicBrainzTags: (id: string) => Promise<import("./features/tagging/tagging.types").TagUndoResult>;
       searchMusicBrainz: (songId: string, title: string, artist: string) => Promise<import("./features/tagging/tagging.types").TagSearchResult[]>;
       chooseMusicBrainzMatch: (songId: string, recordingId: string, releaseId: string) => Promise<import("./features/tagging/tagging.types").TagProposal>;
       searchMusicBrainzAlbum: (songIds: string[], album: string, artist: string) => Promise<import("./features/tagging/tagging.types").TagAlbumSearchResult[]>;
@@ -584,6 +590,9 @@ declare global {
         autoAdd?: boolean;
       }>;
 
+      getDownloadJobs: () => Promise<{ error: string; jobs: import("./features/downloads/download.types").DownloadQueueItem[] }>;
+      resumeDownloadJob: (id: string) => Promise<{ downloadFolder: string; downloads: LocalitfyDownloadResult[]; changedCount: number; songs: Song[]; autoAdd?: boolean }>;
+      clearDownloadJobs: (ids: string[]) => Promise<boolean>;
       cancelDownload: () => Promise<{ cancelled: boolean }>;
       chooseDownloadFolder: () => Promise<{ canceled: boolean; folder: string }>;
       openDownloadsFolder: (folder?: string) => Promise<boolean>;
@@ -618,6 +627,7 @@ declare global {
       clearListeningHistory: () => Promise<AnalysisStatus>;
       /** All-time [songId, finished plays, skips] for songs with listening history. */
       getListeningCounts: () => Promise<Array<[string, number, number]>>;
+      getListeningSummary: (payload: { days: 7 | 30 | 90 }) => Promise<import("./features/analytics/listeningSummary").ListeningSummary | null>;
       recordPlayEvent: (payload: PlayEvent) => Promise<boolean>;
       getLyrics: (payload: { id: string; refresh?: boolean; requestId?: string; cancel?: boolean }) => Promise<import("./features/lyrics/lyrics.types").LyricsResult>;
       searchLyrics: (payload: { id: string; query: string }) => Promise<import("./features/lyrics/lyrics.types").LyricsSearchHit[]>;

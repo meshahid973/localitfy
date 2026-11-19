@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Song } from "../library/song.types";
-import type { DownloadQueueItem, DownloadResult, SpotifyTrack } from "./download.types";
+import type { DownloadQueueItem, DownloadResult, DownloadRetryItem, SpotifyTrack } from "./download.types";
 import {
   enrichDownloadResultsWithLibraryMatches,
   formatSpotifyPrivatePlaylistMessage,
-  friendlyDownloadError
+  friendlyDownloadError,
+  mergeDownloadProgress,
+  retryDownloadsInOrder
 } from "./downloadProcessing";
 
 export type DownloadsTab = "youtube" | "spotify";
@@ -17,15 +19,63 @@ export type DownloadsRuntimeOptions = {
 };
 
 export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerError }: DownloadsRuntimeOptions) {
+  const operation = useRef(false);
+  const retryController = useRef<AbortController | null>(null);
+  const beginDownloadOperation = useCallback(() => {
+    if (operation.current) return false;
+    operation.current = true;
+    return true;
+  }, []);
+  const endDownloadOperation = useCallback(() => { operation.current = false; }, []);
+  const cancelDownloadRetries = useCallback(() => { retryController.current?.abort(); }, []);
+  const retryDownloads = useCallback(async (items: DownloadRetryItem[], retry: (item: DownloadRetryItem) => Promise<unknown>) => {
+    if (operation.current || retryController.current) return;
+    const controller = new AbortController();
+    retryController.current = controller;
+    try { await retryDownloadsInOrder(items, retry, controller.signal); }
+    catch (error) { setPlayerError(`Could not retry downloads: ${String(error)}`); }
+    finally { if (retryController.current === controller) retryController.current = null; }
+  }, [setPlayerError]);
+  useEffect(() => () => { retryController.current?.abort(); }, []);
+  const songsRef = useRef(songs);
+  useEffect(() => { songsRef.current = songs; }, [songs]);
   const [downloadText, setDownloadText] = useState("");
   const [downloadBusy, setDownloadBusy] = useState(false);
   const [downloadResults, setDownloadResults] = useState<DownloadResult[]>([]);
   const [downloadQueue, setDownloadQueue] = useState<DownloadQueueItem[]>([]);
   const [downloadFolderLabel, setDownloadFolderLabel] = useState("");
 
+
+
+  useEffect(() => {
+    if (!ready || !window.localitfy?.getDownloadJobs) return;
+    let cancelled = false;
+    void window.localitfy.getDownloadJobs().then(({ jobs, error }) => {
+      if (cancelled) return;
+      if (error) setPlayerError(error);
+      const completed = enrichDownloadResultsWithLibraryMatches(jobs.filter(item => item.status === "done").map(item => ({ ...item, ok: true })), songsRef.current);
+      const byId = new Map(completed.map(item => [item.recoveryId, item]));
+      const restored = jobs.map(item => item.status === "done" ? { ...item, ...byId.get(item.recoveryId) } : item);
+      setDownloadQueue(current => {
+        const ids = new Set(current.map(item => item.recoveryId || item.id));
+        return [...current, ...restored.filter(item => !ids.has(item.id) && !current.some(active => active.url === item.url))];
+      });
+    }).catch(error => { if (!cancelled) setPlayerError(`Could not restore downloads: ${String(error)}`); });
+    return () => { cancelled = true; };
+  }, [ready, setPlayerError]);
+
   const [convertBusy, setConvertBusy] = useState(false);
   const [convertProgress, setConvertProgress] = useState(0);
   const [convertMessage, setConvertMessage] = useState("");
+
+  useEffect(() => window.localitfy.onDownloadProgress(payload => {
+    if (payload.type === "convert") {
+      const percent = Number(payload.progress ?? 0);
+      setConvertProgress(Number.isFinite(percent) ? Math.max(0, Math.min(100, percent)) : 0);
+      setConvertMessage(payload.message || "Converting...");
+    } else setDownloadQueue(current => mergeDownloadProgress(current, payload));
+  }), []);
+
 
   const [downloadsTab, setDownloadsTab] = useState<DownloadsTab>("youtube");
   const [spotifyUrl, setSpotifyUrl] = useState("");
@@ -42,8 +92,6 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
   const [spotifyConnectionMode, setSpotifyConnectionMode] = useState("oauth-pkce");
   const [spotifyRedirectUri, setSpotifyRedirectUri] = useState("http://127.0.0.1:43877/spotify/callback");
   const [spotifyLoginBusy, setSpotifyLoginBusy] = useState(false);
-  const [spotifyShowCookieInput, setSpotifyShowCookieInput] = useState(false);
-  const [spotifyCookieDraft, setSpotifyCookieDraft] = useState("");
 
   const updateSpotifyConnectionState = useCallback((res: any = {}) => {
     const hasReadyValue = Object.prototype.hasOwnProperty.call(res || {}, "ready") || Object.prototype.hasOwnProperty.call(res || {}, "ok");
@@ -125,36 +173,6 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
     }
   }
 
-  async function handleSpotifySetCookie(sp_dc: string) {
-    const value = sp_dc.trim();
-    if (!value) return;
-
-    setSpotifyLoginBusy(true);
-    setSpotifyFetchError("");
-
-    try {
-      const bridge = (window.localitfy as any);
-      if (!bridge?.spotifySetCookie) {
-        setSpotifyFetchError("Spotify cookie login has been removed. Use Connect Spotify instead.");
-        return;
-      }
-
-      const res = await bridge.spotifySetCookie(value);
-      updateSpotifyConnectionState(res || { ready: true, loggedIn: Boolean(res?.ok) });
-      if (res?.ok) {
-        setSpotifyShowCookieInput(false);
-        setSpotifyCookieDraft("");
-        setStatusText("connected to spotify");
-      } else {
-        setSpotifyFetchError(res?.error || "Invalid sp_dc cookie.");
-      }
-    } catch (error) {
-      setSpotifyFetchError(String((error as Error)?.message || "Cookie save failed."));
-    } finally {
-      setSpotifyLoginBusy(false);
-    }
-  }
-
   async function handleSpotifyLogout() {
     try {
       const res = await (window.localitfy as any).spotifyLogout?.();
@@ -169,8 +187,6 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
     setSpotifySelectedIds(new Set());
     setSpotifyUrl("");
     setSpotifyFetchError("");
-    setSpotifyShowCookieInput(false);
-    setSpotifyCookieDraft("");
     setStatusText("disconnected from spotify");
   }
 
@@ -269,18 +285,19 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
       const next = [...current];
       enrichedResults.forEach((result) => {
         const resultSpotifyTrackId = String(result.spotifyTrackId || "").trim();
-        const index = next.findIndex((item) =>
-          (resultSpotifyTrackId && String(item.spotifyTrackId || "").trim() === resultSpotifyTrackId) ||
-          item.url === result.url ||
-          (result.filename && item.filename === result.filename) ||
-          (result.filePath && item.filePath === result.filePath)
-        );
+        const index = result.recoveryId
+          ? next.findIndex(item => item.recoveryId === result.recoveryId)
+          : next.findIndex(item => !item.recoveryId && (
+              Boolean(resultSpotifyTrackId && item.spotifyTrackId === resultSpotifyTrackId) ||
+              Boolean(result.url && item.url === result.url) || Boolean(result.filePath && item.filePath === result.filePath)
+            ));
 
         if (index === -1) return;
 
         next[index] = {
           ...next[index],
-          status: result.ok ? "done" : "failed",
+          recoveryId: result.recoveryId || next[index].recoveryId,
+          status: result.status || (result.ok ? "done" : "failed"),
           progress: 100,
           message: result.ok
             ? result.importedToLibrary
@@ -305,6 +322,7 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
   }, [songs]);
 
   return {
+    beginDownloadOperation, endDownloadOperation, retryDownloads, cancelDownloadRetries,
     downloadText, setDownloadText,
     downloadBusy, setDownloadBusy,
     downloadResults, setDownloadResults,
@@ -328,10 +346,7 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
     spotifyConnectionMode, setSpotifyConnectionMode,
     spotifyRedirectUri, setSpotifyRedirectUri,
     spotifyLoginBusy, setSpotifyLoginBusy,
-    spotifyShowCookieInput, setSpotifyShowCookieInput,
-    spotifyCookieDraft, setSpotifyCookieDraft,
     handleSpotifyLogin,
-    handleSpotifySetCookie,
     handleSpotifyLogout,
     fetchSpotifyTracks,
     updateSpotifyConnectionState,

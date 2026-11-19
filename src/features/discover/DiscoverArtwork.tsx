@@ -6,7 +6,7 @@ type ArtworkJob = () => Promise<void>;
 const waiting: ArtworkJob[] = [];
 let running = 0;
 function pumpArtwork() {
-  while (running < 2 && waiting.length) {
+  while (running < 4 && waiting.length) {
     const job = waiting.shift()!;
     running++;
     void job().catch(() => undefined).finally(() => { running--; pumpArtwork(); });
@@ -24,7 +24,7 @@ function enqueueArtwork(job: ArtworkJob) {
 }
 function cachedArtwork(key: string) {
   const hit = cache.get(key);
-  if (!hit || Date.now() - hit.at >= (hit.value.coverUrl || hit.value.fallbackCoverUrl ? 86400000 : 600000)) {
+  if (!hit || Date.now() - hit.at >= (hit.value.coverUrl || hit.value.fallbackCoverUrl ? 86400000 : 30000)) {
     cache.delete(key);
     return undefined;
   }
@@ -32,8 +32,16 @@ function cachedArtwork(key: string) {
   cache.set(key, hit);
   return hit.value;
 }
+export function getCachedDiscoverArtwork(title: string, artist: string) {
+  const key = JSON.stringify([title, artist]);
+  return cachedArtwork(key + ":fallback") || cachedArtwork(key);
+}
 const audioDbCover = /^https:\/\/(?:www\.|r2\.)?theaudiodb\.com\/images\/media\/album\/thumb\/[a-z0-9_-]+\.(?:jpg|jpeg|png)(?:\/(?:small|medium))?$/i;
-const safeCover = (value?: string) => value && (audioDbCover.test(value) || /^https:\/\/coverartarchive\.org\/(release|release-group)\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/front-250$/i.test(value) || (/^https:\/\/(?:lastfm\.freetls\.fastly\.net|lastfm-img2\.akamaized\.net)\/i\/u\/(?:[0-9]+x[0-9]+|[0-9]+s)\/[a-f0-9]{32}\.(?:png|jpe?g|webp)$/i.test(value) && !/2a96cbd8b46e442fc41c2b86b821562f|4128a6eb29f94943c9d206c08e625904/i.test(value))) ? value : undefined;
+const youtubeCover = /^https:\/\/(?:lh[0-9]+\.googleusercontent\.com|yt3\.ggpht\.com|yt3\.googleusercontent\.com)\/[A-Za-z0-9_-]+=w256-h256-l90-rj$|^https:\/\/i\.ytimg\.com\/vi\/[A-Za-z0-9_-]{11}\/(?:hqdefault|mqdefault|default|sddefault|maxresdefault)\.jpg$/;
+const deezerCover = /^https:\/\/(?:e-cdns-images|cdns-images|cdn-images)\.dzcdn\.net\/images\/(?:cover|artist)\/[a-f0-9]{32}\/250x250-000000-80-0-0\.jpg$/i;
+const fanartCover = /^https:\/\/assets\.fanart\.tv\/fanart\/music\/[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}\/(?:albumcover|artistthumb)\/[-a-z0-9_.%]+\.(?:jpg|jpeg|png)\/preview$/i;
+export const isDisplayOnlyCover = (value?: string) => Boolean(value && (deezerCover.test(value) || fanartCover.test(value)));
+const safeCover = (value?: string) => value && (deezerCover.test(value) || fanartCover.test(value) || youtubeCover.test(value) || audioDbCover.test(value) || /^https:\/\/coverartarchive\.org\/(release|release-group)\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/front-250$/i.test(value) || (/^https:\/\/(?:lastfm\.freetls\.fastly\.net|lastfm-img2\.akamaized\.net)\/i\/u\/(?:[0-9]+x[0-9]+|[0-9]+s)\/[a-f0-9]{32}\.(?:png|jpe?g|webp)$/i.test(value) && !/2a96cbd8b46e442fc41c2b86b821562f|4128a6eb29f94943c9d206c08e625904/i.test(value))) ? value : undefined;
 export function DiscoverCover({ title, artist, artwork, lookup = false, person = false }: {
   title: string; artist: string; artwork?: DiscoverArtwork; lookup?: boolean; person?: boolean;
 }) {
@@ -42,70 +50,64 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
   useEffect(() => {
     if (!ref.current) return;
     if (typeof IntersectionObserver === "undefined") { setNear(true); return; }
-    const observer = new IntersectionObserver(entries => { if(entries.some(entry=>entry.isIntersecting)){setNear(true);observer.disconnect();} },{rootMargin:"160px"});
+    const observer = new IntersectionObserver(entries => { if(entries.some(entry=>entry.isIntersecting)){setNear(true);observer.disconnect();} },{rootMargin:"240px"});
     observer.observe(ref.current);
     return () => observer.disconnect();
   }, []);
   const key = JSON.stringify([title, artist]);
-  const [resolved, setResolved] = useState<{ key: string; value: DiscoverArtwork }>();
+  const [resolved, setResolved] = useState<{ key: string; value: DiscoverArtwork; fallback: boolean }>();
   const [loaded, setLoaded] = useState<{key:string; url:string}>();
   const [failure, setFailure] = useState<{key:string; urls:string[]}>({key:"",urls:[]});
   const cover = resolved?.key === key ? resolved.value : undefined;
   const failed = failure.key === key ? failure.urls : [];
   const directUrls = [artwork?.coverUrl, artwork?.fallbackCoverUrl, ...(artwork?.coverAlternatives ?? []).slice(0,6)].map(safeCover).filter(Boolean);
-  const src = [...directUrls, safeCover(cover?.coverUrl), safeCover(cover?.fallbackCoverUrl), ...(cover?.coverAlternatives ?? []).slice(0,6).map(safeCover)].find(url => url && !failed.includes(url));
-  const needsLookup = lookup && !directUrls.some(url => url && !failed.includes(url));
+  const resolvedUrls = [safeCover(cover?.coverUrl), safeCover(cover?.fallbackCoverUrl), ...(cover?.coverAlternatives ?? []).slice(0,6).map(safeCover)];
+  const src = [...(failed.length ? resolvedUrls : []), ...directUrls, ...resolvedUrls].find(url => url && !failed.includes(url));
+  const needsLookup = lookup && (!directUrls.length || failed.length > 0);
   const imageReady = Boolean(src && loaded?.key === key && loaded.url === src);
+  const exhausted = Boolean(resolved?.key === key && (resolved.fallback || (!src && failed.length > 0)));
+  const requestKey = exhausted ? key + ":fallback" : key;
   useEffect(() => {
     if (!near || !src || imageReady) return;
-    const timer = window.setTimeout(() => setFailure(current => ({key,urls:[...new Set([...(current.key === key ? current.urls : []),src])]})), 12000);
+    const timer = window.setTimeout(() => setFailure(current => ({key,urls:[...new Set([...(current.key === key ? current.urls : []),src])]})), 6500);
     return () => window.clearTimeout(timer);
   }, [src, key, imageReady, near]);
   useEffect(() => {
-    if (!needsLookup || !artist || !title || !ref.current) return;
-    let live = true, requested = false;
+    if (!needsLookup || (!person && !artist) || !title || !near) return;
+    let live = true;
     let cancelQueued: (() => boolean) | undefined;
+    let retryTimer: number | undefined;
+    let attempts = 0;
     const start = () => {
-      if (requested || !live) return;
-      const cached = cachedArtwork(key);
-      if (cached) {
-        requested = true;
-        setResolved({ key, value: cached });
-        return;
-      }
-      requested = true;
+      if (!live) return;
+      const cached = cachedArtwork(requestKey);
+      if (cached) { setResolved({ key, value: cached, fallback: exhausted }); return; }
       cancelQueued = enqueueArtwork(async () => {
         if (!live) return;
-        let value = cachedArtwork(key);
+        let value = cachedArtwork(requestKey);
         if (!value) {
-          const answer = await window.localitfy.getDiscoveries({ artwork: { title, artist } }).catch(() => null);
-          if (answer?.status !== "artwork") return;
+          attempts++;
+          const answer = await window.localitfy.getDiscoveries({ artwork: { title, artist, kind: person ? "artist" : "recording", fallback: exhausted } }).catch(() => null);
+          if (answer?.status !== "artwork") {
+            if (live && attempts < 3 && answer?.status !== "off") retryTimer = window.setTimeout(start, attempts * 900);
+            return;
+          }
           value = answer;
-          cache.set(key, { at: Date.now(), value });
+          if (!value.coverUrl && !value.fallbackCoverUrl && !value.coverAlternatives?.length) return;
+          cache.set(requestKey, { at: Date.now(), value });
           const oldest = cache.keys().next().value;
           if (cache.size > 512 && oldest !== undefined) cache.delete(oldest);
         }
-        if (live) setResolved({ key, value });
+        if (live) setResolved({ key, value, fallback: exhausted });
       });
     };
-    const stop = () => {
-      if (cancelQueued?.()) { requested = false; cancelQueued = undefined; }
-    };
-    if (typeof IntersectionObserver === "undefined") {
-      start();
-      return () => { live = false; stop(); };
-    }
-    const observer = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting)) start();
-      else stop();
-    }, { rootMargin: "80px" });
-    observer.observe(ref.current);
-    return () => { live = false; observer.disconnect(); stop(); };
-  }, [key, title, artist, needsLookup]);
+    start();
+    return () => { live = false; cancelQueued?.(); if (retryTimer !== undefined) window.clearTimeout(retryTimer); };
+  }, [key, title, artist, needsLookup, near, person, exhausted, requestKey]);
   return <span ref={ref} className="discoverCover" aria-hidden="true">
     {!imageReady ? (person ? <UserRound size={24} /> : <Disc3 size={24} />) : null}
-    {near && src ? <img key={src} src={src} alt="" loading="eager" decoding="async" referrerPolicy="no-referrer" data-ready={imageReady}
+    {near && src ? <img key={src} src={src} alt="" loading="eager" decoding="async" fetchPriority="auto" referrerPolicy="no-referrer" data-ready={imageReady}
       onLoad={() => setLoaded({key,url:src})}
-      onError={() => setFailure(current => ({key,urls:[...(current.key === key ? current.urls : []),src]}))} /> : null}
+      onError={() => setFailure(current => ({key,urls:[...new Set([...(current.key === key ? current.urls : []),src])]}))} /> : null}
   </span>;
 }

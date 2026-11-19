@@ -1135,6 +1135,7 @@ module.exports = {
   // All-time finished and skipped plays per song, for smart playlist rules.
   getListeningCounts: () => [...listeningStats(ensureDb(), Date.now(), { days: 0, halfLifeDays: 0 })]
     .map(([songId, { finishes, skips }]) => [songId, Math.round(finishes), Math.round(skips)]),
+  getListeningSummary: (options) => require("./db/listening-summary.cjs").getRecordedListeningSummary(ensureDb(), options),
   listPlayEvents: (options) => playEvents.listPlayEvents(ensureDb(), options),
   recordPlayEvent: (payload) => {
     const settings = getSettings();

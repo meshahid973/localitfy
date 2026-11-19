@@ -113,8 +113,8 @@ async function fetchCoverArt({ releaseId, releaseGroupId, userAgent, fetchImpl =
   for (const target of targets) {
     const response = await fetchImpl(COVER_ART + target, { headers: { "User-Agent": userAgent }, signal: AbortSignal.timeout(15000) }).catch(() => null);
     if (!response?.ok) continue;
-    const type = String(response.headers.get("content-type") || "");
-    if (!/^image\/(jpeg|png)/.test(type)) continue;
+    const type = String(response.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
+    if (!["image/jpeg", "image/png"].includes(type)) { await response.body?.cancel?.().catch(() => undefined); continue; }
     const length = Number(response.headers.get("content-length") || 0);
     if (length > maxBytes) { await response.body?.cancel?.().catch(() => undefined); continue; }
     let data;
@@ -137,9 +137,13 @@ async function fetchCoverArt({ releaseId, releaseGroupId, userAgent, fetchImpl =
       data = Buffer.concat(chunks, total);
     } else {
       // Older test doubles do not expose a stream; real fetch responses do.
-      data = Buffer.from(await response.arrayBuffer());
+      try { data = Buffer.from(await response.arrayBuffer()); } catch { continue; }
     }
-    if (data.length && data.length <= maxBytes) return { data, ext: type.includes("png") ? ".png" : ".jpg" };
+    if (!data.length || data.length > maxBytes) continue;
+    const png = type === "image/png";
+    const signature = png ? Buffer.from("89504e470d0a1a0a", "hex") : Buffer.from("ffd8ff", "hex");
+    if (!data.subarray(0, signature.length).equals(signature)) continue;
+    return { data, ext: png ? ".png" : ".jpg" };
   }
   return null;
 }

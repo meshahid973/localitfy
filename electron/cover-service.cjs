@@ -5,24 +5,9 @@ const crypto = require("node:crypto");
 let serviceUserDataPath = "";
 const COVER_CACHE_DIR = "resolved-covers-v040";
 
-const IMAGE_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif"]);
-const PREFERRED_FOLDER_COVERS = [
-  "cover.jpg",
-  "cover.jpeg",
-  "cover.png",
-  "folder.jpg",
-  "folder.jpeg",
-  "folder.png",
-  "front.jpg",
-  "front.jpeg",
-  "front.png",
-  "artwork.jpg",
-  "artwork.jpeg",
-  "artwork.png",
-  "album.jpg",
-  "album.jpeg",
-  "album.png"
-];
+const IMAGE_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp"]);
+const PREFERRED_FOLDER_COVERS = ["cover", "folder", "front", "artwork", "album"]
+  .flatMap(name => ["jpg", "jpeg", "png", "webp", "gif", "bmp"].map(extension => `${name}.${extension}`));
 
 function initCoverService(options = {}) {
   serviceUserDataPath = String(options.userDataPath || serviceUserDataPath || "").trim();
@@ -42,7 +27,9 @@ function getCoverCacheDirectory() {
 
 function fileExists(filePath) {
   try {
-    return Boolean(filePath && fs.statSync(filePath).isFile());
+    if (!filePath) return false;
+    const stat = fs.statSync(filePath);
+    return stat.isFile() && stat.size > 0;
   } catch {
     return false;
   }
@@ -82,15 +69,19 @@ function findFolderCover(inputPath) {
 
   if (!files.length) return "";
 
-  const byBase = new Map(files.map((filePath) => [path.basename(filePath).toLowerCase(), filePath]));
+  const byBase = new Map();
+  for (const filePath of files) {
+    const key = path.basename(filePath).toLowerCase();
+    byBase.set(key, byBase.has(key) ? null : filePath);
+  }
 
   for (const name of PREFERRED_FOLDER_COVERS) {
     const match = byBase.get(name);
     if (match) return match;
   }
 
-  const named = files.find((filePath) => /(^|[\s_.-])(cover|folder|front|artwork|album)([\s_.-]|$)/i.test(path.parse(filePath).name));
-  return named || files[0] || "";
+  const named = files.filter((filePath) => /(^|[\s_.-])(cover|folder|front|artwork|album)([\s_.-]|$)/i.test(path.parse(filePath).name));
+  return named.length === 1 ? named[0] : files.length === 1 ? files[0] : "";
 }
 
 function copyCoverToAppStorage(sourcePath, options = {}) {
@@ -99,14 +90,12 @@ function copyCoverToAppStorage(sourcePath, options = {}) {
 
     const stat = fs.statSync(sourcePath);
     const ext = path.extname(sourcePath).toLowerCase() || ".jpg";
-    const source = String(options.source || "cover");
+    const source = /^[a-z]+$/i.test(String(options.source || "")) ? String(options.source) : "cover";
     const seed = [
       source,
       sourcePath,
       String(stat.mtimeMs || ""),
-      String(stat.size || ""),
-      String(options.filePath || ""),
-      String(options.songId || "")
+      String(stat.size || "")
     ].join("::");
 
     const hash = crypto.createHash("sha1").update(seed).digest("hex");
@@ -114,8 +103,10 @@ function copyCoverToAppStorage(sourcePath, options = {}) {
     fs.mkdirSync(dir, { recursive: true });
 
     const targetPath = path.join(dir, `${source}-${hash}${ext}`);
-    if (!fs.existsSync(targetPath)) {
-      fs.copyFileSync(sourcePath, targetPath);
+    if (!fileExists(targetPath) || fs.statSync(targetPath).size !== stat.size) {
+      const temp = targetPath + "." + crypto.randomUUID() + ".tmp";
+      try { fs.copyFileSync(sourcePath, temp); fs.renameSync(temp, targetPath); }
+      finally { try { fs.rmSync(temp, { force: true }); } catch {} }
     }
 
     return targetPath;
@@ -136,7 +127,8 @@ async function resolveSongCover(input = {}) {
   if (!input.preferFolderCover && song.coverSource === "custom" && existingCoverIsUsable(song)) {
     return { coverPath: song.coverPath, coverSource: "custom", coverUpdatedAt: song.coverUpdatedAt || now };
   }
-  const folderCover = input.folderCoverPath || findFolderCover(input.filePath || song.filePath || "");
+  const proposedFolder = input.folderCoverPath || findFolderCover(input.filePath || song.filePath || "");
+  const folderCover = fileExists(proposedFolder) && isImageFile(proposedFolder) ? proposedFolder : "";
 
   if (input.preferFolderCover && folderCover) {
     const cached = copyCoverToAppStorage(folderCover, {
@@ -152,6 +144,14 @@ async function resolveSongCover(input = {}) {
     return { coverPath: song.coverPath, coverSource: "custom", coverUpdatedAt: song.coverUpdatedAt || now };
   }
 
+  if (metadata.embeddedCoverPath && fileExists(metadata.embeddedCoverPath) && isImageFile(metadata.embeddedCoverPath)) {
+    return { coverPath: metadata.embeddedCoverPath, coverSource: "embedded", coverUpdatedAt: now };
+  }
+
+  if (existingCoverIsUsable(song) && !["fallback", "none", "folder"].includes(song.coverSource)) {
+    return { coverPath: song.coverPath, coverSource: song.coverSource || "fallback", coverUpdatedAt: song.coverUpdatedAt || now };
+  }
+
   if (folderCover) {
     const cached = copyCoverToAppStorage(folderCover, {
       source: "folder",
@@ -162,9 +162,6 @@ async function resolveSongCover(input = {}) {
     return { coverPath: cached, coverSource: "folder", coverUpdatedAt: now };
   }
 
-  if (metadata.embeddedCoverPath && fileExists(metadata.embeddedCoverPath) && isImageFile(metadata.embeddedCoverPath)) {
-    return { coverPath: metadata.embeddedCoverPath, coverSource: "embedded", coverUpdatedAt: now };
-  }
 
   const albumEmbeddedCoverPath = input.albumEmbeddedCoverPath || input.albumCoverPath || "";
   if (albumEmbeddedCoverPath && fileExists(albumEmbeddedCoverPath) && isImageFile(albumEmbeddedCoverPath)) {
@@ -180,6 +177,8 @@ async function resolveSongCover(input = {}) {
   if (input.spotifyCoverPath && fileExists(input.spotifyCoverPath) && isImageFile(input.spotifyCoverPath)) {
     return { coverPath: input.spotifyCoverPath, coverSource: "spotify", coverUpdatedAt: now };
   }
+
+  if (existingCoverIsUsable(song)) return { coverPath: song.coverPath, coverSource: song.coverSource || "fallback", coverUpdatedAt: song.coverUpdatedAt || now };
 
   if (input.fallbackCoverPath && fileExists(input.fallbackCoverPath) && isImageFile(input.fallbackCoverPath)) {
     return { coverPath: input.fallbackCoverPath, coverSource: "fallback", coverUpdatedAt: now };

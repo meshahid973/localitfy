@@ -160,7 +160,8 @@ export async function syncFixture({ liveOptions } = {}) {
   const native = {
     getPaths: async () => ({ files: "/phone", mediaPrefix: "https://localhost/_localtify_media_/", deviceName: "Test phone" }),
     setSyncActive: async () => {}, addListener: async () => ({ remove: async () => {} }),
-    downloadFile: async () => ({}), deleteFile: async () => ({}),
+    downloadFile: async (request) => { await hooks.beforeDownload?.(request); return {}; },
+    deleteFile: async (request) => { await hooks.beforeDelete?.(request); return {}; },
     request: async (request) => {
       await hooks.beforeRequest?.(request);
       const result = await send(request);

@@ -16,7 +16,7 @@ test("disabled queue preview no longer consumes a React memo hook", () => {
   assert.doesNotMatch(read("src/App.tsx"), /queuePreviewSongs/);
 });
 
-test("Downloads UI has a real typed prop boundary without runtime behavior changes", () => {
+test("Downloads UI exposes typed download and recovery actions", () => {
   const view = read("src/features/downloads/DownloadsView.tsx");
   const props = view.slice(view.indexOf("export type DownloadsViewProps = {"), view.indexOf("};", view.indexOf("export type DownloadsViewProps = {")) + 2);
   assert.doesNotMatch(props, /\bany\b/);
@@ -24,6 +24,6 @@ test("Downloads UI has a real typed prop boundary without runtime behavior chang
     assert.ok(props.includes(type), type);
   }
   assert.match(props, /setSpotifySelectedIds: Dispatch<SetStateAction<Set<string>>>/);
-  assert.match(props, /retryDownload: \(url: string, source: "youtube" \| "spotify" \| "auto", spotifyTrackId\?: string\)/);
+  assert.match(props, /retryDownload: \(url: string, source: "youtube" \| "spotify" \| "auto", spotifyTrackId\?: string, recoveryId\?: string\)/);
   assert.match(read("src/features/shell/appShell.contract.ts"), /downloads: DownloadsViewProps/);
 });

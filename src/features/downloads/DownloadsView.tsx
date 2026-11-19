@@ -30,7 +30,7 @@ export type DownloadsViewProps = {
   handleSpotifyLogin: () => unknown;
   handleSpotifyLogout: () => unknown;
   openDownloadedSongInLibrary: (item: DownloadResult | DownloadQueueItem) => unknown;
-  retryDownload: (url: string, source: "youtube" | "spotify" | "auto", spotifyTrackId?: string) => unknown;
+  retryDownload: (url: string, source: "youtube" | "spotify" | "auto", spotifyTrackId?: string, recoveryId?: string) => unknown;
   retryFailedDownloads: () => unknown;
   retrySpotifyTrack: (track: SpotifyTrack) => unknown;
   setDownloadText: Dispatch<SetStateAction<string>>;
@@ -384,7 +384,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
                       <div className="downloadQueueList">
                         {visibleDownloadQueueItems.map((item, index) => {
                           const done = item.status === "done";
-                          const failed = item.status === "failed" || item.status === "cancelled";
+                          const failed = item.status === "failed" || item.status === "cancelled" || item.status === "interrupted";
                           const downloadedNotImported = done && item.importedToLibrary === false;
                           const sourceLabel = item.source === "spotify" ? "Spotify" : "YouTube";
 
@@ -403,7 +403,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
                               </div>
 
                               {!done || downloadedNotImported ? (
-                                <div className="downloadQueueTrack"><i style={{ width: `${clamp(item.progress, 0, 100)}%` }} /></div>
+                                <div className="downloadQueueTrack" role="progressbar" aria-label={`Download progress: ${item.title || "track"}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={clamp(item.progress, 0, 100)}><i style={{ width: `${clamp(item.progress, 0, 100)}%` }} /></div>
                               ) : null}
 
                               <div className="downloadQueueMeta">
@@ -418,7 +418,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
                               <div className="downloadQueueActions">
                                 {failed ? (
                                   <>
-                                    <button className="softButton downloadRetryButtonV502" onClick={() => void retryDownload(item.url, item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "")}>retry</button>
+                                    <button className="softButton downloadRetryButtonV502" onClick={() => void retryDownload(item.url, item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "", item.recoveryId)}>{item.status === "interrupted" ? "resume" : "retry"}</button>
                                     <button className="softButton" onClick={() => void copyDownloadError(item.error || item.message || item.url)}>copy error</button>
                                   </>
                                 ) : null}
@@ -442,8 +442,8 @@ export default function DownloadsView(props: DownloadsViewProps) {
                       <p>Convert audio and video to music files.</p>
                     </div>
 
-                    <button className="heroMain" onClick={convertLocalMedia} disabled={convertBusy}>
-                      {convertBusy ? "converting..." : "choose files"}
+                    <button className={convertBusy ? "heroGhost" : "heroMain"} onClick={convertBusy ? () => void cancelCurrentDownload() : convertLocalMedia} disabled={downloadBusy && !convertBusy}>
+                      {convertBusy ? "cancel conversion" : "choose files"}
                     </button>
 
 
@@ -454,7 +454,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
                           <strong>{convertProgress}%</strong>
                         </div>
 
-                        <div className="converterTrack">
+                        <div className="converterTrack" role="progressbar" aria-label="Conversion progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={clamp(convertProgress, 0, 100)}>
                           <i style={{ width: `${convertProgress}%` }} />
                         </div>
                       </div>
@@ -500,7 +500,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
 
                             {failed ? (
                               <span className="downloadResultActionsV502">
-                                <button className="softButton downloadRetryButtonV502" onClick={() => void retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "")}>retry</button>
+                                <button className="softButton downloadRetryButtonV502" onClick={() => void retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "", item.recoveryId)}>retry</button>
                                 <button className="softButton" onClick={() => void copyDownloadError(item.error || item.url || item.filename)}>copy error</button>
                               </span>
                             ) : imported ? (

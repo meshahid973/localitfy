@@ -11,6 +11,7 @@ export type ProposedTags = {
 
 export type TagProposal = {
   songId: string;
+  previewId: string;
   /** Matches TagAlbumGroup.key, so restored proposals land under the right album. */
   groupKey: string;
   confidence: number;
@@ -19,13 +20,15 @@ export type TagProposal = {
   /** Local media URL of the downloaded cover, or "" when the release has none. */
   coverUrl: string;
   musicbrainzUrl: string;
-  /** False for formats other than MP3/FLAC: only the library is updated. */
+  /** Whether physical file writing is available for this proposal. Currently disabled by the native safety gate. */
   writable: boolean;
 };
 
 export type TagLookupResult = { proposals: TagProposal[]; missed: string[] };
 
-export type TagApplyResult = { applied: number; written: number; failed: { songId: string; title: string; error: string }[] };
+export type TagFailure = { songId: string; title: string; error: string };
+export type TagApplyResult = { applied: number; written: number; failed: TagFailure[]; undoId?: string };
+export type TagUndoResult = { restored: number; failed: TagFailure[] };
 
 /** One recording on one release, from a hand-typed MusicBrainz search. */
 export type TagSearchResult = {

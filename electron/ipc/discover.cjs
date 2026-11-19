@@ -5,7 +5,7 @@ const path = require("node:path");
 const { randomUUID } = require("node:crypto");
 const { createLastfmClient } = require("../discover/lastfm.cjs");
 const { discover, withoutOwned } = require("../discover/recommend.cjs");
-const { catalogArtwork, createArtworkLookup } = require("../discover/artwork.cjs");
+const { catalogArtwork, createArtworkLookup, matchArtistArtwork, matchMusicArtwork } = require("../discover/artwork.cjs");
 const { rankCatalog, searchTerms } = require("../discover/catalog.cjs");
 
 const RESULT_TTL_MS = 12 * 60 * 60 * 1000;
@@ -37,11 +37,21 @@ function normalizeCatalog(kind, items) {
 }
 
 /** Public catalog needs only opt-in; Last.fm personalized results require a valid key. */
-function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile, fetch, musicBrainzClient, searchStore, lookupAudioDb, now = Date.now }) {
+function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile, fetch, musicBrainzClient, searchStore, lookupAudioDb, searchYouTubeMusic, searchYouTubeMusicRadio, searchYouTubeArtwork, lookupDeezer, lookupFanart, now = Date.now }) {
   let saved = null;
   let running = null;
   let catalogRunning = null;
   let artworkClient = null, artworkKey = "";
+  async function lookupMusicArtwork(title,artist) {
+    const cleanedArtist=artist.replace(/\s+[-–—]\s+Topic$/i,"").trim();
+    const query=(title+" "+cleanedArtist).trim().slice(0,160);
+    if(getSettings().discoverEnabled!==true)return [];
+    const songs=await searchYouTubeArtwork("recording",query,{artwork:true}).catch(()=>[]);
+    if(matchMusicArtwork(songs,title,artist).coverUrl)return songs;
+    if(getSettings().discoverEnabled!==true)return [];
+    const videos=await searchYouTubeArtwork("video",query,{artwork:true}).catch(()=>[]);
+    return [...songs,...videos];
+  }
   const lookupArtwork = createArtworkLookup(musicBrainzClient, now, async (title, artist) => {
     const settings = getSettings();
     const apiKey = apiKeyFor(settings);
@@ -52,16 +62,49 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
     }
     const client = artworkClient;
     try { return await client.trackInfo(title, artist); } finally { client.flush(); }
-  }, lookupAudioDb ? (title, artist) => getSettings().discoverEnabled === true ? lookupAudioDb(title, artist) : Promise.resolve({}) : undefined);
+  }, lookupAudioDb ? (title, artist) => getSettings().discoverEnabled === true ? lookupAudioDb(title, artist) : Promise.resolve({}) : undefined, searchYouTubeArtwork ? lookupMusicArtwork : undefined,
+    lookupDeezer ? (...args) => getSettings().discoverEnabled===true ? lookupDeezer(...args) : Promise.resolve({}) : undefined,
+    lookupFanart ? (...args) => getSettings().discoverEnabled===true ? lookupFanart(...args) : Promise.resolve({}) : undefined);
+  const artistArtworkCache=new Map(), artistArtworkPending=new Map();
+  async function lookupArtistArtwork(name,fallback=false) {
+    const key=JSON.stringify([name.normalize("NFKC").toLowerCase(),fallback]);
+    const hit=artistArtworkCache.get(key);
+    if(hit&&now()-hit.at<(hit.value.coverUrl?86400000:60000))return hit.value;
+    if(artistArtworkPending.has(key))return artistArtworkPending.get(key);
+    if(artistArtworkPending.size>=4)throw Error("Artwork queue busy");
+    const task=Promise.resolve().then(async()=>{
+      const cleaned=name.replace(/\s+[-–—]\s+Topic$/i,"").trim();
+      if(getSettings().discoverEnabled!==true)return {};
+      if(searchYouTubeArtwork&&!fallback){
+        const value=matchArtistArtwork(await searchYouTubeArtwork("artist",cleaned.slice(0,160),{artwork:true}).catch(()=>[]),name);
+        if(value.coverUrl)return value;
+      }
+      const additional=lookupDeezer&&getSettings().discoverEnabled===true?await lookupDeezer("artist",cleaned).catch(()=>({})):{};
+      if(additional.coverUrl&&!fallback)return additional;
+      if(lookupFanart&&musicBrainzClient?.searchCatalog&&getSettings().discoverEnabled===true){
+        const items=await musicBrainzClient.searchCatalog("artist",cleaned).catch(()=>[]);
+        const exact=(Array.isArray(items)?items:[]).filter(i=>MBID.test(i?.id||"")&&cleanText(i.name).normalize("NFKC").toLowerCase()===cleaned.normalize("NFKC").toLowerCase());
+        const ids=[...new Set(exact.map(i=>i.id))];
+        if(ids.length===1&&getSettings().discoverEnabled===true){
+          const result=await lookupFanart("artist",ids[0]).catch(()=>({}));
+          const covers=[...new Set([result.coverUrl,...(result.coverAlternatives||[]),additional.coverUrl,...(additional.coverAlternatives||[])].filter(Boolean))].slice(0,6);
+          if(covers.length)return {coverUrl:covers[0],...(covers.length>1?{coverAlternatives:covers}:{})};
+        }
+      }
+      return additional;
+    }).then(value=>{if(value.coverUrl)artistArtworkCache.set(key,{at:now(),value});while(artistArtworkCache.size>256)artistArtworkCache.delete(artistArtworkCache.keys().next().value);return value;})
+      .finally(()=>artistArtworkPending.delete(key));
+    artistArtworkPending.set(key,task);return task;
+  }
   router.handle("discover:get", async (_event, payload = {}) => {
     const settings = getSettings();
     if (settings.discoverEnabled !== true) return { status: "off" };
     if (payload?.artwork !== undefined) {
-      const { title, artist } = payload.artwork || {};
-      if (typeof title !== "string" || typeof artist !== "string" || !title.trim() || !artist.trim() || title.length > 300 || artist.length > 300)
+      const { title, artist, kind = "recording", fallback = false } = payload.artwork || {};
+      if (!["artist","recording"].includes(kind) || typeof title !== "string" || typeof artist !== "string" || !title.trim() || (kind === "recording" && !artist.trim()) || title.length > 300 || artist.length > 300)
         return { status: "error", error: "Invalid artwork lookup." };
       try {
-        const artwork = await lookupArtwork(title.trim(), artist.trim());
+        const artwork = kind === "artist" ? await lookupArtistArtwork(title.trim(),fallback===true) : await lookupArtwork(title.trim(), artist.trim(), {fallback:fallback===true});
         return getSettings().discoverEnabled === true ? { status: "artwork", ...artwork } : { status: "off" };
       } catch { return { status: "error", error: "Artwork unavailable." }; }
     }
@@ -72,12 +115,21 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
       if (!["recording", "artist"].includes(kind) || term.length < 2 || term.length > 160)
         return { status: "error", error: "Enter a search of 2–160 characters." };
       if (!musicBrainzClient) return { status: "error", error: "Public catalog is unavailable. Update the desktop application." };
-      const key = JSON.stringify([kind, term.toLowerCase()]);
+      const radioSeed = query?.radioSeed;
+      if (radioSeed !== undefined && (kind !== "recording" || typeof radioSeed !== "string" || !/^[A-Za-z0-9_-]{11}$/.test(radioSeed) || !searchYouTubeMusicRadio)) return { status: "error", error: "Related songs unavailable." };
+      const key = JSON.stringify([kind, term.toLowerCase(), radioSeed || ""]);
       if (catalogRunning && catalogRunning.key !== key)
         return { status: "error", error: "Another catalog search is in progress. Try again when it finishes." };
       if (!catalogRunning) {
         const promise = Promise.resolve().then(async () => {
           if (getSettings().discoverEnabled !== true) return [];
+          if (radioSeed) return searchYouTubeMusicRadio(radioSeed);
+          // Search YouTube Music only for explicit user queries, never library seeds.
+          if (searchYouTubeMusic) {
+            const direct = await searchYouTubeMusic(kind, term).catch(() => []);
+            if (getSettings().discoverEnabled !== true) return [];
+            if (direct.length) return direct;
+          }
           // Artist searches retain the structured catalog; song searches combine
           // exact-title MusicBrainz matches, store metadata and listening popularity.
           if (kind !== "recording" || !searchStore) return normalizeCatalog(kind, await musicBrainzClient.searchCatalog(kind, term));

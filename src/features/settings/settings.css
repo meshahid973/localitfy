@@ -90,7 +90,6 @@
 .settingsPage .settingsPanelHeader strong { color: var(--settings-text); font-size: 15px; font-weight: 700; }
 .settingsPage .settingsPanelHeader span,
 .settingsPage .settingsPanelHeader p,
-.settingsPage .settingsLead,
 .settingsPage .settingsHintText{ margin: 0; color: var(--settings-muted); font-size: 12px; line-height: 1.55; }
 .settingsPage .settingsTwoColumn,
 .settingsPage .settingsGrid.twoCols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }

@@ -159,7 +159,7 @@ test("thumbnail cache refreshes media URLs and downloads shape the library once"
   assert.match(main, /const freshUrl = safeMediaUrl\(cached\.thumbnailPath\)/);
   assert.doesNotMatch(protocols, /bypassCSP\s*:\s*true/);
 
-  const download = main.slice(main.indexOf('ipcRouter.handle("download:audio"'), main.indexOf('ipcRouter.handle("download:cancel"'));
+  const download = main.slice(main.indexOf('const runAudioDownload ='), main.indexOf('ipcRouter.handle("download:cancel"'));
   assert.equal((download.match(/listSongsShaped\(\)/g) || []).length, 2, "one success snapshot and one error fallback");
   assert.match(download, /importNewAudioFilesFromDirectory\(downloadFolder, \[\], \{ includeSongs: false \}\)/);
 

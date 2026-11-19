@@ -15,7 +15,8 @@ const MAX_FILES = 50_000;
 const PARTIAL_FILE = /\.(part|tmp|download|crdownload)$/i;
 const SKIPPED_FOLDERS = new Set(["localitfy-bin", "spotify-covers"]);
 // Same path identity as importNewAudioFiles in main.cjs.
-const pathKey = (file) => path.normalize(String(file || "")).toLowerCase();
+const { filePathKey } = require("./runtime/path-identity.cjs");
+const pathKey = file => filePathKey(file);
 
 function cleanWatchedFolders(value) {
   const folders = new Map();

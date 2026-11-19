@@ -94,7 +94,7 @@ export function useCoversController({
       return cache.assets;
     }
 
-    if (!force && cache.pending) return cache.pending;
+    if (cache.pending) return cache.pending;
 
     if (!window.localitfy.listPixelArt) {
       cache.assets = getCachedRuntimePixelArtAssets();
@@ -332,10 +332,11 @@ export function useCoversController({
     replaceSong(optimistic);
     try {
       const updated = await window.localitfy.patchSong(song.id, { coverPath: null, coverUrl: null });
-      if (updated) replaceSong(updated);
+      if (!updated) throw new Error("Song no longer available");
+      replaceSong(updated);
       setStatusText("cover reset to default");
       showAppToast("cover reset to default", "success");
-      return updated || optimistic;
+      return updated;
     } catch (error) {
       console.error("[localitfy reset cover error]", error);
       replaceSong(song);

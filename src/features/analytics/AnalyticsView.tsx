@@ -1,6 +1,10 @@
 import "./analytics.css";
 import { isAndroidApp } from "../../app/platform";
-import type { CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { ArcDropdownMenu } from "../../shared/ui/ArcDropdownMenu";
+import { ListeningHistoryChart } from "./ListeningHistoryChart";
+import { isListeningSummary, type ListeningSummary } from "./listeningSummary";
+import { formatAnalyticsDuration } from "./formatters";
 import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
 import { PageHeader } from "../../shared/ui/PageHeader";
 import { formatTime } from "../../shared/utils/format";
@@ -88,35 +92,29 @@ export default function AnalyticsView(props: AnalyticsViewProps) {
         />
       ) : null}
 
+      <RecordedListening songs={songs} />
       <section className="analyticsRecapGridV339" aria-label="recap cards">
-        {(analyticsRecapCards || []).map((card, index) => {
-          const progress =
-            typeof card.progress === "number"
-              ? Math.min(100, Math.max(songs.length ? 4 : 0, card.progress))
-              : index === 0
-                ? Math.min(100, Math.max(4, recentImportWeekCount * 12))
-                : index === 1
-                  ? Math.min(100, Math.max(4, songs.length ? 64 : 4))
-                  : Math.min(100, Math.max(4, playedPercent));
+        {(analyticsRecapCards || []).filter(card => card.label !== "all-time listening").map((card, index) => {
+          const progress = typeof card.progress === "number" ? Math.min(100, Math.max(0, card.progress)) : undefined;
 
           return (
             <article
               key={card.label}
               className={`analyticsRecapCardV339 recap-${index}`}
-              style={{ "--recap-progress": `${progress}%` } as CSSProperties}
+              style={{ "--recap-progress": `${progress ?? 0}%` } as CSSProperties}
             >
               <span>{card.label}</span>
               <strong title={card.value}>{card.value}</strong>
               <small>{card.note}</small>
               <em>{card.meta}</em>
-              <i aria-hidden="true" />
+              {progress !== undefined ? <i aria-hidden="true" /> : null}
             </article>
           );
         })}
       </section>
 
       <section className="analyticsSnapshotV339" aria-label="quick stats">
-        {analyticsStatCards.map((card) => (
+        {analyticsStatCards.filter(card => card.label !== "listened").map((card) => (
           <article key={card.label} className="analyticsSnapshotCardV339">
             <span>{card.label}</span>
             <strong title={card.value}>{card.value}</strong>
@@ -140,7 +138,7 @@ export default function AnalyticsView(props: AnalyticsViewProps) {
 
         <div className="analyticsMiniCardV339">
           <span>needs attention</span>
-          <strong>{(missingFileCount + neverPlayedCount).toLocaleString()}</strong>
+          <strong>{(missingFileCount || neverPlayedCount).toLocaleString()}</strong>
           <small>{missingFileCount ? `${missingFileCount} missing file${missingFileCount === 1 ? "" : "s"}` : `${neverPlayedCount} never played`}</small>
         </div>
 
@@ -156,13 +154,13 @@ export default function AnalyticsView(props: AnalyticsViewProps) {
           <p className="eyebrow">recap ready</p>
           <h3>built for monthly or yearly posts</h3>
           <p>
-            Use the recap cards above for a clean localtify wrapped-style summary. These numbers come from local song metadata and saved play counts, so they stay lightweight and private.
+            Share your monthly and yearly import totals. Recorded listening history is shown separately above, using UTC dates.
           </p>
         </div>
         <button
           type="button"
           className="softButton analyticsShareButtonV339"
-          onClick={() => navigator.clipboard?.writeText?.(`localtify recap: ${analyticsRecapCards.map((card) => `${card.label}: ${card.value}`).join(" · ")}`)}
+          onClick={() => navigator.clipboard?.writeText?.(`localtify recap: ${analyticsRecapCards.filter(card => card.label !== "all-time listening").map((card) => `${card.label}: ${card.value}`).join(" · ")}`)}
           disabled={!songs.length}
         >
           copy recap line
@@ -170,4 +168,55 @@ export default function AnalyticsView(props: AnalyticsViewProps) {
       </section>
     </section>
   );
+}
+
+const PERIODS = [{value:"7", label:"Last 7 days"},{value:"30", label:"Last 30 days"},{value:"90", label:"Last 90 days"}] as const;
+
+function RecordedListening({ songs }: { songs: Song[] }) {
+  const [period, setPeriod] = useState<"7" | "30" | "90">("30");
+  const [revision, refresh] = useState(0);
+  const [result, setResult] = useState<ListeningSummary | null>(null);
+  const [busy, setBusy] = useState(true);
+  const [failed, setFailed] = useState(false);
+  const [selectedDay, setSelectedDay] = useState("");
+  useEffect(() => {
+    let active = true;
+    setBusy(true); setFailed(false); setResult(null); setSelectedDay("");
+    window.localitfy.getListeningSummary({days: Number(period) as 7 | 30 | 90})
+      .then(value => { if (active) { const valid = isListeningSummary(value, Number(period)) ? value : null; setResult(valid); setFailed(!valid); } })
+      .catch(() => { if (active) setFailed(true); })
+      .finally(() => { if (active) setBusy(false); });
+    return () => { active = false; };
+  }, [period, revision]);
+  const insights = useMemo(() => {
+    const metadata = new Map(songs.map(song => [song.id, song]));
+    const artists = new Map<string, number>(), genres = new Map<string, number>();
+    for (const entry of result?.bySong || []) {
+      const song = metadata.get(entry.id);
+      if (!song) continue;
+      for (const [map, label] of [[artists, song.artist], [genres, song.genre]] as const) {
+        const value = label?.trim() || "Unknown";
+        map.set(value, (map.get(value) || 0) + entry.ms);
+      }
+    }
+    const top = (map: Map<string, number>) => [...map].sort((a,b) => b[1]-a[1]).slice(0,5);
+    return { artists: top(artists), genres: top(genres) };
+  },[result,songs]);
+  return <section className="analyticsRecorded" aria-label="Recorded listening">
+    <div className="analyticsRecordedHeader"><h2>Listening history</h2><ArcDropdownMenu ariaLabel="Listening history period" value={period} items={PERIODS} onValueChange={(value) => { if (value === "7" || value === "30" || value === "90") setPeriod(value); }} /><button type="button" className="softButton" disabled={busy} onClick={() => refresh(n=>n+1)}>Refresh</button></div>
+    {busy ? <p role="status">Loading listening history…</p> : failed || !result ? <p role="status">Listening history is unavailable. {isAndroidApp() ? "Connect to your paired computer to retrieve it." : "Try refreshing."}</p> : <>
+      <strong>{formatAnalyticsDuration(result.totalMs / 1000)} recorded · {result.sessions.toLocaleString()} listening events</strong>
+      <p>Events are counted once and grouped by the UTC day they began. Older unrecorded listening is not estimated.{isAndroidApp() ? " Includes computer history as of the timestamp below; unsynced phone plays are not included." : ""}</p>
+      <small>Snapshot: {new Date(result.generatedAt).toLocaleString()}</small>
+      {result.comparison && <p className="analyticsHistoryComparison">
+        Previous {result.days} UTC days: {formatAnalyticsDuration(result.comparison.totalMs / 1000)} recorded.
+        {result.comparison.changePercent !== null ? ` ${Math.abs(result.comparison.changePercent).toFixed(1)}% ${result.comparison.changePercent >= 0 ? "more" : "less"} recorded time.` : " No previous listening baseline."}
+        {" "}The current period includes today so far.
+      </p>}
+      <ListeningHistoryChart summary={result} selectedDay={selectedDay} onSelectDay={setSelectedDay} />
+      {result.totalMs > 0 ? <>
+        <div className="analyticsRecordedInsights">{([["Top artist credits", insights.artists],["Top genre tags", insights.genres]] as const).map(([title, entries]) => <div key={title}><h3>{title}</h3>{entries.map(([name,ms])=><p key={name}><span>{name}</span><strong>{formatAnalyticsDuration(ms/1000)}</strong></p>)}</div>)}</div>
+      </> : <p>No listening events have been recorded for this period.</p>}
+    </>}
+  </section>;
 }

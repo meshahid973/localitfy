@@ -16,6 +16,16 @@ const constants = {coverColorSyncOptions:["off","subtle","normal","strong"].map(
 const theme = load("src/features/settings/theme.utils.ts", {"./settings.constants":constants,"./theme.constants":{THEME_ID_SET:new Set(["light","dark"]),RETIRED_ANIMATED_THEME_IDS:new Set()}});
 const { migrateVisualSettings } = load("src/features/settings/visualCustomization.ts", {"./theme.utils":theme});
 const defaults = {theme:"dark",coverColorSyncMode:"normal",showAmbientGradient:true,animatedBackgrounds:true,animeVisuals:true,homeBannerType:"dynamic",mediaCardBackground:"glassy",homeLayoutMode:"balanced",libraryRowStyle:"comfyRows",sidebarBehavior:"slim",playerBackgroundStyle:"coverBlur",homeHeroCoverBrightness:1,catBuddyEnabled:false,volume:.75};
+
+test("release defaults fill missing fields while preserving saved accessibility and layout choices", () => {
+  const saved = { ...defaults, reducedMotion: true, heroExpanded: false, sidebarBehavior: "hover", volume: .25 };
+  const migrated = migrateVisualSettings(saved, defaults, { reducedMotion: false, heroExpanded: true, sidebarBehavior: "slim" });
+  assert.equal(migrated.settings.reducedMotion, true);
+  assert.equal(migrated.settings.heroExpanded, false);
+  assert.equal(migrated.settings.sidebarBehavior, "hover");
+  assert.equal(migrated.settings.volume, .25);
+  assert.equal(migrateVisualSettings(defaults, defaults, { reducedMotion: true }).settings.reducedMotion, true);
+});
 test("legacy visual settings migrate once without losing active choices or rollback data",()=>{
   const old = {...defaults,theme:"mono",customThemeEnabled:true,customThemeColor:"#123456",simpleMode:true,starsIntensity:"strong",homeExpanded:true,coverColorSyncMode:undefined,showAmbientGradient:false,volume:.32,sidebarBehavior:"hover",libraryRowStyle:"coverCards"};
   const result = migrateVisualSettings(old,defaults);

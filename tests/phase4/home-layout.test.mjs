@@ -106,7 +106,7 @@ test("shared artwork palette follows the existing ambient preference and backgro
   const workspace = read("src/styles/view-shell.css");
   const player = read("src/features/player/player.css");
   assert.match(shell, /<ArtworkAmbientContext.Provider value=\{artworkEnabled\}>/);
-  assert.match(backdrop, /enabled && source \? <CrossfadeArtwork/);
+  assert.match(backdrop, /enabled \? <CrossfadeArtwork/);
   assert.match(workspace, /isolation: isolate/);
   assert.match(player, /\.playerBar\[data-ambient\] \{\s*background: transparent !important/);
   assert.match(workspace, /--workspace-sidebar: var\(--lt-fill-subtle\)/);
@@ -136,10 +136,10 @@ test("ambience transitions are bounded and respect reduced motion", () => {
   const backdrop = read("src/features/covers/ArtworkBackdrop.tsx");
   const css = read("src/features/covers/artwork-backdrop.css");
   assert.match(backdrop, /\[frame.previous, frame.current\]\.filter\(Boolean\)/);
-  assert.match(backdrop, /decodeArtwork\(candidate, controller.signal\)/);
+  assert.match(backdrop, /prepareBackdropArtwork\(candidate, controller.signal\)/);
   assert.match(backdrop, /if \(controller.signal.aborted\) return/);
   assert.match(backdrop, /window.clearTimeout\(timer\)/);
-  assert.match(css, /transition: opacity 360ms/);
+  assert.match(css, /transition: opacity 420ms/);
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.match(css, /\.workspaceArtworkBackdrop \.artworkBackdropCover/);
 });

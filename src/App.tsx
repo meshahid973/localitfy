@@ -184,7 +184,6 @@ function MainModeApp() {
   } = usePlayerRuntime({ defaultVolume: defaultSettings.volume });
 
   const startupResumePositionRef = useRef<{ songId: string; time: number } | null>(null);
-  const saveSettingsSerialRef = useRef(0);
   const sidebarResizeFrameRef = useRef<number | null>(null);
   const bootedRef = useRef(false);
   const importOverlayTimerRef = useRef<number | null>(null);
@@ -208,8 +207,6 @@ function MainModeApp() {
   const activeViewRef = useRef<View>("home");
   const libraryOrderSaveTimerRef = useRef<number | null>(null);
   const lastSavedOrderRef = useRef<string[]>([]);
-  const rememberCurrentSongTimerRef = useRef<number | null>(null);
-  const latestRememberedSongIdRef = useRef("");
   const selectSongBurstTimerRef = useRef<number | null>(null);
   const selectSongBurstIntentRef = useRef<{ songId: string; shouldPlay?: boolean } | null>(null);
   const selectSongLastCommitRef = useRef({ key: "", time: 0 });
@@ -226,7 +223,7 @@ function MainModeApp() {
     settingsSearch, setSettingsSearch, deferredSettingsSearch,
     themeSettling,
     themeMotionReady, setThemeMotionReady,
-    saveSettingsTimerRef,
+    saveSettingsTimerRef, writeSettings,
     themeSettlingTimerRef,
     themePaintIdleTimerRef,
     themeSettlingRef
@@ -314,6 +311,7 @@ function MainModeApp() {
   });
 
   const {
+    beginDownloadOperation, endDownloadOperation, retryDownloads, cancelDownloadRetries,
     downloadText, setDownloadText,
     downloadBusy, setDownloadBusy,
     downloadResults, setDownloadResults,
@@ -481,11 +479,6 @@ function MainModeApp() {
 
   useEffect(() => {
     return () => {
-      if (rememberCurrentSongTimerRef.current !== null) {
-        window.clearTimeout(rememberCurrentSongTimerRef.current);
-        rememberCurrentSongTimerRef.current = null;
-      }
-
       if (selectSongBurstTimerRef.current !== null) {
         window.clearTimeout(selectSongBurstTimerRef.current);
         selectSongBurstTimerRef.current = null;
@@ -994,13 +987,12 @@ function MainModeApp() {
 
     const nextMotion = nextExpanded ? "expanding" : "compacting";
     const nextSettings: Settings = {
-      ...settings,
+      ...settingsRef.current,
       heroExpanded: nextExpanded
     };
+    settingsRef.current = nextSettings;
 
-    // V141: compact/expand is a local hero animation only.
-    // After the first toggle, permanent home entrance animations are locked
-    // so the Listen now / recent covers shelf cannot replay a delayed fade-in.
+    // Keep collection entrance animations from replaying after a hero toggle.
     document.body.classList.remove(
       "localitfyHeroReflowing",
       "localitfyHeroWantsExpanded",
@@ -1027,30 +1019,14 @@ function MainModeApp() {
 
     setHomeEntranceSettled(true);
     setHeroMotion(nextMotion);
-    setSettings((current) => {
-      if (current.heroExpanded === nextExpanded) return current;
-      return {
-        ...current,
-        heroExpanded: nextExpanded
-      };
-    });
+    setSettings(nextSettings);
 
     heroReflowTimerRef.current = window.setTimeout(() => {
       setHeroMotion("idle");
       heroReflowTimerRef.current = null;
     }, nextExpanded ? 860 : 700);
 
-    if (bootedRef.current) {
-      if (saveSettingsTimerRef.current !== null) {
-        window.clearTimeout(saveSettingsTimerRef.current);
-      }
-
-      saveSettingsTimerRef.current = window.setTimeout(() => {
-
-        window.localitfy.saveSettings(nextSettings).catch(() => undefined);
-        saveSettingsTimerRef.current = null;
-      }, 360);
-    }
+    void saveSettingsSafely(nextSettings, true);
   }
 
   function toggleHeroExpanded() {
@@ -1181,8 +1157,6 @@ function MainModeApp() {
   const totalPlays = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "total_plays");
   const libraryAlbumCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "album_count");
   const libraryArtistCount = libraryIndex.artistCount;
-  const totalListenedSeconds = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "total_listened_seconds");
-  const totalMinutes = Math.floor(totalListenedSeconds / 60);
   const totalLibrarySeconds = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "total_library_seconds");
   const averageSongSeconds = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "average_song_seconds");
   const playedSongCount = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "played_song_count");
@@ -1208,7 +1182,6 @@ function MainModeApp() {
   const longestSongDuration = localtifyAnalyticsNumber(analyticsAudienceSnapshot, "longest_song_duration");
   const longestSongTitle = localtifyAnalyticsString(analyticsAudienceSnapshot, "longest_song_title", "");
 
-  const listenedTimeLabel = formatAnalyticsDuration(totalListenedSeconds);
   const libraryLengthLabel = formatAnalyticsDuration(totalLibrarySeconds);
 
   const longestSong = useMemo(() => {
@@ -1264,13 +1237,6 @@ function MainModeApp() {
           : "your yearly recap starts with imports",
         meta: `${yearAlbumCount.toLocaleString()} album${yearAlbumCount === 1 ? "" : "s"}`,
         progress: songs.length ? Math.min(100, Math.round((yearImportCount / Math.max(1, songs.length)) * 100)) : 0
-      },
-      {
-        label: "all-time listening",
-        value: listenedTimeLabel,
-        note: `${totalPlays.toLocaleString()} play${totalPlays === 1 ? "" : "s"} • ${formatAnalyticsDuration(totalLibrarySeconds)} library`,
-        meta: mostPlayed ? `top: ${prettyTitle(mostPlayed.title, 7)}` : "play music to build this",
-        progress: playedPercent
       }
     ];
   }, [
@@ -1280,12 +1246,7 @@ function MainModeApp() {
     yearImportCount,
     yearImportSeconds,
     yearAlbumCount,
-    songs.length,
-    listenedTimeLabel,
-    totalPlays,
-    totalLibrarySeconds,
-    mostPlayed,
-    playedPercent
+    songs.length
   ]);
 
   const analyticsStatCards = useMemo(() => ([
@@ -1300,11 +1261,6 @@ function MainModeApp() {
       note: `${playedSongCount.toLocaleString()} played song${playedSongCount === 1 ? "" : "s"} • ${averagePlaysPerSong} avg`
     },
     {
-      label: "listened",
-      value: listenedTimeLabel,
-      note: `${totalMinutes.toLocaleString()} minute${totalMinutes === 1 ? "" : "s"} estimated`
-    },
-    {
       label: "library health",
       value: libraryHealthLabel,
       note: effectiveMissingFileCount > 0 ? `${effectiveMissingFileCount.toLocaleString()} missing file${effectiveMissingFileCount === 1 ? "" : "s"}` : "all files available"
@@ -1316,8 +1272,6 @@ function MainModeApp() {
     totalPlays,
     playedSongCount,
     averagePlaysPerSong,
-    listenedTimeLabel,
-    totalMinutes,
     libraryHealthLabel,
     effectiveMissingFileCount
   ]);
@@ -2054,7 +2008,7 @@ function MainModeApp() {
       // choices, and never modify Android navigation or an existing hover layout.
       const sidebarMigrationKey = "localitfy.sidebar-rail-v1";
       const migrateSidebar = platformInfo.id !== "android" && window.localStorage.getItem(sidebarMigrationKey) !== "true";
-      if (migrateSidebar && nextSettings.sidebarBehavior === "fixed") nextSettings.sidebarBehavior = "slim";
+      if (migrateSidebar && storedSettings.sidebarBehavior === undefined && nextSettings.sidebarBehavior === "fixed") nextSettings.sidebarBehavior = "slim";
 
       if (shouldApplyStartWithWindowsDefault) {
         nextSettings.startWithWindows = true;
@@ -2069,11 +2023,11 @@ function MainModeApp() {
         visualSettingsChanged || (migrateSidebar && nextSettings.sidebarBehavior !== storedSettings.sidebarBehavior);
 
       if (shouldPersistBootSettings) {
-        if (shouldApplyV013Defaults) window.localStorage.setItem(V013_DEFAULTS_KEY, "true");
-        if (shouldApplyStartWithWindowsDefault) window.localStorage.setItem(START_WITH_WINDOWS_DEFAULT_KEY, "true");
-        window.localitfy.saveSettings(nextSettings).then(() => {
+        writeSettings(nextSettings).then(() => {
+          if (shouldApplyV013Defaults) window.localStorage.setItem(V013_DEFAULTS_KEY, "true");
+          if (shouldApplyStartWithWindowsDefault) window.localStorage.setItem(START_WITH_WINDOWS_DEFAULT_KEY, "true");
           if (migrateSidebar) window.localStorage.setItem(sidebarMigrationKey, "true");
-        }).catch(() => undefined);
+        }).catch(() => showAppToast("Could not save settings migration. It will be retried next time.", "error"));
       } else if (migrateSidebar) {
         window.localStorage.setItem(sidebarMigrationKey, "true");
       }
@@ -2103,6 +2057,7 @@ function MainModeApp() {
 
       setSongs(nextSongs);
       setPlaylists(initialPlaylists);
+      settingsRef.current = nextSettings;
       setSettings(nextSettings);
       setCurrentId(initialSongId);
       setReady(true);
@@ -2141,61 +2096,6 @@ function MainModeApp() {
     setSongs(applyLibraryOrder(sanitizeSongList(next)));
     if (importedCount) setStatusText(`added ${importedCount} new song${importedCount === 1 ? "" : "s"} from watched folders`);
   }), []);
-
-  useEffect(() => {
-    const off = window.localitfy.onDownloadProgress((payload) => {
-      const nextProgress = clamp(Number(payload.progress || 0), 0, 100);
-      const nextMessage = payload.message || "working...";
-
-      if (!payload.id && !payload.url) return;
-
-      const itemId = payload.id || payload.url || `download-${Date.now()}`;
-
-      setDownloadQueue((current) => {
-        const existingIndex = current.findIndex((item) => item.id === itemId || item.url === payload.url);
-        const previous = existingIndex >= 0 ? current[existingIndex] : null;
-        const nextItem: DownloadQueueItem = {
-          id: itemId,
-          url: payload.url || previous?.url || "",
-          title: payload.file || payload.filename || previous?.title || "download",
-          status: payload.status || (nextProgress >= 100 ? "done" : "downloading"),
-          progress: nextProgress,
-          message: nextMessage,
-          speed: payload.speed || previous?.speed,
-          eta: payload.eta || previous?.eta,
-          filename: payload.filename || previous?.filename,
-          error: payload.error || previous?.error
-        };
-
-        if (existingIndex === -1) return [...current, nextItem];
-
-        const merged = {
-          ...previous,
-          ...nextItem,
-          title: payload.file || payload.filename || previous?.title || nextItem.title,
-          url: payload.url || previous?.url || nextItem.url
-        };
-
-        const sameVisualState =
-          Math.abs((previous?.progress || 0) - merged.progress) < 0.75 &&
-          previous?.status === merged.status &&
-          previous?.message === merged.message &&
-          previous?.title === merged.title &&
-          previous?.filename === merged.filename &&
-          previous?.error === merged.error;
-
-        if (sameVisualState) return current;
-
-        const copy = [...current];
-        copy[existingIndex] = merged;
-        return copy;
-      });
-    });
-
-    return () => {
-      off();
-    };
-  }, []);
 
   function stopPlaybackFromNative() {
     stopCrossfadeAuto();
@@ -2261,7 +2161,11 @@ function MainModeApp() {
     onPause: () => { stopCrossfadeAuto(); playbackTransitionRef.current.requestPause(); pendingPlayRef.current = false; setIsPlaying(false); },
     onStop: stopPlaybackFromNative,
     onPrevious: () => playPrevious(),
-    onNext: () => playNext(true)
+    onNext: () => playNext(true),
+    onSeek: (seconds) => {
+      const duration = durationRef.current || audioRef.current?.duration || 0;
+      if (Number.isFinite(duration) && duration > 0) handleSeek(seconds / duration * 100);
+    }
   });
 
   useEffect(() => {
@@ -2330,11 +2234,6 @@ function MainModeApp() {
       stopFade();
       stopCrossfadeAuto();
       stopProgressLoop();
-
-      if (saveSettingsTimerRef.current !== null) {
-        window.clearTimeout(saveSettingsTimerRef.current);
-      }
-
 
       if (sleepTimerRef.current !== null) {
         window.clearTimeout(sleepTimerRef.current);
@@ -3734,26 +3633,22 @@ function MainModeApp() {
   async function saveSettingsSafely(next: Settings, debounce = false) {
     if (!bootedRef.current) return;
 
-    const saveSerial = ++saveSettingsSerialRef.current;
+    if (saveSettingsTimerRef.current !== null) {
+      window.clearTimeout(saveSettingsTimerRef.current);
+      saveSettingsTimerRef.current = null;
+    }
 
-    const runSave = () => {
-      if (saveSerial !== saveSettingsSerialRef.current) return;
-      window.localitfy.saveSettings(next).catch(() => showAppToast("Could not save settings", "error"));
-    };
+    const runSave = () => writeSettings(settingsRef.current).catch(() => showAppToast("Could not save settings", "error"));
 
     if (debounce) {
-      if (saveSettingsTimerRef.current !== null) {
-        window.clearTimeout(saveSettingsTimerRef.current);
-      }
-
       saveSettingsTimerRef.current = window.setTimeout(() => {
         saveSettingsTimerRef.current = null;
-        runSave();
+        void runSave();
       }, 260);
       return;
     }
 
-    await window.localitfy.saveSettings(next).catch(() => showAppToast("Could not save settings", "error"));
+    await writeSettings(next).catch(() => showAppToast("Could not save settings", "error"));
   }
 
   async function persistSettings(next: Settings, debounce = false, priority: "immediate" | "transition" = "transition") {
@@ -3902,6 +3797,7 @@ function MainModeApp() {
       homeBannerType: VISUAL_CUSTOMIZATION_DEFAULTS.homeBannerType,
       mediaCardBackground: VISUAL_CUSTOMIZATION_DEFAULTS.mediaCardBackground,
       homeLayoutMode: VISUAL_CUSTOMIZATION_DEFAULTS.homeLayoutMode,
+      homeHeroCoverBrightness: defaultSettings.homeHeroCoverBrightness,
       sidebarBehavior: VISUAL_CUSTOMIZATION_DEFAULTS.sidebarBehavior,
       playerBackgroundStyle: VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle,
       animeVisuals: true,
@@ -3992,17 +3888,15 @@ function MainModeApp() {
       saveDone = true;
 
       const nextSettings = {
-        ...discordSettingsRef.current,
+        ...settingsRef.current,
         playerSize: latestSize
       };
 
       discordSettingsRef.current = nextSettings;
+      settingsRef.current = nextSettings;
       setSettings(nextSettings);
 
-      if (bootedRef.current) {
-
-        window.localitfy.saveSettings(nextSettings).catch(() => undefined);
-      }
+      void saveSettingsSafely(nextSettings);
 
       window.setTimeout(() => {
         appRoot?.style.removeProperty("--player-size-live");
@@ -4091,16 +3985,15 @@ function MainModeApp() {
       saveDone = true;
 
       const nextSettings = {
-        ...discordSettingsRef.current,
+        ...settingsRef.current,
         sidebarWidth: latestWidth
       };
 
       discordSettingsRef.current = nextSettings;
+      settingsRef.current = nextSettings;
       setSettings(nextSettings);
 
-      if (bootedRef.current) {
-        window.localitfy.saveSettings(nextSettings).catch(() => undefined);
-      }
+      void saveSettingsSafely(nextSettings);
 
       window.setTimeout(() => {
         appRoot?.style.removeProperty("--sidebar-width-live");
@@ -4165,40 +4058,8 @@ function MainModeApp() {
 
 
   async function rememberCurrentSong(id: string) {
-    if (!id || !discordSettingsRef.current.rememberLastSong) return;
-
-    latestRememberedSongIdRef.current = id;
-
-    setSettings((previousSettings) => {
-      if (!previousSettings.rememberLastSong || previousSettings.lastSongId === id) {
-        return previousSettings;
-      }
-
-      return {
-        ...previousSettings,
-        lastSongId: id
-      };
-    });
-
-    if (!bootedRef.current) return;
-
-    if (rememberCurrentSongTimerRef.current !== null) {
-      window.clearTimeout(rememberCurrentSongTimerRef.current);
-    }
-
-    rememberCurrentSongTimerRef.current = window.setTimeout(() => {
-      rememberCurrentSongTimerRef.current = null;
-
-      const songIdToSave = latestRememberedSongIdRef.current;
-      if (!songIdToSave || !discordSettingsRef.current.rememberLastSong) return;
-
-      window.localitfy
-        .saveSettings({
-          ...discordSettingsRef.current,
-          lastSongId: songIdToSave
-        })
-        .catch(() => undefined);
-    }, 420);
+    if (!id || !settingsRef.current.rememberLastSong) return;
+    await persistSettings({ ...settingsRef.current, lastSongId: id }, true);
   }
 
   function replaceSong(updated: Song | null) {
@@ -4609,8 +4470,13 @@ function MainModeApp() {
     }
   }
 
-  function clearFailedDownloads() {
-    setDownloadQueue((items) => items.filter((item) => item.status !== "failed" && item.status !== "cancelled"));
+  async function clearFailedDownloads() {
+    const statuses = new Set(["failed", "cancelled", "interrupted"]);
+    const selected = downloadQueue.filter(item => statuses.has(item.status));
+    const ids = new Set(selected.map(item => item.id));
+    try { await window.localitfy.clearDownloadJobs(selected.flatMap(item => item.recoveryId ? [item.recoveryId] : [])); }
+    catch (error) { setPlayerError(String(error)); return; }
+    setDownloadQueue((items) => items.filter((item) => !ids.has(item.id)));
     setDownloadResults((items) => items.filter((item: any) => item.ok));
     setSpotifyTracks((items) => items.map((track: any) => (
       track.downloadStatus === "failed"
@@ -4622,8 +4488,12 @@ function MainModeApp() {
     showAppToast("cleared failed downloads", "success");
   }
 
-  function clearFinishedDownloads() {
-    setDownloadQueue((items) => items.filter((item) => item.status === "queued" || item.status === "downloading" || item.status === "converting"));
+  async function clearFinishedDownloads() {
+    const selected = downloadQueue.filter(item => item.status === "done");
+    const ids = new Set(selected.map(item => item.id));
+    try { await window.localitfy.clearDownloadJobs(selected.flatMap(item => item.recoveryId ? [item.recoveryId] : [])); }
+    catch (error) { setPlayerError(String(error)); return; }
+    setDownloadQueue((items) => items.filter((item) => !ids.has(item.id)));
     setDownloadResults((items) => items.filter((item: any) => !item.ok));
     setStatusText("cleared finished downloads");
     showAppToast("cleared finished downloads", "success");
@@ -4662,13 +4532,13 @@ function MainModeApp() {
   }
 
   async function cancelCurrentDownload() {
+    cancelDownloadRetries();
     try {
       await window.localitfy.cancelDownload?.();
-      setDownloadBusy(false);
-      setStatusText("download cancelled");
+      setStatusText(convertBusy ? "Cancelling conversion…" : "Cancelling downloads…");
       setDownloadQueue((current) => current.map((item) => (
         item.status === "queued" || item.status === "downloading" || item.status === "converting"
-          ? { ...item, status: "cancelled", progress: item.progress || 100, message: "Download cancelled" }
+          ? { ...item, status: "cancelled", progress: item.progress, message: "Download cancelled" }
           : item
       )));
     } catch (error) {
@@ -4677,7 +4547,7 @@ function MainModeApp() {
     }
   }
 
-  async function retryDownload(url: string, source: "youtube" | "spotify" | "auto" = "auto", spotifyTrackId = "") {
+  async function retryDownload(url: string, source: "youtube" | "spotify" | "auto" = "auto", spotifyTrackId = "", recoveryId?: string) {
     if (!url) {
       showAppToast("No URL saved for this failed item", "error");
       return;
@@ -4685,6 +4555,11 @@ function MainModeApp() {
 
     setStatusText("retrying failed download...");
     showAppToast("retrying failed download", "info");
+
+    if (recoveryId) {
+      await downloadAudioLinks(url, recoveryId);
+      return;
+    }
 
     if (source === "spotify" || url.startsWith("spotify:")) {
       const track = spotifyTracks.find((item: any) => item.id === spotifyTrackId) ||
@@ -4708,30 +4583,33 @@ function MainModeApp() {
     await downloadSpotifyTracks([track]);
   }
 
-  async function downloadAudioLinks(overrideText?: string) {
+  async function downloadAudioLinks(overrideText?: string, recoveryId?: string) {
     const urls = parseDownloadUrls(overrideText || downloadText);
 
-    if (!urls.length) {
+    if (!urls.length && !recoveryId) {
       setPlayerError("paste at least one YouTube link first");
       setStatusText("nothing to download");
       return;
     }
 
+    if (!beginDownloadOperation()) return;
     setDownloadBusy(true);
     setConvertBusy(false);
     setConvertProgress(0);
     setConvertMessage("");
     setPlayerError("");
     setStatusText("downloading audio...");
-    setDownloadQueue(makeQueuedDownloads(urls));
+    if (recoveryId) setDownloadQueue(items => items.map(item => item.recoveryId === recoveryId ? { ...item, status: "queued", statusLabel: "", error: "", message: "Resuming download" } : item));
+    else setDownloadQueue(items => [...items.filter(item => item.recoveryId || !urls.includes(item.url)), ...makeQueuedDownloads(urls)]);
 
     try {
-      const result = await window.localitfy.downloadAudioUrls({
+      const result = recoveryId ? await window.localitfy.resumeDownloadJob(recoveryId) : await window.localitfy.downloadAudioUrls({
         urls,
         options: { ...downloadAudioOptions(settings), cleanTitle: settings.downloadCleanTitle }
       });
 
       let nextSongs = applyLibraryOrder(sanitizeSongList(result.songs || []));
+      const autoAdd = result.autoAdd ?? settings.downloadAutoAdd;
       const downloads = result.downloads || [];
       const successCount = downloads.filter((item) => item.ok).length;
       const failCount = downloads.filter((item) => !item.ok).length;
@@ -4769,7 +4647,7 @@ function MainModeApp() {
         const importedCount = enrichedDownloads.filter((item: any) => item.ok && item.importedToLibrary).length;
         const notImportedCount = enrichedDownloads.filter((item: any) => item.ok && !item.importedToLibrary).length;
         setStatusText(
-          settings.downloadAutoAdd
+          autoAdd
             ? notImportedCount > 0
               ? `downloaded ${successCount}; ${notImportedCount} not imported`
               : `downloaded ${successCount} and added ${importedCount || result.changedCount || successCount} to library`
@@ -4781,7 +4659,7 @@ function MainModeApp() {
             : `added ${importedCount || successCount} to library`,
           notImportedCount > 0 ? "info" : "success"
         );
-        if (settings.downloadAutoAdd) changeView("library", "unknown");
+        if (autoAdd) changeView("library", "unknown");
       } else {
         setStatusText("download failed");
         setPlayerError("no audio files downloaded. check the results below.");
@@ -4801,19 +4679,20 @@ function MainModeApp() {
       })) as any[];
 
       setDownloadResults(failedDownloads);
-      setDownloadQueue((items) => items.map((item) => ({
+      setDownloadQueue((items) => items.map((item) => (recoveryId ? item.recoveryId === recoveryId : !item.recoveryId && urls.includes(item.url)) ? ({
         ...item,
         status: "failed",
         progress: 100,
         message,
         error: message,
         statusLabel: "Failed — retry available"
-      })));
+      }) : item));
       setPlayerError(message);
       setStatusText("download failed");
       showAppToast("Download failed — retry from the queue", "error");
     } finally {
       setDownloadBusy(false);
+      endDownloadOperation();
     }
   }
 
@@ -4865,7 +4744,7 @@ function MainModeApp() {
     const selected = Array.isArray(trackOverride) && trackOverride.length
       ? trackOverride
       : spotifyTracks.filter((t) => spotifySelectedIds.has(t.id));
-    if (!selected.length) return;
+    if (!selected.length || !beginDownloadOperation()) return;
 
     if (Array.isArray(trackOverride) && trackOverride.length) {
       setSpotifySelectedIds(new Set(trackOverride.map((track) => track.id)));
@@ -4881,8 +4760,9 @@ function MainModeApp() {
         ? { ...track, downloadStatus: "queued", downloadError: "", downloadMessage: "Queued" }
         : track
     )));
-    setDownloadQueue(
-      selected.map((t, i) => ({
+    setDownloadQueue(items => [
+      ...items.filter(item => item.recoveryId || !selected.some(track => track.id === item.spotifyTrackId)),
+      ...selected.map((t, i) => ({
         id: `spt_${t.id}_${i}`,
         spotifyTrackId: t.id,
         source: "spotify",
@@ -4892,7 +4772,7 @@ function MainModeApp() {
         progress: 0,
         message: "Waiting..."
       }))
-    );
+    ]);
     setStatusText(`downloading ${selected.length} track${selected.length !== 1 ? "s" : ""} from spotify...`);
 
     try {
@@ -4901,7 +4781,7 @@ function MainModeApp() {
       if (!spotifyDownloadBridge) {
         const message = "Spotify downloading is unavailable in this build.";
         setSpotifyFetchError(message);
-        setDownloadQueue((items) => items.map((item) => ({ ...item, status: "failed", progress: 100, message, error: message, statusLabel: "Failed — retry available" })));
+        setDownloadQueue((items) => items.map((item) => !item.recoveryId && selected.some(track => track.id === item.spotifyTrackId) ? ({ ...item, status: "failed", progress: 100, message, error: message, statusLabel: "Failed — retry available" }) : item));
         setStatusText("spotify download failed");
         showAppToast("Spotify download bridge missing", "error");
         return;
@@ -5107,24 +4987,26 @@ function MainModeApp() {
         statusLabel: "Failed — retry available"
       })) as any[];
       setDownloadResults(failedDownloads);
-      setDownloadQueue((items) => items.map((item) => ({
+      setDownloadQueue((items) => items.map((item) => !item.recoveryId && selected.some(track => track.id === item.spotifyTrackId) ? ({
         ...item,
         status: "failed",
         progress: 100,
         message,
         error: message,
         statusLabel: "Failed — retry available"
-      })));
+      }) : item));
       setStatusText("spotify download failed");
       showAppToast("Spotify download failed — retry from the queue", "error");
     } finally {
       setSpotifyDownloadBusy(false);
       setDownloadBusy(false);
+      endDownloadOperation();
     }
   }
   // ------------------------------------------------------------------------
 
   async function convertLocalMedia() {
+    if (!beginDownloadOperation()) return;
     setConvertBusy(true);
     setConvertProgress(0);
     setConvertMessage("choose files to convert...");
@@ -5137,21 +5019,26 @@ function MainModeApp() {
       });
 
       const conversions = result.conversions || [];
+      if (!Array.isArray(result.songs)) throw new Error("Conversion results were incomplete. Reload the application before retrying.");
       const nextSongs = applyLibraryOrder(sanitizeSongList(result.songs || []));
 
       setSongs(nextSongs);
-      setLibraryScanMessage(`indexed ${nextSongs.length} tracks instantly`);
+      setLibraryScanMessage(`library refreshed: ${nextSongs.length} tracks`);
       setDownloadResults(
-        conversions.map((item) => ({
+        enrichDownloadResultsWithLibraryMatches(conversions.map((item) => ({
           ok: item.ok,
+          source: "local",
           filename: item.filename,
           filePath: item.filePath,
           error: item.error,
           url: item.sourcePath
-        }))
+        })), nextSongs)
       );
 
       const successCount = conversions.filter((item) => item.ok).length;
+      const failed = conversions.filter(item => !item.ok);
+      const failure = failed.find(item => !/cancel/i.test(item.error || ""));
+      if (failure) setPlayerError(failure.error || "Conversion failed");
 
       if (nextSongs.length && !currentId) {
         const firstSong = nextSongs[0];
@@ -5164,22 +5051,26 @@ function MainModeApp() {
 
       if (successCount > 0) {
         setConvertProgress(100);
-        setConvertMessage("conversion complete");
+        setConvertMessage(failed.length ? `converted ${successCount}; ${failed.length} failed or cancelled` : "conversion complete");
         setStatusText(
-          `converted ${successCount} file${successCount === 1 ? "" : "s"} and imported ${result.changedCount}`
+          `converted ${successCount} file${successCount === 1 ? "" : "s"} and imported ${result.changedCount}${failed.length ? `; ${failed.length} failed or cancelled` : ""}`
         );
-        changeView("library", "unknown");
+        if (!failed.length) changeView("library", "unknown");
+      } else if (failed.length) {
+        setStatusText(failure ? "conversion failed" : "conversion cancelled");
+        setConvertMessage(failure?.error || "Conversion cancelled");
       } else {
         setStatusText("nothing converted");
         setConvertMessage("no files converted");
       }
     } catch (error) {
       console.error("[localitfy convert failed]", error);
-      setPlayerError("conversion failed. check terminal.");
+      setPlayerError((error as Error)?.message || "Conversion failed");
       setConvertMessage("conversion failed");
       setStatusText("conversion failed");
     } finally {
       setConvertBusy(false);
+      endDownloadOperation();
     }
   }
 
@@ -6267,8 +6158,18 @@ function MainModeApp() {
   function handleSeek(value: string | number) {
     const audio = audioRef.current;
     const duration = durationRef.current || currentDuration || currentSong?.duration || 0;
-    if (!audio || duration <= 0) return;
+    if (!audio || !Number.isFinite(duration) || duration <= 0 || !Number.isFinite(Number(value))) return;
 
+    if (crossfadeAutoStartedRef.current) {
+      stopCrossfadeAuto();
+      const current = songRef.current;
+      const base = clamp(volumeRef.current, 0, 1);
+      const memory = settingsRef.current.perSongVolumeMemory ? clamp(Number(current?.customVolume ?? 1), 0, 1) : 1;
+      const gain = settingsRef.current.volumeNormalization ? clamp(Number(current?.volumeGain ?? 1), 0.2, 2.4) : 1;
+      const restored = clamp(base * memory * gain, 0, 1);
+      setAudioElementVolume(audio, restored);
+      effectiveVolumeRef.current = restored;
+    }
     playbackTransitionRef.current.seekStarted();
     const safePercent = clamp(Number(value), 0, 100);
     const nextTime = (safePercent / 100) * duration;
@@ -6376,13 +6277,7 @@ function MainModeApp() {
 
     if (!bootedRef.current) return;
 
-    if (saveSettingsTimerRef.current !== null) {
-      window.clearTimeout(saveSettingsTimerRef.current);
-    }
-
-    saveSettingsTimerRef.current = window.setTimeout(() => {
-      window.localitfy.saveSettings(nextSettings).catch(() => undefined);
-    }, 180);
+    void saveSettingsSafely(nextSettings, false);
   }
 
   function paintVolumeDraft(percent: number) {
@@ -6507,14 +6402,8 @@ function MainModeApp() {
 
         setCurrentId(nextSong?.id || "");
 
-        if (settings.rememberLastSong) {
-          const nextSettings = {
-            ...settings,
-            lastSongId: nextSong?.id || ""
-          };
-
-          setSettings(nextSettings);
-          await window.localitfy.saveSettings(nextSettings).catch(() => undefined);
+        if (settingsRef.current.rememberLastSong) {
+          await persistSettings({ ...settingsRef.current, lastSongId: nextSong?.id || "" });
         }
       }
 
@@ -6585,14 +6474,8 @@ function MainModeApp() {
 
         setCurrentId(nextSong?.id || "");
 
-        if (settings.rememberLastSong) {
-          const nextSettings = {
-            ...settings,
-            lastSongId: nextSong?.id || ""
-          };
-
-          setSettings(nextSettings);
-          await window.localitfy.saveSettings(nextSettings).catch(() => undefined);
+        if (settingsRef.current.rememberLastSong) {
+          await persistSettings({ ...settingsRef.current, lastSongId: nextSong?.id || "" });
         }
       }
 
@@ -7174,14 +7057,10 @@ function MainModeApp() {
       setStatusText(text);
     }
   };
-  const retryFailedDownloads = () => {
-    failedDownloadQueueItems.forEach((item: DownloadQueueItem) => {
-      void retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "");
-    });
-    failedDownloadResults.forEach((item: DownloadResult) => {
-      void retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "");
-    });
-  };
+  const retryFailedDownloads = () => retryDownloads(
+    [...failedDownloadQueueItems, ...failedDownloadResults],
+    item => item.source === "local" ? convertLocalMedia() : retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "", item.recoveryId)
+  );
 
   const homeSettings = useMemo(() => ({
     heroExpanded: settings.heroExpanded,

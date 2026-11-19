@@ -27,6 +27,15 @@ export default function CoverStudio({ notice, pixelArtBusy, selectedCoverSongs, 
   const previewEntry = useMemo(() => visibleGalleryAssets.find((entry) => entry.key === previewEntryKey) || recentCoverEntries[0] || coverStats.least || visibleGalleryAssets[0] || null, [coverStats.least, previewEntryKey, recentCoverEntries, visibleGalleryAssets]);
   const previewImageUrl = previewEntry ? previewEntry.asset.url || pixelArtUrl(previewEntry.asset.file) : "";
   const activeTargetSong = selectedCoverSongs[0] || currentSong;
+  function findOnlineCover() {
+    if (!activeTargetSong) return;
+    const artist = String(activeTargetSong.artist || "").trim();
+    const album = String(activeTargetSong.album || activeTargetSong.title || "").trim();
+    if (!artist || !album) return;
+    const url = new URL("https://covers.musichoarders.xyz/");
+    url.search = new URLSearchParams({ artist, album }).toString();
+    void window.localitfy.openExternal?.(url.href).catch(() => flashCoverToast("Could not open cover search"));
+  }
   usePageAtmosphere([getRendererSafeImageUrl(previewImageUrl), getRendererSafeImageUrl(activeTargetSong?.coverUrl), getRendererSafeImageUrl(activeTargetSong?.coverPath)].filter(Boolean));
 
   useEffect(() => { if (previewEntryKey && !visibleGalleryAssets.some((entry) => entry.key === previewEntryKey)) setPreviewEntryKey(""); }, [previewEntryKey, visibleGalleryAssets]);
@@ -38,7 +47,7 @@ export default function CoverStudio({ notice, pixelArtBusy, selectedCoverSongs, 
   async function randomizeWithToast(mood: CoverMood) { if (randomizeDisabled) return; await Promise.resolve(randomizeSelectedCovers(mood)); flashCoverToast(mood === "leastUsed" ? "applied least-used covers" : "randomized selected covers"); }
 
   return <section data-page-section="covers" className="coverStudioLayout coverStudioCleanLayout">
-    <PageHeader eyebrow="pixel covers" title="Covers" description="Select songs, then apply or randomize artwork."><div className="coverStudioHeroActions coverStudioCleanActions"><button className="heroMain" type="button" disabled={randomizeDisabled} onClick={() => void randomizeWithToast(coverGalleryMood)}>{pixelArtBusy ? "Working..." : `Randomize ${selectedCount}`}</button><details><summary>Tools</summary><div className="coverMaintenanceMenu"><button type="button" onClick={() => void randomizeWithToast("leastUsed")} disabled={pixelArtBusy || randomizeDisabled}>Least used</button><button type="button" onClick={() => void randomizeMissingCovers?.()} disabled={pixelArtBusy || !missingCoverSongs.length}>Fix missing {missingCoverSongs.length ? `(${missingCoverSongs.length})` : ""}</button><button type="button" onClick={() => void cleanupCoverCache?.()} disabled={pixelArtBusy}>Clear cache</button><button type="button" onClick={() => void rescanPixelArtFolder()} disabled={pixelArtBusy}>Rescan</button></div></details></div></PageHeader>
+    <PageHeader eyebrow="pixel covers" title="Covers" description="Select songs, then apply or randomize artwork."><div className="coverStudioHeroActions coverStudioCleanActions"><button className="heroMain" type="button" disabled={randomizeDisabled} onClick={() => void randomizeWithToast(coverGalleryMood)}>{pixelArtBusy ? "Working..." : `Randomize ${selectedCount}`}</button><details><summary>Tools</summary><div className="coverMaintenanceMenu"><button type="button" onClick={findOnlineCover} disabled={!activeTargetSong?.artist || !(activeTargetSong.album || activeTargetSong.title)}>Find album art online</button><button type="button" onClick={() => void randomizeWithToast("leastUsed")} disabled={pixelArtBusy || randomizeDisabled}>Least used</button><button type="button" onClick={() => void randomizeMissingCovers?.()} disabled={pixelArtBusy || !missingCoverSongs.length}>Fix missing {missingCoverSongs.length ? `(${missingCoverSongs.length})` : ""}</button><button type="button" onClick={() => void cleanupCoverCache?.()} disabled={pixelArtBusy}>Clear cache</button><button type="button" onClick={() => void rescanPixelArtFolder()} disabled={pixelArtBusy}>Rescan</button></div></details></div></PageHeader>
     {notice}
     {coverToast ? <div className="coverApplyToast" role="status">{coverToast}</div> : null}
     <section className="coverMoodTabs coverMoodTabsClean" aria-label="cover filters">{coverMoodOptions.filter((option) => option.id !== "favorites").map((option) => <button key={option.id} type="button" className={coverGalleryMood === option.id ? "active" : ""} onClick={() => setCoverGalleryMood(option.id)}><span>{option.name || option.label || coverMoodName(option.id)}</span><strong title="Available covers">{coverMoodCounts.get(option.id) ?? 0}</strong></button>)}</section>

@@ -7,7 +7,7 @@ import type { NotForMeKind } from "../analysis/notForMe";
 import type { SpotifyTrack } from "../downloads/download.types";
 import type { Settings } from "../settings/settings.types";
 import type { CatalogKind, DiscoverResult, DiscoverTrack } from "./discover.types";
-import { DiscoverCover } from "./DiscoverArtwork";
+import { DiscoverCover, getCachedDiscoverArtwork, isDisplayOnlyCover } from "./DiscoverArtwork";
 import type { Song } from "../library/song.types";
 import { Cover } from "../covers/Cover";
 import { buildDiscoverShelves } from "./discoverShelves";
@@ -28,17 +28,24 @@ export type DiscoverViewProps = {
 const API_KEY = /^[0-9a-f]{32}$/i;
 // Short and stable: downloads use the ID in file names.
 function trackId(track: DiscoverTrack) {
+  const recording = /^https:\/\/www\.youtube\.com\/watch\?v=([A-Za-z0-9_-]{11})$/.exec(track.url);
+  if (recording) return `ytmusic-${recording[1]}`;
   let hash = 2166136261;
   for (const char of `${track.artist}|${track.title}`.toLocaleLowerCase()) hash = Math.imul(hash ^ char.codePointAt(0)!, 16777619);
   return `lastfm-${(hash >>> 0).toString(36)}`;
 }
-const toDownload = (track: DiscoverTrack): SpotifyTrack => ({ id: trackId(track), title: track.title, artist: track.artist, providerUrl: track.url, coverUrl: track.coverUrl, durationMs: track.durationMs });
+const toDownload = (track: DiscoverTrack): SpotifyTrack => {
+  const artwork = getCachedDiscoverArtwork(track.title, track.artist);
+  const coverUrl = [artwork?.coverUrl, track.coverUrl, artwork?.fallbackCoverUrl, ...(artwork?.coverAlternatives || [])].find(url => url && !isDisplayOnlyCover(url));
+  return { id: trackId(track), title: track.title, artist: track.artist, providerUrl: track.url, albumName: track.album, coverUrl, durationMs: track.durationMs || artwork?.durationMs };
+};
 const listNames = (names: string[]) => names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
 const openLink = (url: string) => { if (url) void window.localitfy.openExternal?.(url); };
 
 export default function DiscoverView({ settings, updateSetting, sendToDownloads, notForMe, songs, selectLocalSong }: DiscoverViewProps) {
   const phone = isAndroidApp();
   const [result, setResult] = useState<DiscoverResult | null>(null);
+  const [artworkRevision, setArtworkRevision] = useState(0);
   const [loading, setLoading] = useState(false);
   const [showAllRecommended, setShowAllRecommended] = useState(false);
   const [catalogKind, setCatalogKind] = useState<CatalogKind>("recording");
@@ -59,6 +66,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
   }, [songs, deferredTerm, catalogKind]);
   const [catalog, setCatalog] = useState<DiscoverResult | null>(null);
   const [catalogLoading, setCatalogLoading] = useState(false);
+  const [relatedTitle, setRelatedTitle] = useState("");
   const catalogRequestRef = useRef(0);
   const [showSettings, setShowSettings] = useState(false);
   const [keyDraft, setKeyDraft] = useState(settings.lastfmApiKey || "");
@@ -70,7 +78,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
     setLoading(true);
     try {
       const result = await window.localitfy.getDiscoveries({ refresh });
-      if (requestVersion === requestVersionRef.current) setResult(result);
+      if (requestVersion === requestVersionRef.current) { setResult(result); if (refresh) setArtworkRevision(value => value + 1); }
     } catch {
       if (requestVersion === requestVersionRef.current) setResult({ status: "error", error: "Discover failed. Please try again." });
     } finally {
@@ -87,12 +95,14 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       setCatalog(null);
       setCatalogLoading(false);
       setPicked(new Map());
+      setRelatedTitle("");
     }
     return () => { catalogRequestRef.current += 1; };
   }, [settings.discoverEnabled]);
   async function searchCatalog() {
     const term = catalogTerm.trim();
     if (!settings.discoverEnabled || term.length < 2 || catalogLoading) return;
+    setRelatedTitle("");
     const request = ++catalogRequestRef.current;
     setCatalogLoading(true);
     setCatalog(null);
@@ -101,6 +111,23 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       if (request === catalogRequestRef.current) setCatalog(answer.status === "catalog" || answer.status === "error" ? answer : { status: "error", error: "Public catalog is unavailable. Check the desktop version and Discover settings." });
     } catch {
       if (request === catalogRequestRef.current) setCatalog({ status: "error", error: phone ? "Connect to your " + computerName() + " to search." : "Could not search the public catalog." });
+    } finally {
+      if (request === catalogRequestRef.current) setCatalogLoading(false);
+    }
+  }
+
+  async function searchRelated(track: DiscoverTrack) {
+    const seed = /^https:\/\/www\.youtube\.com\/watch\?v=([A-Za-z0-9_-]{11})$/.exec(track.url)?.[1];
+    if (!seed || !settings.discoverEnabled || catalogLoading) return;
+    const request = ++catalogRequestRef.current;
+    setRelatedTitle(track.title);
+    setCatalogLoading(true);
+    setCatalog(null);
+    try {
+      const answer = await window.localitfy.getDiscoveries({ catalog: { kind: "recording", term: seed, radioSeed: seed } });
+      if (request === catalogRequestRef.current) setCatalog(answer.status === "catalog" || answer.status === "error" ? answer : { status: "error", error: "Related songs unavailable." });
+    } catch {
+      if (request === catalogRequestRef.current) setCatalog({ status: "error", error: "Could not find related songs." });
     } finally {
       if (request === catalogRequestRef.current) setCatalogLoading(false);
     }
@@ -134,14 +161,14 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
   const needsSetup = !settings.discoverEnabled;
   const setup = phone ? <div className="discoverSetup"><p>Turn on Discover and manage its optional Last.fm connection in localtify on your {computerName()}, then sync this phone.</p></div> : (
     <div className="discoverSetup">
-      <p>Search music and the iTunes music catalog without an account or key. Explicit search text is sent to these providers. If you add an optional Last.fm key, Localtify also requests personalized suggestions using artist and song names from your library and looks up suggested tracks in MusicBrainz for artwork. Cover images come from matching Last.fm track metadata, Cover Art Archive, or TheAudioDB when available. Artwork lookup sends only the track title and artist.</p>
+      <p>Search music without an account. Artwork lookups may send track and artist names to YouTube Music, Deezer and other configured providers; optional Last.fm recommendations use your library metadata.</p>
       <details className="discoverOptional" open={Boolean(keyDraft) || undefined}>
       <summary>Optional Last.fm recommendations</summary>
       <label className="discoverKey">
         <span>Last.fm API key (optional)</span>
         <input value={keyDraft} onChange={(event) => setKeyDraft(event.currentTarget.value)} placeholder="32 letters and numbers" spellCheck={false} autoComplete="off" />
       </label>
-      <p className="discoverHint">Keys are free. You need a Last.fm account, which is separate from Google; if you’re not signed in to Last.fm, it asks you to first and then opens the form. Paste the “API key” it shows here, not the shared secret.
+      <p className="discoverHint">Use your Last.fm API key, not the shared secret.
         {" "}<button type="button" className="discoverLink" onClick={() => openLink("https://www.last.fm/api/account/create")}>Get a key <ExternalLink size={12} /></button>
         {" · "}<button type="button" className="discoverLink" onClick={() => openLink("https://www.last.fm/join?next=/api/account/create")}>No account? Sign up <ExternalLink size={12} /></button></p>
       </details>
@@ -186,12 +213,12 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
     {settings.discoverEnabled ? <section className="discoverCatalog" aria-labelledby="discover-catalog-title">
       <h2 id="discover-catalog-title" className="discoverHeading">Explore music</h2>
       <form className="discoverSearch" onSubmit={event => { event.preventDefault(); void searchCatalog(); }}>
-        <ArcDropdownMenu<CatalogKind> ariaLabel="Search category" value={catalogKind} disabled={catalogLoading} items={[{ value: "recording", label: "Songs" }, { value: "artist", label: "Artists" }]} onValueChange={value => { setCatalogKind(value); setCatalog(null); }} />
-        <input type="search" aria-label="Search public music catalog" placeholder="Search songs and artists" value={catalogTerm} maxLength={160} disabled={catalogLoading} onChange={event => { setCatalogTerm(event.currentTarget.value); setCatalog(null); }} />
+        <ArcDropdownMenu<CatalogKind> ariaLabel="Search category" value={catalogKind} disabled={catalogLoading} items={[{ value: "recording", label: "Songs" }, { value: "artist", label: "Artists" }]} onValueChange={value => { setCatalogKind(value); setCatalog(null); setRelatedTitle(""); }} />
+        <input type="search" aria-label="Search public music catalog" placeholder="Search songs and artists" value={catalogTerm} maxLength={160} disabled={catalogLoading} onChange={event => { setCatalogTerm(event.currentTarget.value); setCatalog(null); setRelatedTitle(""); }} />
         <button className="heroMain" type="submit" disabled={catalogLoading || catalogTerm.trim().length < 2}><Search size={15} /><span>{catalogLoading ? "Searching…" : "Search"}</span></button>
       </form>
-      <p className="discoverBecause" role="status">{catalogLoading ? "Searching public catalog…" : "Music catalog · Local playback only"}</p>
-      {localMatches.length && deferredTerm === catalogTerm ? <>
+      {catalogLoading ? <p className="discoverBecause" role="status">Searching…</p> : null}
+      {!relatedTitle && localMatches.length && deferredTerm === catalogTerm ? <>
         <h3 className="discoverHeading">In your library</h3>
         <ul className="discoverSongList" aria-label="Local search results">
           {localMatches.map(song => <li key={song.id}>
@@ -203,32 +230,31 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       </> : null}
       {catalog?.status === "error" ? <p role="alert">{catalog.error}</p> : null}
       {catalog?.status === "catalog" ? catalog.items.length ? <>
-        <h3 className="discoverHeading">Top result</h3>
+        <div className="discoverSectionHead"><h3 className="discoverHeading">{relatedTitle ? `Related to ${relatedTitle}` : "Top result"}</h3>{catalog.kind === "recording" && /^https:\/\/www\.youtube\.com\/watch\?v=[A-Za-z0-9_-]{11}$/.test(catalog.items[0].url) ? <button type="button" className="softButton" disabled={catalogLoading} onClick={() => void searchRelated(catalog.items[0])}>Similar songs</button> : null}</div>
         {catalog.items.slice(0,1).map(item => <div key={item.id} className="discoverTopResult">
-          <DiscoverCover title={item.title} artist={item.artist} artwork={item} lookup={catalog.kind === "recording"} person={catalog.kind === "artist"} />
+          <DiscoverCover title={item.title} artist={item.artist} artwork={item} lookup person={catalog.kind === "artist"} />
           <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => openLink(item.url)} title={item.title}>{item.title}</button><small>{item.subtitle}</small></span>
           {catalog.kind === "recording" ? <><span className="discoverDuration">{duration(item.durationMs)}</span>{pickButton(item)}</> : null}
         </div>)}
-        {catalog.items.length > 1 ? <h3 className="discoverHeading">More matches</h3> : null}
+        {catalog.items.length > 1 ? <h3 className="discoverHeading">{relatedTitle ? "More related songs" : "More matches"}</h3> : null}
         <ul className="discoverSongList" aria-label="Search results">
         {catalog.items.slice(1).map(item => <li key={item.id}>
-          <DiscoverCover title={item.title} artist={item.artist} artwork={item} lookup={catalog.kind === "recording"} person={catalog.kind === "artist"} />
+          <DiscoverCover title={item.title} artist={item.artist} artwork={item} lookup person={catalog.kind === "artist"} />
           <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => openLink(item.url)} title={item.title}>{item.title}</button><small title={item.subtitle}>{item.subtitle}</small></span>
           {catalog.kind === "recording" ? <><span className="discoverDuration">{duration(item.durationMs)}</span>{pickButton(item)}</> : null}
         </li>)}
       </ul></> : <p role="status">No matching catalog results.</p> : null}
     </section> : null}
-    {result?.status === "needs-key" && settings.discoverEnabled && !phone ? <p className="discoverBecause">Personalized Last.fm suggestions are optional. Add a key in Settings if you want them.</p> : null}
-    {phone && !needsSetup ? <p className="discoverHint">Catalog searches and suggestions use your paired {computerName()}. Manage recommendations there.</p> : null}
-    {settings.discoverEnabled && loading && !ready ? <p className="discoverNotice" role="status">Loading optional personalized suggestions…</p> : null}
+
+    {settings.discoverEnabled && loading && !ready ? <p className="discoverNotice" role="status">Finding music…</p> : null}
     {settings.discoverEnabled && result?.status === "error" ? <p className="discoverNotice" role="alert">{result.error} <button type="button" className="softButton" onClick={() => void load(true)}>Retry</button></p> : null}
-    {settings.discoverEnabled && result?.status === "no-taste" ? <p className="discoverNotice">Play or like a few songs first. Discover learns from what you listen to.</p> : null}
+    {settings.discoverEnabled && result?.status === "no-taste" ? <p className="discoverNotice">Play or like songs to get recommendations.</p> : null}
 
     {recommendedTracks.length ? <section className="discoverSection" aria-labelledby="discover-recommended">
       <div className="discoverSectionHead"><h2 id="discover-recommended" className="discoverHeading">Recommended songs</h2>{recommendedTracks.length > 10 ? <button type="button" className="discoverName discoverMore" aria-expanded={showAllRecommended} onClick={() => setShowAllRecommended(value => !value)}>{showAllRecommended ? "Show less" : "See all"}</button> : null}</div>
       <ul className="discoverSongList">
         {(showAllRecommended ? recommendedTracks : recommendedTracks.slice(0, 10)).map(track => <li key={trackId(track)}>
-          <DiscoverCover title={track.title} artist={track.artist} artwork={track} lookup />
+          <DiscoverCover key={artworkRevision} title={track.title} artist={track.artist} artwork={track} lookup />
           <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => openLink(track.url)} title={track.title}>{track.title}</button><small>{track.artist}</small></span>
           {pickButton(track)}
         </li>)}
@@ -241,7 +267,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
         {popularTracks.map(track => <li key={trackId(track)}>
           <div className="discoverShelfArt">
             <button type="button" className="discoverArtLink" onClick={() => openLink(track.url)} aria-label={`Open ${track.title} on Last.fm`}>
-              <DiscoverCover title={track.title} artist={track.artist} artwork={track} lookup />
+              <DiscoverCover key={artworkRevision} title={track.title} artist={track.artist} artwork={track} lookup />
             </button>
             <div className="discoverShelfActions">{pickButton(track)}</div>
           </div>
@@ -254,7 +280,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       <h2 id="discover-artists" className="discoverHeading">Artists you might like</h2>
       <ul className="discoverSongList">
         {ready.artists.map(artist => <li key={artist.name}>
-          <DiscoverCover title={artist.name} artist="" person />
+          <DiscoverCover key={artworkRevision} title={artist.name} artist="" person lookup />
           <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => openLink(artist.url)} title={artist.name}>{artist.name}</button>
             <small title={listNames(artist.because)}>Because you play {listNames(artist.because)}{artist.seedCount > artist.because.length ? ` and ${artist.seedCount - artist.because.length} more` : ""}</small>
           </span>
@@ -263,7 +289,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       </ul>
     </section> : null}
 
-    {ready && !ready.artists.length && !ready.tracks.length ? <p className="discoverNotice">Nothing new to suggest right now. Try again after listening to more music.</p> : null}
+    {ready && !ready.artists.length && !ready.tracks.length ? <p className="discoverNotice">No new recommendations yet.</p> : null}
 
     {picked.size ? <div className="discoverTray" role="region" aria-label="Picked songs">
       <span>{picked.size} song{picked.size === 1 ? "" : "s"} picked</span>

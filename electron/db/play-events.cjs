@@ -15,6 +15,7 @@ function createPlayEventsTable(database) {
       contextType TEXT NOT NULL DEFAULT 'library',
       contextId TEXT
     );
+    CREATE INDEX IF NOT EXISTS idx_play_events_time ON play_events(startedAt);
     CREATE INDEX IF NOT EXISTS idx_play_events_song_time ON play_events(songId, startedAt);
     CREATE INDEX IF NOT EXISTS idx_play_events_session_time ON play_events(sessionId, startedAt);
   `);

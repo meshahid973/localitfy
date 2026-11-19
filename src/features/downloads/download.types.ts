@@ -1,7 +1,9 @@
-export type DownloadStatus = "queued" | "downloading" | "converting" | "importing" | "done" | "failed" | "cancelled";
+export type DownloadStatus = "queued" | "downloading" | "converting" | "importing" | "done" | "failed" | "cancelled" | "interrupted";
 
 export type DownloadResult = {
   ok: boolean;
+  status?: DownloadStatus;
+  recoveryId?: string;
   url?: string;
   filePath?: string;
   filename?: string;
@@ -22,8 +24,11 @@ export type DownloadResult = {
   statusLabel?: string;
 };
 
+export type DownloadRetryItem = Pick<DownloadResult, "url" | "source" | "spotifyTrackId" | "recoveryId">;
+
 export type DownloadQueueItem = {
   id: string;
+  recoveryId?: string;
   url: string;
   title: string;
   status: DownloadStatus;
@@ -43,6 +48,8 @@ export type DownloadQueueItem = {
   librarySongId?: string;
   statusLabel?: string;
 };
+
+export type DownloadProgress = Partial<DownloadQueueItem> & { file?: string; percent?: number };
 
 export type SpotifyTrack = {
   id: string;

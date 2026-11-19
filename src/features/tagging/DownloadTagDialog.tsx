@@ -22,6 +22,7 @@ export default function DownloadTagDialog({ songIds, titleOf, onClose }: Downloa
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
   const [saved, setSaved] = useState(false);
+  const [undoId, setUndoId] = useState<string | null>(null);
 
   useLayoutEffect(() => {
     const dialog = dialogRef.current;
@@ -29,10 +30,10 @@ export default function DownloadTagDialog({ songIds, titleOf, onClose }: Downloa
     return () => { if (dialog?.open) dialog.close(); };
   }, []);
 
-  async function lookUp() {
-    setBusy(`Looking up ${plural(songIds.length, "song")} on MusicBrainz…`); setMessage("");
+  async function lookUp(ids = songIds) {
+    setBusy(`Looking up ${plural(ids.length, "song")} on MusicBrainz…`); setMessage("");
     try {
-      const next = await window.localitfy.lookUpMusicBrainzTags(songIds);
+      const next = await window.localitfy.lookUpMusicBrainzTags(ids);
       setResult(next);
       setSelected(new Set(next.proposals.filter((proposal) => proposal.confidence >= AUTO_SELECT).map((proposal) => proposal.songId)));
       if (!next.proposals.length) setMessage("MusicBrainz didn’t find these songs.");
@@ -43,11 +44,15 @@ export default function DownloadTagDialog({ songIds, titleOf, onClose }: Downloa
     const ids = [...selected];
     setBusy(`Saving tags for ${plural(ids.length, "song")}…`); setMessage("");
     try {
-      const applied = await window.localitfy.applyMusicBrainzTags(ids);
+      const applied = await window.localitfy.applyMusicBrainzTags(ids, Object.fromEntries((result?.proposals || []).map(proposal => [proposal.songId, proposal.previewId])));
+      if (applied.applied) setUndoId(applied.undoId || null);
       const parts = [`Updated ${plural(applied.applied, "song")}${applied.written ? `, wrote tags into ${plural(applied.written, "file")} (originals are in the Trash)` : ""}.`];
       if (applied.failed.length) parts.push(`Could not update: ${applied.failed.map((failure) => `${failure.title} (${failure.error})`).join(", ")}.`);
+      const failed = new Set(applied.failed.map(failure => failure.songId));
+      const done = new Set(ids.filter(id => !failed.has(id)));
+      setResult(current => current ? { ...current, proposals: current.proposals.filter(proposal => !done.has(proposal.songId)) } : null);
       setSaved(!applied.failed.length);
-      setSelected(new Set(applied.failed.map((failure) => failure.songId)));
+      setSelected(failed);
       setMessage(parts.join(" "));
     } catch (reason) { setMessage(errorText(reason)); } finally { setBusy(""); }
   }
@@ -56,6 +61,16 @@ export default function DownloadTagDialog({ songIds, titleOf, onClose }: Downloa
   // Album by album, in track order.
   const proposals = result ? [...result.proposals].sort((a, b) => a.tags.album.localeCompare(b.tags.album) || byTrack(a, b)) : [];
 
+  async function undo() {
+    if (!undoId) return;
+    setBusy("Restoring previous tags…"); setMessage("");
+    try {
+      const result = await window.localitfy.undoMusicBrainzTags(undoId);
+      setUndoId(null); setSaved(true);
+      setMessage(`Restored ${plural(result.restored, "song")}.${result.failed.length ? " Could not restore: " + result.failed.map(item => item.title + " (" + item.error + ")").join(", ") + "." : ""}`);
+    } catch (reason) { setMessage(errorText(reason)); } finally { setBusy(""); }
+  }
+
   return <dialog ref={dialogRef} className="tagSearchDialog" aria-labelledby="download-tag-title" aria-modal="true"
     onCancel={(event) => { event.preventDefault(); if (!busy) onClose(); }}>
     <section className="tagSearchContent">
@@ -63,7 +78,7 @@ export default function DownloadTagDialog({ songIds, titleOf, onClose }: Downloa
         <div className="tagSearchHeading">
           <p className="tagSearchEyebrow">Downloads finished</p>
           <h2 id="download-tag-title">Get tags from MusicBrainz?</h2>
-          <p>{result ? `${result.proposals.length} match${result.proposals.length === 1 ? "" : "es"} for ${plural(songIds.length, "downloaded song")}` : `Fill in album, track numbers, genre and cover art for ${plural(songIds.length, "downloaded song")}. You review every change before it’s saved.`}</p>
+          <p>{result ? `${result.proposals.length} match${result.proposals.length === 1 ? "" : "es"} for ${plural(songIds.length, "downloaded song")}` : `Fill in album, genre and cover art for ${plural(songIds.length, "downloaded song")}. You review every change before it’s saved.`}</p>
         </div>
         <button type="button" className="tagSearchClose" onClick={onClose} disabled={Boolean(busy)} aria-label="Close"><X size={20} /></button>
       </header>
@@ -77,13 +92,15 @@ export default function DownloadTagDialog({ songIds, titleOf, onClose }: Downloa
         </div>
       </> : <div className="tagSearchChosen">
         <div className="tagSearchActions">
-          {saved ? <button type="button" className="tagSearchButton primary" onClick={onClose}>Done</button> : <>
+          {undoId ? <button type="button" className="tagSearchButton" disabled={Boolean(busy)} onClick={() => void undo()}>Undo save</button> : null}
+          {saved ? <button type="button" className="tagSearchButton primary" disabled={Boolean(busy)} onClick={onClose}>Done</button> : <>
             <button type="button" className="tagSearchButton" disabled={Boolean(busy)} onClick={onClose}>Not now</button>
+            <button type="button" className="tagSearchButton" disabled={Boolean(busy) || !proposals.length} onClick={() => void lookUp(proposals.map(proposal => proposal.songId))}>Look up again</button>
             <button type="button" className="tagSearchButton primary" disabled={Boolean(busy) || !selected.size} onClick={() => void save()}><Check size={14} /> Save tags for {plural(selected.size, "song")}</button>
           </>}
         </div>
         <ul className="taggingProposals" aria-label="Matches">
-          {proposals.map((proposal) => <ProposalRow key={proposal.songId} proposal={proposal} checked={selected.has(proposal.songId)} onToggle={() => toggle(proposal.songId)} />)}
+          {proposals.map((proposal) => <ProposalRow key={proposal.songId} proposal={proposal} checked={selected.has(proposal.songId)} disabled={Boolean(busy) || saved} onToggle={() => toggle(proposal.songId)} />)}
           {result.missed.map((id) => <li key={id} className="taggingMissed">No match found for {titleOf(id)}</li>)}
         </ul>
       </div>}
