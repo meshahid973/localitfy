@@ -418,3 +418,27 @@ test("Discover uses verified Last.fm track art and tries multiple valid releases
   const art=catalogArtwork("recording",{releases:[{id:"12345678-1234-1234-1234-123456789abc"},{id:"22345678-1234-1234-1234-123456789abc"}]});
   assert.equal(art.coverAlternatives.length,2);
 });
+
+
+test("direct music catalog is explicit, preferred, and falls back after provider failure", async () => {
+  const handlers = new Map(), settings = { discoverEnabled: false };
+  const directItem = { id: "ytmusic:abcdefghijk", title: "Track", artist: "Artist", url: "https://www.youtube.com/watch?v=abcdefghijk" };
+  const calls=[];
+  let fail=false;
+  registerDiscoverIpc({handle:(channel,handler)=>handlers.set(channel,handler)}, {
+    getSongs:()=>[],getSettings:()=>settings,
+    musicBrainzClient:{searchCatalog:async(kind,term)=>{calls.push(["fallback",kind,term]);return [{id:"12345678-1234-1234-1234-123456789abc",title:"Track","artist-credit":[{name:"Artist"}]}];}},
+    searchYouTubeMusic:async(kind,term)=>{calls.push(["direct",kind,term]);if(fail)throw Error("offline");return [directItem];}
+  });
+  const get=payload=>handlers.get("discover:get")({},payload);
+  assert.equal((await get({catalog:{kind:"recording",term:"Track"}})).status,"off");
+  assert.equal(calls.length,0);
+  settings.discoverEnabled=true;
+  assert.equal((await get({})).status,"needs-key");
+  assert.equal(calls.length,0,"opening discovery does not send local seeds to YouTube");
+  assert.deepEqual((await get({catalog:{kind:"recording",term:"Track"}})).items,[directItem]);
+  assert.deepEqual(calls,[["direct","recording","Track"]]);
+  fail=true;
+  assert.equal((await get({catalog:{kind:"recording",term:"Track"}})).items[0].title,"Track");
+  assert.deepEqual(calls.slice(1),[["direct","recording","Track"],["fallback","recording","Track"]]);
+});

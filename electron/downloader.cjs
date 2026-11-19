@@ -9,6 +9,8 @@ const { createDownloadJobStore } = require("./download-jobs.cjs");
 const { publishDownloadedFile, isPendingPublication } = require("./download-publication.cjs");
 const { filePathKey } = require("./runtime/path-identity.cjs");
 const { createMediaConverter } = require("./media-converter.cjs");
+const { createYouTubeMusicSearch, isJunkVideo, exactMusicCandidate } = require("./discover/youtube-music.cjs");
+const searchMusicCatalog = createYouTubeMusicSearch();
 
 let _userDataPath = null;
 let _ffmpegPath = ffmpegStatic || null;
@@ -585,18 +587,6 @@ function buildSpotifySearchQueries(track = {}) {
   return queries;
 }
 
-function buildSpotifyDirectSearchFallbackUrl(track = {}, best = null) {
-  const queries = buildSpotifySearchQueries(track);
-  const title = String(track.title || track.name || "").trim();
-  const artist = String(track.artist || track.artists || "").trim();
-  const bestQuery = String(best?.searchQuery || "").trim();
-  const query = bestQuery || queries[0] || `${artist ? `${artist} ` : ""}${title}`.trim();
-
-  if (!query) return "";
-
-  return `ytsearch1:${query}`;
-}
-
 function getCandidateUrl(candidate = {}) {
   const direct =
     candidate.webpage_url ||
@@ -832,7 +822,7 @@ function scoreSpotifyYoutubeCandidate(track = {}, candidate = {}) {
     expectedDurationSeconds <= 0 ||
     candidateDurationSeconds <= 0 ||
     Math.abs(expectedDurationSeconds - candidateDurationSeconds) <= 18;
-  const hardReject = hasHardSpotifyRejectWord(track, candidate) || require("./discover/youtube-music.cjs").isJunkVideo(candidateTitle, `${wantedTitle} ${wantedArtist}`);
+  const hardReject = hasHardSpotifyRejectWord(track, candidate) || isJunkVideo(candidateTitle, `${wantedTitle} ${wantedArtist}`);
 
   if (hasUsefulTitle && !hardReject) {
     score += 8;
@@ -859,57 +849,23 @@ function scoreSpotifyYoutubeCandidate(track = {}, candidate = {}) {
 async function findSpotifyYoutubeMatch(track = {}, onProgress, job = {}) {
   const selected = require("./discover/track-identity.cjs").selectedYouTubeUrl(getSpotifyTrackId(track));
   if (selected) return { matchOk: true, matchScore: 100, matchMode: "selected-recording", providerUrl: selected, matchedTitle: String(track.title || ""), matchedArtist: String(track.artist || ""), matchedDurationMs: Number(track.durationMs) || 0 };
+  if (activeDownloadCancelled) throw new Error("Download cancelled");
+  const query = [track.title || track.name, track.artist || track.artists].filter(Boolean).join(" ").trim();
+  const direct = query.length >= 2 && query.length <= 160
+    ? exactMusicCandidate(track, await searchMusicCatalog("recording", query).catch(() => [])) : null;
+  if (activeDownloadCancelled) throw new Error("Download cancelled");
+  if (direct) return { matchOk: true, matchScore: 100, matchMode: "catalog-exact", providerUrl: direct.url, matchedTitle: direct.title, matchedArtist: direct.artist, matchedDurationMs: direct.durationMs };
   const candidates = await searchSpotifyYoutubeCandidates(track, 12);
   const scored = candidates
     .map((candidate) => scoreSpotifyYoutubeCandidate(track, candidate))
+    .filter(candidate => normalizeYouTubeUrl(candidate.providerUrl))
+    .map(candidate => ({ ...candidate, providerUrl: normalizeYouTubeUrl(candidate.providerUrl) }))
     .sort((a, b) => b.matchScore - a.matchScore);
 
   const best = scored.find((candidate) => candidate.matchOk) || scored[0] || null;
   const title = String(track.title || track.name || "track").trim();
 
   if (!best || !best.matchOk) {
-    const fallbackUrl = buildSpotifyDirectSearchFallbackUrl(track, best);
-
-    if (fallbackUrl) {
-      reportProgress(onProgress, {
-        type: "download",
-        status: "downloading",
-        id: job.id,
-        url: job.url,
-        spotifyTrackId: job.spotifyTrackId,
-        spotifyUrl: job.spotifyUrl,
-        source: "spotify",
-        provider: "youtube",
-        index: job.index,
-        total: job.total,
-        file: title,
-        progress: 4,
-        speed: null,
-        size: null,
-        eta: null,
-        providerUrl: fallbackUrl,
-        message: `Using direct search fallback: "${title}"`
-      });
-
-      return {
-        ok: true,
-        url: job.url,
-        spotifyTrackId: job.spotifyTrackId,
-        spotifyUrl: job.spotifyUrl,
-        source: "spotify",
-        provider: "youtube",
-        matchOk: true,
-        matchScore: best?.matchScore || 32,
-        matchMode: "direct-search",
-        matchReasons: best?.matchReasons || ["direct-search-fallback"],
-        matchedTitle: best?.matchedTitle || title,
-        matchedArtist: best?.matchedArtist || "",
-        matchedDurationMs: best?.matchedDurationMs || 0,
-        providerUrl: fallbackUrl,
-        candidatesChecked: scored.length
-      };
-    }
-
     const bestScore = Math.round(best?.matchScore || 0);
     const message = scored.length
       ? `Could not safely match "${title}" (best score ${bestScore}).`
@@ -1058,7 +1014,7 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
       status: "downloading",
       progress: 6,
       providerUrl: match.providerUrl,
-      message: match.matchMode === "direct-search" ? `Searching YouTube directly: ${title}` : `Matched ${match.matchMode || "safely"} (${Math.round(match.matchScore)}): ${match.matchedTitle || title}`
+      message: match.matchMode === "selected-recording" ? `Selected recording: ${title}` : `Matched ${match.matchMode || "safely"} (${Math.round(match.matchScore)}): ${match.matchedTitle || title}`
     });
 
     const resultMetadata = {

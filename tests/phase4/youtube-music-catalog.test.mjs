@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {createRequire} from "node:module";
 const require=createRequire(import.meta.url);
-const {createYouTubeMusicSearch,mapSearchResponse,safeThumbnail,isJunkVideo}=require("../../electron/discover/youtube-music.cjs");
+const {createYouTubeMusicSearch,mapSearchResponse,safeThumbnail,isJunkVideo,exactMusicCandidate}=require("../../electron/discover/youtube-music.cjs");
 const col=runs=>({musicResponsiveListItemFlexColumnRenderer:{text:{runs}}});
 const linked=(text,pageType,browseId)=>({text,navigationEndpoint:{browseEndpoint:{browseId,browseEndpointContextSupportedConfigs:{browseEndpointContextMusicConfig:{pageType}}}}});
 const row=(title,id="abcdefghijk")=>({musicResponsiveListItemRenderer:{playlistItemData:{videoId:id},flexColumns:[col([{text:title}]),col([linked("Kenshi Yonezu","MUSIC_PAGE_TYPE_ARTIST","UCabcdefghijklmnopqrstuv"),{text:" • "},linked("KICK BACK","MUSIC_PAGE_TYPE_ALBUM","MPREalbum"),{text:" • "},{text:"3:13"}])],thumbnail:{musicThumbnailRenderer:{thumbnail:{thumbnails:[{url:"https://lh3.googleusercontent.com/abc=w512-h512-l90-rj",width:512,height:512}]}}}}});
@@ -26,4 +26,17 @@ test("catalog requests coalesce, cache and send no account credentials",async()=
 test("catalog failure is not cached",async()=>{
  let calls=0;const search=createYouTubeMusicSearch(async()=>++calls===1?{ok:false}:{ok:true,text:async()=>JSON.stringify(response([row("KICK BACK")]))});
  await assert.rejects(search("recording","kick back"));assert.equal((await search("recording","kick back")).length,1);
+});
+
+
+test("automatic download matching requires exact metadata, duration and an unambiguous video ID",()=>{
+ const wanted={title:"KICK BACK",artist:"Kenshi Yonezu",durationMs:193000};
+ const correct={...wanted,url:"https://www.youtube.com/watch?v=abcdefghijk",durationMs:194000};
+ assert.equal(exactMusicCandidate(wanted,[correct]),correct);
+ assert.equal(exactMusicCandidate(wanted,[{...correct,title:"KICK BACK (live)"}]),null);
+ assert.equal(exactMusicCandidate(wanted,[{...correct,durationMs:205000}]),null);
+ assert.equal(exactMusicCandidate(wanted,[{...correct,artist:"Someone else"}]),null);
+ assert.equal(exactMusicCandidate(wanted,[correct,{...correct,url:"https://www.youtube.com/watch?v=abcdefghij2"}]),null);
+ assert.equal(exactMusicCandidate(wanted,[{...correct,url:"https://evil.test/watch?v=abcdefghijk"}]),null);
+ assert.equal(exactMusicCandidate({...wanted,durationMs:0},[correct]),null);
 });

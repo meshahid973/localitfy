@@ -117,4 +117,14 @@ function createYouTubeMusicSearch(fetchImpl=globalThis.fetch,now=Date.now) {
     pending.set(key,task);return task;
   };
 }
-module.exports={createYouTubeMusicSearch,mapSearchResponse,safeThumbnail,isJunkVideo,matchesQuery};
+// Only skip secondary matching if catalog title, artist and known duration agree.
+function exactMusicCandidate(wanted, items) {
+  const title=norm(wanted?.title || wanted?.name), artist=norm(wanted?.artist || wanted?.artists);
+  const durationMs=Number(wanted?.durationMs) || Number(wanted?.duration)*1000 || 0;
+  if(!title||!artist||!Number.isFinite(durationMs)||durationMs<=0)return null;
+  const exact=arr(items).filter(item=>norm(item.title)===title&&norm(item.artist)===artist&&Number.isFinite(item.durationMs)&&Math.abs(item.durationMs-durationMs)<=3000&&/^https:\/\/www\.youtube\.com\/watch\?v=[A-Za-z0-9_-]{11}$/.test(item.url||""));
+  // Different video IDs may refer to different recordings; ambiguity falls back.
+  const unique=[...new Map(exact.map(item=>[item.url,item])).values()];
+  return unique.length===1?unique[0]:null;
+}
+module.exports={createYouTubeMusicSearch,mapSearchResponse,safeThumbnail,isJunkVideo,matchesQuery,exactMusicCandidate};
