@@ -1,3 +1,4 @@
+const { finalizeDownloadImport } = require("./runtime/download-imports.cjs");
 const { filePathKey } = require("./runtime/path-identity.cjs");
 const { app, powerMonitor, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net, safeStorage } = require("electron");
 const { createIpcRouter } = require("./ipc/router.cjs");
@@ -62,6 +63,8 @@ const {
   downloadAudioUrls,
   cancelActiveDownloads,
   listDownloadJobs,
+  runDownloadOperation,
+  isDownloadFileInProgress,
   getDownloadRecoveryRequest,
   clearDownloadJobs,
   convertLocalMediaFiles,
@@ -1385,7 +1388,7 @@ function listAudioFilesInDirectory(directory, options = {}) {
         walk(fullPath, depth + 1);
         continue;
       }
-      if (!entry.isFile() || !isAudioFile(fullPath) || /\.(part|tmp|download|crdownload)$/i.test(entry.name)) continue;
+      if (!entry.isFile() || !isAudioFile(fullPath) || isDownloadFileInProgress(fullPath) || /\.(part|tmp|download|crdownload)$/i.test(entry.name)) continue;
       out.push(fullPath);
     }
   };
@@ -1457,6 +1460,7 @@ async function importNewAudioFilesFromDirectory(directory, tracks = [], options 
 async function importNewAudioFiles(audioFiles, tracks = []) {
   const existingPaths = new Set(getSongs().map((song) => filePathKey(String(song.filePath || ""))).filter(Boolean));
   const newFiles = audioFiles.filter((filePath) => {
+    if (isDownloadFileInProgress(filePath)) return false;
     const key = filePathKey(String(filePath || ""));
     return key && !existingPaths.has(key);
   });
@@ -2422,7 +2426,7 @@ app.whenReady().then(async () => {
       const senderWindow = BrowserWindow.fromWebContents(event.sender) || mainWindow;
       const result = await openImportDialog(senderWindow);
       if (result.canceled || !result.filePaths?.length) return listSongsShaped();
-      const validAudioFiles = result.filePaths.filter((f) => fileExists(f) && isAudioFile(f));
+      const validAudioFiles = result.filePaths.filter((f) => fileExists(f) && isAudioFile(f) && !isDownloadFileInProgress(f));
       if (!validAudioFiles.length) return listSongsShaped();
       const pixelArtFiles = getPixelArtFiles();
       const usedCovers = new Set();
@@ -2452,7 +2456,7 @@ app.whenReady().then(async () => {
   ipcRouter.handle("album:scan-folder", async (event, payload = {}) => { try { return await handleAlbumFolderScan(event, payload); } catch (error) { console.log("[localtify album folder scan error]", error?.stack || error?.message || error); return { ok: false, error: error?.message || "album folder scan failed", songs: listSongsShaped(), albums: [] }; } });
   ipcRouter.handle("album:import-folder", async (event, payload = {}) => { try { return await handleAlbumFolderImport(event, payload); } catch (error) { console.log("[localtify album folder import error]", error?.stack || error?.message || error); return { ok: false, error: error?.message || "album folder import failed", songs: listSongsShaped(), albums: [] }; } });
 
-  ipcRouter.handle("media:convert-pick", async (event, payload) => {
+  ipcRouter.handle("media:convert-pick", (event, payload) => runDownloadOperation(async () => {
     try {
       const senderWindow = BrowserWindow.fromWebContents(event.sender) || mainWindow;
       const dialogOptions = { title: "choose videos or audio to convert", buttonLabel: "convert to mp3", defaultPath: app.getPath("downloads"), properties: ["openFile", "multiSelections"], filters: [{ name: "media files", extensions: ["mp4", "webm", "mkv", "mov", "avi", "m4v", "mp3", "wav", "ogg", "flac", "m4a", "aac"] }] };
@@ -2473,9 +2477,10 @@ app.whenReady().then(async () => {
       }
       return { ...converted, changedCount, songs: afterSongs, downloadFolder: getDownloadDirectory() };
     } catch (error) { console.log("[localitfy convert pick error]", error?.message); return { downloadFolder: getDownloadDirectory(), conversions: [], changedCount: 0, songs: listSongsShaped() }; }
-  });
+  }));
 
   const runAudioDownload = async (event, payload) => {
+    let downloaded;
     try {
       const urls = Array.isArray(payload?.urls) ? payload.urls : [payload?.url].filter(Boolean);
       const options = payload?.options && typeof payload.options === "object" ? payload.options : {};
@@ -2483,9 +2488,10 @@ app.whenReady().then(async () => {
       const autoAdd = typeof payload?.autoAdd === "boolean" ? payload.autoAdd : options.autoAdd !== false;
       const downloadFolder = getDownloadDirectory(payload?.folder ?? options.downloadFolder);
       const result = await downloadAudioUrls(urls, downloadFolder, (progress) => {
-        if (!mainWindow || mainWindow.isDestroyed()) return;
+        if (!event.sender || event.sender.isDestroyed()) return;
         event.sender.send("download:progress", progress);
       }, { bitrate: payload?.bitrate || 192, proxy: payload?.proxy || "", quality, format, cleanTitle, keepOriginal: keepOriginal === true, autoAdd });
+      downloaded = result;
       const successfulFiles = result.downloads.filter((item) => item.ok && item.filePath && fileExists(item.filePath) && isAudioFile(item.filePath)).map((item) => item.filePath);
       let changedCount = 0;
       if (autoAdd && successfulFiles.length) {
@@ -2500,14 +2506,18 @@ app.whenReady().then(async () => {
         changedCount += refresh.changedCount;
       }
       const afterSongs = listSongsShaped();
+      finalizeDownloadImport(event, result.downloads, afterSongs);
       console.log(`[localitfy download] downloaded=${successfulFiles.length}, changed=${changedCount}, autoAdd=${autoAdd}`);
       return { ...result, changedCount, songs: afterSongs, autoAdd };
     } catch (error) {
       console.log("[localitfy download error]", error?.stack || error?.message);
-      return { downloadFolder: getDownloadDirectory(), downloads: [{ ok: false, error: error?.message || "download failed" }], changedCount: 0, songs: listSongsShaped(), autoAdd: true };
+      const songs = listSongsShaped();
+      const message = error?.message || "download failed";
+      const downloads = finalizeDownloadImport(event, downloaded?.downloads, songs, message);
+      return { downloadFolder: downloaded?.downloadFolder || getDownloadDirectory(), downloads, changedCount: 0, songs, autoAdd: true };
     }
   };
-  ipcRouter.handle("download:audio", runAudioDownload);
+  ipcRouter.handle("download:audio", (event, payload) => runDownloadOperation(() => runAudioDownload(event, payload)));
   ipcRouter.handle("download:jobs", () => listDownloadJobs());
   ipcRouter.handle("download:clear-jobs", (_event, ids) => clearDownloadJobs(ids));
 
@@ -2626,15 +2636,17 @@ app.whenReady().then(async () => {
   const runSpotifyDownloadBatch = async (event, payload = {}) => {
     const tracks = Array.isArray(payload?.tracks) ? payload.tracks : [];
     const options = payload?.options && typeof payload.options === "object" ? payload.options : payload;
+    let downloaded;
     try {
       const downloadFolder = getDownloadDirectory(options?.downloadFolder || options?.outputDir || options?.folder);
       const autoAdd = typeof options?.autoAdd === "boolean" ? options.autoAdd : true;
       const progressCallback = (progress) => {
-        if (!mainWindow || mainWindow.isDestroyed()) return;
+        if (!event.sender || event.sender.isDestroyed()) return;
         event.sender.send("download:progress", progress);
         if (progress?.status === "done") event.sender.send("spotdl-track-done", progress);
       };
       const result = await downloadSpotifyBatch(tracks, downloadFolder, progressCallback, options);
+      downloaded = result;
       const tracksBySpotifyId = new Map(tracks.map((track) => [String(track?.spotifyTrackId || track?.id || "").trim(), track]).filter(([id]) => Boolean(id)));
       const successfulDownloads = (result.downloads || []).map((item, index) => {
         const spotifyTrackId = String(item?.spotifyTrackId || "").trim();
@@ -2680,22 +2692,26 @@ app.whenReady().then(async () => {
         const imported = importMapBySpotifyId.get(String(item?.spotifyTrackId || "").trim()) || (item?.filePath ? importMapByFilePath.get(filePathKey(String(item.filePath))) : null) || null;
         return { ...item, importedToLibrary: Boolean(imported), librarySongId: imported?.songId || item.librarySongId || "" };
       });
-      for (const item of finalDownloads) if (item?.ok) event.sender.send("spotdl-track-done", item);
-      return { ...result, downloads: finalDownloads, changedCount, songs: listSongsShaped(), autoAdd, downloadFolder, importedFilePaths: Array.from(new Set(importedFilePaths.filter(Boolean))), spotifyImportedSongIds: Array.from(new Set(importedSongIds.filter(Boolean))), spotifyImportMap, spotifySourceName: payload?.sourceName || options?.sourceName || "", spotifySourceType: payload?.sourceType || options?.sourceType || "" };
+      const songs = listSongsShaped();
+      finalizeDownloadImport(event, finalDownloads, songs);
+      return { ...result, downloads: finalDownloads, changedCount, songs, autoAdd, downloadFolder, importedFilePaths: Array.from(new Set(importedFilePaths.filter(Boolean))), spotifyImportedSongIds: Array.from(new Set(importedSongIds.filter(Boolean))), spotifyImportMap, spotifySourceName: payload?.sourceName || options?.sourceName || "", spotifySourceType: payload?.sourceType || options?.sourceType || "" };
     } catch (error) {
       console.log("[localitfy spotify batch download error]", error?.message || error);
-      return { downloadFolder: getDownloadDirectory(options?.downloadFolder || options?.outputDir || options?.folder), downloads: [{ ok: false, error: error?.message || "batch download failed" }], changedCount: 0, songs: listSongsShaped(), spotifyImportedSongIds: [], spotifyImportMap: [], importedFilePaths: [] };
+      const songs = listSongsShaped();
+      const message = error?.message || "batch download failed";
+      const downloads = finalizeDownloadImport(event, downloaded?.downloads, songs, message);
+      return { downloadFolder: downloaded?.downloadFolder || getDownloadDirectory(options?.downloadFolder || options?.outputDir || options?.folder), downloads, changedCount: 0, songs, spotifyImportedSongIds: [], spotifyImportMap: [], importedFilePaths: [] };
     }
   };
-  ipcRouter.handle("spotify-download-batch", runSpotifyDownloadBatch);
-  ipcRouter.handle("spotdl-download-batch", runSpotifyDownloadBatch);
-  ipcRouter.handle("download:resume-job", async (event, id) => {
+  ipcRouter.handle("spotify-download-batch", (event, payload) => runDownloadOperation(() => runSpotifyDownloadBatch(event, payload)));
+  ipcRouter.handle("spotdl-download-batch", (event, payload) => runDownloadOperation(() => runSpotifyDownloadBatch(event, payload)));
+  ipcRouter.handle("download:resume-job", (event, id) => runDownloadOperation(async () => {
     const request = getDownloadRecoveryRequest(id);
     if (request.source === "spotify") return runSpotifyDownloadBatch(event, {
       tracks: [request.track], options: { ...request.options, downloadFolder: request.folder }
     });
     return runAudioDownload(event, { urls: [request.url], folder: request.folder, options: request.options });
-  });
+  }));
 
   ipcRouter.handle("localitfy:check-for-updates", async (_event, payload) => checkForUpdates(payload));
   ipcRouter.handle("localitfy:download-update", async () => downloadUpdate());

@@ -6,7 +6,7 @@ import { createRequire } from "node:module";
 import test from "node:test";
 
 const require = createRequire(import.meta.url);
-const { publishDownloadedFile } = require("../../electron/download-publication.cjs");
+const { publishDownloadedFile, isPendingPublication } = require("../../electron/download-publication.cjs");
 const { createDownloadJobStore } = require("../../electron/download-jobs.cjs");
 const { filePathKey } = require("../../electron/runtime/path-identity.cjs");
 
@@ -78,8 +78,10 @@ test("filesystems without hard links reserve exclusively and recover completed o
     fs.writeFileSync(source, "complete audio");
     fs.writeFileSync(path.join(directory, "track.mp3"), "user audio");
     const output = await publishDownloadedFile(source, directory, "track.mp3", identity => {
+      if (identity.pendingOutput) assert.equal(isPendingPublication(identity.filePath), true, "watchers must not import a portable file while it is copied");
       store.update(job.id, { ...identity, status: "importing", result: { ok: true, filePath: identity.filePath } });
     });
+    assert.equal(isPendingPublication(output), false);
     assert.equal(path.basename(output), "track (1).mp3");
     assert.equal(fs.readFileSync(path.join(directory, "track.mp3"), "utf8"), "user audio");
     const recorded = store.get(job.id);
@@ -89,6 +91,25 @@ test("filesystems without hard links reserve exclusively and recover completed o
     store.update(job.id, { mtimeMs: -1 });
     assert.equal(createDownloadJobStore(directory).prepare(request).status, "done");
   } finally { fs.promises.link = link; fs.rmSync(directory, { recursive: true, force: true }); }
+});
+
+test("partial recovery does not remove a replacement file with different ownership", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "localtify-publish-"));
+  try {
+    const store = createDownloadJobStore(directory);
+    const request = { source: "youtube", url: "https://www.youtube.com/watch?v=abcdefghijk", folder: directory };
+    const job = store.prepare(request);
+    const filePath = path.join(directory, "track.mp3");
+    fs.writeFileSync(filePath, "partial");
+    const owned = fs.statSync(filePath);
+    store.update(job.id, { status: "importing", result: { ok: true, filePath }, sizeBytes: 100, mtimeMs: -1,
+      pendingOutput: { filePath, ino: owned.ino, dev: owned.dev, birthtimeMs: owned.birthtimeMs } });
+    fs.renameSync(filePath, path.join(directory, "old-partial"));
+    fs.writeFileSync(filePath, "user's replacement");
+    const recovered = createDownloadJobStore(directory);
+    recovered.remove(job.id);
+    assert.equal(fs.readFileSync(filePath, "utf8"), "user's replacement");
+  } finally { fs.rmSync(directory, { recursive: true, force: true }); }
 });
 
 test("recovery removes only its verified incomplete portable output, preserving unrelated files", () => {

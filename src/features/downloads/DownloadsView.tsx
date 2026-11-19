@@ -30,7 +30,7 @@ export type DownloadsViewProps = {
   handleSpotifyLogin: () => unknown;
   handleSpotifyLogout: () => unknown;
   openDownloadedSongInLibrary: (item: DownloadResult | DownloadQueueItem) => unknown;
-  retryDownload: (url: string, source: "youtube" | "spotify" | "auto", spotifyTrackId?: string) => unknown;
+  retryDownload: (url: string, source: "youtube" | "spotify" | "auto", spotifyTrackId?: string, recoveryId?: string) => unknown;
   retryFailedDownloads: () => unknown;
   retrySpotifyTrack: (track: SpotifyTrack) => unknown;
   setDownloadText: Dispatch<SetStateAction<string>>;
@@ -418,7 +418,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
                               <div className="downloadQueueActions">
                                 {failed ? (
                                   <>
-                                    <button className="softButton downloadRetryButtonV502" onClick={() => void retryDownload(item.url, item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "")}>{item.status === "interrupted" ? "resume" : "retry"}</button>
+                                    <button className="softButton downloadRetryButtonV502" onClick={() => void retryDownload(item.url, item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "", item.recoveryId)}>{item.status === "interrupted" ? "resume" : "retry"}</button>
                                     <button className="softButton" onClick={() => void copyDownloadError(item.error || item.message || item.url)}>copy error</button>
                                   </>
                                 ) : null}
@@ -500,7 +500,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
 
                             {failed ? (
                               <span className="downloadResultActionsV502">
-                                <button className="softButton downloadRetryButtonV502" onClick={() => void retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "")}>retry</button>
+                                <button className="softButton downloadRetryButtonV502" onClick={() => void retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "", item.recoveryId)}>retry</button>
                                 <button className="softButton" onClick={() => void copyDownloadError(item.error || item.url || item.filename)}>copy error</button>
                               </span>
                             ) : imported ? (

@@ -59,6 +59,7 @@ declare global {
     index?: number;
     total?: number;
     status?: "queued" | "downloading" | "converting" | "importing" | "done" | "failed" | "cancelled" | "interrupted";
+    filePath?: string;
     file?: string;
     filename?: string;
     progress?: number;
@@ -89,6 +90,7 @@ declare global {
 
   type LocalitfyDownloadResult = {
     ok: boolean;
+    status?: LocalitfyDownloadProgressPayload["status"];
     recoveryId?: string;
     url?: string;
     filePath?: string;

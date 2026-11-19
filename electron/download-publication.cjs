@@ -3,6 +3,8 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const { filePathKey } = require("./runtime/path-identity.cjs");
+const pendingPublications = new Set();
 
 /** Publish complete audio without replacing an existing file, including on another drive. */
 async function publishDownloadedFile(source, directory, filename, beforePublish = () => {}, publicationId = crypto.randomUUID()) {
@@ -17,6 +19,7 @@ async function publishDownloadedFile(source, directory, filename, beforePublish 
     const stat = await fs.promises.stat(temporary);
     if (!stat.size) throw new Error("Downloaded audio is empty");
     const parsed = path.parse(filename);
+    let portableHash;
     for (let index = 0; index < 10000; index++) {
       const candidate = path.join(directory, index ? `${parsed.name} (${index})${parsed.ext}` : filename);
       await beforePublish({ filePath: candidate, filename: path.basename(candidate), sizeBytes: stat.size, mtimeMs: stat.mtimeMs });
@@ -30,17 +33,20 @@ async function publishDownloadedFile(source, directory, filename, beforePublish 
         if (["ENOTSUP", "EOPNOTSUPP", "EPERM", "ENOSYS"].includes(error.code)) {
           // FAT/exFAT cannot hard-link. Reserve exclusively, then checkpoint ownership
           // before copying, so restart recovery can distinguish our partial file.
+          if (!portableHash) {
+            const hash = crypto.createHash("sha256");
+            for await (const chunk of fs.createReadStream(temporary)) hash.update(chunk);
+            portableHash = hash.digest("hex");
+          }
           let output;
           try { output = await fs.promises.open(candidate, "wx"); }
           catch (reserveError) { if (reserveError.code === "EEXIST") continue; throw reserveError; }
           let complete = false;
-          const hash = crypto.createHash("sha256");
+          pendingPublications.add(filePathKey(candidate));
           try {
-            for await (const chunk of fs.createReadStream(temporary)) hash.update(chunk);
-            const sha256 = hash.digest("hex");
             const owned = await output.stat();
-            const identity = { filePath: candidate, filename: path.basename(candidate), sizeBytes: stat.size, mtimeMs: stat.mtimeMs, sha256,
-              pendingOutput: { ino: owned.ino, dev: owned.dev, birthtimeMs: owned.birthtimeMs } };
+            const identity = { filePath: candidate, filename: path.basename(candidate), sizeBytes: stat.size, mtimeMs: stat.mtimeMs, sha256: portableHash,
+              pendingOutput: { filePath: candidate, ino: owned.ino, dev: owned.dev, birthtimeMs: owned.birthtimeMs } };
             await beforePublish(identity);
             for await (const chunk of fs.createReadStream(temporary)) {
               let offset = 0;
@@ -57,7 +63,8 @@ async function publishDownloadedFile(source, directory, filename, beforePublish 
             return candidate;
           } finally {
             await output.close();
-            if (!complete) await fs.promises.unlink(candidate).catch(() => {});
+            if (!complete) await fs.promises.unlink(candidate).catch(error => { if (error.code !== "ENOENT") throw error; });
+            pendingPublications.delete(filePathKey(candidate));
           }
         }
         throw error;
@@ -69,9 +76,23 @@ async function publishDownloadedFile(source, directory, filename, beforePublish 
   }
 }
 
+function cleanPartialPublication(job) {
+  const pending = job?.pendingOutput;
+  const filename = pending?.filePath || job?.result?.filePath;
+  if (!pending || !filename || !Number.isSafeInteger(job.sizeBytes) || job.sizeBytes <= 0 || path.dirname(filename) !== job.request.folder) return false;
+  let stat;
+  try { stat = fs.statSync(filename); } catch (error) { if (error.code === "ENOENT") return false; throw error; }
+  if (!stat.isFile() || stat.ino !== pending.ino || stat.dev !== pending.dev || stat.birthtimeMs !== pending.birthtimeMs || stat.size >= job.sizeBytes) return false;
+  pendingPublications.add(filePathKey(filename));
+  fs.unlinkSync(filename);
+  pendingPublications.delete(filePathKey(filename));
+  return true;
+}
+
 function publicationTemporaryPath(directory, id) {
   if (!path.isAbsolute(directory) || !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(id)) throw new Error("Invalid publication identity");
   return path.join(directory, `.localtify-publish-${id}.tmp`);
 }
 
-module.exports = { publishDownloadedFile, publicationTemporaryPath };
+module.exports = { publishDownloadedFile, publicationTemporaryPath, cleanPartialPublication,
+  isPendingPublication: filename => pendingPublications.has(filePathKey(filename)) };

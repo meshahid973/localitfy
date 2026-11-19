@@ -7,7 +7,8 @@ const ffmpegStatic = require("ffmpeg-static");
 const sanitize = require("sanitize-filename");
 const { ensureYtDlpBinary, spawnYtDlp } = require("./runtime/yt-dlp.cjs");
 const { createDownloadJobStore } = require("./download-jobs.cjs");
-const { publishDownloadedFile } = require("./download-publication.cjs");
+const { publishDownloadedFile, isPendingPublication } = require("./download-publication.cjs");
+const { filePathKey } = require("./runtime/path-identity.cjs");
 
 let _userDataPath = null;
 let _ffmpegPath = ffmpegStatic || null;
@@ -16,10 +17,18 @@ const activeDownloadProcesses = new Set();
 let activeDownloadCancelled = false;
 let activeDownloadInterrupted = false;
 let activeBatch = false;
+let activeDownloadOperation = false;
 let downloadJobs = null;
 let downloadStorageError = "";
 const batchJobIds = new Set();
 const progressSavedAt = new Map();
+
+/** Keep the operation locked until its library import has committed as well. */
+async function runDownloadOperation(work) {
+  if (activeDownloadOperation) throw new Error("A download or conversion is already running");
+  activeDownloadOperation = true;
+  try { return await work(); } finally { activeDownloadOperation = false; }
+}
 
 async function runDownloadBatch(work) {
   if (activeBatch) throw new Error("A download or conversion is already running");
@@ -30,7 +39,7 @@ async function runDownloadBatch(work) {
   try { return await work(); } finally {
     for (const id of batchJobIds) {
       const job = downloadJobs?.get(id);
-      if (["queued", "downloading", "converting", "importing"].includes(job?.status)) {
+      if (["queued", "downloading", "converting", "importing"].includes(job?.status) && !(job.status === "importing" && job.result?.ok)) {
         try { downloadJobs.update(id, { status: activeDownloadCancelled && !activeDownloadInterrupted ? "cancelled" : "interrupted", message: activeDownloadCancelled && !activeDownloadInterrupted ? "Download cancelled" : "Download interrupted. Resume when ready." }); }
         catch (error) { console.error("[localtify download checkpoint]", error.message); }
       }
@@ -78,17 +87,47 @@ function getDownloadRecoveryRequest(id) {
 
 function clearDownloadJobs(ids) {
   if (!Array.isArray(ids) || ids.length > 500 || ids.some(id => typeof id !== "string")) throw new Error("Invalid saved download selection");
+  if (ids.some(id => ["queued", "downloading", "converting", "importing"].includes(downloadJobs?.get(id)?.status))) throw new Error("Cancel the active download before removing it");
   for (const id of ids) downloadJobs?.remove(id);
   return true;
 }
 
 function recordDownloadResult(job, result) {
   if (!job?.recoveryId || !downloadJobs) return;
-  const status = result.ok ? "done" : activeDownloadInterrupted ? "interrupted" : /cancel/i.test(result.error || "") ? "cancelled" : "failed";
+  const importPending = result.ok && downloadJobs.get(job.recoveryId)?.request.options.autoAdd !== false;
+  const status = result.ok ? importPending ? "importing" : "done" : activeDownloadInterrupted ? "interrupted" : /cancel/i.test(result.error || "") ? "cancelled" : "failed";
   let identity = {};
   if (result.ok) { const stat = fs.statSync(result.filePath); identity = { sizeBytes: stat.size, mtimeMs: stat.mtimeMs }; }
-  downloadJobs.update(job.recoveryId, { status, result, ...identity, progress: result.ok ? 100 : 0, message: result.ok ? "Downloaded" : result.error });
+  downloadJobs.update(job.recoveryId, { status, result, ...identity, importPending, progress: result.ok ? 100 : 0, message: result.ok ? importPending ? "Adding saved audio to library" : "Downloaded" : result.error });
   if (result.ok || status === "cancelled") downloadJobs.cleanWorkDirectory(job.recoveryId);
+}
+
+function completeDownloadImports(results, songs, error = "") {
+  const byPath = new Map((songs || []).map(song => [filePathKey(song.filePath), song]));
+  for (const item of results || []) {
+    if (!item?.ok || !item.recoveryId) continue;
+    const job = downloadJobs?.get(item.recoveryId);
+    if (!job) continue;
+    const song = byPath.get(filePathKey(item.filePath));
+    downloadJobs.update(job.id, {
+      status: error ? "interrupted" : "done", importPending: Boolean(error), progress: 100,
+      pendingOutput: null,
+      message: error ? "Audio saved. Resume to finish adding it to the library." : song ? "Added to library" : "Downloaded",
+      result: { ...job.result, importedToLibrary: Boolean(song), librarySongId: song?.id || "", error: error || undefined }
+    });
+  }
+}
+
+function isDownloadFileInProgress(filename) {
+  if (isPendingPublication(filename)) return true;
+  if (!_userDataPath || typeof filename !== "string" || !path.isAbsolute(filename)) return false;
+  const relative = path.relative(path.join(_userDataPath, "download-jobs"), filename);
+  return relative === "" || !relative.startsWith(`..${path.sep}`) && relative !== ".." && !path.isAbsolute(relative);
+}
+
+function reportProgress(callback, payload) {
+  try { callback?.(payload); }
+  catch (error) { console.warn("[localtify download progress listener]", error?.message || error); }
 }
 
 function isSupportedMediaPath(filePath) {
@@ -343,7 +382,7 @@ function runYtDlp(ytDlp, args, onProgress, job) {
             try { downloadJobs.update(job.recoveryId, { status: payload.status, progress: payload.progress, message: payload.message }); progressSavedAt.set(job.recoveryId, Date.now()); }
             catch (error) { proc.kill(); return reject(error); }
           }
-          onProgress?.(payload);
+          reportProgress(onProgress, payload);
         }
       }
     };
@@ -380,7 +419,7 @@ async function downloadYouTube(url, destinationDirectory, onProgress, options = 
     }
     const outputTemplate = path.join(workingDirectory, `ytdl_${tempId}_%(title)s.%(ext)s`);
 
-    onProgress?.({
+    reportProgress(onProgress, {
       type: "download",
       status: "downloading",
       id: job.id,
@@ -436,9 +475,9 @@ async function downloadYouTube(url, destinationDirectory, onProgress, options = 
     }, job.recoveryId);
     try { fs.unlinkSync(sourcePath); } catch (error) { console.warn("[localtify downloaded source cleanup]", error.message); }
 
-    onProgress?.({
+    reportProgress(onProgress, {
       type: "download",
-      status: "done",
+      status: options.autoAdd === false ? "done" : "importing",
       id: job.id,
       url,
       index: job.index,
@@ -498,7 +537,7 @@ function convertOneToMp3(inputPath, outputDirectory, bitrate = 192, onProgress, 
     const safeBitrate = Math.max(64, Math.min(320, Number(bitrate) || 192));
     let lastPercent = -1;
 
-    onProgress?.({ type: "convert", file: baseName, progress: 0, speed: null, message: "Converting to MP3..." });
+    reportProgress(onProgress, { type: "convert", file: baseName, progress: 0, speed: null, message: "Converting to MP3..." });
 
     const proc = spawn(
       _ffmpegPath,
@@ -514,7 +553,7 @@ function convertOneToMp3(inputPath, outputDirectory, bitrate = 192, onProgress, 
         const percent = Math.max(0, Math.min(99, Math.floor((elapsed / durationSeconds) * 100)));
         if (percent === lastPercent) continue;
         lastPercent = percent;
-        onProgress?.({ type: "convert", file: baseName, progress: percent, speed: null, message: `Converting... ${percent}%` });
+        reportProgress(onProgress, { type: "convert", file: baseName, progress: percent, speed: null, message: `Converting... ${percent}%` });
       }
     });
 
@@ -530,7 +569,7 @@ function convertOneToMp3(inputPath, outputDirectory, bitrate = 192, onProgress, 
         return;
       }
       if (deleteAfter) { try { fs.unlinkSync(inputPath); } catch {} }
-      onProgress?.({ type: "convert", file: baseName, progress: 100, speed: null, message: "Done" });
+      reportProgress(onProgress, { type: "convert", file: baseName, progress: 100, speed: null, message: "Done" });
       resolve({ ok: true, filePath: outputPath, filename: path.basename(outputPath) });
     });
   });
@@ -902,7 +941,7 @@ async function findSpotifyYoutubeMatch(track = {}, onProgress, job = {}) {
     const fallbackUrl = buildSpotifyDirectSearchFallbackUrl(track, best);
 
     if (fallbackUrl) {
-      onProgress?.({
+      reportProgress(onProgress, {
         type: "download",
         status: "downloading",
         id: job.id,
@@ -946,7 +985,7 @@ async function findSpotifyYoutubeMatch(track = {}, onProgress, job = {}) {
       ? `Could not safely match "${title}" (best score ${bestScore}).`
       : `Could not find YouTube candidates for "${title}".`;
 
-    onProgress?.({
+    reportProgress(onProgress, {
       type: "download",
       status: "failed",
       id: job.id,
@@ -1036,19 +1075,19 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
 
     if (saved.status === "done") {
       results.push({ ...saved.result, recoveryId: saved.id });
-      onProgress?.({ ...basePayload, status: "done", progress: 100, message: "Already downloaded; checking library import" });
+      reportProgress(onProgress, { ...basePayload, status: options.autoAdd === false ? "done" : "importing", progress: 100, message: "Already downloaded; checking library import" });
       continue;
     }
     downloadJobs.update(saved.id, { status: "downloading", message: "Finding a matching recording" });
 
-    onProgress?.({
+    reportProgress(onProgress, {
       ...basePayload,
       status: "queued",
       progress: 0,
       message: `Queued Spotify track "${title}"`
     });
 
-    onProgress?.({
+    reportProgress(onProgress, {
       ...basePayload,
       status: "downloading",
       progress: 2,
@@ -1070,20 +1109,21 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
         error: message,
         matchOk: false
       };
-      results.push(failed);
+      results.push({ ...failed, recoveryId: saved.id });
       recordDownloadResult(basePayload, failed);
       if (String(message).toLowerCase().includes("cancel")) break;
       continue;
     }
 
     if (!match?.matchOk || !match.providerUrl) {
-      results.push(match);
-      recordDownloadResult(basePayload, match || { ok: false, error: "No safe matching recording found" });
+      const failure = match || { ok: false, url: searchUrl, source: "spotify", spotifyTrackId, error: "No safe matching recording found" };
+      results.push({ ...failure, recoveryId: saved.id });
+      recordDownloadResult(basePayload, failure);
       if (String(match?.error || "").toLowerCase().includes("cancel")) break;
       continue;
     }
 
-    onProgress?.({
+    reportProgress(onProgress, {
       ...basePayload,
       status: "downloading",
       progress: 6,
@@ -1109,7 +1149,7 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
     recordDownloadResult(basePayload, enrichedBase);
 
     if (!dlResult.ok) {
-      onProgress?.({
+      reportProgress(onProgress, {
         ...basePayload,
         status: String(dlResult.error || "").toLowerCase().includes("cancel") ? "cancelled" : "failed",
         progress: 100,
@@ -1137,7 +1177,7 @@ async function downloadAudioUrls(input, destinationDirectory, onProgress, option
     const id = saved?.id || `${Date.now()}-${index}`;
     const job = { id, recoveryId: saved?.id, url, index, total: urls.length };
 
-    onProgress?.({ type: "download", status: "queued", id, recoveryId: saved?.id, url, index, total: urls.length, file: "queued track", progress: 0, message: "Queued..." });
+    reportProgress(onProgress, { type: "download", status: "queued", id, recoveryId: saved?.id, url, index, total: urls.length, file: "queued track", progress: 0, message: "Queued..." });
 
     const normalizedUrl = normalizeYouTubeUrl(url);
     const result = saved?.status === "done" ? saved.result : normalizedUrl
@@ -1146,7 +1186,7 @@ async function downloadAudioUrls(input, destinationDirectory, onProgress, option
     recordDownloadResult(job, result);
 
     if (!result.ok) {
-      onProgress?.({ type: "download", status: String(result.error || "").toLowerCase().includes("cancel") ? "cancelled" : "failed", id, recoveryId: saved?.id, url, index, total: urls.length, file: "track", progress: 100, error: result.error, message: String(result.error || "").toLowerCase().includes("cancel") ? "Download cancelled" : "Download failed — retry?" });
+      reportProgress(onProgress, { type: "download", status: String(result.error || "").toLowerCase().includes("cancel") ? "cancelled" : "failed", id, recoveryId: saved?.id, url, index, total: urls.length, file: "track", progress: 100, error: result.error, message: String(result.error || "").toLowerCase().includes("cancel") ? "Download cancelled" : "Download failed — retry?" });
     }
 
     results.push({ ...result, recoveryId: job.recoveryId });
@@ -1189,6 +1229,9 @@ async function convertLocalMediaFiles(filePaths, destinationDirectory, options =
 
 module.exports = {
   listDownloadJobs,
+  completeDownloadImports,
+  runDownloadOperation,
+  isDownloadFileInProgress,
   getDownloadRecoveryRequest,
   clearDownloadJobs,
   normalizeYouTubeUrl,

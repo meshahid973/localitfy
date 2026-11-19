@@ -314,6 +314,7 @@ function MainModeApp() {
   });
 
   const {
+    beginDownloadOperation, endDownloadOperation, retryDownloads, cancelDownloadRetries,
     downloadText, setDownloadText,
     downloadBusy, setDownloadBusy,
     downloadResults, setDownloadResults,
@@ -2119,65 +2120,6 @@ function MainModeApp() {
     setSongs(applyLibraryOrder(sanitizeSongList(next)));
     if (importedCount) setStatusText(`added ${importedCount} new song${importedCount === 1 ? "" : "s"} from watched folders`);
   }), []);
-
-  useEffect(() => {
-    const off = window.localitfy.onDownloadProgress((payload) => {
-      const nextProgress = clamp(Number(payload.progress || 0), 0, 100);
-      const nextMessage = payload.message || "working...";
-
-      if (!payload.id && !payload.url) return;
-
-      const itemId = payload.id || payload.url || `download-${Date.now()}`;
-
-      setDownloadQueue((current) => {
-        const existingIndex = current.findIndex((item) => item.id === itemId || item.url === payload.url);
-        const previous = existingIndex >= 0 ? current[existingIndex] : null;
-        const nextItem: DownloadQueueItem = {
-          id: itemId,
-          recoveryId: payload.recoveryId || previous?.recoveryId,
-          source: payload.source || previous?.source,
-          spotifyTrackId: payload.spotifyTrackId || previous?.spotifyTrackId,
-          url: payload.url || previous?.url || "",
-          title: payload.file || payload.filename || previous?.title || "download",
-          status: payload.status || (nextProgress >= 100 ? "done" : "downloading"),
-          progress: nextProgress,
-          message: nextMessage,
-          speed: payload.speed ?? undefined,
-          eta: payload.eta ?? undefined,
-          filename: payload.filename || previous?.filename,
-          error: payload.error || previous?.error
-        };
-
-        if (existingIndex === -1) return [...current, nextItem];
-
-        const merged = {
-          ...previous,
-          ...nextItem,
-          title: payload.file || payload.filename || previous?.title || nextItem.title,
-          url: payload.url || previous?.url || nextItem.url
-        };
-
-        const sameVisualState =
-          Math.abs((previous?.progress || 0) - merged.progress) < 0.75 &&
-          previous?.status === merged.status &&
-          previous?.message === merged.message &&
-          previous?.title === merged.title &&
-          previous?.speed === merged.speed && previous?.eta === merged.eta &&
-          previous?.filename === merged.filename &&
-          previous?.error === merged.error;
-
-        if (sameVisualState) return current;
-
-        const copy = [...current];
-        copy[existingIndex] = merged;
-        return copy;
-      });
-    });
-
-    return () => {
-      off();
-    };
-  }, []);
 
   function stopPlaybackFromNative() {
     stopCrossfadeAuto();
@@ -4601,9 +4543,11 @@ function MainModeApp() {
 
   async function clearFailedDownloads() {
     const statuses = new Set(["failed", "cancelled", "interrupted"]);
-    try { await window.localitfy.clearDownloadJobs(downloadQueue.filter(item => statuses.has(item.status) && item.recoveryId).map(item => item.recoveryId!)); }
+    const selected = downloadQueue.filter(item => statuses.has(item.status));
+    const ids = new Set(selected.map(item => item.id));
+    try { await window.localitfy.clearDownloadJobs(selected.flatMap(item => item.recoveryId ? [item.recoveryId] : [])); }
     catch (error) { setPlayerError(String(error)); return; }
-    setDownloadQueue((items) => items.filter((item) => !statuses.has(item.status)));
+    setDownloadQueue((items) => items.filter((item) => !ids.has(item.id)));
     setDownloadResults((items) => items.filter((item: any) => item.ok));
     setSpotifyTracks((items) => items.map((track: any) => (
       track.downloadStatus === "failed"
@@ -4616,9 +4560,11 @@ function MainModeApp() {
   }
 
   async function clearFinishedDownloads() {
-    try { await window.localitfy.clearDownloadJobs(downloadQueue.filter(item => item.status === "done" && item.recoveryId).map(item => item.recoveryId!)); }
+    const selected = downloadQueue.filter(item => item.status === "done");
+    const ids = new Set(selected.map(item => item.id));
+    try { await window.localitfy.clearDownloadJobs(selected.flatMap(item => item.recoveryId ? [item.recoveryId] : [])); }
     catch (error) { setPlayerError(String(error)); return; }
-    setDownloadQueue((items) => items.filter((item) => item.status !== "done"));
+    setDownloadQueue((items) => items.filter((item) => !ids.has(item.id)));
     setDownloadResults((items) => items.filter((item: any) => !item.ok));
     setStatusText("cleared finished downloads");
     showAppToast("cleared finished downloads", "success");
@@ -4657,6 +4603,7 @@ function MainModeApp() {
   }
 
   async function cancelCurrentDownload() {
+    cancelDownloadRetries();
     try {
       await window.localitfy.cancelDownload?.();
       setStatusText("Cancelling downloads…");
@@ -4671,7 +4618,7 @@ function MainModeApp() {
     }
   }
 
-  async function retryDownload(url: string, source: "youtube" | "spotify" | "auto" = "auto", spotifyTrackId = "") {
+  async function retryDownload(url: string, source: "youtube" | "spotify" | "auto" = "auto", spotifyTrackId = "", recoveryId?: string) {
     if (!url) {
       showAppToast("No URL saved for this failed item", "error");
       return;
@@ -4680,9 +4627,8 @@ function MainModeApp() {
     setStatusText("retrying failed download...");
     showAppToast("retrying failed download", "info");
 
-    const saved = downloadQueue.find(item => item.recoveryId && (item.url === url || Boolean(spotifyTrackId && item.spotifyTrackId === spotifyTrackId)));
-    if (saved?.recoveryId) {
-      await downloadAudioLinks(url, saved.recoveryId);
+    if (recoveryId) {
+      await downloadAudioLinks(url, recoveryId);
       return;
     }
 
@@ -4709,7 +4655,6 @@ function MainModeApp() {
   }
 
   async function downloadAudioLinks(overrideText?: string, recoveryId?: string) {
-    if (downloadBusy || spotifyDownloadBusy || convertBusy) return;
     const urls = parseDownloadUrls(overrideText || downloadText);
 
     if (!urls.length && !recoveryId) {
@@ -4718,6 +4663,7 @@ function MainModeApp() {
       return;
     }
 
+    if (!beginDownloadOperation()) return;
     setDownloadBusy(true);
     setConvertBusy(false);
     setConvertProgress(0);
@@ -4725,7 +4671,7 @@ function MainModeApp() {
     setPlayerError("");
     setStatusText("downloading audio...");
     if (recoveryId) setDownloadQueue(items => items.map(item => item.recoveryId === recoveryId ? { ...item, status: "queued", statusLabel: "", error: "", message: "Resuming download" } : item));
-    else setDownloadQueue(items => [...items.filter(item => !urls.includes(item.url)), ...makeQueuedDownloads(urls)]);
+    else setDownloadQueue(items => [...items.filter(item => item.recoveryId || !urls.includes(item.url)), ...makeQueuedDownloads(urls)]);
 
     try {
       const result = recoveryId ? await window.localitfy.resumeDownloadJob(recoveryId) : await window.localitfy.downloadAudioUrls({
@@ -4804,7 +4750,7 @@ function MainModeApp() {
       })) as any[];
 
       setDownloadResults(failedDownloads);
-      setDownloadQueue((items) => items.map((item) => (recoveryId ? item.recoveryId === recoveryId : urls.includes(item.url)) ? ({
+      setDownloadQueue((items) => items.map((item) => (recoveryId ? item.recoveryId === recoveryId : !item.recoveryId && urls.includes(item.url)) ? ({
         ...item,
         status: "failed",
         progress: 100,
@@ -4817,6 +4763,7 @@ function MainModeApp() {
       showAppToast("Download failed — retry from the queue", "error");
     } finally {
       setDownloadBusy(false);
+      endDownloadOperation();
     }
   }
 
@@ -4868,7 +4815,7 @@ function MainModeApp() {
     const selected = Array.isArray(trackOverride) && trackOverride.length
       ? trackOverride
       : spotifyTracks.filter((t) => spotifySelectedIds.has(t.id));
-    if (!selected.length) return;
+    if (!selected.length || !beginDownloadOperation()) return;
 
     if (Array.isArray(trackOverride) && trackOverride.length) {
       setSpotifySelectedIds(new Set(trackOverride.map((track) => track.id)));
@@ -4884,8 +4831,9 @@ function MainModeApp() {
         ? { ...track, downloadStatus: "queued", downloadError: "", downloadMessage: "Queued" }
         : track
     )));
-    setDownloadQueue(
-      selected.map((t, i) => ({
+    setDownloadQueue(items => [
+      ...items.filter(item => item.recoveryId || !selected.some(track => track.id === item.spotifyTrackId)),
+      ...selected.map((t, i) => ({
         id: `spt_${t.id}_${i}`,
         spotifyTrackId: t.id,
         source: "spotify",
@@ -4895,7 +4843,7 @@ function MainModeApp() {
         progress: 0,
         message: "Waiting..."
       }))
-    );
+    ]);
     setStatusText(`downloading ${selected.length} track${selected.length !== 1 ? "s" : ""} from spotify...`);
 
     try {
@@ -4904,7 +4852,7 @@ function MainModeApp() {
       if (!spotifyDownloadBridge) {
         const message = "Spotify downloading is unavailable in this build.";
         setSpotifyFetchError(message);
-        setDownloadQueue((items) => items.map((item) => ({ ...item, status: "failed", progress: 100, message, error: message, statusLabel: "Failed — retry available" })));
+        setDownloadQueue((items) => items.map((item) => !item.recoveryId && selected.some(track => track.id === item.spotifyTrackId) ? ({ ...item, status: "failed", progress: 100, message, error: message, statusLabel: "Failed — retry available" }) : item));
         setStatusText("spotify download failed");
         showAppToast("Spotify download bridge missing", "error");
         return;
@@ -5110,24 +5058,26 @@ function MainModeApp() {
         statusLabel: "Failed — retry available"
       })) as any[];
       setDownloadResults(failedDownloads);
-      setDownloadQueue((items) => items.map((item) => ({
+      setDownloadQueue((items) => items.map((item) => !item.recoveryId && selected.some(track => track.id === item.spotifyTrackId) ? ({
         ...item,
         status: "failed",
         progress: 100,
         message,
         error: message,
         statusLabel: "Failed — retry available"
-      })));
+      }) : item));
       setStatusText("spotify download failed");
       showAppToast("Spotify download failed — retry from the queue", "error");
     } finally {
       setSpotifyDownloadBusy(false);
       setDownloadBusy(false);
+      endDownloadOperation();
     }
   }
   // ------------------------------------------------------------------------
 
   async function convertLocalMedia() {
+    if (!beginDownloadOperation()) return;
     setConvertBusy(true);
     setConvertProgress(0);
     setConvertMessage("choose files to convert...");
@@ -5183,6 +5133,7 @@ function MainModeApp() {
       setStatusText("conversion failed");
     } finally {
       setConvertBusy(false);
+      endDownloadOperation();
     }
   }
 
@@ -7187,14 +7138,10 @@ function MainModeApp() {
       setStatusText(text);
     }
   };
-  const retryFailedDownloads = () => {
-    failedDownloadQueueItems.forEach((item: DownloadQueueItem) => {
-      void retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "");
-    });
-    failedDownloadResults.forEach((item: DownloadResult) => {
-      void retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "");
-    });
-  };
+  const retryFailedDownloads = () => retryDownloads(
+    [...failedDownloadQueueItems, ...failedDownloadResults],
+    item => retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "", item.recoveryId)
+  );
 
   const homeSettings = useMemo(() => ({
     heroExpanded: settings.heroExpanded,

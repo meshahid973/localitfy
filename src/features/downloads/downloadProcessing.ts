@@ -1,5 +1,60 @@
 import type { Song } from "../library/song.types";
-import type { DownloadQueueItem, DownloadResult } from "./download.types";
+import type { DownloadQueueItem, DownloadResult, DownloadRetryItem, DownloadProgress } from "./download.types";
+
+export function mergeDownloadProgress(current: DownloadQueueItem[], payload: DownloadProgress): DownloadQueueItem[] {
+  const id = payload.id || payload.recoveryId || payload.url;
+  if (!id) return current;
+  const sameRequest = (item: DownloadQueueItem) => Boolean(payload.url && item.url === payload.url || payload.spotifyTrackId && item.spotifyTrackId === payload.spotifyTrackId);
+  let index = current.findIndex(item => item.id === id || Boolean(payload.recoveryId && item.recoveryId === payload.recoveryId));
+  if (index < 0) index = current.findIndex(item => !item.recoveryId && sameRequest(item));
+  const previous = index >= 0 ? current[index] : undefined;
+  const rawProgress = Number(payload.progress ?? payload.percent ?? 0);
+  const progress = Number.isFinite(rawProgress) ? Math.max(0, Math.min(100, rawProgress)) : previous?.progress || 0;
+  const status = payload.status || (progress >= 100 ? "done" : "downloading");
+  const merged: DownloadQueueItem = {
+    ...previous, id, recoveryId: payload.recoveryId || previous?.recoveryId,
+    source: payload.source || previous?.source, spotifyTrackId: payload.spotifyTrackId || previous?.spotifyTrackId,
+    url: previous?.source === "spotify" ? previous.url : payload.url || previous?.url || "",
+    title: payload.file || payload.filename || previous?.title || "download",
+    status, progress, message: payload.message || "working...", speed: payload.speed, eta: payload.eta,
+    filePath: payload.filePath || previous?.filePath,
+    filename: payload.filename || previous?.filename,
+    importedToLibrary: payload.importedToLibrary ?? previous?.importedToLibrary,
+    librarySongId: payload.librarySongId ?? previous?.librarySongId,
+    error: ["failed", "cancelled", "interrupted"].includes(status) ? payload.error || previous?.error : undefined,
+    statusLabel: payload.statusLabel || (status === previous?.status ? previous.statusLabel : undefined)
+  };
+  const placeholder = (item: DownloadQueueItem, position: number) => position !== index && Boolean(merged.recoveryId) && !item.recoveryId && sameRequest(item);
+  const hasPlaceholder = current.some(placeholder);
+  if (previous && !hasPlaceholder && Math.abs(previous.progress - progress) < 0.75 &&
+      previous.status === merged.status && previous.message === merged.message && previous.title === merged.title &&
+      previous.speed === merged.speed && previous.eta === merged.eta && previous.filename === merged.filename &&
+      previous.error === merged.error && previous.recoveryId === merged.recoveryId && previous.source === merged.source && previous.spotifyTrackId === merged.spotifyTrackId &&
+      previous.filePath === merged.filePath && previous.importedToLibrary === merged.importedToLibrary && previous.librarySongId === merged.librarySongId) return current;
+  const next = current.map((item, position) => position === index ? merged : item).filter((item, position) => !placeholder(item, position));
+  if (index < 0) next.push(merged);
+  return next;
+}
+
+export function deduplicateDownloadRetries(items: readonly DownloadRetryItem[]) {
+  const key = (item: DownloadRetryItem) => item.spotifyTrackId ? `spotify:${item.spotifyTrackId}` : parseDownloadUrls(item.url || "")[0] || "";
+  const saved = new Set(items.filter(item => item.recoveryId).map(key));
+  const seen = new Set<string>();
+  return items.filter(item => {
+    if (!item.url) return false;
+    const identity = item.recoveryId ? `job:${item.recoveryId}` : `request:${key(item)}`;
+    if (seen.has(identity) || !item.recoveryId && saved.has(key(item))) return false;
+    seen.add(identity);
+    return true;
+  });
+}
+
+export async function retryDownloadsInOrder(items: readonly DownloadRetryItem[], retry: (item: DownloadRetryItem) => Promise<unknown>, signal: AbortSignal) {
+  for (const item of deduplicateDownloadRetries(items)) {
+    if (signal.aborted) return;
+    await retry(item);
+  }
+}
 
 export function parseDownloadUrls(text: string) {
   const urls = text.split(/\r?\n|,/).map(url => url.trim()).filter(Boolean);
@@ -130,12 +185,12 @@ export function enrichDownloadResultsWithLibraryMatches(results: DownloadResult[
       ...result,
       importedToLibrary,
       librarySongId: match?.id || "",
-      error: cleanedError || result.error,
+      error: result.ok ? undefined : cleanedError || result.error,
       statusLabel: result.ok
         ? importedToLibrary
           ? "Added to library"
           : "Downloaded, not imported"
-        : "Failed — retry available"
+        : result.status === "interrupted" ? "Interrupted — resume available" : "Failed — retry available"
     } satisfies DownloadResult;
   });
 }

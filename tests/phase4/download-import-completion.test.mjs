@@ -1,0 +1,53 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { createRequire } from "node:module";
+import test from "node:test";
+
+const require = createRequire(import.meta.url);
+require("../../electron/runtime/yt-dlp.cjs").ensureYtDlpBinary = async () => assert.fail("import recovery must not access the network");
+const downloader = require("../../electron/downloader.cjs");
+const { createDownloadJobStore } = require("../../electron/download-jobs.cjs");
+const { finalizeDownloadImport } = require("../../electron/runtime/download-imports.cjs");
+
+test("import failure retains saved audio and a later committed import clears its recovery state", async () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "localtify-import-completion-"));
+  try {
+    const url = "https://www.youtube.com/watch?v=abcdefghijk";
+    const store = createDownloadJobStore(directory);
+    const job = store.prepare({ source: "youtube", url, folder: directory });
+    const filePath = path.join(directory, "track.mp3");
+    fs.writeFileSync(filePath, "saved audio");
+    const stat = fs.statSync(filePath);
+    store.update(job.id, { status: "importing", result: { ok: true, url, filePath, filename: "track.mp3" }, sizeBytes: stat.size, mtimeMs: stat.mtimeMs });
+    downloader.initDownloader({ userDataPath: directory });
+    const saved = await downloader.downloadAudioUrls([url], directory, () => {});
+    const events = [];
+    const event = { sender: { isDestroyed: () => false, send: (channel, payload) => events.push({ channel, payload }) } };
+    const failure = finalizeDownloadImport(event, saved.downloads, [], "database locked");
+    assert.equal(failure[0].ok, false);
+    assert.equal(failure[0].status, "interrupted");
+    assert.equal(failure[0].recoveryId, job.id);
+    assert.equal(events.at(-1).payload.status, "interrupted");
+    assert.equal(fs.readFileSync(filePath, "utf8"), "saved audio");
+    const resumed = await downloader.downloadAudioUrls([url], directory, () => {});
+    const song = { id: "existing-song", filePath, title: "User's title" };
+    finalizeDownloadImport(event, resumed.downloads, [song]);
+    const committed = createDownloadJobStore(directory).get(job.id);
+    assert.equal(committed.status, "done");
+    assert.equal(committed.importPending, false);
+    assert.equal(committed.result.librarySongId, song.id);
+    assert.equal(events.at(-1).payload.importedToLibrary, true);
+    assert.equal(events.at(-1).payload.filePath, filePath);
+    assert.equal(song.title, "User's title");
+    assert.equal(fs.readdirSync(directory).filter(name => name.endsWith(".mp3")).length, 1);
+  } finally { fs.rmSync(directory, { recursive: true, force: true }); }
+});
+
+test("completion notification failure does not change a successful result", () => {
+  const item = { ok: true, url: "https://www.youtube.com/watch?v=abcdefghijk", filePath: "/music/track.mp3" };
+  const results = [item];
+  assert.equal(finalizeDownloadImport({ sender: { isDestroyed: () => false, send: () => { throw new Error("window closed"); } } }, results, []), results);
+  assert.equal(item.ok, true);
+});

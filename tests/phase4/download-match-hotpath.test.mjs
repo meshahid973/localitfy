@@ -121,3 +121,56 @@ test("Linux paths differing only by case cannot claim each other's imported meta
   assert.deepEqual(Array.from(results, item => item.librarySongId), ["upper", "lower", ""]);
   assert.equal(exports.findDownloadedSongMatch({ ok: true, filePath: "c:\\music\\TRACK.flac" }, [song("windows", { filePath: "C:\\Music\\Track.flac", sourceTrackId: "" })]).id, "windows");
 });
+
+test("progress follows persistent identity rather than an older job with the same URL", () => {
+  const url = "https://www.youtube.com/watch?v=abcdefghijk";
+  const old = { id: "old", recoveryId: "old", url, title: "Old format", status: "done", progress: 100, message: "Downloaded" };
+  const placeholder = { id: "queued", url, title: "New format", status: "queued", progress: 0, message: "Waiting" };
+  const first = exports.mergeDownloadProgress([old, placeholder], { id: "new", recoveryId: "new", url, status: "downloading", progress: 25 });
+  assert.equal(first.length, 2);
+  assert.equal(first[0], old);
+  assert.equal(first[1].recoveryId, "new");
+  const same = exports.mergeDownloadProgress(first, { id: "new", recoveryId: "new", url, status: "downloading", progress: 25.25 });
+  assert.equal(same, first, "small identical progress updates avoid rerendering the queue");
+  const done = exports.mergeDownloadProgress(first, { id: "new", recoveryId: "new", url, status: "done", progress: 100, filePath: "/music/new.flac", importedToLibrary: true, librarySongId: "song-new" });
+  assert.equal(done[0], old);
+  assert.equal(done[1].librarySongId, "song-new");
+  assert.equal(done[1].filePath, "/music/new.flac");
+});
+
+test("cached-job progress removes only its pending placeholder and keeps Spotify request URLs", () => {
+  const url = "https://open.spotify.com/track/abc123";
+  const job = { id: "saved", recoveryId: "saved", url, source: "spotify", spotifyTrackId: "abc123", title: "Saved", status: "failed", progress: 50, message: "Failed", error: "old error" };
+  const pending = { ...job, id: "queued", recoveryId: undefined, status: "queued" };
+  const next = exports.mergeDownloadProgress([job, pending], { id: "saved", recoveryId: "saved", url: "https://www.youtube.com/watch?v=abcdefghijk", spotifyTrackId: "abc123", status: "downloading", progress: 10 });
+  assert.equal(next.length, 1);
+  assert.equal(next[0].url, url);
+  assert.equal(next[0].error, undefined);
+  assert.equal(exports.mergeDownloadProgress(next, { id: "saved", recoveryId: "saved", progress: NaN })[0].progress, 10);
+});
+
+test("retry deduplication retains distinct saved formats and combines queue/result duplicates", () => {
+  const url = "https://www.youtube.com/watch?v=abcdefghijk";
+  const entries = [{ recoveryId: "mp3", url }, { recoveryId: "flac", url }, { recoveryId: "mp3", url }, { url }, { url: "https://youtu.be/abcdefghijk" }];
+  assert.deepEqual(Array.from(exports.deduplicateDownloadRetries(entries), item => item.recoveryId), ["mp3", "flac"]);
+});
+
+test("retries run one at a time and cancellation prevents the remaining jobs", async () => {
+  const controller = new AbortController();
+  const calls = [];
+  let active = 0, maximum = 0;
+  await exports.retryDownloadsInOrder([
+    { recoveryId: "one", url: "https://youtu.be/abcdefghijk" },
+    { recoveryId: "two", url: "https://youtu.be/abcdefghijk" },
+    { recoveryId: "three", url: "https://youtu.be/abcdefghijk" }
+  ], async item => {
+    active++;
+    maximum = Math.max(maximum, active);
+    calls.push(item.recoveryId);
+    await Promise.resolve();
+    active--;
+    if (item.recoveryId === "two") controller.abort();
+  }, controller.signal);
+  assert.deepEqual(calls, ["one", "two"]);
+  assert.equal(maximum, 1);
+});

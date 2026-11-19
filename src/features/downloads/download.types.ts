@@ -2,6 +2,7 @@ export type DownloadStatus = "queued" | "downloading" | "converting" | "importin
 
 export type DownloadResult = {
   ok: boolean;
+  status?: DownloadStatus;
   recoveryId?: string;
   url?: string;
   filePath?: string;
@@ -22,6 +23,8 @@ export type DownloadResult = {
   librarySongId?: string;
   statusLabel?: string;
 };
+
+export type DownloadRetryItem = Pick<DownloadResult, "url" | "source" | "spotifyTrackId" | "recoveryId">;
 
 export type DownloadQueueItem = {
   id: string;
@@ -45,6 +48,8 @@ export type DownloadQueueItem = {
   librarySongId?: string;
   statusLabel?: string;
 };
+
+export type DownloadProgress = Partial<DownloadQueueItem> & { file?: string; percent?: number };
 
 export type SpotifyTrack = {
   id: string;

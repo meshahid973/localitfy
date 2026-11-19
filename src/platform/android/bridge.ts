@@ -76,7 +76,13 @@ export function createAndroidBridge(): Bridge {
     else void LocaltifyNative.moveToBackground();
   });
 
+  const unsupportedDownload = async () => { throw new Error(unavailable()); };
   const implemented: Partial<Bridge> = {
+    downloadAudioUrls: unsupportedDownload,
+    resumeDownloadJob: unsupportedDownload,
+    spotifyDownloadBatch: unsupportedDownload,
+    spotdlDownloadBatch: unsupportedDownload,
+    pickAndConvertMedia: unsupportedDownload,
     getDownloadJobs: async () => ({ error: "", jobs: [] }),
     clearDownloadJobs: async () => true,
     bootstrap: async () => {

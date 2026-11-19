@@ -3,7 +3,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const { publicationTemporaryPath } = require("./download-publication.cjs");
+const { publicationTemporaryPath, cleanPartialPublication } = require("./download-publication.cjs");
 
 const STATES = new Set(["queued", "downloading", "converting", "importing", "done", "failed", "cancelled", "interrupted"]);
 const UNFINISHED = new Set(["queued", "downloading", "converting", "importing"]);
@@ -93,13 +93,15 @@ function createDownloadJobStore(userDataPath, { now = Date.now } = {}) {
       const request = normalizeRequest(item.request);
       if (item.key !== requestKey(request)) throw new Error("Download recovery job identity does not match its request");
       const recovered = { ...item, request };
-      if (UNFINISHED.has(item.status)) {
+      if (UNFINISHED.has(item.status) || item.status === "done" && request.options.autoAdd && item.importPending !== false && item.result?.importedToLibrary !== true) {
         recovered.status = "interrupted";
         recovered.message = "Interrupted by application restart. Resume when ready.";
         recovered.updatedAt = now();
       }
       if (jobs.has(item.id)) throw new Error("Duplicate download recovery identity");
       jobs.set(item.id, recovered);
+      try { if (cleanPartialPublication(recovered)) recovered.pendingOutput = null; }
+      catch (error) { console.warn("[localtify interrupted download cleanup]", error.message); }
       try { fs.rmSync(publicationTemporaryPath(request.folder, item.id), { force: true }); }
       catch (error) { console.warn("[localtify stale download publication]", error.message); }
     }
@@ -112,12 +114,17 @@ function createDownloadJobStore(userDataPath, { now = Date.now } = {}) {
     const request = normalizeRequest(input);
     const key = requestKey(request);
     const old = [...jobs.values()].find(job => job.key === key && job.status !== "cancelled");
+    if (old?.pendingOutput) cleanPartialPublication(old);
     if (["done", "interrupted"].includes(old?.status) && old.result?.ok && old.result.filePath) {
       try {
         const stat = fs.statSync(old.result.filePath);
-        if (stat.isFile() && stat.size === old.sizeBytes && (stat.mtimeMs === old.mtimeMs || old.sha256 && hashFile(old.result.filePath) === old.sha256)) return { ...clone(old), status: "done" };
-        const pending = old.pendingOutput;
-        if (pending && stat.isFile() && stat.ino === pending.ino && stat.dev === pending.dev && stat.birthtimeMs === pending.birthtimeMs && stat.size < old.sizeBytes && path.dirname(old.result.filePath) === request.folder) fs.unlinkSync(old.result.filePath);
+        if (stat.isFile() && stat.size === old.sizeBytes && (old.sha256 ? hashFile(old.result.filePath) === old.sha256 : stat.mtimeMs === old.mtimeMs)) {
+          const reused = { ...clone(old), request, status: "done", importPending: request.options.autoAdd, updatedAt: now(), result: { ...old.result, error: undefined } };
+          const next = new Map(jobs);
+          next.set(old.id, reused);
+          persist(next);
+          return clone(reused);
+        }
       } catch { /* A removed or changed output must be downloaded again. */ }
     }
     const job = {
@@ -140,7 +147,7 @@ function createDownloadJobStore(userDataPath, { now = Date.now } = {}) {
     if (!old) throw new Error("Download recovery job not found");
     if (patch.status && !STATES.has(patch.status)) throw new Error("Invalid download state");
     const job = { ...old, updatedAt: now() };
-    for (const key of ["status", "result", "sizeBytes", "mtimeMs", "pendingOutput", "sha256"]) if (patch[key] !== undefined) job[key] = clone(patch[key]);
+    for (const key of ["status", "result", "sizeBytes", "mtimeMs", "pendingOutput", "sha256", "importPending"]) if (patch[key] !== undefined) job[key] = clone(patch[key]);
     if (patch.progress !== undefined) job.progress = Math.max(0, Math.min(100, Number(patch.progress) || 0));
     if (patch.message !== undefined) job.message = String(patch.message).slice(0, 2000);
     const next = new Map(jobs);
@@ -166,6 +173,7 @@ function createDownloadJobStore(userDataPath, { now = Date.now } = {}) {
     const job = jobs.get(id);
     if (!job) return false;
     if (UNFINISHED.has(job.status)) throw new Error("Cancel the active download before removing it");
+    cleanPartialPublication(job);
     cleanWorkDirectory(id);
     fs.rmSync(publicationTemporaryPath(job.request.folder, id), { force: true });
     const next = new Map(jobs);
