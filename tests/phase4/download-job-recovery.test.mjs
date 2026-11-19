@@ -54,3 +54,19 @@ test("cancelled jobs are not resumed and journal inputs cannot escape the owned 
     assert.deepEqual(fs.readdirSync(path.join(dir, "download-jobs")).filter(name => name.endsWith(".tmp")), []);
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
+
+
+test("Discover track identities survive the download journal without substituting another recording", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "localtify-discover-download-"));
+  try {
+    const store = createDownloadJobStore(dir);
+    const selected = { ...request(dir), source: "spotify", track: { id: "ytmusic-abcde_fghij", title: "Track", artist: "Artist", coverUrl: "https://lh3.googleusercontent.com/abc=w256-h256-l90-rj" }, url: "https://www.youtube.com/watch?v=abcde_fghij" };
+    const job = store.prepare(selected);
+    store.update(job.id, { status: "downloading" });
+    const reopened = createDownloadJobStore(dir);
+    assert.equal(reopened.prepare(selected).id, job.id);
+    assert.equal(reopened.get(job.id).request.track.id, selected.track.id);
+    assert.throws(() => reopened.prepare({ ...selected, url: "https://www.youtube.com/watch?v=abcdefghijk" }), /identity/);
+    assert.ok(reopened.prepare({ ...selected, url: "https://open.spotify.com/track/lastfm-abc123", track: { id: "lastfm-abc123", title: "Track" } }).id);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});

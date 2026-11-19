@@ -14,7 +14,10 @@ const clone = value => structuredClone(value);
 function normalizeRequest(request) {
   if (!["youtube", "spotify"].includes(request?.source)) throw new Error("Unknown download source");
   const url = new URL(String(request.url || ""));
-  const hosts = request.source === "youtube" ? ["www.youtube.com"] : ["open.spotify.com"];
+  const { selectedYouTubeUrl, validTrackIdentity } = require("./discover/track-identity.cjs");
+  const selected = request.source === "spotify" ? selectedYouTubeUrl(request.track?.id) : "";
+  const hosts = request.source === "youtube" || selected ? ["www.youtube.com"] : ["open.spotify.com"];
+  if (selected && url.href !== selected) throw new Error("Selected recording identity does not match its URL");
   if (url.protocol !== "https:" || !hosts.includes(url.hostname) || url.username || url.password || url.port) throw new Error("Invalid download URL");
   if (!path.isAbsolute(request.folder || "")) throw new Error("Download folder must be absolute");
   const options = request.options || {};
@@ -28,7 +31,7 @@ function normalizeRequest(request) {
   };
   if (request.source === "spotify") {
     const track = request.track;
-    if (!track || !/^[a-zA-Z0-9]{1,64}$/.test(String(track.id || ""))) throw new Error("A Spotify track identity is required");
+    if (!track || !validTrackIdentity(track.id)) throw new Error("A valid track identity is required");
     result.track = {};
     for (const key of ["id", "title", "artist", "albumName", "spotifyUrl", "isrc", "coverUrl", "albumCoverUrl", "spotifyCoverUrl"]) {
       if (typeof track[key] === "string") result.track[key] = track[key].slice(0, 2000);

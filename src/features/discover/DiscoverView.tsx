@@ -28,11 +28,13 @@ export type DiscoverViewProps = {
 const API_KEY = /^[0-9a-f]{32}$/i;
 // Short and stable: downloads use the ID in file names.
 function trackId(track: DiscoverTrack) {
+  const recording = /^https:\/\/www\.youtube\.com\/watch\?v=([A-Za-z0-9_-]{11})$/.exec(track.url);
+  if (recording) return `ytmusic-${recording[1]}`;
   let hash = 2166136261;
   for (const char of `${track.artist}|${track.title}`.toLocaleLowerCase()) hash = Math.imul(hash ^ char.codePointAt(0)!, 16777619);
   return `lastfm-${(hash >>> 0).toString(36)}`;
 }
-const toDownload = (track: DiscoverTrack): SpotifyTrack => ({ id: trackId(track), title: track.title, artist: track.artist, providerUrl: track.url, coverUrl: track.coverUrl, durationMs: track.durationMs });
+const toDownload = (track: DiscoverTrack): SpotifyTrack => ({ id: trackId(track), title: track.title, artist: track.artist, providerUrl: track.url, albumName: track.album, coverUrl: track.coverUrl, durationMs: track.durationMs });
 const listNames = (names: string[]) => names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
 const openLink = (url: string) => { if (url) void window.localitfy.openExternal?.(url); };
 

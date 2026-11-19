@@ -24,7 +24,8 @@ const { createUpdaterRuntime } = require("./runtime/updater.cjs");
 const { createMediaServerRuntime } = require("./runtime/media-server.cjs");
 const { createThumbnailScheduler } = require("./runtime/thumbnail-scheduler.cjs");
 const { createGenreMetadataBackfill } = require("./runtime/genre-backfill.cjs");
-const { safeImageExtensionFromUrlOrType, bestSpotifyImage, parseSpotifyUrl, shapeSpotifyTrack, decodeHtmlEntities, uniqSpotifyIds } = require("./runtime/spotify-normalize.cjs");
+const { bestSpotifyImage, parseSpotifyUrl, shapeSpotifyTrack, decodeHtmlEntities, uniqSpotifyIds } = require("./runtime/spotify-normalize.cjs");
+const { safeProviderCover, imageExtension } = require("./runtime/remote-cover.cjs");
 const { createAppMenuRuntime, createAppCommandSender } = require("./runtime/app-menu.cjs");
 const { installRendererSecurityGuards, installSessionPermissionGuards, isTrustedMainFrameIpcEvent } = require("./runtime/security.cjs");
 const { createDatabaseRepositories } = require("./db/repositories.cjs");
@@ -676,8 +677,7 @@ function getSpotifyCoverCacheDirectory() {
 function downloadHttpsBuffer(urlString, maxBytes = 8 * 1024 * 1024, redirectLimit = 4) {
   return new Promise((resolve, reject) => {
     let parsed;
-    try { parsed = new URL(String(urlString || "")); } catch { return reject(new Error("invalid cover url")); }
-    if (parsed.protocol !== "https:") return reject(new Error("cover url must be https"));
+    try { parsed = new URL(safeProviderCover(urlString)); } catch { return reject(new Error("invalid cover url")); }
     const req = https.request({
       hostname: parsed.hostname,
       port: 443,
@@ -686,13 +686,15 @@ function downloadHttpsBuffer(urlString, maxBytes = 8 * 1024 * 1024, redirectLimi
       timeout: 15000,
       headers: {
         "User-Agent": SPOTIFY_BROWSER_UA || "Mozilla/5.0",
-        "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-        "Referer": "https://open.spotify.com/"
+        "Accept": "image/jpeg,image/png,image/webp,image/gif",
+        ...(parsed.hostname === "i.scdn.co" ? { "Referer": "https://open.spotify.com/" } : {})
       }
     }, (res) => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location && redirectLimit > 0) {
         res.resume();
-        const nextUrl = new URL(res.headers.location, urlString).toString();
+        let nextUrl;
+        try { nextUrl = safeProviderCover(new URL(res.headers.location, parsed.href).href); } catch {}
+        if (!nextUrl) { reject(new Error("unapproved cover redirect")); return; }
         downloadHttpsBuffer(nextUrl, maxBytes, redirectLimit - 1).then(resolve, reject);
         return;
       }
@@ -717,19 +719,22 @@ function downloadHttpsBuffer(urlString, maxBytes = 8 * 1024 * 1024, redirectLimi
 }
 
 async function cacheSpotifyCoverImage(coverUrl, stableKey = "") {
-  const cleanUrl = String(coverUrl || "").trim();
-  if (!cleanUrl || !/^https:\/\/i\.scdn\.co\//i.test(cleanUrl)) return "";
+  const cleanUrl = safeProviderCover(coverUrl);
+  if (!cleanUrl) return "";
   try {
     const hash = crypto.createHash("sha1").update(`${stableKey}::${cleanUrl}`).digest("hex").slice(0, 22);
     const cacheDir = getSpotifyCoverCacheDirectory();
     for (const ext of [".jpg", ".png", ".webp", ".gif"]) {
       const existing = path.join(cacheDir, `${hash}${ext}`);
-      if (fileExists(existing)) return existing;
+      try { const stat = await fs.promises.stat(existing); if (stat.isFile() && stat.size >= 12) return existing; } catch {}
     }
     const image = await downloadHttpsBuffer(cleanUrl);
-    const ext = safeImageExtensionFromUrlOrType(cleanUrl, image.contentType);
+    const ext = imageExtension(image.buffer, image.contentType);
+    if (!ext) return "";
     const targetPath = path.join(cacheDir, `${hash}${ext}`);
-    await fs.promises.writeFile(targetPath, image.buffer);
+    const temporary = targetPath + "." + crypto.randomUUID() + ".part";
+    try { await fs.promises.writeFile(temporary, image.buffer, { flag: "wx" }); await fs.promises.rename(temporary, targetPath); }
+    finally { await fs.promises.rm(temporary, { force: true }).catch(() => undefined); }
     return targetPath;
   } catch (error) {
     console.log("[localtify spotify cover cache error]", error?.message || error);
@@ -1445,7 +1450,7 @@ async function makeSongFromFileWithExactSpotifyTrack(filePath, track = {}, pixel
   const spotifyUrl = String(sourceInfo?.sourceUrl || track?.sourceUrl || track?.spotifyUrl || (spotifyTrackId ? `https://open.spotify.com/track/${spotifyTrackId}` : "")).trim();
   const cachedCoverPath = await cacheSpotifyCoverImage(coverUrl, spotifyTrackId || track?.id || title || filePath);
   const useSpotifyCover = cachedCoverPath && (!baseSong.coverPath || baseSong.coverSource === "fallback" || baseSong.coverSource === "none");
-  return { ...baseSong, title: title || baseSong.title, artist: artist || baseSong.artist, album: album || baseSong.album || "", coverPath: useSpotifyCover ? cachedCoverPath : baseSong.coverPath, coverSource: useSpotifyCover ? "spotify" : baseSong.coverSource, coverUpdatedAt: useSpotifyCover ? new Date().toISOString() : baseSong.coverUpdatedAt, duration, durationMs: Number(track?.durationMs || duration * 1000 || baseSong.durationMs || 0) || 0, sourceType: "spotify", sourceTrackId: spotifyTrackId, sourceUrl: spotifyUrl, sourceProvider: String(sourceInfo?.sourceProvider || sourceInfo?.provider || "youtube"), sourceProviderUrl: String(sourceInfo?.sourceProviderUrl || sourceInfo?.providerUrl || ""), sourceMatchScore: Number(sourceInfo?.sourceMatchScore ?? sourceInfo?.matchScore ?? 0) || 0 };
+  return { ...baseSong, title: title || baseSong.title, artist: artist || baseSong.artist, album: album || baseSong.album || "", coverPath: useSpotifyCover ? cachedCoverPath : baseSong.coverPath, coverSource: useSpotifyCover ? "spotify" : baseSong.coverSource, coverUpdatedAt: useSpotifyCover ? new Date().toISOString() : baseSong.coverUpdatedAt, duration, durationMs: Number(track?.durationMs || duration * 1000 || baseSong.durationMs || 0) || 0, sourceType: require("./discover/track-identity.cjs").selectedYouTubeId(spotifyTrackId) ? "youtube" : "spotify", sourceTrackId: spotifyTrackId, sourceUrl: spotifyUrl, sourceProvider: String(sourceInfo?.sourceProvider || sourceInfo?.provider || "youtube"), sourceProviderUrl: String(sourceInfo?.sourceProviderUrl || sourceInfo?.providerUrl || ""), sourceMatchScore: Number(sourceInfo?.sourceMatchScore ?? sourceInfo?.matchScore ?? 0) || 0 };
 }
 
 async function importNewAudioFilesFromDirectory(directory, tracks = [], options = {}) {

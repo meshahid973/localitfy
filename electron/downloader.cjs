@@ -550,6 +550,8 @@ function getSpotifyTrackId(track = {}) {
 }
 
 function getSpotifyTrackUrl(track = {}) {
+  const chosen = require("./discover/track-identity.cjs").selectedYouTubeUrl(getSpotifyTrackId(track));
+  if (chosen) return chosen;
   const explicit = String(track.spotifyUrl || track.url || "").trim();
   const trackId = getSpotifyTrackId(track);
   if (/^https:\/\/open\.spotify\.com\/track\//i.test(explicit)) return explicit;
@@ -855,6 +857,8 @@ function scoreSpotifyYoutubeCandidate(track = {}, candidate = {}) {
 }
 
 async function findSpotifyYoutubeMatch(track = {}, onProgress, job = {}) {
+  const selected = require("./discover/track-identity.cjs").selectedYouTubeUrl(getSpotifyTrackId(track));
+  if (selected) return { matchOk: true, matchScore: 100, matchMode: "selected-recording", providerUrl: selected, matchedTitle: String(track.title || ""), matchedArtist: String(track.artist || ""), matchedDurationMs: Number(track.durationMs) || 0 };
   const candidates = await searchSpotifyYoutubeCandidates(track, 12);
   const scored = candidates
     .map((candidate) => scoreSpotifyYoutubeCandidate(track, candidate))
@@ -967,7 +971,7 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
   const total = tracks.length;
   const savedJobs = tracks.map(track => {
     const id = getSpotifyTrackId(track) || crypto.createHash("sha256").update(JSON.stringify([track.title || track.name, track.artist || track.artists])).digest("hex").slice(0, 22);
-    return prepareDownloadJob({ source: "spotify", url: `https://open.spotify.com/track/${id}`, folder: destinationDirectory, options,
+    return prepareDownloadJob({ source: "spotify", url: require("./discover/track-identity.cjs").selectedYouTubeUrl(id) || `https://open.spotify.com/track/${id}`, folder: destinationDirectory, options,
       track: { ...track, id, title: String(track.title || track.name || "unknown"), artist: String(track.artist || track.artists || "") } });
   });
 
