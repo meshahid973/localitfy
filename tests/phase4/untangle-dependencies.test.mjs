@@ -15,7 +15,6 @@ function loadThemeUtilities() {
     exports,
     require(specifier) {
       if (specifier === "./settings.constants") return { coverColorSyncOptions: [] };
-      if (specifier === "./theme.constants") return { RETIRED_ANIMATED_THEME_IDS: new Set(), THEME_ID_SET: new Set(["dark", "light"]) };
       throw new Error("Unexpected utility import: " + specifier);
     }
   });

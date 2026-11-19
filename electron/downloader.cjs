@@ -1131,7 +1131,6 @@ module.exports = {
   downloadAudioUrls: (...args) => runDownloadBatch(() => downloadAudioUrls(...args)),
   downloadSpotifyBatch: (...args) => runDownloadBatch(() => downloadSpotifyBatch(...args)),
   convertLocalMediaFiles: (...args) => runDownloadBatch(() => convertLocalMediaFiles(...args)),
-  convertOneToMp3,
   isSupportedMediaPath,
   _test: { getBaseArgs, buildStrategies, AUDIO_FORMAT_SELECTOR, ORIGINAL_AUDIO_FORMAT_SELECTOR },
   cancelActiveDownloads
