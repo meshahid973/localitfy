@@ -184,7 +184,6 @@ function MainModeApp() {
   } = usePlayerRuntime({ defaultVolume: defaultSettings.volume });
 
   const startupResumePositionRef = useRef<{ songId: string; time: number } | null>(null);
-  const saveSettingsSerialRef = useRef(0);
   const sidebarResizeFrameRef = useRef<number | null>(null);
   const bootedRef = useRef(false);
   const importOverlayTimerRef = useRef<number | null>(null);
@@ -208,8 +207,6 @@ function MainModeApp() {
   const activeViewRef = useRef<View>("home");
   const libraryOrderSaveTimerRef = useRef<number | null>(null);
   const lastSavedOrderRef = useRef<string[]>([]);
-  const rememberCurrentSongTimerRef = useRef<number | null>(null);
-  const latestRememberedSongIdRef = useRef("");
   const selectSongBurstTimerRef = useRef<number | null>(null);
   const selectSongBurstIntentRef = useRef<{ songId: string; shouldPlay?: boolean } | null>(null);
   const selectSongLastCommitRef = useRef({ key: "", time: 0 });
@@ -226,7 +223,7 @@ function MainModeApp() {
     settingsSearch, setSettingsSearch, deferredSettingsSearch,
     themeSettling,
     themeMotionReady, setThemeMotionReady,
-    saveSettingsTimerRef,
+    saveSettingsTimerRef, writeSettings,
     themeSettlingTimerRef,
     themePaintIdleTimerRef,
     themeSettlingRef
@@ -482,11 +479,6 @@ function MainModeApp() {
 
   useEffect(() => {
     return () => {
-      if (rememberCurrentSongTimerRef.current !== null) {
-        window.clearTimeout(rememberCurrentSongTimerRef.current);
-        rememberCurrentSongTimerRef.current = null;
-      }
-
       if (selectSongBurstTimerRef.current !== null) {
         window.clearTimeout(selectSongBurstTimerRef.current);
         selectSongBurstTimerRef.current = null;
@@ -1027,13 +1019,7 @@ function MainModeApp() {
 
     setHomeEntranceSettled(true);
     setHeroMotion(nextMotion);
-    setSettings((current) => {
-      if (current.heroExpanded === nextExpanded) return current;
-      return {
-        ...current,
-        heroExpanded: nextExpanded
-      };
-    });
+    setSettings(nextSettings);
 
     heroReflowTimerRef.current = window.setTimeout(() => {
       setHeroMotion("idle");
@@ -2037,7 +2023,7 @@ function MainModeApp() {
         visualSettingsChanged || (migrateSidebar && nextSettings.sidebarBehavior !== storedSettings.sidebarBehavior);
 
       if (shouldPersistBootSettings) {
-        window.localitfy.saveSettings(nextSettings).then(() => {
+        writeSettings(nextSettings).then(() => {
           if (shouldApplyV013Defaults) window.localStorage.setItem(V013_DEFAULTS_KEY, "true");
           if (shouldApplyStartWithWindowsDefault) window.localStorage.setItem(START_WITH_WINDOWS_DEFAULT_KEY, "true");
           if (migrateSidebar) window.localStorage.setItem(sidebarMigrationKey, "true");
@@ -2071,6 +2057,7 @@ function MainModeApp() {
 
       setSongs(nextSongs);
       setPlaylists(initialPlaylists);
+      settingsRef.current = nextSettings;
       setSettings(nextSettings);
       setCurrentId(initialSongId);
       setReady(true);
@@ -2247,11 +2234,6 @@ function MainModeApp() {
       stopFade();
       stopCrossfadeAuto();
       stopProgressLoop();
-
-      if (saveSettingsTimerRef.current !== null) {
-        window.clearTimeout(saveSettingsTimerRef.current);
-      }
-
 
       if (sleepTimerRef.current !== null) {
         window.clearTimeout(sleepTimerRef.current);
@@ -3651,30 +3633,22 @@ function MainModeApp() {
   async function saveSettingsSafely(next: Settings, debounce = false) {
     if (!bootedRef.current) return;
 
-    const saveSerial = ++saveSettingsSerialRef.current;
     if (saveSettingsTimerRef.current !== null) {
       window.clearTimeout(saveSettingsTimerRef.current);
       saveSettingsTimerRef.current = null;
     }
 
-    const runSave = () => {
-      if (saveSerial !== saveSettingsSerialRef.current) return;
-      window.localitfy.saveSettings(next).catch(() => showAppToast("Could not save settings", "error"));
-    };
+    const runSave = () => writeSettings(settingsRef.current).catch(() => showAppToast("Could not save settings", "error"));
 
     if (debounce) {
-      if (saveSettingsTimerRef.current !== null) {
-        window.clearTimeout(saveSettingsTimerRef.current);
-      }
-
       saveSettingsTimerRef.current = window.setTimeout(() => {
         saveSettingsTimerRef.current = null;
-        runSave();
+        void runSave();
       }, 260);
       return;
     }
 
-    await window.localitfy.saveSettings(next).catch(() => showAppToast("Could not save settings", "error"));
+    await writeSettings(next).catch(() => showAppToast("Could not save settings", "error"));
   }
 
   async function persistSettings(next: Settings, debounce = false, priority: "immediate" | "transition" = "transition") {
@@ -3914,17 +3888,15 @@ function MainModeApp() {
       saveDone = true;
 
       const nextSettings = {
-        ...discordSettingsRef.current,
+        ...settingsRef.current,
         playerSize: latestSize
       };
 
       discordSettingsRef.current = nextSettings;
+      settingsRef.current = nextSettings;
       setSettings(nextSettings);
 
-      if (bootedRef.current) {
-
-        window.localitfy.saveSettings(nextSettings).catch(() => undefined);
-      }
+      void saveSettingsSafely(nextSettings);
 
       window.setTimeout(() => {
         appRoot?.style.removeProperty("--player-size-live");
@@ -4013,16 +3985,15 @@ function MainModeApp() {
       saveDone = true;
 
       const nextSettings = {
-        ...discordSettingsRef.current,
+        ...settingsRef.current,
         sidebarWidth: latestWidth
       };
 
       discordSettingsRef.current = nextSettings;
+      settingsRef.current = nextSettings;
       setSettings(nextSettings);
 
-      if (bootedRef.current) {
-        window.localitfy.saveSettings(nextSettings).catch(() => undefined);
-      }
+      void saveSettingsSafely(nextSettings);
 
       window.setTimeout(() => {
         appRoot?.style.removeProperty("--sidebar-width-live");
@@ -4087,40 +4058,8 @@ function MainModeApp() {
 
 
   async function rememberCurrentSong(id: string) {
-    if (!id || !discordSettingsRef.current.rememberLastSong) return;
-
-    latestRememberedSongIdRef.current = id;
-
-    setSettings((previousSettings) => {
-      if (!previousSettings.rememberLastSong || previousSettings.lastSongId === id) {
-        return previousSettings;
-      }
-
-      return {
-        ...previousSettings,
-        lastSongId: id
-      };
-    });
-
-    if (!bootedRef.current) return;
-
-    if (rememberCurrentSongTimerRef.current !== null) {
-      window.clearTimeout(rememberCurrentSongTimerRef.current);
-    }
-
-    rememberCurrentSongTimerRef.current = window.setTimeout(() => {
-      rememberCurrentSongTimerRef.current = null;
-
-      const songIdToSave = latestRememberedSongIdRef.current;
-      if (!songIdToSave || !discordSettingsRef.current.rememberLastSong) return;
-
-      window.localitfy
-        .saveSettings({
-          ...discordSettingsRef.current,
-          lastSongId: songIdToSave
-        })
-        .catch(() => undefined);
-    }, 420);
+    if (!id || !settingsRef.current.rememberLastSong) return;
+    await persistSettings({ ...settingsRef.current, lastSongId: id }, true);
   }
 
   function replaceSong(updated: Song | null) {
@@ -6463,14 +6402,8 @@ function MainModeApp() {
 
         setCurrentId(nextSong?.id || "");
 
-        if (settings.rememberLastSong) {
-          const nextSettings = {
-            ...settings,
-            lastSongId: nextSong?.id || ""
-          };
-
-          setSettings(nextSettings);
-          await window.localitfy.saveSettings(nextSettings).catch(() => undefined);
+        if (settingsRef.current.rememberLastSong) {
+          await persistSettings({ ...settingsRef.current, lastSongId: nextSong?.id || "" });
         }
       }
 
@@ -6541,14 +6474,8 @@ function MainModeApp() {
 
         setCurrentId(nextSong?.id || "");
 
-        if (settings.rememberLastSong) {
-          const nextSettings = {
-            ...settings,
-            lastSongId: nextSong?.id || ""
-          };
-
-          setSettings(nextSettings);
-          await window.localitfy.saveSettings(nextSettings).catch(() => undefined);
+        if (settingsRef.current.rememberLastSong) {
+          await persistSettings({ ...settingsRef.current, lastSongId: nextSong?.id || "" });
         }
       }
 
