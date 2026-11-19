@@ -452,3 +452,16 @@ test("related music uses an explicit validated seed and observes discovery opt-o
  settings.discoverEnabled=true;assert.equal((await get("bad")).status,"error");assert.equal(calls,0);
  assert.equal((await get("abcdefghijk")).status,"catalog");assert.equal(calls,1);
 });
+
+
+test("recommendation artwork uses verified catalog metadata before slower providers",async()=>{
+ const {createArtworkLookup,matchMusicArtwork}=require("../../electron/discover/artwork.cjs");
+ const candidate={title:"Song",artist:"Artist",coverUrl:"https://lh3.googleusercontent.com/abc=w256-h256-l90-rj",durationMs:123000};
+ let calls=0;
+ const lookup=createArtworkLookup({searchRecordings:async()=>{throw Error("unneeded");}},Date.now,async()=>{throw Error("unneeded");},undefined,async()=>{calls++;return [candidate];});
+ const results=await Promise.all([lookup("Song","Artist - Topic"),lookup("Song","Artist - Topic")]);
+ assert.deepEqual(results[0],{coverUrl:candidate.coverUrl,durationMs:123000});assert.deepEqual(results[0],results[1]);assert.equal(calls,1);
+ assert.deepEqual(matchMusicArtwork([candidate],"Wrong","Artist"),{});
+ assert.deepEqual(matchMusicArtwork([candidate,{...candidate,coverUrl:"https://lh3.googleusercontent.com/other=w256-h256-l90-rj"}],"Song","Artist"),{});
+ assert.deepEqual(matchMusicArtwork([{...candidate,coverUrl:"https://evil.test/cover.jpg"}],"Song","Artist"),{});
+});

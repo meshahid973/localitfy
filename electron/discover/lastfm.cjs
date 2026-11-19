@@ -124,7 +124,7 @@ function createLastfmClient({ apiKey, cacheFile, fetch = globalThis.fetch, now =
     },
     async topTracks(artist, limit = 3) {
       const body = await call("artist.gettoptracks", { artist, limit: String(limit) });
-      return list(body?.toptracks?.track).map((item) => ({ title: String(item?.name || "").trim(), artist: artistName(item) || artist, url: item?.url || "" }))
+      return list(body?.toptracks?.track).map((item) => ({ title: String(item?.name || "").trim(), artist: artistName(item) || artist, url: item?.url || "", ...(Number(item?.duration)>0 && Number.isFinite(Number(item.duration)) ? {durationMs:Number(item.duration)*1000} : {}) }))
         .filter((item) => item.title).slice(0, limit);
     },
     async searchTracks(title, limit = 35) {

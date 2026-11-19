@@ -43,7 +43,7 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
   useEffect(() => {
     if (!ref.current) return;
     if (typeof IntersectionObserver === "undefined") { setNear(true); return; }
-    const observer = new IntersectionObserver(entries => { if(entries.some(entry=>entry.isIntersecting)){setNear(true);observer.disconnect();} },{rootMargin:"160px"});
+    const observer = new IntersectionObserver(entries => { if(entries.some(entry=>entry.isIntersecting)){setNear(true);observer.disconnect();} },{rootMargin:"240px"});
     observer.observe(ref.current);
     return () => observer.disconnect();
   }, []);
@@ -54,12 +54,13 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
   const cover = resolved?.key === key ? resolved.value : undefined;
   const failed = failure.key === key ? failure.urls : [];
   const directUrls = [artwork?.coverUrl, artwork?.fallbackCoverUrl, ...(artwork?.coverAlternatives ?? []).slice(0,6)].map(safeCover).filter(Boolean);
-  const src = [...directUrls, safeCover(cover?.coverUrl), safeCover(cover?.fallbackCoverUrl), ...(cover?.coverAlternatives ?? []).slice(0,6).map(safeCover)].find(url => url && !failed.includes(url));
-  const needsLookup = lookup && !directUrls.some(url => url && !failed.includes(url));
+  const resolvedUrls = [safeCover(cover?.coverUrl), safeCover(cover?.fallbackCoverUrl), ...(cover?.coverAlternatives ?? []).slice(0,6).map(safeCover)];
+  const src = [...(failed.length ? resolvedUrls : []), ...directUrls, ...resolvedUrls].find(url => url && !failed.includes(url));
+  const needsLookup = lookup && (!directUrls.length || failed.length > 0);
   const imageReady = Boolean(src && loaded?.key === key && loaded.url === src);
   useEffect(() => {
     if (!near || !src || imageReady) return;
-    const timer = window.setTimeout(() => setFailure(current => ({key,urls:[...new Set([...(current.key === key ? current.urls : []),src])]})), 12000);
+    const timer = window.setTimeout(() => setFailure(current => ({key,urls:[...new Set([...(current.key === key ? current.urls : []),src])]})), 6500);
     return () => window.clearTimeout(timer);
   }, [src, key, imageReady, near]);
   useEffect(() => {
@@ -80,7 +81,7 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
         let value = cachedArtwork(key);
         if (!value) {
           const answer = await window.localitfy.getDiscoveries({ artwork: { title, artist } }).catch(() => null);
-          if (answer?.status !== "artwork") return;
+          if (answer?.status !== "artwork") { requested = false; return; }
           value = answer;
           cache.set(key, { at: Date.now(), value });
           const oldest = cache.keys().next().value;
@@ -99,13 +100,13 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
     const observer = new IntersectionObserver(entries => {
       if (entries.some(entry => entry.isIntersecting)) start();
       else stop();
-    }, { rootMargin: "80px" });
+    }, { rootMargin: "240px" });
     observer.observe(ref.current);
     return () => { live = false; observer.disconnect(); stop(); };
   }, [key, title, artist, needsLookup]);
   return <span ref={ref} className="discoverCover" aria-hidden="true">
     {!imageReady ? (person ? <UserRound size={24} /> : <Disc3 size={24} />) : null}
-    {near && src ? <img key={src} src={src} alt="" loading="eager" decoding="async" referrerPolicy="no-referrer" data-ready={imageReady}
+    {near && src ? <img key={src} src={src} alt="" loading="eager" decoding="async" fetchPriority="low" referrerPolicy="no-referrer" data-ready={imageReady}
       onLoad={() => setLoaded({key,url:src})}
       onError={() => setFailure(current => ({key,urls:[...(current.key === key ? current.urls : []),src]}))} /> : null}
   </span>;

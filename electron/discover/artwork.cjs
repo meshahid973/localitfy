@@ -23,7 +23,19 @@ function lastfmArtwork(track,title,artist) {
   const coverUrl = images.slice().reverse().map(i=>i?.["#text"]).find(value=>typeof value==="string" && /^https:\/\/(?:lastfm\.freetls\.fastly\.net|lastfm-img2\.akamaized\.net)\/i\/u\/(?:[0-9]+x[0-9]+|[0-9]+s)\/[a-f0-9]{32}\.(?:png|jpe?g|webp)$/i.test(value) && !/2a96cbd8b46e442fc41c2b86b821562f|4128a6eb29f94943c9d206c08e625904/i.test(value));
   return coverUrl ? {coverUrl} : {};
 }
-function createArtworkLookup(client,now=Date.now,trackInfo,lookupAudioDb) {
+// Exact catalog identity only; conflicting versions must not acquire unrelated artwork.
+function matchMusicArtwork(items,title,artist) {
+  const artistKey = value => norm(value).replace(/\s+-\s+topic$/i,"");
+  const matches = (Array.isArray(items)?items:[]).filter(item=>norm(item?.title)===norm(title)&&artistKey(item?.artist)===artistKey(artist)&&item.coverUrl);
+  const unique = [...new Map(matches.map(item=>[item.coverUrl,item])).values()];
+  if(unique.length!==1)return {};
+  const item=unique[0];
+  const {safeThumbnail}=require("./youtube-music.cjs");
+  const coverUrl=safeThumbnail(item.coverUrl);
+  if(!coverUrl)return {};
+  return {coverUrl,...(Number.isFinite(item.durationMs)&&item.durationMs>0?{durationMs:item.durationMs}:{})};
+}
+function createArtworkLookup(client,now=Date.now,trackInfo,lookupAudioDb,lookupMusic) {
   const cache=new Map(), pending=new Map();
   return async (title,artist) => {
     const key=JSON.stringify([norm(title),norm(artist)]), hit=cache.get(key);
@@ -35,6 +47,10 @@ function createArtworkLookup(client,now=Date.now,trackInfo,lookupAudioDb) {
     if(pending.has(key)) return pending.get(key);
     if(pending.size>=4) throw new Error("Artwork queue busy");
     const task=Promise.resolve().then(async()=>{
+      if (lookupMusic) {
+        const direct = matchMusicArtwork(await lookupMusic(title,artist).catch(()=>[]),title,artist);
+        if (direct.coverUrl) return direct;
+      }
       const track = trackInfo ? await trackInfo(title,artist).catch(()=>null) : null;
       const primary = lastfmArtwork(track,title,artist);
       const verified = norm(track?.name)===norm(title)&&norm(track?.artist?.name)===norm(artist);
@@ -57,4 +73,4 @@ function createArtworkLookup(client,now=Date.now,trackInfo,lookupAudioDb) {
     return task;
   };
 }
-module.exports={catalogArtwork,matchRecordingArtwork,createArtworkLookup,lastfmArtwork};
+module.exports={catalogArtwork,matchRecordingArtwork,createArtworkLookup,lastfmArtwork,matchMusicArtwork};

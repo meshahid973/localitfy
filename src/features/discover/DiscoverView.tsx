@@ -156,14 +156,14 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
   const needsSetup = !settings.discoverEnabled;
   const setup = phone ? <div className="discoverSetup"><p>Turn on Discover and manage its optional Last.fm connection in localtify on your {computerName()}, then sync this phone.</p></div> : (
     <div className="discoverSetup">
-      <p>Search YouTube Music, MusicBrainz and iTunes without an account or key. Explicit search text is sent to these providers. Similar songs sends only the chosen YouTube video ID. If you add an optional Last.fm key, Localtify also requests personalized suggestions using artist and song names from your library and looks up suggested tracks in MusicBrainz for artwork. Cover images come from YouTube Music, matching Last.fm track metadata, Cover Art Archive or TheAudioDB when available. Artwork lookup sends only the track title and artist.</p>
+      <p>Search music without an account. Searches and artwork lookups share song metadata with music providers; optional Last.fm recommendations use your library artists and tracks.</p>
       <details className="discoverOptional" open={Boolean(keyDraft) || undefined}>
       <summary>Optional Last.fm recommendations</summary>
       <label className="discoverKey">
         <span>Last.fm API key (optional)</span>
         <input value={keyDraft} onChange={(event) => setKeyDraft(event.currentTarget.value)} placeholder="32 letters and numbers" spellCheck={false} autoComplete="off" />
       </label>
-      <p className="discoverHint">Keys are free. You need a Last.fm account, which is separate from Google; if you’re not signed in to Last.fm, it asks you to first and then opens the form. Paste the “API key” it shows here, not the shared secret.
+      <p className="discoverHint">Use your Last.fm API key, not the shared secret.
         {" "}<button type="button" className="discoverLink" onClick={() => openLink("https://www.last.fm/api/account/create")}>Get a key <ExternalLink size={12} /></button>
         {" · "}<button type="button" className="discoverLink" onClick={() => openLink("https://www.last.fm/join?next=/api/account/create")}>No account? Sign up <ExternalLink size={12} /></button></p>
       </details>
@@ -212,7 +212,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
         <input type="search" aria-label="Search public music catalog" placeholder="Search songs and artists" value={catalogTerm} maxLength={160} disabled={catalogLoading} onChange={event => { setCatalogTerm(event.currentTarget.value); setCatalog(null); setRelatedTitle(""); }} />
         <button className="heroMain" type="submit" disabled={catalogLoading || catalogTerm.trim().length < 2}><Search size={15} /><span>{catalogLoading ? "Searching…" : "Search"}</span></button>
       </form>
-      <p className="discoverBecause" role="status">{catalogLoading ? "Searching public catalog…" : "Music catalog · Local playback only"}</p>
+      {catalogLoading ? <p className="discoverBecause" role="status">Searching…</p> : null}
       {!relatedTitle && localMatches.length && deferredTerm === catalogTerm ? <>
         <h3 className="discoverHeading">In your library</h3>
         <ul className="discoverSongList" aria-label="Local search results">
@@ -240,11 +240,10 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
         </li>)}
       </ul></> : <p role="status">No matching catalog results.</p> : null}
     </section> : null}
-    {result?.status === "needs-key" && settings.discoverEnabled && !phone ? <p className="discoverBecause">Personalized Last.fm suggestions are optional. Add a key in Settings if you want them.</p> : null}
-    {phone && !needsSetup ? <p className="discoverHint">Catalog searches and suggestions use your paired {computerName()}. Manage recommendations there.</p> : null}
-    {settings.discoverEnabled && loading && !ready ? <p className="discoverNotice" role="status">Loading optional personalized suggestions…</p> : null}
+
+    {settings.discoverEnabled && loading && !ready ? <p className="discoverNotice" role="status">Finding music…</p> : null}
     {settings.discoverEnabled && result?.status === "error" ? <p className="discoverNotice" role="alert">{result.error} <button type="button" className="softButton" onClick={() => void load(true)}>Retry</button></p> : null}
-    {settings.discoverEnabled && result?.status === "no-taste" ? <p className="discoverNotice">Play or like a few songs first. Discover learns from what you listen to.</p> : null}
+    {settings.discoverEnabled && result?.status === "no-taste" ? <p className="discoverNotice">Play or like songs to get recommendations.</p> : null}
 
     {recommendedTracks.length ? <section className="discoverSection" aria-labelledby="discover-recommended">
       <div className="discoverSectionHead"><h2 id="discover-recommended" className="discoverHeading">Recommended songs</h2>{recommendedTracks.length > 10 ? <button type="button" className="discoverName discoverMore" aria-expanded={showAllRecommended} onClick={() => setShowAllRecommended(value => !value)}>{showAllRecommended ? "Show less" : "See all"}</button> : null}</div>
@@ -285,7 +284,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       </ul>
     </section> : null}
 
-    {ready && !ready.artists.length && !ready.tracks.length ? <p className="discoverNotice">Nothing new to suggest right now. Try again after listening to more music.</p> : null}
+    {ready && !ready.artists.length && !ready.tracks.length ? <p className="discoverNotice">No new recommendations yet.</p> : null}
 
     {picked.size ? <div className="discoverTray" role="region" aria-label="Picked songs">
       <span>{picked.size} song{picked.size === 1 ? "" : "s"} picked</span>

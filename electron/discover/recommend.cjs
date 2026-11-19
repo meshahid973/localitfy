@@ -107,7 +107,7 @@ async function discover({ songs, hiddenArtists = [], client, now = Date.now() })
   const tracks = favouriteTracks.flatMap((list, index) => list
     .filter((track) => !hidden({ artist: track.artist || favourites[index].name }) && !taste.ownedTracks.has(trackKey(track.artist || favourites[index].name, track.title)))
     .slice(0, MISSING_SONGS_PER_ARTIST)
-    .map((track) => ({ title: track.title, artist: track.artist || favourites[index].name, url: track.url })));
+    .map((track) => ({ ...track, title: track.title, artist: track.artist || favourites[index].name })));
 
   return {
     status: "ready",
