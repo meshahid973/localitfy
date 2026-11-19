@@ -466,6 +466,8 @@ test("recommendation artwork uses verified catalog metadata before slower provid
  assert.equal(matchMusicArtwork([candidate,{...candidate,coverUrl:"https://lh3.googleusercontent.com/other=w256-h256-l90-rj"}],"Song","Artist").coverAlternatives.length,2);
  assert.equal(matchMusicArtwork([candidate],"Artist - Song","Artist").coverUrl,candidate.coverUrl);
  assert.deepEqual(matchMusicArtwork([candidate],"Song (slowed)","Artist"),{});
+ assert.equal(matchMusicArtwork([{...candidate,title:"Song (Official Music Video)"}],"Song","Artist").coverUrl,candidate.coverUrl);
+ assert.deepEqual(matchMusicArtwork([{...candidate,title:"Song (Live)"}],"Song","Artist"),{});
  assert.deepEqual(matchMusicArtwork([{...candidate,coverUrl:"https://evil.test/cover.jpg"}],"Song","Artist"),{});
 });
 

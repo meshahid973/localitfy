@@ -26,16 +26,17 @@ function lastfmArtwork(track,title,artist) {
 // Reuse the catalog's actual artwork, accounting for formatting differences
 // without stripping version markers (live, remix, slowed, etc.).
 const musicKey = value => norm(value).replace(/[^\p{L}\p{N}\p{M}]+/gu," ").trim();
+const titleKey = value => musicKey(norm(value).replace(/\s*[([]\s*(?:official\s+(?:music\s+)?video|official\s+audio|lyric\s+video|official\s+lyric\s+video)\s*[)\]]\s*$/i,""));
 const artistKey = value => musicKey(norm(value).replace(/\s+[-–—]\s+topic$/i,""));
 const equivalentArtist=(a,b)=>artistKey(a)===artistKey(b) && Boolean(artistKey(b));
 function matchMusicArtwork(items,title,artist) {
   const {safeThumbnail}=require("./youtube-music.cjs");
   const wantedArtist=artistKey(artist);
-  const wantedTitle=musicKey(title);
+  const wantedTitle=titleKey(title);
   const artistPrefix=norm(title).split(/\s+-\s+/);
   const titleKeys=new Set([wantedTitle]);
-  if(artistPrefix.length>1 && artistKey(artistPrefix[0])===wantedArtist) titleKeys.add(musicKey(artistPrefix.slice(1).join(" - ")));
-  const matches=(Array.isArray(items)?items:[]).filter(item=>titleKeys.has(musicKey(item?.title))&&equivalentArtist(item?.artist,artist))
+  if(artistPrefix.length>1 && artistKey(artistPrefix[0])===wantedArtist) titleKeys.add(titleKey(artistPrefix.slice(1).join(" - ")));
+  const matches=(Array.isArray(items)?items:[]).filter(item=>titleKeys.has(titleKey(item?.title))&&equivalentArtist(item?.artist,artist))
     .map(item=>({...item,coverUrl:safeThumbnail(item.coverUrl)})).filter(item=>item.coverUrl);
   if(!wantedArtist||!wantedTitle||!matches.length)return {};
   // Different releases of the same exact song can have valid alternate art.

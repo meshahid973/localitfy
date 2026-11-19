@@ -33,7 +33,8 @@ function cachedArtwork(key: string) {
   return hit.value;
 }
 export function getCachedDiscoverArtwork(title: string, artist: string) {
-  return cachedArtwork(JSON.stringify([title, artist]));
+  const key = JSON.stringify([title, artist]);
+  return cachedArtwork(key + ":fallback") || cachedArtwork(key);
 }
 const audioDbCover = /^https:\/\/(?:www\.|r2\.)?theaudiodb\.com\/images\/media\/album\/thumb\/[a-z0-9_-]+\.(?:jpg|jpeg|png)(?:\/(?:small|medium))?$/i;
 const youtubeCover = /^https:\/\/(?:lh[0-9]+\.googleusercontent\.com|yt3\.ggpht\.com|yt3\.googleusercontent\.com)\/[A-Za-z0-9_-]+=w256-h256-l90-rj$|^https:\/\/i\.ytimg\.com\/vi\/[A-Za-z0-9_-]{11}\/(?:hqdefault|mqdefault|default|sddefault|maxresdefault)\.jpg$/;
@@ -51,7 +52,7 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
     return () => observer.disconnect();
   }, []);
   const key = JSON.stringify([title, artist]);
-  const [resolved, setResolved] = useState<{ key: string; value: DiscoverArtwork }>();
+  const [resolved, setResolved] = useState<{ key: string; value: DiscoverArtwork; fallback: boolean }>();
   const [loaded, setLoaded] = useState<{key:string; url:string}>();
   const [failure, setFailure] = useState<{key:string; urls:string[]}>({key:"",urls:[]});
   const cover = resolved?.key === key ? resolved.value : undefined;
@@ -61,7 +62,7 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
   const src = [...(failed.length ? resolvedUrls : []), ...directUrls, ...resolvedUrls].find(url => url && !failed.includes(url));
   const needsLookup = lookup && (!directUrls.length || failed.length > 0);
   const imageReady = Boolean(src && loaded?.key === key && loaded.url === src);
-  const exhausted = !src && failed.length > 0 && !person;
+  const exhausted = !person && resolved?.key === key && (resolved.fallback || (!src && failed.length > 0));
   const requestKey = exhausted ? key + ":fallback" : key;
   useEffect(() => {
     if (!near || !src || imageReady) return;
@@ -77,7 +78,7 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
     const start = () => {
       if (!live) return;
       const cached = cachedArtwork(requestKey);
-      if (cached) { setResolved({ key, value: cached }); return; }
+      if (cached) { setResolved({ key, value: cached, fallback: exhausted }); return; }
       cancelQueued = enqueueArtwork(async () => {
         if (!live) return;
         let value = cachedArtwork(requestKey);
@@ -94,7 +95,7 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
           const oldest = cache.keys().next().value;
           if (cache.size > 512 && oldest !== undefined) cache.delete(oldest);
         }
-        if (live) setResolved({ key, value });
+        if (live) setResolved({ key, value, fallback: exhausted });
       });
     };
     start();

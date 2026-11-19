@@ -44,6 +44,7 @@ const openLink = (url: string) => { if (url) void window.localitfy.openExternal?
 export default function DiscoverView({ settings, updateSetting, sendToDownloads, notForMe, songs, selectLocalSong }: DiscoverViewProps) {
   const phone = isAndroidApp();
   const [result, setResult] = useState<DiscoverResult | null>(null);
+  const [artworkRevision, setArtworkRevision] = useState(0);
   const [loading, setLoading] = useState(false);
   const [showAllRecommended, setShowAllRecommended] = useState(false);
   const [catalogKind, setCatalogKind] = useState<CatalogKind>("recording");
@@ -76,7 +77,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
     setLoading(true);
     try {
       const result = await window.localitfy.getDiscoveries({ refresh });
-      if (requestVersion === requestVersionRef.current) setResult(result);
+      if (requestVersion === requestVersionRef.current) { setResult(result); if (refresh) setArtworkRevision(value => value + 1); }
     } catch {
       if (requestVersion === requestVersionRef.current) setResult({ status: "error", error: "Discover failed. Please try again." });
     } finally {
@@ -252,7 +253,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       <div className="discoverSectionHead"><h2 id="discover-recommended" className="discoverHeading">Recommended songs</h2>{recommendedTracks.length > 10 ? <button type="button" className="discoverName discoverMore" aria-expanded={showAllRecommended} onClick={() => setShowAllRecommended(value => !value)}>{showAllRecommended ? "Show less" : "See all"}</button> : null}</div>
       <ul className="discoverSongList">
         {(showAllRecommended ? recommendedTracks : recommendedTracks.slice(0, 10)).map(track => <li key={trackId(track)}>
-          <DiscoverCover title={track.title} artist={track.artist} artwork={track} lookup />
+          <DiscoverCover key={artworkRevision} title={track.title} artist={track.artist} artwork={track} lookup />
           <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => openLink(track.url)} title={track.title}>{track.title}</button><small>{track.artist}</small></span>
           {pickButton(track)}
         </li>)}
@@ -265,7 +266,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
         {popularTracks.map(track => <li key={trackId(track)}>
           <div className="discoverShelfArt">
             <button type="button" className="discoverArtLink" onClick={() => openLink(track.url)} aria-label={`Open ${track.title} on Last.fm`}>
-              <DiscoverCover title={track.title} artist={track.artist} artwork={track} lookup />
+              <DiscoverCover key={artworkRevision} title={track.title} artist={track.artist} artwork={track} lookup />
             </button>
             <div className="discoverShelfActions">{pickButton(track)}</div>
           </div>
@@ -278,7 +279,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       <h2 id="discover-artists" className="discoverHeading">Artists you might like</h2>
       <ul className="discoverSongList">
         {ready.artists.map(artist => <li key={artist.name}>
-          <DiscoverCover title={artist.name} artist="" person lookup />
+          <DiscoverCover key={artworkRevision} title={artist.name} artist="" person lookup />
           <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => openLink(artist.url)} title={artist.name}>{artist.name}</button>
             <small title={listNames(artist.because)}>Because you play {listNames(artist.because)}{artist.seedCount > artist.because.length ? ` and ${artist.seedCount - artist.because.length} more` : ""}</small>
           </span>
