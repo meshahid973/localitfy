@@ -62,9 +62,15 @@ export default function TaggingSettings({ settings, songs, updateSetting }: Tagg
       for (const [index, group] of groups.entries()) {
         setActiveKey(group.key);
         setBusy(groups.length > 1 ? `Looking up ${index + 1} of ${groups.length}: ${groupName(group)}` : `Looking up ${groupName(group)}`);
-        const result = await window.localitfy.lookUpMusicBrainzTags(idsOf(group));
+        const requestedIds = idsOf(group);
+        const result = await window.localitfy.lookUpMusicBrainzTags(requestedIds);
         setResults((current) => ({ ...current, [group.key]: result }));
-        setSelected((current) => new Set([...current, ...result.proposals.filter((proposal) => proposal.confidence >= AUTO_SELECT).map((proposal) => proposal.songId)]));
+        setSelected((current) => {
+          const next = new Set(current);
+          for (const id of group.songIds) next.delete(id);
+          for (const proposal of result.proposals) if (proposal.confidence >= AUTO_SELECT) next.add(proposal.songId);
+          return next;
+        });
         setQueued((current) => { const next = new Set(current); next.delete(group.key); return next; });
       }
       if (groups.length > 1) setMessage("Lookup finished. Check the matches, then save the ones you want.");
@@ -72,10 +78,12 @@ export default function TaggingSettings({ settings, songs, updateSetting }: Tagg
   }
 
   async function apply() {
-    const ids = [...selected];
+    const previewIds = Object.fromEntries(Object.values(results).flatMap(result => result.proposals).map(proposal => [proposal.songId, proposal.previewId]));
+    const ids = [...selected].filter(id => Object.hasOwn(previewIds, id));
+    if (!ids.length) { setSelected(new Set()); return; }
     setBusy(`Saving tags for ${plural(ids.length, "song")}…`); setMessage("");
     try {
-      const result = await window.localitfy.applyMusicBrainzTags(ids, Object.fromEntries(Object.values(results).flatMap(result => result.proposals).map(proposal => [proposal.songId, proposal.previewId])));
+      const result = await window.localitfy.applyMusicBrainzTags(ids, previewIds);
       if (result.applied) setUndoId(result.undoId || null);
       const failed = new Set(result.failed.map((failure) => failure.songId));
       const done = new Set(ids.filter((id) => !failed.has(id)));
@@ -119,7 +127,7 @@ export default function TaggingSettings({ settings, songs, updateSetting }: Tagg
         {state}
       </div>
       {result ? <ul className="taggingProposals">
-        {proposals.map((proposal) => <ProposalRow key={proposal.songId} proposal={proposal} checked={selected.has(proposal.songId)} onToggle={() => toggle(proposal.songId)} />)}
+        {proposals.map((proposal) => <ProposalRow key={proposal.songId} proposal={proposal} checked={selected.has(proposal.songId)} disabled={disabled} onToggle={() => toggle(proposal.songId)} />)}
         {result.missed.map((id) => <li key={id} className="taggingMissed">No match found for {titleOf(id)}</li>)}
         {!proposals.length && !result.missed.length ? <li className="taggingMissed">All saved.</li> : null}
       </ul> : null}
@@ -127,7 +135,7 @@ export default function TaggingSettings({ settings, songs, updateSetting }: Tagg
   };
 
   return <div className="settingsPanelCard settingsFocusPanelV491">
-    <div className="settingsPanelHeader"><div><strong>MusicBrainz tagging</strong><span>Looks songs up on MusicBrainz, the open music database, and fills in title, artist, album, genre, track numbers and cover art. You review every change before anything is saved. Lookups send each song’s title, artist, album and length to musicbrainz.org; covers come from the Cover Art Archive and are saved on this device.</span></div></div>
+    <div className="settingsPanelHeader"><div><strong>MusicBrainz tagging</strong><span>Looks songs up on MusicBrainz, the open music database, and fills in title, artist, album, genre and cover art in your library. You review every change before anything is saved. Lookups send each song’s title, artist, album and length to musicbrainz.org; covers come from the Cover Art Archive and are saved on this device.</span></div></div>
     <fieldset className="experimentalControls">
       <ToggleRow label="Use MusicBrainz tagging" help="Off by default. Only looks songs up when you ask it to." checked={enabled} onChange={(value) => void updateSetting("musicbrainzTagging", value)} />
       <p className="settingsHintText" role="note">File writing is temporarily disabled for safety. Saving tags updates your Localtify library only; your original music files are left untouched.</p>

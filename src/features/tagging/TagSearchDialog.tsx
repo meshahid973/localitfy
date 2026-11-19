@@ -34,7 +34,7 @@ export default function TagSearchDialog({ song, onClose }: TagSearchDialogProps)
 
   async function search() {
     if (!title.trim()) return;
-    setBusy("Searching MusicBrainz…"); setMessage(""); setProposal(null);
+    setBusy("Searching MusicBrainz…"); setMessage(""); setProposal(null); setResults(null);
     try {
       const next = await window.localitfy.searchMusicBrainz(song.id, title.trim(), artist.trim());
       setResults(next);

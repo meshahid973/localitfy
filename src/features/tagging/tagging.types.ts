@@ -20,7 +20,7 @@ export type TagProposal = {
   /** Local media URL of the downloaded cover, or "" when the release has none. */
   coverUrl: string;
   musicbrainzUrl: string;
-  /** False for formats other than MP3/FLAC: only the library is updated. */
+  /** Whether physical file writing is available for this proposal. Currently disabled by the native safety gate. */
   writable: boolean;
 };
 
