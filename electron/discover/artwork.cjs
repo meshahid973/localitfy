@@ -23,17 +23,37 @@ function lastfmArtwork(track,title,artist) {
   const coverUrl = images.slice().reverse().map(i=>i?.["#text"]).find(value=>typeof value==="string" && /^https:\/\/(?:lastfm\.freetls\.fastly\.net|lastfm-img2\.akamaized\.net)\/i\/u\/(?:[0-9]+x[0-9]+|[0-9]+s)\/[a-f0-9]{32}\.(?:png|jpe?g|webp)$/i.test(value) && !/2a96cbd8b46e442fc41c2b86b821562f|4128a6eb29f94943c9d206c08e625904/i.test(value));
   return coverUrl ? {coverUrl} : {};
 }
-// Exact catalog identity only; conflicting versions must not acquire unrelated artwork.
+// Reuse the catalog's actual artwork, accounting for formatting differences
+// without stripping version markers (live, remix, slowed, etc.).
+const musicKey = value => norm(value).replace(/[^\p{L}\p{N}\p{M}]+/gu," ").trim();
+const artistKey = value => musicKey(norm(value).replace(/\s+-\s+topic$/i,""));
 function matchMusicArtwork(items,title,artist) {
-  const artistKey = value => norm(value).replace(/\s+-\s+topic$/i,"");
-  const matches = (Array.isArray(items)?items:[]).filter(item=>norm(item?.title)===norm(title)&&artistKey(item?.artist)===artistKey(artist)&&item.coverUrl);
-  const unique = [...new Map(matches.map(item=>[item.coverUrl,item])).values()];
-  if(unique.length!==1)return {};
-  const item=unique[0];
   const {safeThumbnail}=require("./youtube-music.cjs");
-  const coverUrl=safeThumbnail(item.coverUrl);
-  if(!coverUrl)return {};
-  return {coverUrl,...(Number.isFinite(item.durationMs)&&item.durationMs>0?{durationMs:item.durationMs}:{})};
+  const wantedArtist=artistKey(artist);
+  const wantedTitle=musicKey(title);
+  const artistPrefix=norm(title).split(/\s+-\s+/);
+  const titleKeys=new Set([wantedTitle]);
+  if(artistPrefix.length>1 && artistKey(artistPrefix[0])===wantedArtist) titleKeys.add(musicKey(artistPrefix.slice(1).join(" - ")));
+  const matches=(Array.isArray(items)?items:[]).filter(item=>titleKeys.has(musicKey(item?.title))&&artistKey(item?.artist)===wantedArtist)
+    .map(item=>({...item,coverUrl:safeThumbnail(item.coverUrl)})).filter(item=>item.coverUrl);
+  if(!wantedArtist||!wantedTitle||!matches.length)return {};
+  // Different releases of the same exact song can have valid alternate art.
+  // Reject conflicting known lengths rather than attaching an unrelated version.
+  const lengths=matches.map(item=>item.durationMs).filter(v=>Number.isFinite(v)&&v>0);
+  if(lengths.length>1&&Math.max(...lengths)-Math.min(...lengths)>5000)return {};
+  const ranked=matches.slice().sort((a,b)=>Number(b.coverUrl.includes("googleusercontent"))-Number(a.coverUrl.includes("googleusercontent")));
+  const item=ranked[0];
+  const covers=[...new Set(ranked.flatMap(candidate=>{
+    const id=/^https:\/\/www\.youtube\.com\/watch\?v=([A-Za-z0-9_-]{11})$/.exec(candidate.url||"")?.[1];
+    return [candidate.coverUrl,id?"https://i.ytimg.com/vi/"+id+"/hqdefault.jpg":undefined].filter(Boolean);
+  }))].slice(0,6);
+  return {coverUrl:item.coverUrl,...(covers.length>1?{coverAlternatives:covers}:{}),...(Number.isFinite(item.durationMs)&&item.durationMs>0?{durationMs:item.durationMs}:{})};
+}
+function matchArtistArtwork(items,name) {
+  const {safeThumbnail}=require("./youtube-music.cjs");
+  const exact=(Array.isArray(items)?items:[]).filter(item=>artistKey(item?.title)===artistKey(name)&&/^ytmusic:UC[A-Za-z0-9_-]{22}$/.test(item.id||"")&&safeThumbnail(item.coverUrl));
+  const unique=[...new Map(exact.map(item=>[item.id,item])).values()];
+  return unique.length===1?{coverUrl:safeThumbnail(unique[0].coverUrl)}:{};
 }
 function createArtworkLookup(client,now=Date.now,trackInfo,lookupAudioDb,lookupMusic) {
   const cache=new Map(), pending=new Map();
@@ -73,4 +93,4 @@ function createArtworkLookup(client,now=Date.now,trackInfo,lookupAudioDb,lookupM
     return task;
   };
 }
-module.exports={catalogArtwork,matchRecordingArtwork,createArtworkLookup,lastfmArtwork,matchMusicArtwork};
+module.exports={catalogArtwork,matchRecordingArtwork,createArtworkLookup,lastfmArtwork,matchMusicArtwork,matchArtistArtwork};

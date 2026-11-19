@@ -462,6 +462,23 @@ test("recommendation artwork uses verified catalog metadata before slower provid
  const results=await Promise.all([lookup("Song","Artist - Topic"),lookup("Song","Artist - Topic")]);
  assert.deepEqual(results[0],{coverUrl:candidate.coverUrl,durationMs:123000});assert.deepEqual(results[0],results[1]);assert.equal(calls,1);
  assert.deepEqual(matchMusicArtwork([candidate],"Wrong","Artist"),{});
- assert.deepEqual(matchMusicArtwork([candidate,{...candidate,coverUrl:"https://lh3.googleusercontent.com/other=w256-h256-l90-rj"}],"Song","Artist"),{});
+ assert.deepEqual(matchMusicArtwork([candidate,{...candidate,coverUrl:"https://lh3.googleusercontent.com/other=w256-h256-l90-rj",durationMs:190000}],"Song","Artist"),{});
+ assert.equal(matchMusicArtwork([candidate,{...candidate,coverUrl:"https://lh3.googleusercontent.com/other=w256-h256-l90-rj"}],"Song","Artist").coverAlternatives.length,2);
+ assert.equal(matchMusicArtwork([candidate],"Artist - Song","Artist").coverUrl,candidate.coverUrl);
+ assert.deepEqual(matchMusicArtwork([candidate],"Song (slowed)","Artist"),{});
  assert.deepEqual(matchMusicArtwork([{...candidate,coverUrl:"https://evil.test/cover.jpg"}],"Song","Artist"),{});
+});
+
+
+test("recommended artists request exact catalog portraits and cache them",async()=>{
+ const handlers=new Map(),settings={discoverEnabled:false};let calls=0;
+ const coverUrl="https://lh3.googleusercontent.com/portrait=w256-h256-l90-rj";
+ registerDiscoverIpc({handle:(channel,handler)=>handlers.set(channel,handler)},{getSongs:()=>[],getSettings:()=>settings,searchYouTubeArtwork:async(kind,name)=>{calls++;assert.equal(kind,"artist");assert.equal(name,"Artist");return [{id:"ytmusic:UCabcdefghijklmnopqrstuv",title:"Artist",coverUrl}];}});
+ const get=()=>handlers.get("discover:get")({},{artwork:{title:"Artist",artist:"",kind:"artist"}});
+ assert.equal((await get()).status,"off");assert.equal(calls,0);
+ settings.discoverEnabled=true;
+ const result=await Promise.all([get(),get()]);assert.deepEqual(result,[{status:"artwork",coverUrl},{status:"artwork",coverUrl}]);assert.equal(calls,1);
+ assert.deepEqual(await get(),{status:"artwork",coverUrl});assert.equal(calls,1);
+ const {matchArtistArtwork}=require("../../electron/discover/artwork.cjs");
+ assert.deepEqual(matchArtistArtwork([{id:"ytmusic:UCabcdefghijklmnopqrstuv",title:"Different",coverUrl}],"Artist"),{});
 });

@@ -103,7 +103,7 @@ async function requestCatalog(fetchImpl,endpoint,payload) {
   else {raw=await response.text();if(Buffer.byteLength(raw)>max)throw Error("Oversized music catalog");}
   return JSON.parse(raw);
 }
-function createYouTubeMusicSearch(fetchImpl=globalThis.fetch,now=Date.now) {
+function createYouTubeMusicSearch(fetchImpl=globalThis.fetch,now=Date.now,maxPending=2) {
   const cache=new Map(),pending=new Map();
   return async (kind,query)=>{
     if(!Object.hasOwn(filters,kind)||typeof query!=="string"||query.trim().length<2||query.length>160)return [];
@@ -111,7 +111,7 @@ function createYouTubeMusicSearch(fetchImpl=globalThis.fetch,now=Date.now) {
     const hit=cache.get(key);
     if(hit&&now()-hit.at<300000){cache.delete(key);cache.set(key,hit);return hit.items;}
     if(pending.has(key))return pending.get(key);
-    if(pending.size>=2)throw Error("Music search busy");
+    if(pending.size>=maxPending)throw Error("Music search busy");
     const task=Promise.resolve().then(async()=>{
       const body=await requestCatalog(fetchImpl,"search",{query:query.trim(),params:filters[kind]});
       const items=mapSearchResponse(body,kind,query);

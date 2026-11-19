@@ -6,7 +6,7 @@ type ArtworkJob = () => Promise<void>;
 const waiting: ArtworkJob[] = [];
 let running = 0;
 function pumpArtwork() {
-  while (running < 2 && waiting.length) {
+  while (running < 4 && waiting.length) {
     const job = waiting.shift()!;
     running++;
     void job().catch(() => undefined).finally(() => { running--; pumpArtwork(); });
@@ -67,24 +67,25 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
     return () => window.clearTimeout(timer);
   }, [src, key, imageReady, near]);
   useEffect(() => {
-    if (!needsLookup || !artist || !title || !ref.current) return;
-    let live = true, requested = false;
+    if (!needsLookup || (!person && !artist) || !title || !near) return;
+    let live = true;
     let cancelQueued: (() => boolean) | undefined;
+    let retryTimer: number | undefined;
+    let attempts = 0;
     const start = () => {
-      if (requested || !live) return;
+      if (!live) return;
       const cached = cachedArtwork(key);
-      if (cached) {
-        requested = true;
-        setResolved({ key, value: cached });
-        return;
-      }
-      requested = true;
+      if (cached) { setResolved({ key, value: cached }); return; }
       cancelQueued = enqueueArtwork(async () => {
         if (!live) return;
         let value = cachedArtwork(key);
         if (!value) {
-          const answer = await window.localitfy.getDiscoveries({ artwork: { title, artist } }).catch(() => null);
-          if (answer?.status !== "artwork") { requested = false; return; }
+          attempts++;
+          const answer = await window.localitfy.getDiscoveries({ artwork: { title, artist, kind: person ? "artist" : "recording" } }).catch(() => null);
+          if (answer?.status !== "artwork") {
+            if (live && attempts < 3 && answer?.status !== "off") retryTimer = window.setTimeout(start, attempts * 900);
+            return;
+          }
           value = answer;
           cache.set(key, { at: Date.now(), value });
           const oldest = cache.keys().next().value;
@@ -93,20 +94,9 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
         if (live) setResolved({ key, value });
       });
     };
-    const stop = () => {
-      if (cancelQueued?.()) { requested = false; cancelQueued = undefined; }
-    };
-    if (typeof IntersectionObserver === "undefined") {
-      start();
-      return () => { live = false; stop(); };
-    }
-    const observer = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting)) start();
-      else stop();
-    }, { rootMargin: "240px" });
-    observer.observe(ref.current);
-    return () => { live = false; observer.disconnect(); stop(); };
-  }, [key, title, artist, needsLookup]);
+    start();
+    return () => { live = false; cancelQueued?.(); if (retryTimer !== undefined) window.clearTimeout(retryTimer); };
+  }, [key, title, artist, needsLookup, near, person]);
   return <span ref={ref} className="discoverCover" aria-hidden="true">
     {!imageReady ? (person ? <UserRound size={24} /> : <Disc3 size={24} />) : null}
     {near && src ? <img key={src} src={src} alt="" loading="eager" decoding="async" fetchPriority="low" referrerPolicy="no-referrer" data-ready={imageReady}

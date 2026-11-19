@@ -5,7 +5,7 @@ const path = require("node:path");
 const { randomUUID } = require("node:crypto");
 const { createLastfmClient } = require("../discover/lastfm.cjs");
 const { discover, withoutOwned } = require("../discover/recommend.cjs");
-const { catalogArtwork, createArtworkLookup } = require("../discover/artwork.cjs");
+const { catalogArtwork, createArtworkLookup, matchArtistArtwork } = require("../discover/artwork.cjs");
 const { rankCatalog, searchTerms } = require("../discover/catalog.cjs");
 
 const RESULT_TTL_MS = 12 * 60 * 60 * 1000;
@@ -53,15 +53,28 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
     const client = artworkClient;
     try { return await client.trackInfo(title, artist); } finally { client.flush(); }
   }, lookupAudioDb ? (title, artist) => getSettings().discoverEnabled === true ? lookupAudioDb(title, artist) : Promise.resolve({}) : undefined, searchYouTubeArtwork ? (title, artist) => getSettings().discoverEnabled === true ? searchYouTubeArtwork("recording", `${title} ${artist.replace(/\s+-\s+Topic$/i,"")}`.slice(0,160)) : Promise.resolve([]) : undefined);
+  const artistArtworkCache=new Map(), artistArtworkPending=new Map();
+  async function lookupArtistArtwork(name) {
+    if (!searchYouTubeArtwork) return {};
+    const key=name.normalize("NFKC").toLowerCase();
+    const hit=artistArtworkCache.get(key);
+    if(hit&&now()-hit.at<(hit.value.coverUrl?86400000:60000))return hit.value;
+    if(artistArtworkPending.has(key))return artistArtworkPending.get(key);
+    if(artistArtworkPending.size>=4)throw Error("Artwork queue busy");
+    const task=Promise.resolve().then(()=>searchYouTubeArtwork("artist",name.slice(0,160)))
+      .then(items=>{const value=matchArtistArtwork(items,name);artistArtworkCache.set(key,{at:now(),value});while(artistArtworkCache.size>256)artistArtworkCache.delete(artistArtworkCache.keys().next().value);return value;})
+      .finally(()=>artistArtworkPending.delete(key));
+    artistArtworkPending.set(key,task);return task;
+  }
   router.handle("discover:get", async (_event, payload = {}) => {
     const settings = getSettings();
     if (settings.discoverEnabled !== true) return { status: "off" };
     if (payload?.artwork !== undefined) {
-      const { title, artist } = payload.artwork || {};
-      if (typeof title !== "string" || typeof artist !== "string" || !title.trim() || !artist.trim() || title.length > 300 || artist.length > 300)
+      const { title, artist, kind = "recording" } = payload.artwork || {};
+      if (!["artist","recording"].includes(kind) || typeof title !== "string" || typeof artist !== "string" || !title.trim() || (kind === "recording" && !artist.trim()) || title.length > 300 || artist.length > 300)
         return { status: "error", error: "Invalid artwork lookup." };
       try {
-        const artwork = await lookupArtwork(title.trim(), artist.trim());
+        const artwork = kind === "artist" ? await lookupArtistArtwork(title.trim()) : await lookupArtwork(title.trim(), artist.trim());
         return getSettings().discoverEnabled === true ? { status: "artwork", ...artwork } : { status: "off" };
       } catch { return { status: "error", error: "Artwork unavailable." }; }
     }
