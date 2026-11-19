@@ -1,4 +1,3 @@
-const { summarizeRecordedListening } = require("../db/listening-summary.cjs");
 const path = require("node:path");
 const { createSimilarityService } = require("../analysis/similarity-service.cjs");
 const { createAnalysisService } = require("../analysis/service.cjs");
@@ -29,10 +28,7 @@ function registerAnalysisIpc(router, { app, powerMonitor, repositories, ffmpegPa
   router.handle("listening:counts", () => repositories.listening.counts());
   router.handle("listening:summary", (_event, payload) => {
     const days = [7, 30, 90].includes(payload?.days) ? payload.days : 30;
-    const now = Date.now();
-    const since = Math.floor(now / 86400000) * 86400000 - (days - 1) * 86400000;
-    const events = repositories.listening.list({ since, before: now + 1 });
-    return summarizeRecordedListening(events, since, now, days);
+    return repositories.listening.summary({ days });
   });
   app.once("before-quit", () => { similarity.dispose(); void service?.dispose(); });
 }

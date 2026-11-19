@@ -2,7 +2,8 @@ import "./analytics.css";
 import { isAndroidApp } from "../../app/platform";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { ArcDropdownMenu } from "../../shared/ui/ArcDropdownMenu";
-import type { ListeningSummary } from "./listeningSummary";
+import { ListeningHistoryChart } from "./ListeningHistoryChart";
+import { isListeningSummary, type ListeningSummary } from "./listeningSummary";
 import { formatAnalyticsDuration } from "./formatters";
 import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
 import { PageHeader } from "../../shared/ui/PageHeader";
@@ -182,7 +183,7 @@ function RecordedListening({ songs }: { songs: Song[] }) {
     let active = true;
     setBusy(true); setFailed(false); setResult(null); setSelectedDay("");
     window.localitfy.getListeningSummary({days: Number(period) as 7 | 30 | 90})
-      .then(value => { if (active) { setResult(value); setFailed(!value); } })
+      .then(value => { if (active) { const valid = isListeningSummary(value, Number(period)) ? value : null; setResult(valid); setFailed(!valid); } })
       .catch(() => { if (active) setFailed(true); })
       .finally(() => { if (active) setBusy(false); });
     return () => { active = false; };
@@ -201,16 +202,19 @@ function RecordedListening({ songs }: { songs: Song[] }) {
     const top = (map: Map<string, number>) => [...map].sort((a,b) => b[1]-a[1]).slice(0,5);
     return { artists: top(artists), genres: top(genres) };
   },[result,songs]);
-  const dayItems = (result?.byDay || []).map(day => ({ value: day.day, label: `${day.day} · ${formatAnalyticsDuration(day.ms / 1000)}` }));
-  const shown = result?.byDay.find(day => day.day === selectedDay);
   return <section className="analyticsRecorded" aria-label="Recorded listening">
     <div className="analyticsRecordedHeader"><h2>Listening history</h2><ArcDropdownMenu ariaLabel="Listening history period" value={period} items={PERIODS} onValueChange={(value) => { if (value === "7" || value === "30" || value === "90") setPeriod(value); }} /><button type="button" className="softButton" disabled={busy} onClick={() => refresh(n=>n+1)}>Refresh</button></div>
     {busy ? <p role="status">Loading listening history…</p> : failed || !result ? <p role="status">Listening history is unavailable. {isAndroidApp() ? "Connect to your paired computer to retrieve it." : "Try refreshing."}</p> : <>
       <strong>{formatAnalyticsDuration(result.totalMs / 1000)} recorded · {result.sessions.toLocaleString()} listening events</strong>
       <p>Events are counted once and grouped by the UTC day they began. Older unrecorded listening is not estimated.{isAndroidApp() ? " Includes computer history as of the timestamp below; unsynced phone plays are not included." : ""}</p>
       <small>Snapshot: {new Date(result.generatedAt).toLocaleString()}</small>
+      {result.comparison && <p className="analyticsHistoryComparison">
+        Previous {result.days} UTC days: {formatAnalyticsDuration(result.comparison.totalMs / 1000)} recorded.
+        {result.comparison.changePercent !== null ? ` ${Math.abs(result.comparison.changePercent).toFixed(1)}% ${result.comparison.changePercent >= 0 ? "more" : "less"} recorded time.` : " No previous listening baseline."}
+        {" "}The current period includes today so far.
+      </p>}
+      <ListeningHistoryChart summary={result} selectedDay={selectedDay} onSelectDay={setSelectedDay} />
       {result.totalMs > 0 ? <>
-        <div className="analyticsRecordedHeader"><ArcDropdownMenu ariaLabel="Inspect listening day" value={selectedDay || dayItems.at(-1)?.value || ""} items={dayItems} onValueChange={setSelectedDay} /><p role="status">{shown ? shown.day + " · " + formatAnalyticsDuration(shown.ms/1000) : "Select a UTC day to inspect recorded listening."}</p></div>
         <div className="analyticsRecordedInsights">{([["Top artist credits", insights.artists],["Top genre tags", insights.genres]] as const).map(([title, entries]) => <div key={title}><h3>{title}</h3>{entries.map(([name,ms])=><p key={name}><span>{name}</span><strong>{formatAnalyticsDuration(ms/1000)}</strong></p>)}</div>)}</div>
       </> : <p>No listening events have been recorded for this period.</p>}
     </>}

@@ -36,7 +36,7 @@ function fixtureCover(index) {
 const songs=Array.from({length:12},(_,i)=>({id:"qa-"+i,title:"test track "+i,artist:"test artist "+(i%8),album:"test album "+Math.floor(i/4),genre:"ambient",filePath:wav("qa-"+i),coverPath:fixtureCover(i),coverSource:"local",duration:20,dateAdded:"2026-01-01T00:00:00Z",playCount:12-i,lastPlayed:"2026-11-16T00:00:00Z",liked:i===0}));
 for (const song of songs) fs.writeFileSync(song.filePath.replace(/\.wav$/, ".lrc"), "[00:00.00]<00:00.00>Local <00:01.00>lyric fixture\n[00:05.00]Second lyric line\n");
 const seed=spawnSync(process.execPath,["-e",
-  "const db=require(process.argv[1]);db.initDatabase(process.argv[2]);const songs=JSON.parse(process.argv[3]);db.insertSongs(songs);db.savePlaylists([{id:'qa-playlist',name:'qa playlist',songIds:songs.map(s=>s.id),createdAt:Date.now()}]);db.saveSettings({startWithWindows:false,idleScreensaverEnabled:false,discordRpcEnabled:false,reducedMotion:false,discoverEnabled:true,lyricsEnabled:true,lyricsOnlineLookup:false,coverColorSyncMode:'strong',homeBannerType:'dynamic',showAmbientGradient:true,playerBackgroundStyle:'coverBlur',homeHiddenSections:['dailyMixes','likedSongs','rediscover','notPlayedYet']});",
+  "const db=require(process.argv[1]);db.initDatabase(process.argv[2]);const songs=JSON.parse(process.argv[3]);db.insertSongs(songs);for(let i=0;i<180;i++){const startedAt=Date.now()-i*86400000-60000,msListened=1000+(i%7)*4000;db.recordPlayEvent({id:'qa-listen-'+i,sessionId:'qa-session',songId:songs[i%songs.length].id,startedAt,updatedAt:startedAt+msListened,endedAt:startedAt+msListened,msListened,outcome:'ended',contextType:'library',contextId:null});}db.savePlaylists([{id:'qa-playlist',name:'qa playlist',songIds:songs.map(s=>s.id),createdAt:Date.now()}]);db.saveSettings({startWithWindows:false,idleScreensaverEnabled:false,discordRpcEnabled:false,reducedMotion:false,discoverEnabled:true,lyricsEnabled:true,lyricsOnlineLookup:false,coverColorSyncMode:'strong',homeBannerType:'dynamic',showAmbientGradient:true,playerBackgroundStyle:'coverBlur',homeHiddenSections:['dailyMixes','likedSongs','rediscover','notPlayedYet']});",
   path.join(root,"electron/db.cjs"),path.join(app.getPath("userData"),"localitfy.sqlite"),JSON.stringify(songs)],{env:{...process.env,ELECTRON_RUN_AS_NODE:"1"},encoding:"utf8"});
 if(seed.status!==0)throw Error("Synthetic database seed failed: "+seed.stderr);
 const recoveryStore=require("../electron/download-jobs.cjs").createDownloadJobStore(app.getPath("userData"));
@@ -53,7 +53,7 @@ const server=http.createServer((req,res)=>{
 });
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function until(fn,label,timeout=35000){const end=Date.now()+timeout;while(Date.now()<end){const v=await fn();if(v)return v;await sleep(200);}throw Error("Timeout: "+label);}
-async function screenshot(win,name){const image=await win.webContents.capturePage();assert.ok(!image.isEmpty());fs.writeFileSync(path.join(output,name+".png"),image.toPNG());}
+async function screenshot(win,name){await win.webContents.executeJavaScript("new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve(true))))");const image=await win.webContents.capturePage();assert.ok(!image.isEmpty());fs.writeFileSync(path.join(output,name+".png"),image.toPNG());}
 async function metrics(label){
   // Prime Electron's interval-based CPU counters before sampling.
   app.getAppMetrics();
@@ -310,7 +310,20 @@ server.listen(5173,async()=>{
             assert.ok(history && Number.isFinite(history.totalMs) && history.totalMs>=0,"recorded listening summary");
             assert.equal(history.byDay.length,7,"seven-day history");
             assert.equal(history.byDay.reduce((sum,day)=>sum+day.ms,0),history.totalMs,"daily totals equal recorded total");
-            await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.analyticsRecorded')"),"recorded listening UI");
+            assert.ok(history.comparison.totalMs>0,"historical comparison uses fixture playback events");
+            await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.analyticsChartInspector')"),"recorded listening chart");
+            await win.webContents.executeJavaScript("document.querySelector('button[aria-label=\"Listening history period\"]').click()");
+            await until(()=>win.webContents.executeJavaScript("Array.from(document.querySelectorAll('[role=menuitemradio]')).some(item=>item.textContent.includes('Last 7 days'))"),"history periods");
+            await win.webContents.executeJavaScript("Array.from(document.querySelectorAll('[role=menuitemradio]')).find(item=>item.textContent.includes('Last 7 days')).click()");
+            await until(()=>win.webContents.executeJavaScript("document.querySelector('.analyticsChartInspector')?.max==='6'"),"seven-day chart selection");
+            await until(()=>win.webContents.executeJavaScript("document.querySelector('button[aria-label=\"Listening history period\"] .arcDropdownLabel').textContent==='Last 7 days'"),"selected period label finishes its transition");
+            await win.webContents.executeJavaScript("document.querySelector('.analyticsChartInspector').focus()");
+            win.webContents.sendInputEvent({type:"keyDown",keyCode:"Home"});
+            win.webContents.sendInputEvent({type:"keyUp",keyCode:"Home"});
+            await until(()=>win.webContents.executeJavaScript("document.querySelector('.analyticsChartInspector')?.value==='0'"),"history chart Home key");
+            const readable=await win.webContents.executeJavaScript("document.querySelector('.analyticsChartInspector').getAttribute('aria-valuetext')");
+            assert.ok(readable.includes(history.byDay[0].day),"chart announces the selected UTC day");
+            assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('.analyticsHistoryChartData tbody tr').length"),7,"daily data remains available to assistive technology");
           }
           const geometry=await win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return {width:page.clientWidth,scroll:page.scrollWidth}})()`);
           assert.ok(geometry.width>0&&geometry.scroll<=geometry.width+3,"page overflow "+view+" "+mode+" "+JSON.stringify(geometry));

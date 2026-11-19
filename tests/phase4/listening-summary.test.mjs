@@ -1,18 +1,87 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { DatabaseSync } from "node:sqlite";
 import { createRequire } from "node:module";
+import fs from "node:fs";
+import ts from "typescript";
 const require = createRequire(import.meta.url);
-const { summarizeRecordedListening } = require("../../electron/db/listening-summary.cjs");
-test("history aggregates recorded milliseconds once per event, and excludes invalid or out-of-period events", () => {
-  const since=Date.UTC(2026,0,1),day=86400000,now=since+day+60000;
-  const event=(id,songId,startedAt,msListened)=>({id,songId,startedAt,msListened});
-  const result=summarizeRecordedListening([
-    event("a","song",since+1000,2000),event("a","song",since+1000,3000),
-    event("b","song",since+day,1000),event("c","other",since+day+2000,500),
-    event("old","song",since-1,200),event("future","song",now+1,200),event("bad","song",now-100,500)
-  ],since,now,2);
-  assert.equal(result.totalMs,4500);
-  assert.equal(result.sessions,3);
-  assert.deepEqual(result.byDay,[{day:"2026-01-01",ms:3000},{day:"2026-01-02",ms:1500}]);
-  assert.deepEqual(result.bySong,[{id:"song",ms:4000},{id:"other",ms:500}]);
+const { getRecordedListeningSummary } = require("../../electron/db/listening-summary.cjs");
+const { createPlayEventsTable } = require("../../electron/db/play-events.cjs");
+const compiled = ts.transpileModule(fs.readFileSync("src/features/analytics/listeningSummary.ts", "utf8"), { compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 } }).outputText;
+const { isListeningSummary } = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString("base64")}`);
+
+function fixture() {
+  const database = new DatabaseSync(":memory:");
+  database.exec("CREATE TABLE songs (id TEXT PRIMARY KEY); INSERT INTO songs VALUES ('song'), ('other');");
+  createPlayEventsTable(database);
+  const insert = database.prepare(`INSERT INTO play_events (id, sessionId, songId, startedAt, updatedAt, msListened)
+    VALUES (?, 'session', ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET msListened = MAX(msListened, excluded.msListened)`);
+  return { database, event: (id, song, start, ms, updated = start + ms) => insert.run(id, song, start, updated, ms) };
+}
+
+test("SQLite aggregates actual recorded milliseconds once per event with zero-filled UTC days", () => {
+  const { database, event } = fixture();
+  try {
+    const since = Date.UTC(2026, 0, 1), day = 86400000, now = since + 6 * day + 60000;
+    event("a", "song", since + 1000, 2000);
+    event("a", "song", since + 1000, 3000);
+    event("b", "song", since + 6 * day, 1000);
+    event("c", "other", since + 6 * day + 2000, 500);
+    event("old", "song", since - 1000, 200);
+    event("future", "song", now + 1, 200);
+    event("bad", "song", now - 100, 500);
+    const result = getRecordedListeningSummary(database, { days: 7, now });
+    assert.equal(result.totalMs, 4500);
+    assert.equal(result.sessions, 3);
+    assert.equal(result.byDay.length, 7);
+    assert.deepEqual(result.byDay.map(entry => entry.ms), [3000, 0, 0, 0, 0, 0, 1500]);
+    assert.deepEqual(result.bySong.sort((a,b) => a.id.localeCompare(b.id)), [{id:"other",ms:500}, {id:"song",ms:4000}]);
+    assert.equal(result.comparison.totalMs, 200);
+    assert.equal(result.comparison.sessions, 1);
+    assert.equal(result.comparison.endAt, since);
+    assert.equal(result.comparison.changePercent, 2150);
+    assert.equal(isListeningSummary(result, 7), true);
+    assert.equal(database.prepare("EXPLAIN QUERY PLAN SELECT * FROM play_events WHERE startedAt >= ?").all(since).some(row => row.detail.includes("idx_play_events_time")), true);
+  } finally { database.close(); }
+});
+
+test("remote and cached listening snapshots cannot claim inconsistent dates, totals or baselines", () => {
+  const { database } = fixture();
+  try {
+    const snapshot = getRecordedListeningSummary(database, { days: 7, now: Date.UTC(2026, 0, 7, 1) });
+    assert.equal(isListeningSummary(snapshot, 7), true);
+    const legacy = structuredClone(snapshot);
+    delete legacy.comparison;
+    delete legacy.startAt;
+    assert.equal(isListeningSummary(legacy, 7), true, "older valid computer snapshots remain readable offline");
+    assert.equal(isListeningSummary(snapshot, 30), false);
+    assert.equal(isListeningSummary({ ...snapshot, generatedAt: Number.MAX_SAFE_INTEGER }), false);
+    assert.equal(isListeningSummary({ ...snapshot, bySong: undefined }), false);
+    assert.equal(isListeningSummary({ ...snapshot, totalMs: 1000 }), false);
+    assert.equal(isListeningSummary({ ...snapshot, sessions: 1 }), false);
+    const duplicates = structuredClone(snapshot);
+    duplicates.byDay[1].day = duplicates.byDay[0].day;
+    assert.equal(isListeningSummary(duplicates), false);
+    const fabricated = structuredClone(snapshot);
+    fabricated.comparison.changePercent = 100;
+    assert.equal(isListeningSummary(fabricated), false);
+  } finally { database.close(); }
+});
+
+test("empty periods and cleared history contain no invented baseline or percentages", () => {
+  const { database, event } = fixture();
+  try {
+    const now = Date.UTC(2026, 0, 7, 1);
+    let result = getRecordedListeningSummary(database, { days: 30, now });
+    assert.equal(result.totalMs, 0);
+    assert.equal(result.comparison.changePercent, null);
+    event("actual", "song", now - 10000, 1000);
+    result = getRecordedListeningSummary(database, { days: 30, now });
+    assert.equal(result.totalMs, 1000);
+    assert.equal(result.comparison.totalMs, 0);
+    assert.equal(result.comparison.changePercent, null);
+    database.exec("DELETE FROM play_events");
+    assert.equal(getRecordedListeningSummary(database, { days: 90, now }).totalMs, 0);
+    assert.throws(() => getRecordedListeningSummary(database, { days: 365, now }), /Invalid listening period/);
+  } finally { database.close(); }
 });

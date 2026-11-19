@@ -45,3 +45,24 @@
 .analyticsRecorded > p, .analyticsRecorded > small { margin: 0; color: var(--lt-muted); }
 .analyticsRecordedInsights { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(240px,100%),1fr)); gap: var(--lt-section-gap); }
 .analyticsRecordedInsights p { display: flex; justify-content: space-between; gap: var(--lt-gap-control); color: var(--lt-muted); }
+
+.analyticsHistoryChart { margin: 0; min-width: 0; display: grid; gap: var(--lt-space-2); }
+.analyticsHistoryChartCaption, .analyticsHistoryChartAxis, .analyticsHistoryChartLegend { display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--lt-gap-control); color: var(--lt-muted); font-size: var(--lt-text-sm); }
+.analyticsHistoryChartPlot { position: relative; min-width: 0; height: 164px; }
+.analyticsHistoryChartPlot:has(:focus-visible) { outline: 2px solid var(--lt-accent); outline-offset: 3px; border-radius: var(--lt-radius-sm); }
+.analyticsHistoryChartPlot svg { display: block; overflow: visible; }
+.analyticsHistoryChartCurrent, .analyticsHistoryChartPrevious { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.analyticsHistoryChartCurrent { stroke: var(--lt-accent); }
+.analyticsHistoryChartPrevious { stroke: var(--lt-muted); stroke-dasharray: 4 5; opacity: .65; }
+.analyticsHistoryChartArea { fill: var(--lt-accent); opacity: .06; }
+.analyticsHistoryChartBaseline { fill: none; stroke: var(--lt-border); stroke-width: 1; }
+.analyticsHistoryChartDot { fill: var(--lt-accent); stroke: var(--lt-surface); stroke-width: 2; }
+.analyticsHistoryChartLegend > span::before { content: ""; display: inline-block; width: 14px; margin-right: 6px; border-top: 2px solid var(--lt-accent); vertical-align: middle; }
+.analyticsHistoryChartLegend > span + span::before { border-top: 2px dashed var(--lt-muted); }
+.analyticsHistoryChartPlot .analyticsChartInspector { position: absolute; inset: 10px; width: calc(100% - 20px); height: calc(100% - 20px); margin: 0; padding: 0; border: 0; opacity: 0; cursor: crosshair; touch-action: pan-y; }
+.analyticsHistoryChartReadout { margin: 0; font-size: var(--lt-text-sm); color: var(--lt-muted); font-variant-numeric: tabular-nums; }
+.analyticsHistoryChartData { color: var(--lt-muted); font-size: var(--lt-text-sm); }
+.analyticsHistoryChartData > summary { cursor: pointer; width: fit-content; }
+.analyticsHistoryChartData > div { overflow-x: auto; }
+.analyticsHistoryChartData table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.analyticsHistoryChartData th, .analyticsHistoryChartData td { padding: var(--lt-space-2); text-align: left; border-bottom: 1px solid var(--lt-border); white-space: nowrap; }
