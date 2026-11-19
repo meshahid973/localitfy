@@ -50,55 +50,47 @@ export default function CoversView(props: CoversViewProps) {
   } = props;
 
   return (
-
-              <>
-
-
-              <Suspense
-                fallback={<section data-page-section="covers" className="coverStudioLayout"><PageHeader title="Covers" /><CollectionLoading label="Loading covers…" /></section>}
-              >
-                <CoverStudio
-                notice={!songs.length ? (
-                <div className="coverStudioEmptyNotice" role="status">
-                  <span>Import songs to use Covers.</span>
-                  <button className="softButton" type="button" onClick={importSongs}>Import songs</button>
-                </div>
-              ) : !filteredCoverGalleryAssets.length && !pixelArtBusy ? (
-                <div className="coverStudioEmptyNotice" role="status">
-                  <span>No covers found.</span>
-                  <button className="softButton" type="button" onClick={() => void rescanPixelArtFolder()}>Rescan</button>
-                </div>
-              ) : null}
-                pixelArtBusy={pixelArtBusy}
-                selectedCoverSongs={selectedCoverSongs}
-                currentSong={currentSong}
-                coverGalleryMood={coverGalleryMood}
-                coverMoodOptions={coverMoodOptions}
-                coverMoodCounts={coverMoodCounts}
-                coverStats={coverStats}
-                filteredCoverGalleryAssets={filteredCoverGalleryAssets}
-                coverPickerSongList={coverPickerSongList}
-                missingCoverSongs={missingCoverSongs}
-                randomizeMissingCovers={randomizeMissingCovers}
-                cleanupCoverCache={cleanupCoverCache}
-                coverSelectedSongIds={coverSelectedSongIds}
-                CoverComponent={Cover}
-                prettyTitle={prettyTitle}
-                prettyMeta={prettyMeta}
-                pixelArtUrl={pixelArtUrl}
-                coverMoodName={coverMoodName}
-                setCoverGalleryMood={setCoverGalleryMood}
-                randomizeSelectedCovers={randomizeSelectedCovers}
-                rescanPixelArtFolder={rescanPixelArtFolder}
-                selectCurrentSongForCovers={selectCurrentSongForCovers}
-                selectVisibleSongsForCovers={selectVisibleSongsForCovers}
-                setCoverSelectedSongIds={setCoverSelectedSongIds}
-                toggleCoverSongSelection={toggleCoverSongSelection}
-                applyCoverAssetToSelection={applyCoverAssetToSelection}
-                togglePixelCoverExcluded={togglePixelCoverExcluded}
-                />
-              </Suspense>
-              </>
-            
+    <Suspense fallback={<section data-page-section="covers" className="coverStudioLayout"><PageHeader title="Covers" /><CollectionLoading label="Loading covers…" /></section>}>
+      <CoverStudio
+        notice={!songs.length ? (
+          <div className="coverStudioEmptyNotice" role="status">
+            <span>Import songs to use Covers.</span>
+            <button className="softButton" type="button" onClick={importSongs}>Import songs</button>
+          </div>
+        ) : !filteredCoverGalleryAssets.length && !pixelArtBusy ? (
+          <div className="coverStudioEmptyNotice" role="status">
+            <span>No covers found.</span>
+            <button className="softButton" type="button" onClick={() => void rescanPixelArtFolder()}>Rescan</button>
+          </div>
+        ) : null}
+        pixelArtBusy={pixelArtBusy}
+        selectedCoverSongs={selectedCoverSongs}
+        currentSong={currentSong}
+        coverGalleryMood={coverGalleryMood}
+        coverMoodOptions={coverMoodOptions}
+        coverMoodCounts={coverMoodCounts}
+        coverStats={coverStats}
+        filteredCoverGalleryAssets={filteredCoverGalleryAssets}
+        coverPickerSongList={coverPickerSongList}
+        missingCoverSongs={missingCoverSongs}
+        randomizeMissingCovers={randomizeMissingCovers}
+        cleanupCoverCache={cleanupCoverCache}
+        coverSelectedSongIds={coverSelectedSongIds}
+        CoverComponent={Cover}
+        prettyTitle={prettyTitle}
+        prettyMeta={prettyMeta}
+        pixelArtUrl={pixelArtUrl}
+        coverMoodName={coverMoodName}
+        setCoverGalleryMood={setCoverGalleryMood}
+        randomizeSelectedCovers={randomizeSelectedCovers}
+        rescanPixelArtFolder={rescanPixelArtFolder}
+        selectCurrentSongForCovers={selectCurrentSongForCovers}
+        selectVisibleSongsForCovers={selectVisibleSongsForCovers}
+        setCoverSelectedSongIds={setCoverSelectedSongIds}
+        toggleCoverSongSelection={toggleCoverSongSelection}
+        applyCoverAssetToSelection={applyCoverAssetToSelection}
+        togglePixelCoverExcluded={togglePixelCoverExcluded}
+      />
+    </Suspense>
   );
 }

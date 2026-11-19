@@ -13,9 +13,10 @@ function catalogArtwork(kind, item) {
   const alternatives = [...new Set(releases.flatMap(r => [url("release",r.id),url("release-group",r["release-group"]?.id)]).filter(Boolean))].slice(0,6);
   return {...(release ? {coverUrl:url("release",release.id),fallbackCoverUrl:url("release-group",release["release-group"]?.id),coverAlternatives:alternatives} : {}), ...(Number.isFinite(item.length) && item.length > 0 ? {durationMs:item.length} : {})};
 }
-function matchRecordingArtwork(items,title,artist) {
-  const matches = (Array.isArray(items) ? items : []).filter(item => norm(item?.title) === norm(title) && norm(credit(item)) === norm(artist));
-  return matches.length === 1 ? catalogArtwork("recording",matches[0]) : {};
+function findRecording(items,title,artist,recordingId) {
+  const matches=(Array.isArray(items)?items:[]).filter(item=>norm(item?.title)===norm(title)&&norm(credit(item))===norm(artist));
+  const identified=validId(recordingId)?matches.find(item=>item.id===recordingId):undefined;
+  return identified || (matches.length===1?matches[0]:undefined);
 }
 function lastfmArtwork(track,title,artist) {
   if (norm(track?.name)!==norm(title) || norm(track?.artist?.name)!==norm(artist)) return {};
@@ -61,7 +62,7 @@ function createArtworkLookup(client,now=Date.now,trackInfo,lookupAudioDb,lookupM
   const cache=new Map(), pending=new Map();
   return async (title,artist,{fallback=false}={}) => {
     const key=JSON.stringify([norm(title),norm(artist),fallback]), hit=cache.get(key);
-    if(hit && now()-hit.at<(hit.value.coverUrl || hit.value.fallbackCoverUrl ? 86400000 : 30000)) {
+    if(hit && now()-hit.at<86400000) {
       cache.delete(key); cache.set(key,hit);
       return hit.value;
     }
@@ -79,16 +80,14 @@ function createArtworkLookup(client,now=Date.now,trackInfo,lookupAudioDb,lookupM
       const primary = lastfmArtwork(track,title,artist);
       const verified = norm(track?.name)===norm(title)&&norm(track?.artist?.name)===norm(artist);
       const release = verified && validId(track?.album?.mbid) ? url("release",track.album.mbid) : undefined;
-      if (primary.coverUrl && !fallback) return {...primary,...(release?{fallbackCoverUrl:release}:{}),...(deezer.coverUrl?{coverAlternatives:[deezer.coverUrl,...(deezer.coverAlternatives||[])].slice(0,6)}:{})};
+      if (primary.coverUrl && !fallback) return {...primary,...(release?{fallbackCoverUrl:release}:{})};
       const alternate = lookupAudioDb ? await lookupAudioDb(title,artist).catch(()=>({})) : {};
       const known = [...new Set([primary.coverUrl,alternate.coverUrl,release,deezer.coverUrl,...(deezer.coverAlternatives||[])].filter(Boolean))];
       const knownArt=known.length?{coverUrl:known[0],fallbackCoverUrl:known[1],coverAlternatives:known.slice(0,6)}:{};
       if (known.length && !fallback) return knownArt;
       if (!client?.searchRecordings) return knownArt;
       const items=await client.searchRecordings(title,artist,{background:true}).catch(error=>{if(known.length)return [];throw error;});
-      const exact=(Array.isArray(items)?items:[]).filter(item=>norm(item?.title)===norm(title)&&norm(credit(item))===norm(artist));
-      const identified=validId(track?.mbid)&&norm(track?.name)===norm(title)&&norm(track?.artist?.name)===norm(artist) ? exact.find(item=>item.id===track.mbid) : null;
-      const matched = identified || (exact.length===1 ? exact[0] : null);
+      const matched=findRecording(items,title,artist,verified?track?.mbid:undefined);
       if(!matched)return knownArt;
       const result=catalogArtwork("recording",matched);
       if(lookupFanart){
@@ -113,4 +112,4 @@ function createArtworkLookup(client,now=Date.now,trackInfo,lookupAudioDb,lookupM
     return task;
   };
 }
-module.exports={catalogArtwork,matchRecordingArtwork,createArtworkLookup,lastfmArtwork,matchMusicArtwork,matchArtistArtwork};
+module.exports={catalogArtwork,createArtworkLookup,lastfmArtwork,matchMusicArtwork,matchArtistArtwork};

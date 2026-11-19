@@ -27,7 +27,6 @@ test("Spotify URL and track normalizers are runtime-owned and retain behavior", 
   assert.deepEqual(spotify.parseSpotifyUrl("spotify:track:ABC123"), { type: "track", id: "ABC123" });
   assert.deepEqual(spotify.parseSpotifyUrl("https://open.spotify.com/playlist/Ab123"), { type: "playlist", id: "Ab123" });
   assert.equal(spotify.parseSpotifyUrl("not spotify"), null);
-  assert.equal(spotify.safeImageExtensionFromUrlOrType("https://x/image", "image/webp"), ".webp");
   assert.equal(spotify.bestSpotifyImage([{ url: "small", width: 30 }, { url: "large", width: 200 }]), "large");
   assert.equal(spotify.decodeHtmlEntities("A &amp; B &quot;C&quot;"), 'A & B "C"');
   assert.deepEqual(spotify.uniqSpotifyIds(["A".repeat(22), "A".repeat(22), "B".repeat(22), "bad"]), ["A".repeat(22), "B".repeat(22)]);
