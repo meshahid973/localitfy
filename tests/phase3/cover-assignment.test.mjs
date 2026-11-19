@@ -47,6 +47,9 @@ test("cover resolution prefers embedded art, avoids ambiguous images and shares 
   assert.equal(findFolderCover(album),cover);
   const one=copyCoverToAppStorage(cover,{source:"folder",songId:"one"}),two=copyCoverToAppStorage(cover,{source:"folder",songId:"two"});
   assert.ok(one);assert.equal(one,two);
+  fs.writeFileSync(one, "");
+  assert.equal(copyCoverToAppStorage(cover,{source:"folder"}),one);
+  assert.equal(fs.readFileSync(one,"utf8"),"cover", "empty cached copies are repaired");
   assert.equal((await resolveSongCover({folderCoverPath:cover,metadata:{embeddedCoverPath:a}})).coverPath,a);
   assert.equal((await resolveSongCover({folderCoverPath:cover,metadata:{embeddedCoverPath:a},preferFolderCover:true})).coverPath,one);
   assert.equal((await resolveSongCover({song:{coverPath:b,coverSource:"spotify"},folderCoverPath:path.join(album,"missing.jpg")})).coverPath,b);
@@ -59,4 +62,6 @@ test("cover resolution prefers embedded art, avoids ambiguous images and shares 
   const ambiguous=path.join(dir,"ambiguous");fs.mkdirSync(ambiguous);
   fs.writeFileSync(path.join(ambiguous,"album-artwork-one.jpg"),"one");fs.writeFileSync(path.join(ambiguous,"album-artwork-two.jpg"),"two");
   assert.equal(findFolderCover(ambiguous),"", "ambiguous named images require a choice");
+  const empty=path.join(dir,"empty.jpg");fs.writeFileSync(empty,"");
+  assert.equal((await resolveSongCover({song:{coverPath:empty,coverSource:"custom"},fallbackCoverPath:a})).coverPath,a);
 });

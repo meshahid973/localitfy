@@ -162,6 +162,17 @@ test("cover downloads reject oversized streaming responses before buffering the 
   assert.deepEqual(result.data, JPEG);
 });
 
+test("cover downloads reject invalid image signatures and try another cover", async () => {
+  let calls = 0;
+  const result = await fetchCoverArt({
+    releaseId: "one", releaseGroupId: "two", userAgent: "localtify/test",
+    fetchImpl: async () => ({ ok: true, headers: new Map([["content-type", "image/jpeg"]]),
+      arrayBuffer: async () => ++calls === 1 ? Buffer.from("not a jpeg") : JPEG })
+  });
+  assert.equal(calls, 2);
+  assert.deepEqual(result.data, JPEG);
+});
+
 function fakeMusicBrainz() {
   const credit = [{ name: "brakence", joinphrase: "", artist: { id: "brakence" } }];
   const release = {

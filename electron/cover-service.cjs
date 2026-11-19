@@ -27,7 +27,9 @@ function getCoverCacheDirectory() {
 
 function fileExists(filePath) {
   try {
-    return Boolean(filePath && fs.statSync(filePath).isFile());
+    if (!filePath) return false;
+    const stat = fs.statSync(filePath);
+    return stat.isFile() && stat.size > 0;
   } catch {
     return false;
   }
@@ -67,7 +69,11 @@ function findFolderCover(inputPath) {
 
   if (!files.length) return "";
 
-  const byBase = new Map(files.map((filePath) => [path.basename(filePath).toLowerCase(), filePath]));
+  const byBase = new Map();
+  for (const filePath of files) {
+    const key = path.basename(filePath).toLowerCase();
+    byBase.set(key, byBase.has(key) ? null : filePath);
+  }
 
   for (const name of PREFERRED_FOLDER_COVERS) {
     const match = byBase.get(name);
@@ -97,7 +103,7 @@ function copyCoverToAppStorage(sourcePath, options = {}) {
     fs.mkdirSync(dir, { recursive: true });
 
     const targetPath = path.join(dir, `${source}-${hash}${ext}`);
-    if (!fs.existsSync(targetPath)) {
+    if (!fileExists(targetPath) || fs.statSync(targetPath).size !== stat.size) {
       const temp = targetPath + "." + crypto.randomUUID() + ".tmp";
       try { fs.copyFileSync(sourcePath, temp); fs.renameSync(temp, targetPath); }
       finally { try { fs.rmSync(temp, { force: true }); } catch {} }

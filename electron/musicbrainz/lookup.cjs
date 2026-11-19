@@ -2,6 +2,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+const { randomUUID } = require("node:crypto");
 const { fetchCoverArt } = require("./client.cjs");
 const { normalize, similarity, creditText, primaryArtist, artistScore, recordingScore, releaseRank, formatGenres, buildProposal, pickRecording, matchReleaseTracks } = require("./match.cjs");
 
@@ -25,6 +26,7 @@ const onTrack = (song, release, { track, medium, recording }, score) => ({
 function createTaggingLookup({ client, coverDir, userAgent, fetchImpl = fetch }) {
   const genreCache = new Map();
   const coverCache = new Map();
+  const missingCovers = new Map();
 
   async function genresFor(releaseGroupId, artistIds = []) {
     const key = `${releaseGroupId || ""}|${artistIds[0] || ""}`;
@@ -38,18 +40,36 @@ function createTaggingLookup({ client, coverDir, userAgent, fetchImpl = fetch })
   }
 
   async function coverFor(releaseId, releaseGroupId) {
-    if (!releaseId) return "";
+    if (typeof releaseId !== "string" || !/^[a-zA-Z0-9-]{1,128}$/.test(releaseId)) return "";
+    for (const ext of [".jpg", ".png"]) {
+      const existing = path.join(coverDir, releaseId + ext);
+      try { const stat = fs.statSync(existing); if (stat.isFile() && stat.size > 0) return existing; } catch {}
+    }
+    if ((missingCovers.get(releaseId) || 0) > Date.now()) return "";
+    missingCovers.delete(releaseId);
     if (!coverCache.has(releaseId)) {
       coverCache.set(releaseId, (async () => {
-        for (const ext of [".jpg", ".png"]) { const existing = path.join(coverDir, releaseId + ext); if (fs.existsSync(existing)) return existing; }
         const art = await fetchCoverArt({ releaseId, releaseGroupId, userAgent, fetchImpl }).catch(() => null);
-        if (!art) return "";
-        fs.mkdirSync(coverDir, { recursive: true });
-        const target = path.join(coverDir, releaseId + art.ext);
-        fs.writeFileSync(target + ".part", art.data);
-        fs.renameSync(target + ".part", target);
-        return target;
-      })());
+        if (!art) {
+          missingCovers.set(releaseId, Date.now() + 30_000);
+          while (missingCovers.size > 256) missingCovers.delete(missingCovers.keys().next().value);
+          return "";
+        }
+        let temporary;
+        try {
+          fs.mkdirSync(coverDir, { recursive: true });
+          const target = path.join(coverDir, releaseId + art.ext);
+          temporary = target + "." + randomUUID() + ".part";
+          fs.writeFileSync(temporary, art.data, { flag: "wx" });
+          fs.renameSync(temporary, target);
+          return target;
+        } catch (error) {
+          console.warn("[localtify cover cache]", error?.message || error);
+          return "";
+        } finally {
+          if (temporary) { try { fs.rmSync(temporary, { force: true }); } catch {} }
+        }
+      })().finally(() => coverCache.delete(releaseId)));
     }
     return coverCache.get(releaseId);
   }

@@ -222,10 +222,10 @@ test("changing an audio extension persists the replacement before deleting the o
     fs.writeFileSync(replacement, "replacement audio");
     f.repositories.songs.patch("a", { filePath: replacement });
     const deleted = [];
-    f.hooks.beforeDelete = ({ path }) => { deleted.push(path); assert.equal(f.persisted.get("files").a.audioExt, "flac"); };
+    f.hooks.beforeDelete = ({ path }) => { deleted.push([path, f.persisted.get("files").a.audioExt]); };
     await f.sync.syncNow();
     assert.equal(f.sync.getSyncProgress().phase, "done");
-    assert.deepEqual(deleted, ["library/a.mp3"]);
+    assert.deepEqual(deleted, [["library/a.mp3", "flac"]]);
     await f.restartPhone();
     assert.equal(f.phone.files.a.audioExt, "flac");
   } finally { await f.close(); }
