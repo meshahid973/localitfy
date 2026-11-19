@@ -995,13 +995,12 @@ function MainModeApp() {
 
     const nextMotion = nextExpanded ? "expanding" : "compacting";
     const nextSettings: Settings = {
-      ...settings,
+      ...settingsRef.current,
       heroExpanded: nextExpanded
     };
+    settingsRef.current = nextSettings;
 
-    // V141: compact/expand is a local hero animation only.
-    // After the first toggle, permanent home entrance animations are locked
-    // so the Listen now / recent covers shelf cannot replay a delayed fade-in.
+    // Keep collection entrance animations from replaying after a hero toggle.
     document.body.classList.remove(
       "localitfyHeroReflowing",
       "localitfyHeroWantsExpanded",
@@ -1041,17 +1040,7 @@ function MainModeApp() {
       heroReflowTimerRef.current = null;
     }, nextExpanded ? 860 : 700);
 
-    if (bootedRef.current) {
-      if (saveSettingsTimerRef.current !== null) {
-        window.clearTimeout(saveSettingsTimerRef.current);
-      }
-
-      saveSettingsTimerRef.current = window.setTimeout(() => {
-
-        window.localitfy.saveSettings(nextSettings).catch(() => undefined);
-        saveSettingsTimerRef.current = null;
-      }, 360);
-    }
+    void saveSettingsSafely(nextSettings, true);
   }
 
   function toggleHeroExpanded() {
@@ -2033,7 +2022,7 @@ function MainModeApp() {
       // choices, and never modify Android navigation or an existing hover layout.
       const sidebarMigrationKey = "localitfy.sidebar-rail-v1";
       const migrateSidebar = platformInfo.id !== "android" && window.localStorage.getItem(sidebarMigrationKey) !== "true";
-      if (migrateSidebar && nextSettings.sidebarBehavior === "fixed") nextSettings.sidebarBehavior = "slim";
+      if (migrateSidebar && storedSettings.sidebarBehavior === undefined && nextSettings.sidebarBehavior === "fixed") nextSettings.sidebarBehavior = "slim";
 
       if (shouldApplyStartWithWindowsDefault) {
         nextSettings.startWithWindows = true;
@@ -2048,11 +2037,11 @@ function MainModeApp() {
         visualSettingsChanged || (migrateSidebar && nextSettings.sidebarBehavior !== storedSettings.sidebarBehavior);
 
       if (shouldPersistBootSettings) {
-        if (shouldApplyV013Defaults) window.localStorage.setItem(V013_DEFAULTS_KEY, "true");
-        if (shouldApplyStartWithWindowsDefault) window.localStorage.setItem(START_WITH_WINDOWS_DEFAULT_KEY, "true");
         window.localitfy.saveSettings(nextSettings).then(() => {
+          if (shouldApplyV013Defaults) window.localStorage.setItem(V013_DEFAULTS_KEY, "true");
+          if (shouldApplyStartWithWindowsDefault) window.localStorage.setItem(START_WITH_WINDOWS_DEFAULT_KEY, "true");
           if (migrateSidebar) window.localStorage.setItem(sidebarMigrationKey, "true");
-        }).catch(() => undefined);
+        }).catch(() => showAppToast("Could not save settings migration. It will be retried next time.", "error"));
       } else if (migrateSidebar) {
         window.localStorage.setItem(sidebarMigrationKey, "true");
       }
@@ -3834,6 +3823,7 @@ function MainModeApp() {
       homeBannerType: VISUAL_CUSTOMIZATION_DEFAULTS.homeBannerType,
       mediaCardBackground: VISUAL_CUSTOMIZATION_DEFAULTS.mediaCardBackground,
       homeLayoutMode: VISUAL_CUSTOMIZATION_DEFAULTS.homeLayoutMode,
+      homeHeroCoverBrightness: defaultSettings.homeHeroCoverBrightness,
       sidebarBehavior: VISUAL_CUSTOMIZATION_DEFAULTS.sidebarBehavior,
       playerBackgroundStyle: VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle,
       animeVisuals: true,
@@ -6348,13 +6338,7 @@ function MainModeApp() {
 
     if (!bootedRef.current) return;
 
-    if (saveSettingsTimerRef.current !== null) {
-      window.clearTimeout(saveSettingsTimerRef.current);
-    }
-
-    saveSettingsTimerRef.current = window.setTimeout(() => {
-      window.localitfy.saveSettings(nextSettings).catch(() => undefined);
-    }, 180);
+    void saveSettingsSafely(nextSettings, false);
   }
 
   function paintVolumeDraft(percent: number) {

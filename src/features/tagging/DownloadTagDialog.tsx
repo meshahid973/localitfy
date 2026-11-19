@@ -44,7 +44,7 @@ export default function DownloadTagDialog({ songIds, titleOf, onClose }: Downloa
     const ids = [...selected];
     setBusy(`Saving tags for ${plural(ids.length, "song")}…`); setMessage("");
     try {
-      const applied = await window.localitfy.applyMusicBrainzTags(ids);
+      const applied = await window.localitfy.applyMusicBrainzTags(ids, Object.fromEntries((result?.proposals || []).map(proposal => [proposal.songId, proposal.previewId])));
       if (applied.applied) setUndoId(applied.undoId || null);
       const parts = [`Updated ${plural(applied.applied, "song")}${applied.written ? `, wrote tags into ${plural(applied.written, "file")} (originals are in the Trash)` : ""}.`];
       if (applied.failed.length) parts.push(`Could not update: ${applied.failed.map((failure) => `${failure.title} (${failure.error})`).join(", ")}.`);

@@ -53,6 +53,7 @@ function extensionFromMime(mime = "") {
   if (clean.includes("png")) return ".png";
   if (clean.includes("webp")) return ".webp";
   if (clean.includes("gif")) return ".gif";
+  if (clean.includes("bmp")) return ".bmp";
   return ".jpg";
 }
 
@@ -77,8 +78,10 @@ function saveEmbeddedCover(filePath, picture) {
     const ext = extensionFromMime(picture?.format || picture?.mime || "");
     const targetPath = path.join(dir, `${hash}${ext}`);
 
-    if (!fs.existsSync(targetPath)) {
-      fs.writeFileSync(targetPath, buffer);
+    if (!fs.existsSync(targetPath) || fs.statSync(targetPath).size !== buffer.length) {
+      const temporary = `${targetPath}.${crypto.randomUUID()}.tmp`;
+      try { fs.writeFileSync(temporary, buffer, { flag: "wx" }); fs.renameSync(temporary, targetPath); }
+      finally { fs.rmSync(temporary, { force: true }); }
     }
 
     return targetPath;

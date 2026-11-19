@@ -30,6 +30,19 @@ function registerTaggingIpc(router, deps) {
   const lookup = createTaggingLookup({ client: deps.musicBrainzClient || createMusicBrainzClient({ userAgent, fetchImpl, ...deps.clientOptions }), coverDir: path.join(app.getPath("userData"), "musicbrainz-covers"), userAgent, fetchImpl });
   // Proposals stay in the main process; the renderer only ever sends song IDs back.
   const proposals = new Map();
+  const snapshots = new WeakMap();
+  const snapshotKeys = ["title", "artist", "album", "genre", "filePath", "coverPath", "coverSource", "coverUpdatedAt"];
+  const snapshot = song => {
+    const stat = fs.statSync(song.filePath);
+    return { fields: Object.fromEntries(snapshotKeys.map(key => [key, song[key] ?? null])), size: stat.size, mtimeMs: stat.mtimeMs };
+  };
+  const remember = (proposal, before, manual = false) => {
+    proposal.previewId = randomUUID();
+    if (manual) proposal.manual = true;
+    snapshots.set(proposal, before);
+    proposals.set(proposal.songId, proposal);
+  };
+
   const MAX_UNDO_TRACKS = 10000;
   let lastUndo = null;
   const notifyChanges = (count) => {
@@ -66,8 +79,9 @@ function registerTaggingIpc(router, deps) {
     const found = [];
     const missed = [];
     for (const songs of groups.values()) {
-      const result = await lookup.lookupGroup(songs);
-      for (const proposal of result.proposals) { proposals.set(proposal.songId, proposal); found.push(view(proposal)); }
+      const before = new Map(songs.map(song => [song.id, snapshot(song)]));
+    const result = await lookup.lookupGroup(songs);
+      for (const proposal of result.proposals) { remember(proposal, before.get(proposal.songId)); found.push(view(proposal)); }
       missed.push(...result.missed);
     }
     return { proposals: found, missed };
@@ -85,8 +99,9 @@ function registerTaggingIpc(router, deps) {
     requireEnabled();
     const [song] = songsFor([payload.songId]);
     if (!song) throw new Error("This song's file could not be found");
+    const before = snapshot(song);
     const proposal = await lookup.proposalFor(song, { recordingId: String(payload.recordingId || ""), releaseId: String(payload.releaseId || "") });
-    proposals.set(song.id, Object.assign(proposal, { manual: true }));
+    remember(proposal, before, true);
     return view(proposal);
   });
 
@@ -102,8 +117,9 @@ function registerTaggingIpc(router, deps) {
     requireEnabled();
     const songs = songsFor(payload.songIds);
     if (!songs.length) throw new Error("None of this album's files could be found");
+    const before = new Map(songs.map(song => [song.id, snapshot(song)]));
     const result = await lookup.albumProposalsFor(songs, String(payload.releaseId || ""));
-    for (const proposal of result.proposals) proposals.set(proposal.songId, Object.assign(proposal, { manual: true }));
+    for (const proposal of result.proposals) remember(proposal, before.get(proposal.songId), true);
     return { proposals: result.proposals.map(view), missed: result.missed };
   });
 
@@ -135,9 +151,14 @@ function registerTaggingIpc(router, deps) {
         continue;
       }
       try {
-        if (["title", "artist", "album", "genre"].some(key => String(song[key] ?? "") !== String(proposal.current[key] ?? ""))) {
+        if (!proposal.previewId || payload.previewIds?.[id] !== proposal.previewId) throw new Error("Preview changed since it was shown; look up the song again before applying");
+        const baseline = snapshots.get(proposal);
+        const keys = proposal.coverPath ? snapshotKeys : snapshotKeys.slice(0, 5);
+        if (!baseline || keys.some(key => (song[key] ?? null) !== baseline.fields[key])) {
           throw new Error("Metadata changed since preview; look up the song again before applying");
         }
+        const currentFile = fs.statSync(song.filePath);
+        if (currentFile.size !== baseline.size || currentFile.mtimeMs !== baseline.mtimeMs) throw new Error("Audio file changed since preview; look up the song again before applying");
         const write = writeFiles && canWriteTags(song.filePath);
         if (write) {
           await writeMusicBrainzTags({ filePath: song.filePath, tags: proposal.tags, ids: proposal.ids, cover: proposal.coverPath, ffmpegPath, parseFile, trashItem: (file) => shell.trashItem(file) });
@@ -154,7 +175,7 @@ function registerTaggingIpc(router, deps) {
         repository.patch(song.id, patch);
         const after = repository.get(song.id);
         if (!after) throw new Error("Song disappeared during save");
-        if (!write && undoEntries.length <= MAX_UNDO_TRACKS) undoEntries.push({ songId: song.id, filePath: song.filePath, before, after: Object.fromEntries(Object.keys(patch).map(key => [key, after[key] ?? null])) });
+        if (!write && undoEntries.length <= MAX_UNDO_TRACKS) undoEntries.push({ songId: song.id, filePath: song.filePath, fileSize: currentFile.size, fileMtimeMs: currentFile.mtimeMs, before, after: Object.fromEntries(Object.keys(patch).map(key => [key, after[key] ?? null])) });
         proposals.delete(song.id);
         applied += 1;
       } catch (error) {
@@ -183,6 +204,8 @@ function registerTaggingIpc(router, deps) {
       const song = repository.get(entry.songId);
       try {
         if (!song || song.filePath !== entry.filePath || Object.keys(entry.after).some(key => (song[key] ?? null) !== entry.after[key])) throw new Error("Song changed after save; newer edits were kept");
+        const currentFile = fs.statSync(song.filePath);
+        if (currentFile.size !== entry.fileSize || currentFile.mtimeMs !== entry.fileMtimeMs) throw new Error("Audio file changed after save; newer files were kept");
         repository.patch(entry.songId, entry.before);
         proposals.delete(entry.songId);
         restored += 1;

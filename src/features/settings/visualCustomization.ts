@@ -41,7 +41,7 @@ export function applyVisualCustomizationDefaults<T extends Record<string, any>>(
 /** Migrate saved visual settings once at bootstrap, preserving unknown legacy data for rollback. */
 export function migrateVisualSettings(raw: unknown, defaults: Settings, releaseDefaults?: Partial<Settings>) {
   const stored = (raw && typeof raw === "object" ? raw : {}) as Partial<Settings> & LegacyThemeSettings & { theme?: unknown };
-  const settings = applyVisualCustomizationDefaults({ ...defaults, ...stored, ...releaseDefaults } as Settings);
+  const settings = applyVisualCustomizationDefaults({ ...defaults, ...releaseDefaults, ...stored } as Settings);
   settings.animatedBackgrounds = true;
   settings.animeVisuals = true;
   settings.coverColorSyncMode = normalizeCoverColorSyncMode(stored.coverColorSyncMode ??

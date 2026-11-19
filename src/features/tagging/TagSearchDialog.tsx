@@ -55,7 +55,7 @@ export default function TagSearchDialog({ song, onClose }: TagSearchDialogProps)
     if (!proposal) return;
     setBusy("Saving tags…"); setMessage("");
     try {
-      const result = await window.localitfy.applyMusicBrainzTags([song.id]);
+      const result = await window.localitfy.applyMusicBrainzTags([song.id], { [song.id]: proposal.previewId });
       if (result.applied) setUndoId(result.undoId || null);
       if (result.failed.length) { setMessage(`Could not update this song: ${result.failed[0].error}.`); return; }
       if (!result.applied) { setMessage("No metadata changes were applied. Look up the song again."); return; }

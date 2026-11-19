@@ -97,7 +97,6 @@ export type Settings = {
   audioEffectAmount: number;
   audioReverbAmount: number;
   rememberPlaybackPosition: boolean;
-  skipSilence: boolean;
   minimizeToTray: boolean;
   startWithWindows: boolean;
   downloadQuality: "best" | "320" | "256" | "192";

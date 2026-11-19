@@ -482,7 +482,7 @@ test("IPC: gated by the setting, proposals stay native, and library-only apply u
   assert.deepEqual(pending.map((proposal) => proposal.songId), ["a", "b"], "finished lookups survive the panel closing");
   assert.equal(pending[0].groupKey, `marrow\0${dir}`);
 
-  const result = await router.invoke("tagging:apply", { songIds: ["a", "unknown"] });
+  const result = await router.invoke("tagging:apply", { songIds: ["a", "unknown"], previewIds: Object.fromEntries(proposals.map(proposal => [proposal.songId, proposal.previewId])) });
   assert.ok(result.undoId);
   assert.deepEqual({ ...result, undoId: undefined }, { applied: 1, written: 0, failed: [{ songId: "unknown", title: "unknown", error: "Song or matching proposal is no longer available" }], undoId: undefined });
   assert.deepEqual(await router.invoke("tagging:undo-state"), { id: result.undoId, count: 1 });
@@ -505,11 +505,11 @@ test("IPC: gated by the setting, proposals stay native, and library-only apply u
   assert.deepEqual((await router.invoke("tagging:pending")).map((proposal) => proposal.songId), [], "a hand-picked match stays with its dialog");
   const originalTitle = songs.get("b").title;
   songs.get("b").title = "Edited after preview";
-  assert.match((await router.invoke("tagging:apply", { songIds: ["b"] })).failed[0].error, /Metadata changed since preview/);
+  assert.match((await router.invoke("tagging:apply", { songIds: ["b"], previewIds: { b: chosen.previewId } })).failed[0].error, /Metadata changed since preview/);
   assert.equal(songs.get("b").title, "Edited after preview");
   songs.get("b").title = originalTitle;
   settings.musicbrainzWriteFiles = true;
-  const saved = await router.invoke("tagging:apply", { songIds: ["b"] });
+  const saved = await router.invoke("tagging:apply", { songIds: ["b"], previewIds: { b: chosen.previewId } });
   assert.equal(saved.applied, 1);
   assert.equal(saved.written, 0, "backend file-write gate cannot be overridden by settings");
   assert.deepEqual(saved.failed, []);

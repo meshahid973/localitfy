@@ -5,24 +5,9 @@ const crypto = require("node:crypto");
 let serviceUserDataPath = "";
 const COVER_CACHE_DIR = "resolved-covers-v040";
 
-const IMAGE_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif"]);
-const PREFERRED_FOLDER_COVERS = [
-  "cover.jpg",
-  "cover.jpeg",
-  "cover.png",
-  "folder.jpg",
-  "folder.jpeg",
-  "folder.png",
-  "front.jpg",
-  "front.jpeg",
-  "front.png",
-  "artwork.jpg",
-  "artwork.jpeg",
-  "artwork.png",
-  "album.jpg",
-  "album.jpeg",
-  "album.png"
-];
+const IMAGE_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp"]);
+const PREFERRED_FOLDER_COVERS = ["cover", "folder", "front", "artwork", "album"]
+  .flatMap(name => ["jpg", "jpeg", "png", "webp", "gif", "bmp"].map(extension => `${name}.${extension}`));
 
 function initCoverService(options = {}) {
   serviceUserDataPath = String(options.userDataPath || serviceUserDataPath || "").trim();
@@ -89,8 +74,8 @@ function findFolderCover(inputPath) {
     if (match) return match;
   }
 
-  const named = files.find((filePath) => /(^|[\s_.-])(cover|folder|front|artwork|album)([\s_.-]|$)/i.test(path.parse(filePath).name));
-  return named || (files.length === 1 ? files[0] : "");
+  const named = files.filter((filePath) => /(^|[\s_.-])(cover|folder|front|artwork|album)([\s_.-]|$)/i.test(path.parse(filePath).name));
+  return named.length === 1 ? named[0] : files.length === 1 ? files[0] : "";
 }
 
 function copyCoverToAppStorage(sourcePath, options = {}) {
@@ -157,6 +142,10 @@ async function resolveSongCover(input = {}) {
     return { coverPath: metadata.embeddedCoverPath, coverSource: "embedded", coverUpdatedAt: now };
   }
 
+  if (existingCoverIsUsable(song) && !["fallback", "none", "folder"].includes(song.coverSource)) {
+    return { coverPath: song.coverPath, coverSource: song.coverSource || "fallback", coverUpdatedAt: song.coverUpdatedAt || now };
+  }
+
   if (folderCover) {
     const cached = copyCoverToAppStorage(folderCover, {
       source: "folder",
@@ -183,11 +172,12 @@ async function resolveSongCover(input = {}) {
     return { coverPath: input.spotifyCoverPath, coverSource: "spotify", coverUpdatedAt: now };
   }
 
+  if (existingCoverIsUsable(song)) return { coverPath: song.coverPath, coverSource: song.coverSource || "fallback", coverUpdatedAt: song.coverUpdatedAt || now };
+
   if (input.fallbackCoverPath && fileExists(input.fallbackCoverPath) && isImageFile(input.fallbackCoverPath)) {
     return { coverPath: input.fallbackCoverPath, coverSource: "fallback", coverUpdatedAt: now };
   }
 
-  if (existingCoverIsUsable(song)) return { coverPath: song.coverPath, coverSource: song.coverSource || "fallback", coverUpdatedAt: song.coverUpdatedAt || now };
   return { coverPath: "", coverSource: "none", coverUpdatedAt: now };
 }
 

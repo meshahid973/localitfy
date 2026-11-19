@@ -75,7 +75,7 @@ export default function TaggingSettings({ settings, songs, updateSetting }: Tagg
     const ids = [...selected];
     setBusy(`Saving tags for ${plural(ids.length, "song")}…`); setMessage("");
     try {
-      const result = await window.localitfy.applyMusicBrainzTags(ids);
+      const result = await window.localitfy.applyMusicBrainzTags(ids, Object.fromEntries(Object.values(results).flatMap(result => result.proposals).map(proposal => [proposal.songId, proposal.previewId])));
       if (result.applied) setUndoId(result.undoId || null);
       const failed = new Set(result.failed.map((failure) => failure.songId));
       const done = new Set(ids.filter((id) => !failed.has(id)));

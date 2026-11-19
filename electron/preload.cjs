@@ -43,7 +43,7 @@ contextBridge.exposeInMainWorld("localitfy", {
   auditMusicBrainzTags: () => ipcRenderer.invoke("tagging:audit"),
   getPendingMusicBrainzTags: () => ipcRenderer.invoke("tagging:pending"),
   lookUpMusicBrainzTags: (songIds) => ipcRenderer.invoke("tagging:lookup", { songIds }),
-  applyMusicBrainzTags: (songIds) => ipcRenderer.invoke("tagging:apply", { songIds }),
+  applyMusicBrainzTags: (songIds, previewIds) => ipcRenderer.invoke("tagging:apply", { songIds, previewIds }),
   getMusicBrainzUndo: () => ipcRenderer.invoke("tagging:undo-state"),
   undoMusicBrainzTags: (id) => ipcRenderer.invoke("tagging:undo", { id }),
   searchMusicBrainz: (songId, title, artist) => ipcRenderer.invoke("tagging:search", { songId, title, artist }),

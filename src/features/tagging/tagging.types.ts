@@ -11,6 +11,7 @@ export type ProposedTags = {
 
 export type TagProposal = {
   songId: string;
+  previewId: string;
   /** Matches TagAlbumGroup.key, so restored proposals land under the right album. */
   groupKey: string;
   confidence: number;

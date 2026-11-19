@@ -50,4 +50,13 @@ test("cover resolution prefers embedded art, avoids ambiguous images and shares 
   assert.equal((await resolveSongCover({folderCoverPath:cover,metadata:{embeddedCoverPath:a}})).coverPath,a);
   assert.equal((await resolveSongCover({folderCoverPath:cover,metadata:{embeddedCoverPath:a},preferFolderCover:true})).coverPath,one);
   assert.equal((await resolveSongCover({song:{coverPath:b,coverSource:"spotify"},folderCoverPath:path.join(album,"missing.jpg")})).coverPath,b);
+  assert.equal((await resolveSongCover({song:{coverPath:b,coverSource:"spotify"},folderCoverPath:cover,fallbackCoverPath:a})).coverPath,b, "automatic folder guesses preserve valid provider artwork");
+  assert.equal((await resolveSongCover({song:{coverPath:b,coverSource:"embedded"},fallbackCoverPath:a})).coverPath,b, "pixel fallback never replaces valid embedded artwork");
+  const animated=path.join(dir,"animated");fs.mkdirSync(animated);
+  const gif=path.join(animated,"cover.gif");fs.writeFileSync(gif,"GIF89a");
+  assert.equal(findFolderCover(animated),gif);
+  assert.equal((await resolveSongCover({song:{coverPath:gif,coverSource:"custom"},fallbackCoverPath:a})).coverPath,gif);
+  const ambiguous=path.join(dir,"ambiguous");fs.mkdirSync(ambiguous);
+  fs.writeFileSync(path.join(ambiguous,"album-artwork-one.jpg"),"one");fs.writeFileSync(path.join(ambiguous,"album-artwork-two.jpg"),"two");
+  assert.equal(findFolderCover(ambiguous),"", "ambiguous named images require a choice");
 });

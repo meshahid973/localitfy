@@ -20,6 +20,23 @@ export function useSettingsController({ initialSettings }: UseSettingsController
   const themeSettlingRef = useRef(false);
 
   useEffect(() => {
+    const flush = () => {
+      if (saveSettingsTimerRef.current === null) return;
+      window.clearTimeout(saveSettingsTimerRef.current);
+      saveSettingsTimerRef.current = null;
+      void window.localitfy.saveSettings(settingsRef.current).catch(error => console.warn("[localtify settings flush]", error));
+    };
+    const onVisibility = () => { if (document.hidden) flush(); };
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", onVisibility);
+      flush();
+    };
+  }, []);
+
+  useEffect(() => {
     settingsRef.current = settings;
   }, [settings]);
 
