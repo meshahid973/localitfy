@@ -134,7 +134,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
   const needsSetup = !settings.discoverEnabled;
   const setup = phone ? <div className="discoverSetup"><p>Turn on Discover and manage its optional Last.fm connection in localtify on your {computerName()}, then sync this phone.</p></div> : (
     <div className="discoverSetup">
-      <p>Search music and the iTunes music catalog without an account or key. Explicit search text is sent to these providers. If you add an optional Last.fm key, Localtify also requests personalized suggestions using artist and song names from your library and looks up suggested tracks in MusicBrainz for artwork. Cover images come from matching Last.fm track metadata, Cover Art Archive, or TheAudioDB when available. Artwork lookup sends only the track title and artist.</p>
+      <p>Search YouTube Music, MusicBrainz and iTunes without an account or key. Explicit search text is sent to these providers. If you add an optional Last.fm key, Localtify also requests personalized suggestions using artist and song names from your library and looks up suggested tracks in MusicBrainz for artwork. Cover images come from YouTube Music, matching Last.fm track metadata, Cover Art Archive or TheAudioDB when available. Artwork lookup sends only the track title and artist.</p>
       <details className="discoverOptional" open={Boolean(keyDraft) || undefined}>
       <summary>Optional Last.fm recommendations</summary>
       <label className="discoverKey">

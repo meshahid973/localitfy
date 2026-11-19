@@ -830,7 +830,7 @@ function scoreSpotifyYoutubeCandidate(track = {}, candidate = {}) {
     expectedDurationSeconds <= 0 ||
     candidateDurationSeconds <= 0 ||
     Math.abs(expectedDurationSeconds - candidateDurationSeconds) <= 18;
-  const hardReject = hasHardSpotifyRejectWord(track, candidate);
+  const hardReject = hasHardSpotifyRejectWord(track, candidate) || require("./discover/youtube-music.cjs").isJunkVideo(candidateTitle, `${wantedTitle} ${wantedArtist}`);
 
   if (hasUsefulTitle && !hardReject) {
     score += 8;

@@ -37,7 +37,7 @@ function normalizeCatalog(kind, items) {
 }
 
 /** Public catalog needs only opt-in; Last.fm personalized results require a valid key. */
-function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile, fetch, musicBrainzClient, searchStore, lookupAudioDb, now = Date.now }) {
+function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile, fetch, musicBrainzClient, searchStore, lookupAudioDb, searchYouTubeMusic, now = Date.now }) {
   let saved = null;
   let running = null;
   let catalogRunning = null;
@@ -78,6 +78,12 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
       if (!catalogRunning) {
         const promise = Promise.resolve().then(async () => {
           if (getSettings().discoverEnabled !== true) return [];
+          // Search YouTube Music only for explicit user queries, never library seeds.
+          if (searchYouTubeMusic) {
+            const direct = await searchYouTubeMusic(kind, term).catch(() => []);
+            if (getSettings().discoverEnabled !== true) return [];
+            if (direct.length) return direct;
+          }
           // Artist searches retain the structured catalog; song searches combine
           // exact-title MusicBrainz matches, store metadata and listening popularity.
           if (kind !== "recording" || !searchStore) return normalizeCatalog(kind, await musicBrainzClient.searchCatalog(kind, term));

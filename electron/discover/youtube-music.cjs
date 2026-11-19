@@ -1,0 +1,120 @@
+"use strict";
+
+// Adapted with the requester-reported permission from tryliner/desktop:
+// src/shared/youtube/innertube/{innertubeClient,innertubeTrackMapper,
+// innertubeThumbnail,innertubeSearchRanking}.ts. Localtify adaptation:
+// catalog metadata only; no accounts, tokens, playback endpoints or Liner services.
+const endpoint = "https://music.youtube.com/youtubei/v1/search?prettyPrint=false";
+const clientVersion = "1.20260911.08.00";
+const filters = { recording: "EgWKAQIIAWoKEAkQBRAKEAMQBA%3D%3D", artist: "EgWKAQIgAWoKEAkQBRAKEAMQBA%3D%3D" };
+const videoId = /^[A-Za-z0-9_-]{11}$/;
+const artistId = /^UC[A-Za-z0-9_-]{22}$/;
+const clean = v => typeof v === "string" ? v.trim().slice(0,300) : "";
+const norm = v => clean(v).normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]+/gu," ").trim();
+const arr = v => Array.isArray(v) ? v : [];
+const runs = v => arr(v?.runs);
+const text = v => clean(runs(v).map(r=>r?.text || "").join("") || v?.simpleText);
+const browse = r => r?.navigationEndpoint?.browseEndpoint;
+const kindOf = r => browse(r)?.browseEndpointContextSupportedConfigs?.browseEndpointContextMusicConfig?.pageType;
+const duration = v => {
+  if (!/^\d{1,3}:\d{2}(?::\d{2})?$/.test(v)) return undefined;
+  const parts = v.split(":").map(Number);
+  if (parts.at(-1)>59 || (parts.length===3 && parts[1]>59)) return undefined;
+  const ms=parts.reduce((n,p)=>n*60+p,0)*1000;
+  return ms>0 ? ms : undefined;
+};
+const junk = ["reaction","reacts","reacting","first time hearing","tutorial","how to play","guitar lesson","piano tutorial","sheet music","guitar cover","drum cover","dance cover","dance practice","podcast","interview","unboxing","1 hour loop","10 hours","full album","album stream","greatest hits","nightcore","slowed","reverb","sped up","bass boosted","8d audio","реакция","кавер","подкаст"];
+const containsPhrase=(s,p)=>(" "+s+" ").includes(" "+p+" ");
+function isJunkVideo(title,query) {
+  const t=norm(title),q=norm(query);
+  return junk.some(p=>containsPhrase(t,p)&&!containsPhrase(q,p));
+}
+function matchesQuery(query,title,artist) {
+  const tokens=norm(query).split(" ").filter(Boolean).filter(t=>!["the","a","an","of","in","on","to","and","or","feat","ft","official","audio","video","music","lyrics","opening","ending","ost","theme","op","ed"].includes(t));
+  if(!tokens.length)return false;
+  const combined=norm(title+" "+artist);
+  const matched=tokens.filter(t=>combined.includes(t)).length;
+  return matched >= (tokens.length <= 2 ? tokens.length : Math.ceil(tokens.length*.75));
+}
+function safeThumbnail(raw) {
+  try {
+    const u=new URL(raw);
+    if(u.protocol!=="https:"||u.username||u.password||u.port||u.search||u.hash)return undefined;
+    if (/^(?:lh[0-9]+\.googleusercontent\.com|yt3\.ggpht\.com|yt3\.googleusercontent\.com)$/.test(u.hostname) && /^\/[A-Za-z0-9_-]+(?:=[A-Za-z0-9_-]+)?$/.test(u.pathname)) {
+      return u.origin+u.pathname.split("=")[0]+"=w256-h256-l90-rj";
+    }
+    if (u.hostname==="i.ytimg.com" && /^\/vi\/[A-Za-z0-9_-]{11}\/(?:hqdefault|mqdefault|default|sddefault|maxresdefault)\.jpg$/.test(u.pathname))return u.href;
+  } catch {}
+  return undefined;
+}
+function coverFor(row,id) {
+  const thumbs=arr(row?.thumbnail?.musicThumbnailRenderer?.thumbnail?.thumbnails);
+  const candidates=thumbs.map(t=>({url:safeThumbnail(t?.url),width:Number(t?.width)||0,height:Number(t?.height)||0})).filter(t=>t.url);
+  candidates.sort((a,b)=>Number(b.width===b.height)-Number(a.width===a.height)||b.width-a.width);
+  return candidates[0]?.url || (videoId.test(id)?"https://i.ytimg.com/vi/"+id+"/hqdefault.jpg":undefined);
+}
+function column(row,index) {return row?.flexColumns?.[index]?.musicResponsiveListItemFlexColumnRenderer?.text;}
+function mapRow(row,kind) {
+  const title=text(column(row,0));
+  if(!title)return null;
+  const titleRun=runs(column(row,0))[0];
+  const metadata=runs(column(row,1));
+  if(kind==="artist"){
+    const id=browse(row)?.browseId||browse(titleRun)?.browseId;
+    const page=kindOf(row)||kindOf(titleRun);
+    if(page!=="MUSIC_PAGE_TYPE_ARTIST"||!artistId.test(id||""))return null;
+    return {id:"ytmusic:"+id,title,artist:"",subtitle:"YouTube Music",url:"https://music.youtube.com/channel/"+id,coverUrl:coverFor(row,id)};
+  }
+  const id=row?.playlistItemData?.videoId||titleRun?.navigationEndpoint?.watchEndpoint?.videoId||row?.overlay?.musicItemThumbnailOverlayRenderer?.content?.musicPlayButtonRenderer?.playNavigationEndpoint?.watchEndpoint?.videoId||row?.navigationEndpoint?.watchEndpoint?.videoId;
+  if(!videoId.test(id||""))return null;
+  const artists=metadata.filter(r=>["MUSIC_PAGE_TYPE_ARTIST","MUSIC_PAGE_TYPE_USER_CHANNEL"].includes(kindOf(r))).map(r=>clean(r.text)).filter(Boolean);
+  const segments=metadata.map(r=>r?.text||"").join("").split("•").map(clean).filter(Boolean);
+  if(["song","video"].includes(segments[0]?.toLowerCase()))segments.shift();
+  const artist=artists.join(", ")||segments.find(v=>!duration(v)&&!/^\d[\d,.]*\s*(?:views|plays)$/i.test(v))||"";
+  if(!artist)return null;
+  const album=clean(metadata.find(r=>kindOf(r)==="MUSIC_PAGE_TYPE_ALBUM")?.text);
+  const fixed=arr(row.fixedColumns).flatMap(c=>runs(c?.musicResponsiveListItemFixedColumnRenderer?.text));
+  const durationMs=[...metadata,...fixed].map(r=>duration(clean(r?.text))).find(Boolean);
+  return {id:"ytmusic:"+id,title,artist,album,subtitle:[artist,album].filter(Boolean).join(" · "),url:"https://www.youtube.com/watch?v="+id,durationMs,coverUrl:coverFor(row,id)};
+}
+function mapSearchResponse(body,kind,query) {
+  const tabs=arr(body?.contents?.tabbedSearchResultsRenderer?.tabs);
+  const sections=tabs.flatMap(t=>arr(t?.tabRenderer?.content?.sectionListRenderer?.contents));
+  const items=sections.flatMap(s=>arr(s?.musicShelfRenderer?.contents).concat(arr(s?.musicCardShelfRenderer?.contents),arr(s?.itemSectionRenderer?.contents)));
+  const seen=new Set(), result=[];
+  for(const item of items.slice(0,150)){
+    const row=item?.musicResponsiveListItemRenderer;
+    if(!row)continue;
+    const mapped=mapRow(row,kind);
+    if(!mapped||seen.has(mapped.id)||(kind==="recording"&&isJunkVideo(mapped.title,query)))continue;
+    seen.add(mapped.id);result.push(mapped);
+  }
+  return result.filter(v=>matchesQuery(query,v.title,v.artist)).slice(0,25);
+}
+function createYouTubeMusicSearch(fetchImpl=globalThis.fetch,now=Date.now) {
+  const cache=new Map(),pending=new Map();
+  return async (kind,query)=>{
+    if(!Object.hasOwn(filters,kind)||typeof query!=="string"||query.trim().length<2||query.length>160)return [];
+    const key=JSON.stringify([kind,query.normalize("NFKC").trim().toLowerCase()]);
+    const hit=cache.get(key);
+    if(hit&&now()-hit.at<300000){cache.delete(key);cache.set(key,hit);return hit.items;}
+    if(pending.has(key))return pending.get(key);
+    if(pending.size>=2)throw Error("Music search busy");
+    const task=Promise.resolve().then(async()=>{
+      const response=await fetchImpl(endpoint,{method:"POST",redirect:"error",credentials:"omit",headers:{"content-type":"application/json",accept:"application/json","x-youtube-client-name":"67","x-youtube-client-version":clientVersion,"x-origin":"https://music.youtube.com"},body:JSON.stringify({query:query.trim(),params:filters[kind],context:{client:{clientName:"WEB_REMIX",clientVersion,hl:"en",gl:"US"}}}),signal:AbortSignal.timeout(6500)});
+      if(!response.ok)throw Error("YouTube Music catalog unavailable");
+      // Bound decoded response size, even when content-length is absent.
+      const max=2*1024*1024;
+      if(Number(response.headers?.get("content-length"))>max){await response.body?.cancel?.();throw Error("Oversized music catalog");}
+      const reader=response.body?.getReader?.();
+      let raw;
+      if(reader){const chunks=[];let size=0;try{for(;;){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>max){await reader.cancel();throw Error("Oversized music catalog");}chunks.push(Buffer.from(value));}raw=Buffer.concat(chunks,size).toString("utf8");}finally{reader.releaseLock();}}
+      else {raw=await response.text();if(Buffer.byteLength(raw)>max)throw Error("Oversized music catalog");}
+      const items=mapSearchResponse(JSON.parse(raw),kind,query);
+      cache.set(key,{at:now(),items});while(cache.size>128)cache.delete(cache.keys().next().value);
+      return items;
+    }).finally(()=>pending.delete(key));
+    pending.set(key,task);return task;
+  };
+}
+module.exports={createYouTubeMusicSearch,mapSearchResponse,safeThumbnail,isJunkVideo,matchesQuery};
