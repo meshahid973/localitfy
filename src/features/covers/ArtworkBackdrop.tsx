@@ -46,6 +46,7 @@ function CrossfadeArtwork({ source, fallbacks = [], workspace = false }: { sourc
   }, [frame]);
 
   return <div className={workspace ? "artworkBackdrop workspaceArtworkBackdrop" : "artworkBackdrop"} aria-hidden="true">
+    <div className="artworkBackdropStack">
     {[frame.previous, frame.current].filter(Boolean).map(src => (
       <div key={src} className="artworkBackdropLayer" data-visible={src === frame.current ? "true" : "false"} data-hold={src === frame.previous && Boolean(frame.current)} data-raster={src.startsWith("data:image/png;")}>
         <div className="artworkBackdropCover">
@@ -54,6 +55,7 @@ function CrossfadeArtwork({ source, fallbacks = [], workspace = false }: { sourc
         </div>
       </div>
     ))}
+    </div>
   </div>;
 }
 

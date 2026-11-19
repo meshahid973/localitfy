@@ -6,6 +6,12 @@
   pointer-events: none;
 }
 
+.artworkBackdropStack {
+  position: absolute;
+  inset: 0;
+  opacity: .32;
+}
+
 .artworkBackdropLayer {
   position: absolute;
   inset: 0;
@@ -22,7 +28,6 @@
   width: calc(100% + 48px);
   height: calc(100% + 48px);
   border-radius: 0;
-  opacity: .32;
   filter: blur(22px) saturate(.65) brightness(.7);
 }
 
@@ -62,11 +67,11 @@
 .app[data-theme="light"] > .workspaceArtworkBackdrop { --workspace-art-opacity: .15; }
 .app[data-theme="light"][data-cover-sync="strong"] > .workspaceArtworkBackdrop { --workspace-art-opacity: .19; }
 .app[data-theme="light"][data-cover-sync="subtle"] > .workspaceArtworkBackdrop { --workspace-art-opacity: .08; }
+.workspaceArtworkBackdrop .artworkBackdropStack { opacity: var(--workspace-art-opacity); }
 .workspaceArtworkBackdrop .artworkBackdropCover {
   inset: -64px;
   width: calc(100% + 128px);
   height: calc(100% + 128px);
-  opacity: var(--workspace-art-opacity);
   filter: blur(64px) saturate(.95);
 }
 .artworkBackdrop .artworkBackdropLayer[data-raster="true"] .artworkBackdropCover {

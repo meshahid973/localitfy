@@ -111,6 +111,6 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
     {!imageReady ? (person ? <UserRound size={24} /> : <Disc3 size={24} />) : null}
     {near && src ? <img key={src} src={src} alt="" loading="eager" decoding="async" fetchPriority="low" referrerPolicy="no-referrer" data-ready={imageReady}
       onLoad={() => setLoaded({key,url:src})}
-      onError={() => setFailure(current => ({key,urls:[...(current.key === key ? current.urls : []),src]}))} /> : null}
+      onError={() => setFailure(current => ({key,urls:[...new Set([...(current.key === key ? current.urls : []),src])]}))} /> : null}
   </span>;
 }
