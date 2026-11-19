@@ -31,11 +31,16 @@ export function useNativeMediaSession({
 
   useEffect(() => {
     if (!("mediaSession" in navigator)) return;
+    const seekLimit = (audio: HTMLAudioElement) => [duration, audio.duration].find(value => Number.isFinite(value) && value > 0) || 0;
     const seekBy = (seconds: number) => {
       const audio = audioRef.current;
-      if (!audio) return;
-      const limit = duration || audio.duration || 0;
-      actionsRef.current.onSeek(clamp(audio.currentTime + seconds, 0, limit || Number.MAX_SAFE_INTEGER));
+      if (!audio || !Number.isFinite(audio.currentTime)) return;
+      const limit = seekLimit(audio);
+      if (limit) actionsRef.current.onSeek(clamp(audio.currentTime + seconds, 0, limit));
+    };
+    const registered: MediaSessionAction[] = [];
+    const setActionHandler = (action: MediaSessionAction, handler: MediaSessionActionHandler) => {
+      try { navigator.mediaSession.setActionHandler(action, handler); registered.push(action); } catch { /* Unsupported actions must not disable the remaining controls. */ }
     };
     try {
       const mediaArtworkSrc = getRendererSafeImageUrl(song?.coverUrl);
@@ -51,20 +56,27 @@ export function useNativeMediaSession({
         })
         : null;
       navigator.mediaSession.playbackState = song ? (isPlaying ? "playing" : "paused") : "none";
-      navigator.mediaSession.setActionHandler("play", () => actionsRef.current.onPlay());
-      navigator.mediaSession.setActionHandler("pause", () => actionsRef.current.onPause());
-      navigator.mediaSession.setActionHandler("stop", () => actionsRef.current.onStop());
-      navigator.mediaSession.setActionHandler("previoustrack", () => actionsRef.current.onPrevious());
-      navigator.mediaSession.setActionHandler("nexttrack", () => actionsRef.current.onNext());
-      navigator.mediaSession.setActionHandler("seekbackward", () => seekBy(-10));
-      navigator.mediaSession.setActionHandler("seekforward", () => seekBy(10));
-      navigator.mediaSession.setActionHandler("seekto", details => {
-        const audio = audioRef.current;
-        if (audio && typeof details.seekTime === "number" && Number.isFinite(details.seekTime)) actionsRef.current.onSeek(clamp(details.seekTime, 0, duration || audio.duration || 0));
-      });
     } catch {
-      // Native controls are optional and must never interrupt playback.
+      // Native metadata is optional and must never interrupt playback.
     }
+    const offset = (details: MediaSessionActionDetails) => Number.isFinite(details.seekOffset) && Number(details.seekOffset) > 0 ? Number(details.seekOffset) : 10;
+    setActionHandler("play", () => actionsRef.current.onPlay());
+    setActionHandler("pause", () => actionsRef.current.onPause());
+    setActionHandler("stop", () => actionsRef.current.onStop());
+    setActionHandler("previoustrack", () => actionsRef.current.onPrevious());
+    setActionHandler("nexttrack", () => actionsRef.current.onNext());
+    setActionHandler("seekbackward", details => seekBy(-offset(details)));
+    setActionHandler("seekforward", details => seekBy(offset(details)));
+    setActionHandler("seekto", details => {
+      const audio = audioRef.current;
+      const limit = audio ? seekLimit(audio) : 0;
+      if (limit && typeof details.seekTime === "number" && Number.isFinite(details.seekTime)) actionsRef.current.onSeek(clamp(details.seekTime, 0, limit));
+    });
+    return () => {
+      for (const action of registered) {
+        try { navigator.mediaSession.setActionHandler(action, null); } catch { /* Optional action. */ }
+      }
+    };
   }, [song?.id, song?.coverUrl, song?.title, song?.artist, song?.album, isPlaying, duration]);
 
   useEffect(() => {
@@ -81,5 +93,5 @@ export function useNativeMediaSession({
     } catch {
       // Windows media progress is optional.
     }
-  }, [song?.id, duration, playbackSpeed]);
+  }, [song?.id, duration, playbackSpeed, isPlaying]);
 }

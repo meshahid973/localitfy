@@ -76,6 +76,9 @@ test("titles lose credits and upload noise before searching and matching", () =>
   assert.equal(searchTitle("Heartless (Official Audio)"), "Heartless");
   assert.equal(similarity("Ain't In LA", "Ain’t in LA"), 1);
   assert.equal(similarity("RADIO (feat. Kim Petras)", "RADIO"), 1);
+  assert.equal(similarity("Beyoncé", "Beyonce"), 1);
+  assert.equal(similarity("ガラス", "ｶﾞﾗｽ"), 1);
+  assert.notEqual(similarity("ガラス", "カラス"), 1, "Japanese voiced kana must remain distinct");
   assert.equal(formatGenres([{ name: "hip hop", count: 10 }, { name: "synth-pop", count: 5 }, { name: "jazz", count: 1 }]), "Hip Hop; Synth-Pop");
 });
 
