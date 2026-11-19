@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {createRequire} from "node:module";
 const require=createRequire(import.meta.url);
-const {createYouTubeMusicSearch,mapSearchResponse,safeThumbnail,isJunkVideo,exactMusicCandidate}=require("../../electron/discover/youtube-music.cjs");
+const {createYouTubeMusicSearch,createYouTubeMusicRadio,mapSearchResponse,mapRadioResponse,safeThumbnail,isJunkVideo,exactMusicCandidate}=require("../../electron/discover/youtube-music.cjs");
 const col=runs=>({musicResponsiveListItemFlexColumnRenderer:{text:{runs}}});
 const linked=(text,pageType,browseId)=>({text,navigationEndpoint:{browseEndpoint:{browseId,browseEndpointContextSupportedConfigs:{browseEndpointContextMusicConfig:{pageType}}}}});
 const row=(title,id="abcdefghijk")=>({musicResponsiveListItemRenderer:{playlistItemData:{videoId:id},flexColumns:[col([{text:title}]),col([linked("Kenshi Yonezu","MUSIC_PAGE_TYPE_ARTIST","UCabcdefghijklmnopqrstuv"),{text:" • "},linked("KICK BACK","MUSIC_PAGE_TYPE_ALBUM","MPREalbum"),{text:" • "},{text:"3:13"}])],thumbnail:{musicThumbnailRenderer:{thumbnail:{thumbnails:[{url:"https://lh3.googleusercontent.com/abc=w512-h512-l90-rj",width:512,height:512}]}}}}});
@@ -39,4 +39,16 @@ test("automatic download matching requires exact metadata, duration and an unamb
  assert.equal(exactMusicCandidate(wanted,[correct,{...correct,url:"https://www.youtube.com/watch?v=abcdefghij2"}]),null);
  assert.equal(exactMusicCandidate(wanted,[{...correct,url:"https://evil.test/watch?v=abcdefghijk"}]),null);
  assert.equal(exactMusicCandidate({...wanted,durationMs:0},[correct]),null);
+});
+
+
+test("radio maps a bounded related-song queue and omits the selected seed",async()=>{
+  const track=(videoId,title)=>({playlistPanelVideoRenderer:{videoId,title:{runs:[{text:title}]},longBylineText:{runs:[{text:"Artist"}]},lengthText:{runs:[{text:"3:30"}]}}});
+  const body={contents:{singleColumnMusicWatchNextResultsRenderer:{tabbedRenderer:{watchNextTabbedResultsRenderer:{tabs:[{tabRenderer:{content:{musicQueueRenderer:{content:{playlistPanelRenderer:{contents:[track("abcdefghijk","Seed"),track("abcdefghij2","Related"),track("abcdefghij2","Duplicate"),track("abcdefghij3","Guitar lesson")]}}}}}}]}}}}};
+  const items=mapRadioResponse(body,"abcdefghijk");
+  assert.equal(items.length,1);assert.equal(items[0].title,"Related");assert.equal(items[0].durationMs,210000);
+  let count=0;
+  const radio=createYouTubeMusicRadio(async(url,options)=>{count++;assert.match(url,/\/next\?/);const payload=JSON.parse(options.body);assert.equal(payload.videoId,"abcdefghijk");assert.equal(payload.playlistId,"RDAMVMabcdefghijk");assert.equal(payload.query,undefined);return {ok:true,text:async()=>JSON.stringify(body)};});
+  const [a,b]=await Promise.all([radio("abcdefghijk"),radio("abcdefghijk")]);assert.deepEqual(a,b);assert.equal(count,1);
+  await assert.rejects(radio("bad-seed"),/Invalid radio seed/);
 });

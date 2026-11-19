@@ -442,3 +442,13 @@ test("direct music catalog is explicit, preferred, and falls back after provider
   assert.equal((await get({catalog:{kind:"recording",term:"Track"}})).items[0].title,"Track");
   assert.deepEqual(calls.slice(1),[["direct","recording","Track"],["fallback","recording","Track"]]);
 });
+
+
+test("related music uses an explicit validated seed and observes discovery opt-out",async()=>{
+ const handlers=new Map(),settings={discoverEnabled:false};let calls=0;
+ registerDiscoverIpc({handle:(channel,handler)=>handlers.set(channel,handler)},{getSongs:()=>[],getSettings:()=>settings,musicBrainzClient:{},searchYouTubeMusicRadio:async seed=>{calls++;assert.equal(seed,"abcdefghijk");return [];}});
+ const get=seed=>handlers.get("discover:get")({},{catalog:{kind:"recording",term:"seed",radioSeed:seed}});
+ assert.equal((await get("abcdefghijk")).status,"off");assert.equal(calls,0);
+ settings.discoverEnabled=true;assert.equal((await get("bad")).status,"error");assert.equal(calls,0);
+ assert.equal((await get("abcdefghijk")).status,"catalog");assert.equal(calls,1);
+});

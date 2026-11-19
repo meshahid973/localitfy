@@ -37,7 +37,7 @@ function normalizeCatalog(kind, items) {
 }
 
 /** Public catalog needs only opt-in; Last.fm personalized results require a valid key. */
-function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile, fetch, musicBrainzClient, searchStore, lookupAudioDb, searchYouTubeMusic, now = Date.now }) {
+function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile, fetch, musicBrainzClient, searchStore, lookupAudioDb, searchYouTubeMusic, searchYouTubeMusicRadio, now = Date.now }) {
   let saved = null;
   let running = null;
   let catalogRunning = null;
@@ -72,12 +72,15 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
       if (!["recording", "artist"].includes(kind) || term.length < 2 || term.length > 160)
         return { status: "error", error: "Enter a search of 2–160 characters." };
       if (!musicBrainzClient) return { status: "error", error: "Public catalog is unavailable. Update the desktop application." };
-      const key = JSON.stringify([kind, term.toLowerCase()]);
+      const radioSeed = query?.radioSeed;
+      if (radioSeed !== undefined && (kind !== "recording" || typeof radioSeed !== "string" || !/^[A-Za-z0-9_-]{11}$/.test(radioSeed) || !searchYouTubeMusicRadio)) return { status: "error", error: "Related songs unavailable." };
+      const key = JSON.stringify([kind, term.toLowerCase(), radioSeed || ""]);
       if (catalogRunning && catalogRunning.key !== key)
         return { status: "error", error: "Another catalog search is in progress. Try again when it finishes." };
       if (!catalogRunning) {
         const promise = Promise.resolve().then(async () => {
           if (getSettings().discoverEnabled !== true) return [];
+          if (radioSeed) return searchYouTubeMusicRadio(radioSeed);
           // Search YouTube Music only for explicit user queries, never library seeds.
           if (searchYouTubeMusic) {
             const direct = await searchYouTubeMusic(kind, term).catch(() => []);

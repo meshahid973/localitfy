@@ -61,6 +61,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
   }, [songs, deferredTerm, catalogKind]);
   const [catalog, setCatalog] = useState<DiscoverResult | null>(null);
   const [catalogLoading, setCatalogLoading] = useState(false);
+  const [relatedTitle, setRelatedTitle] = useState("");
   const catalogRequestRef = useRef(0);
   const [showSettings, setShowSettings] = useState(false);
   const [keyDraft, setKeyDraft] = useState(settings.lastfmApiKey || "");
@@ -89,12 +90,14 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       setCatalog(null);
       setCatalogLoading(false);
       setPicked(new Map());
+      setRelatedTitle("");
     }
     return () => { catalogRequestRef.current += 1; };
   }, [settings.discoverEnabled]);
   async function searchCatalog() {
     const term = catalogTerm.trim();
     if (!settings.discoverEnabled || term.length < 2 || catalogLoading) return;
+    setRelatedTitle("");
     const request = ++catalogRequestRef.current;
     setCatalogLoading(true);
     setCatalog(null);
@@ -103,6 +106,23 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       if (request === catalogRequestRef.current) setCatalog(answer.status === "catalog" || answer.status === "error" ? answer : { status: "error", error: "Public catalog is unavailable. Check the desktop version and Discover settings." });
     } catch {
       if (request === catalogRequestRef.current) setCatalog({ status: "error", error: phone ? "Connect to your " + computerName() + " to search." : "Could not search the public catalog." });
+    } finally {
+      if (request === catalogRequestRef.current) setCatalogLoading(false);
+    }
+  }
+
+  async function searchRelated(track: DiscoverTrack) {
+    const seed = /^https:\/\/www\.youtube\.com\/watch\?v=([A-Za-z0-9_-]{11})$/.exec(track.url)?.[1];
+    if (!seed || !settings.discoverEnabled || catalogLoading) return;
+    const request = ++catalogRequestRef.current;
+    setRelatedTitle(track.title);
+    setCatalogLoading(true);
+    setCatalog(null);
+    try {
+      const answer = await window.localitfy.getDiscoveries({ catalog: { kind: "recording", term: seed, radioSeed: seed } });
+      if (request === catalogRequestRef.current) setCatalog(answer.status === "catalog" || answer.status === "error" ? answer : { status: "error", error: "Related songs unavailable." });
+    } catch {
+      if (request === catalogRequestRef.current) setCatalog({ status: "error", error: "Could not find related songs." });
     } finally {
       if (request === catalogRequestRef.current) setCatalogLoading(false);
     }
@@ -136,7 +156,7 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
   const needsSetup = !settings.discoverEnabled;
   const setup = phone ? <div className="discoverSetup"><p>Turn on Discover and manage its optional Last.fm connection in localtify on your {computerName()}, then sync this phone.</p></div> : (
     <div className="discoverSetup">
-      <p>Search YouTube Music, MusicBrainz and iTunes without an account or key. Explicit search text is sent to these providers. If you add an optional Last.fm key, Localtify also requests personalized suggestions using artist and song names from your library and looks up suggested tracks in MusicBrainz for artwork. Cover images come from YouTube Music, matching Last.fm track metadata, Cover Art Archive or TheAudioDB when available. Artwork lookup sends only the track title and artist.</p>
+      <p>Search YouTube Music, MusicBrainz and iTunes without an account or key. Explicit search text is sent to these providers. Similar songs sends only the chosen YouTube video ID. If you add an optional Last.fm key, Localtify also requests personalized suggestions using artist and song names from your library and looks up suggested tracks in MusicBrainz for artwork. Cover images come from YouTube Music, matching Last.fm track metadata, Cover Art Archive or TheAudioDB when available. Artwork lookup sends only the track title and artist.</p>
       <details className="discoverOptional" open={Boolean(keyDraft) || undefined}>
       <summary>Optional Last.fm recommendations</summary>
       <label className="discoverKey">
@@ -188,12 +208,12 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
     {settings.discoverEnabled ? <section className="discoverCatalog" aria-labelledby="discover-catalog-title">
       <h2 id="discover-catalog-title" className="discoverHeading">Explore music</h2>
       <form className="discoverSearch" onSubmit={event => { event.preventDefault(); void searchCatalog(); }}>
-        <ArcDropdownMenu<CatalogKind> ariaLabel="Search category" value={catalogKind} disabled={catalogLoading} items={[{ value: "recording", label: "Songs" }, { value: "artist", label: "Artists" }]} onValueChange={value => { setCatalogKind(value); setCatalog(null); }} />
-        <input type="search" aria-label="Search public music catalog" placeholder="Search songs and artists" value={catalogTerm} maxLength={160} disabled={catalogLoading} onChange={event => { setCatalogTerm(event.currentTarget.value); setCatalog(null); }} />
+        <ArcDropdownMenu<CatalogKind> ariaLabel="Search category" value={catalogKind} disabled={catalogLoading} items={[{ value: "recording", label: "Songs" }, { value: "artist", label: "Artists" }]} onValueChange={value => { setCatalogKind(value); setCatalog(null); setRelatedTitle(""); }} />
+        <input type="search" aria-label="Search public music catalog" placeholder="Search songs and artists" value={catalogTerm} maxLength={160} disabled={catalogLoading} onChange={event => { setCatalogTerm(event.currentTarget.value); setCatalog(null); setRelatedTitle(""); }} />
         <button className="heroMain" type="submit" disabled={catalogLoading || catalogTerm.trim().length < 2}><Search size={15} /><span>{catalogLoading ? "Searching…" : "Search"}</span></button>
       </form>
       <p className="discoverBecause" role="status">{catalogLoading ? "Searching public catalog…" : "Music catalog · Local playback only"}</p>
-      {localMatches.length && deferredTerm === catalogTerm ? <>
+      {!relatedTitle && localMatches.length && deferredTerm === catalogTerm ? <>
         <h3 className="discoverHeading">In your library</h3>
         <ul className="discoverSongList" aria-label="Local search results">
           {localMatches.map(song => <li key={song.id}>
@@ -205,13 +225,13 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       </> : null}
       {catalog?.status === "error" ? <p role="alert">{catalog.error}</p> : null}
       {catalog?.status === "catalog" ? catalog.items.length ? <>
-        <h3 className="discoverHeading">Top result</h3>
+        <div className="discoverSectionHead"><h3 className="discoverHeading">{relatedTitle ? `Related to ${relatedTitle}` : "Top result"}</h3>{catalog.kind === "recording" && /^https:\/\/www\.youtube\.com\/watch\?v=[A-Za-z0-9_-]{11}$/.test(catalog.items[0].url) ? <button type="button" className="softButton" disabled={catalogLoading} onClick={() => void searchRelated(catalog.items[0])}>Similar songs</button> : null}</div>
         {catalog.items.slice(0,1).map(item => <div key={item.id} className="discoverTopResult">
           <DiscoverCover title={item.title} artist={item.artist} artwork={item} lookup={catalog.kind === "recording"} person={catalog.kind === "artist"} />
           <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => openLink(item.url)} title={item.title}>{item.title}</button><small>{item.subtitle}</small></span>
           {catalog.kind === "recording" ? <><span className="discoverDuration">{duration(item.durationMs)}</span>{pickButton(item)}</> : null}
         </div>)}
-        {catalog.items.length > 1 ? <h3 className="discoverHeading">More matches</h3> : null}
+        {catalog.items.length > 1 ? <h3 className="discoverHeading">{relatedTitle ? "More related songs" : "More matches"}</h3> : null}
         <ul className="discoverSongList" aria-label="Search results">
         {catalog.items.slice(1).map(item => <li key={item.id}>
           <DiscoverCover title={item.title} artist={item.artist} artwork={item} lookup={catalog.kind === "recording"} person={catalog.kind === "artist"} />
