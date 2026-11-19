@@ -67,6 +67,9 @@ contextBridge.exposeInMainWorld("localitfy", {
   importAlbumFolder: (payload) => ipcRenderer.invoke("album:import-folder", payload),
 
   downloadAudioUrls: (payload) => ipcRenderer.invoke("download:audio", payload),
+  getDownloadJobs: () => ipcRenderer.invoke("download:jobs"),
+  resumeDownloadJob: (id) => ipcRenderer.invoke("download:resume-job", id),
+  clearDownloadJobs: (ids) => ipcRenderer.invoke("download:clear-jobs", ids),
   cancelDownload: () => ipcRenderer.invoke("download:cancel"),
   chooseDownloadFolder: () => ipcRenderer.invoke("download:choose-folder"),
   openDownloadsFolder: (folder) => ipcRenderer.invoke("download:open-folder", folder),

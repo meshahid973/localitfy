@@ -62,6 +62,11 @@ export function friendlyDownloadError(error: unknown, fallback = "Download faile
   return raw.length > 170 ? `${raw.slice(0, 167)}...` : raw;
 }
 
+function downloadPathKey(value: string | undefined) {
+  const text = String(value || "").trim();
+  return /^[a-z]:[\\/]|^\\\\/i.test(text) ? text.replace(/\\/g, "/").toLowerCase() : text;
+}
+
 type DownloadSongLookup = {
   spotifyIds: Map<string, Song>;
   filePaths: Map<string, Song>;
@@ -75,7 +80,7 @@ export function buildDownloadSongLookup(librarySongs: readonly Song[]): Download
   const basenames = new Map<string, Song | null>();
   for (const song of librarySongs) {
     const spotifyId = String((song as Song & { sourceTrackId?: string }).sourceTrackId || "").trim();
-    const filePath = String(song.filePath || "").trim().toLowerCase();
+    const filePath = downloadPathKey(song.filePath);
     if (spotifyId && !spotifyIds.has(spotifyId)) spotifyIds.set(spotifyId, song);
     if (filePath && !filePaths.has(filePath)) filePaths.set(filePath, song);
     const name = filePath.split(/[\\/]/).pop();
@@ -85,8 +90,8 @@ export function buildDownloadSongLookup(librarySongs: readonly Song[]): Download
 }
 
 export function findDownloadedSongMatch(result: DownloadResult, librarySongs: Song[], lookup?: DownloadSongLookup) {
-  const filePath = String(result.filePath || "").trim().toLowerCase();
-  const filename = String(result.filename || "").trim().toLowerCase();
+  const filePath = downloadPathKey(result.filePath);
+  const filename = String(result.filename || "").trim();
   const spotifyTrackId = String(result.spotifyTrackId || "").trim();
 
   if (spotifyTrackId) {
@@ -99,14 +104,14 @@ export function findDownloadedSongMatch(result: DownloadResult, librarySongs: So
   if (filePath) {
     const exact = lookup
       ? lookup.filePaths.get(filePath)
-      : librarySongs.find((song) => String(song.filePath || "").trim().toLowerCase() === filePath);
+      : librarySongs.find((song) => downloadPathKey(song.filePath) === filePath);
     if (exact) return exact;
   }
 
   if (filename) {
     if (filePath) return null; // An explicit path must not be confused with an unrelated file.
     if (lookup) return lookup.basenames.get(filename) || null;
-    const matches = librarySongs.filter(song => String(song.filePath || "").trim().toLowerCase().split(/[\\/]/).pop() === filename);
+    const matches = librarySongs.filter(song => downloadPathKey(song.filePath).split(/[\\/]/).pop() === filename);
     return matches.length === 1 ? matches[0] : null;
   }
 

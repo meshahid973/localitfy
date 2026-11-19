@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Song } from "../library/song.types";
 import type { DownloadQueueItem, DownloadResult, SpotifyTrack } from "./download.types";
 import {
@@ -17,11 +17,30 @@ export type DownloadsRuntimeOptions = {
 };
 
 export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerError }: DownloadsRuntimeOptions) {
+  const songsRef = useRef(songs);
+  useEffect(() => { songsRef.current = songs; }, [songs]);
   const [downloadText, setDownloadText] = useState("");
   const [downloadBusy, setDownloadBusy] = useState(false);
   const [downloadResults, setDownloadResults] = useState<DownloadResult[]>([]);
   const [downloadQueue, setDownloadQueue] = useState<DownloadQueueItem[]>([]);
   const [downloadFolderLabel, setDownloadFolderLabel] = useState("");
+
+  useEffect(() => {
+    if (!ready || !window.localitfy?.getDownloadJobs) return;
+    let cancelled = false;
+    void window.localitfy.getDownloadJobs().then(({ jobs, error }) => {
+      if (cancelled) return;
+      if (error) setPlayerError(error);
+      const completed = enrichDownloadResultsWithLibraryMatches(jobs.filter(item => item.status === "done").map(item => ({ ...item, ok: true })), songsRef.current);
+      const byId = new Map(completed.map(item => [item.recoveryId, item]));
+      const restored = jobs.map(item => item.status === "done" ? { ...item, ...byId.get(item.recoveryId) } : item);
+      setDownloadQueue(current => {
+        const ids = new Set(current.map(item => item.recoveryId || item.id));
+        return [...current, ...restored.filter(item => !ids.has(item.id) && !current.some(active => active.url === item.url))];
+      });
+    }).catch(error => { if (!cancelled) setPlayerError(`Could not restore downloads: ${String(error)}`); });
+    return () => { cancelled = true; };
+  }, [ready, setPlayerError]);
 
   const [convertBusy, setConvertBusy] = useState(false);
   const [convertProgress, setConvertProgress] = useState(0);
@@ -270,6 +289,7 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
       enrichedResults.forEach((result) => {
         const resultSpotifyTrackId = String(result.spotifyTrackId || "").trim();
         const index = next.findIndex((item) =>
+          (result.recoveryId && item.recoveryId === result.recoveryId) ||
           (resultSpotifyTrackId && String(item.spotifyTrackId || "").trim() === resultSpotifyTrackId) ||
           item.url === result.url ||
           (result.filename && item.filename === result.filename) ||
@@ -280,6 +300,7 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
 
         next[index] = {
           ...next[index],
+          recoveryId: result.recoveryId || next[index].recoveryId,
           status: result.ok ? "done" : "failed",
           progress: 100,
           message: result.ok

@@ -384,7 +384,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
                       <div className="downloadQueueList">
                         {visibleDownloadQueueItems.map((item, index) => {
                           const done = item.status === "done";
-                          const failed = item.status === "failed" || item.status === "cancelled";
+                          const failed = item.status === "failed" || item.status === "cancelled" || item.status === "interrupted";
                           const downloadedNotImported = done && item.importedToLibrary === false;
                           const sourceLabel = item.source === "spotify" ? "Spotify" : "YouTube";
 
@@ -418,7 +418,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
                               <div className="downloadQueueActions">
                                 {failed ? (
                                   <>
-                                    <button className="softButton downloadRetryButtonV502" onClick={() => void retryDownload(item.url, item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "")}>retry</button>
+                                    <button className="softButton downloadRetryButtonV502" onClick={() => void retryDownload(item.url, item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "")}>{item.status === "interrupted" ? "resume" : "retry"}</button>
                                     <button className="softButton" onClick={() => void copyDownloadError(item.error || item.message || item.url)}>copy error</button>
                                   </>
                                 ) : null}

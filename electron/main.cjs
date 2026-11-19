@@ -1,3 +1,4 @@
+const { filePathKey } = require("./runtime/path-identity.cjs");
 const { app, powerMonitor, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net, safeStorage } = require("electron");
 const { createIpcRouter } = require("./ipc/router.cjs");
 const { registerAnalysisIpc, preserveExperimentalSettings } = require("./ipc/analysis.cjs");
@@ -60,6 +61,9 @@ const { setDiscordActivity, clearDiscordActivity, getDiscordStatus, resetDiscord
 const {
   downloadAudioUrls,
   cancelActiveDownloads,
+  listDownloadJobs,
+  getDownloadRecoveryRequest,
+  clearDownloadJobs,
   convertLocalMediaFiles,
   isSupportedMediaPath,
   downloadSpotifyBatch
@@ -498,7 +502,7 @@ function getCoverThumbnailDirectory() {
 function getCoverThumbnailCacheKey(filePath) {
   try {
     const info = getFileInfoCached(filePath);
-    const signature = [path.normalize(String(filePath || "")).toLowerCase(), info.size || 0, Math.round(info.mtimeMs || 0), COVER_THUMBNAIL_SIZE].join("|");
+    const signature = [filePathKey(String(filePath || "")), info.size || 0, Math.round(info.mtimeMs || 0), COVER_THUMBNAIL_SIZE].join("|");
     return crypto.createHash("sha1").update(signature).digest("hex");
   } catch {
     return crypto.createHash("sha1").update(String(filePath || "")).digest("hex");
@@ -1360,7 +1364,7 @@ async function makeSongFromFile(filePath, pixelArtFiles = [], usedCovers = new S
 }
 
 function normalizeForLooseMatch(value = "") {
-  return String(value || "").toLowerCase().replace(/\.[a-z0-9]+$/i, "").replace(/\([^)]*\)|\[[^\]]*\]/g, " ").replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+  return String(value || "").normalize("NFKC").toLowerCase().replace(/\.[a-z0-9]+$/i, "").replace(/\([^)]*\)|\[[^\]]*\]/g, " ").replace(/[^\p{L}\p{N}]+/gu, " ").replace(/\s+/g, " ").trim();
 }
 
 function listAudioFilesInDirectory(directory, options = {}) {
@@ -1451,9 +1455,9 @@ async function importNewAudioFilesFromDirectory(directory, tracks = [], options 
 }
 /** Adds the files that are not in the library yet (matched by path). Shared by folder refreshes and watched folders. */
 async function importNewAudioFiles(audioFiles, tracks = []) {
-  const existingPaths = new Set(getSongs().map((song) => path.normalize(String(song.filePath || "")).toLowerCase()).filter(Boolean));
+  const existingPaths = new Set(getSongs().map((song) => filePathKey(String(song.filePath || ""))).filter(Boolean));
   const newFiles = audioFiles.filter((filePath) => {
-    const key = path.normalize(String(filePath || "")).toLowerCase();
+    const key = filePathKey(String(filePath || ""));
     return key && !existingPaths.has(key);
   });
   if (!newFiles.length) return { changedCount: 0, importedCount: 0, files: [] };
@@ -1518,10 +1522,10 @@ function findAlbumFoldersFromRoot(rootPath, mode = "single") {
     const current = queue.shift();
     const folderPath = current?.folderPath || "";
     const depth = Number(current?.depth || 0);
-    const folderKey = path.normalize(folderPath).toLowerCase();
+    const folderKey = filePathKey(folderPath);
     if (!folderPath || seen.has(folderKey)) continue;
     seen.add(folderKey);
-    const isRoot = folderKey === path.normalize(root).toLowerCase();
+    const isRoot = folderKey === filePathKey(root);
     if (isAlbumFolderCandidate(folderPath)) { folders.push(folderPath); continue; }
     if (depth >= ALBUM_FOLDER_LIBRARY_SCAN_MAX_DEPTH) continue;
     let entries = [];
@@ -1537,7 +1541,7 @@ function findAlbumFoldersFromRoot(rootPath, mode = "single") {
 
 async function buildAlbumFolderPreview(folderPath, index = 0) {
   const folderTitle = cleanAlbumFolderText(path.basename(folderPath), `album ${index + 1}`);
-  const existingPaths = new Set(getSongs().map((song) => path.normalize(String(song.filePath || "")).toLowerCase()).filter(Boolean));
+  const existingPaths = new Set(getSongs().map((song) => filePathKey(String(song.filePath || ""))).filter(Boolean));
   const audioFiles = listAudioFilesInDirectory(folderPath, { maxDepth: 1, maxFiles: ALBUM_FOLDER_MAX_TRACKS_PER_ALBUM });
   const folderCoverPath = findAlbumFolderCoverPath(folderPath);
   let albumEmbeddedCoverPath = "";
@@ -1548,7 +1552,7 @@ async function buildAlbumFolderPreview(folderPath, index = 0) {
     const filenameMetadata = parseAlbumTrackFileName(filePath, folderTitle);
     const shouldReadCover = !folderCoverPath && !albumEmbeddedCoverPath && trackIndex < 12;
     const tagMetadata = await readLocalAudioMetadata(filePath, { readCover: shouldReadCover });
-    const duplicate = existingPaths.has(path.normalize(String(filePath || "")).toLowerCase());
+    const duplicate = existingPaths.has(filePathKey(String(filePath || "")));
     if (!albumEmbeddedCoverPath && tagMetadata?.embeddedCoverPath && fileExists(tagMetadata.embeddedCoverPath)) albumEmbeddedCoverPath = tagMetadata.embeddedCoverPath;
     const durationMs = Math.max(0, Number(tagMetadata?.durationMs || 0), Number(tagMetadata?.duration || 0) > 0 ? Number(tagMetadata.duration) * 1000 : 0);
     parsedTracks.push({
@@ -1652,7 +1656,7 @@ async function handleAlbumFolderImport(event, payload = {}) {
   const allTracks = albums.flatMap((album) => (Array.isArray(album.tracks) ? album.tracks : []).map((track) => ({ album, track })));
   event.sender.send("album-folder-import:progress", { type: "import-start", index: 0, total: allTracks.length, message: "Adding album tracks to Localtify..." });
   const existingSongsBefore = getSongs();
-  const existingSongByPath = new Map(existingSongsBefore.filter((song) => song?.filePath).map((song) => [path.normalize(String(song.filePath || "")).toLowerCase(), song]));
+  const existingSongByPath = new Map(existingSongsBefore.filter((song) => song?.filePath).map((song) => [filePathKey(String(song.filePath || "")), song]));
   const existingPaths = new Set(existingSongByPath.keys());
   const pixelArtFiles = getPixelArtFiles();
   const usedCovers = new Set();
@@ -1665,7 +1669,7 @@ async function handleAlbumFolderImport(event, payload = {}) {
   for (let index = 0; index < allTracks.length; index += 1) {
     const { album, track } = allTracks[index];
     const filePath = String(track.filePath || "");
-    const fileKey = path.normalize(filePath).toLowerCase();
+    const fileKey = filePathKey(filePath);
     if (index === 0 || index + 1 === allTracks.length || index % ALBUM_FOLDER_IMPORT_PROGRESS_EVERY_TRACKS === 0) {
       event.sender.send("album-folder-import:progress", { type: "import-progress", index: index + 1, total: allTracks.length, filePath, message: `Adding ${track.title || path.basename(filePath)}` });
     }
@@ -1714,9 +1718,9 @@ async function handleAlbumFolderImport(event, payload = {}) {
   clearFileInfoCache();
   const rawSongs = getSongs();
   const songById = new Map(rawSongs.map((song) => [song.id, song]));
-  const songByPath = new Map(rawSongs.map((song) => [path.normalize(String(song.filePath || "")).toLowerCase(), song]));
+  const songByPath = new Map(rawSongs.map((song) => [filePathKey(String(song.filePath || "")), song]));
   const importedAlbums = albums.map((album) => {
-    const songIds = (album.tracks || []).map((track) => songByPath.get(path.normalize(String(track.filePath || "")).toLowerCase())?.id).filter(Boolean);
+    const songIds = (album.tracks || []).map((track) => songByPath.get(filePathKey(String(track.filePath || "")))?.id).filter(Boolean);
     const albumSongs = songIds.map((id) => songById.get(id)).filter(Boolean);
     const preferredCoverSong = albumSongs.find((song) => String(song.coverSource || "") === "folder" && song.coverPath) || albumSongs.find((song) => String(song.coverSource || "") === "embedded" && song.coverPath) || albumSongs.find((song) => String(song.coverSource || "") === "custom" && song.coverPath) || albumSongs.find((song) => song.coverPath) || null;
     const stableCoverPath = preferredCoverSong?.coverPath || album.coverPath || "";
@@ -1736,10 +1740,10 @@ async function repairSpotifyMetadataForFolder(directory, tracks = [], options = 
   const audioFiles = listAudioFilesInDirectory(directory, options);
   if (!audioFiles.length || !Array.isArray(tracks) || !tracks.length) return { changedCount: 0, songs: listSongsShaped() };
   const songs = getSongs();
-  const byPath = new Map(songs.filter((song) => song?.filePath).map((song) => [path.normalize(String(song.filePath)).toLowerCase(), song]));
+  const byPath = new Map(songs.filter((song) => song?.filePath).map((song) => [filePathKey(String(song.filePath)), song]));
   let changedCount = 0;
   for (const filePath of audioFiles) {
-    const key = path.normalize(String(filePath || "")).toLowerCase();
+    const key = filePathKey(String(filePath || ""));
     const song = byPath.get(key);
     if (!song) continue;
     const matched = matchSpotifyTrackForFile(filePath, tracks);
@@ -2462,7 +2466,8 @@ app.whenReady().then(async () => {
       if (successfulFiles.length) {
         const pixelArtFiles = getPixelArtFiles();
         const usedCovers = new Set();
-        changedCount = insertSongs(await Promise.all(successfulFiles.map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers))));
+        const existingPaths = new Set(getSongs().map(song => filePathKey(song.filePath)));
+        changedCount = insertSongs(await Promise.all(successfulFiles.filter(file => !existingPaths.has(filePathKey(file))).map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers))));
         clearFileInfoCache();
         afterSongs = listSongsShaped();
       }
@@ -2470,7 +2475,7 @@ app.whenReady().then(async () => {
     } catch (error) { console.log("[localitfy convert pick error]", error?.message); return { downloadFolder: getDownloadDirectory(), conversions: [], changedCount: 0, songs: listSongsShaped() }; }
   });
 
-  ipcRouter.handle("download:audio", async (event, payload) => {
+  const runAudioDownload = async (event, payload) => {
     try {
       const urls = Array.isArray(payload?.urls) ? payload.urls : [payload?.url].filter(Boolean);
       const options = payload?.options && typeof payload.options === "object" ? payload.options : {};
@@ -2480,13 +2485,14 @@ app.whenReady().then(async () => {
       const result = await downloadAudioUrls(urls, downloadFolder, (progress) => {
         if (!mainWindow || mainWindow.isDestroyed()) return;
         event.sender.send("download:progress", progress);
-      }, { bitrate: payload?.bitrate || 192, proxy: payload?.proxy || "", quality, format, cleanTitle, keepOriginal: keepOriginal === true });
+      }, { bitrate: payload?.bitrate || 192, proxy: payload?.proxy || "", quality, format, cleanTitle, keepOriginal: keepOriginal === true, autoAdd });
       const successfulFiles = result.downloads.filter((item) => item.ok && item.filePath && fileExists(item.filePath) && isAudioFile(item.filePath)).map((item) => item.filePath);
       let changedCount = 0;
       if (autoAdd && successfulFiles.length) {
         const pixelArtFiles = getPixelArtFiles();
         const usedCovers = new Set();
-        changedCount = insertSongs(await Promise.all(successfulFiles.map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers))));
+        const existingPaths = new Set(getSongs().map(song => filePathKey(song.filePath)));
+        changedCount = insertSongs(await Promise.all(successfulFiles.filter(file => !existingPaths.has(filePathKey(file))).map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers))));
         clearFileInfoCache();
       }
       if (autoAdd) {
@@ -2500,7 +2506,10 @@ app.whenReady().then(async () => {
       console.log("[localitfy download error]", error?.stack || error?.message);
       return { downloadFolder: getDownloadDirectory(), downloads: [{ ok: false, error: error?.message || "download failed" }], changedCount: 0, songs: listSongsShaped(), autoAdd: true };
     }
-  });
+  };
+  ipcRouter.handle("download:audio", runAudioDownload);
+  ipcRouter.handle("download:jobs", () => listDownloadJobs());
+  ipcRouter.handle("download:clear-jobs", (_event, ids) => clearDownloadJobs(ids));
 
   ipcRouter.handle("download:cancel", async () => ({ cancelled: cancelActiveDownloads() }));
   ipcRouter.handle("download:choose-folder", async () => {
@@ -2640,10 +2649,17 @@ app.whenReady().then(async () => {
         const pixelArtFiles = getPixelArtFiles();
         const usedCovers = new Set();
         const importedSongs = [];
+        const existingByPath = new Map(getSongs().map(song => [filePathKey(song.filePath), song]));
         for (const { item, track } of successfulDownloads) {
           const filePath = item.filePath;
           importedFilePaths.push(filePath);
           const spotifyTrackId = String(item.spotifyTrackId || track?.spotifyTrackId || track?.id || "").trim();
+          const existing = existingByPath.get(filePathKey(filePath));
+          if (existing) {
+            importedSongIds.push(existing.id);
+            spotifyImportMap.push({ spotifyTrackId, songId: existing.id, filePath });
+            continue;
+          }
           const sourceInfo = { sourceTrackId: spotifyTrackId, sourceUrl: String(item.spotifyUrl || track?.spotifyUrl || (spotifyTrackId ? `https://open.spotify.com/track/${spotifyTrackId}` : "")).trim(), sourceProvider: String(item.provider || "youtube"), sourceProviderUrl: String(item.providerUrl || ""), sourceMatchScore: Number(item.matchScore || 0), matchedArtist: item.matchedArtist };
           const song = await makeSongFromFileWithExactSpotifyTrack(filePath, track, pixelArtFiles, usedCovers, sourceInfo);
           importedSongs.push(song);
@@ -2659,13 +2675,13 @@ app.whenReady().then(async () => {
         clearFileInfoCache();
       }
       const importMapBySpotifyId = new Map(spotifyImportMap.map((item) => [String(item.spotifyTrackId || "").trim(), item]).filter(([id]) => Boolean(id)));
-      const importMapByFilePath = new Map(spotifyImportMap.map((item) => [path.normalize(String(item.filePath || "")).toLowerCase(), item]).filter(([filePath]) => Boolean(filePath)));
+      const importMapByFilePath = new Map(spotifyImportMap.map((item) => [filePathKey(String(item.filePath || "")), item]).filter(([filePath]) => Boolean(filePath)));
       const finalDownloads = (result.downloads || []).map((item) => {
-        const imported = importMapBySpotifyId.get(String(item?.spotifyTrackId || "").trim()) || (item?.filePath ? importMapByFilePath.get(path.normalize(String(item.filePath)).toLowerCase()) : null) || null;
+        const imported = importMapBySpotifyId.get(String(item?.spotifyTrackId || "").trim()) || (item?.filePath ? importMapByFilePath.get(filePathKey(String(item.filePath))) : null) || null;
         return { ...item, importedToLibrary: Boolean(imported), librarySongId: imported?.songId || item.librarySongId || "" };
       });
       for (const item of finalDownloads) if (item?.ok) event.sender.send("spotdl-track-done", item);
-      return { ...result, downloads: finalDownloads, changedCount, songs: listSongsShaped(), downloadFolder, importedFilePaths: Array.from(new Set(importedFilePaths.filter(Boolean))), spotifyImportedSongIds: Array.from(new Set(importedSongIds.filter(Boolean))), spotifyImportMap, spotifySourceName: payload?.sourceName || options?.sourceName || "", spotifySourceType: payload?.sourceType || options?.sourceType || "" };
+      return { ...result, downloads: finalDownloads, changedCount, songs: listSongsShaped(), autoAdd, downloadFolder, importedFilePaths: Array.from(new Set(importedFilePaths.filter(Boolean))), spotifyImportedSongIds: Array.from(new Set(importedSongIds.filter(Boolean))), spotifyImportMap, spotifySourceName: payload?.sourceName || options?.sourceName || "", spotifySourceType: payload?.sourceType || options?.sourceType || "" };
     } catch (error) {
       console.log("[localitfy spotify batch download error]", error?.message || error);
       return { downloadFolder: getDownloadDirectory(options?.downloadFolder || options?.outputDir || options?.folder), downloads: [{ ok: false, error: error?.message || "batch download failed" }], changedCount: 0, songs: listSongsShaped(), spotifyImportedSongIds: [], spotifyImportMap: [], importedFilePaths: [] };
@@ -2673,6 +2689,13 @@ app.whenReady().then(async () => {
   };
   ipcRouter.handle("spotify-download-batch", runSpotifyDownloadBatch);
   ipcRouter.handle("spotdl-download-batch", runSpotifyDownloadBatch);
+  ipcRouter.handle("download:resume-job", async (event, id) => {
+    const request = getDownloadRecoveryRequest(id);
+    if (request.source === "spotify") return runSpotifyDownloadBatch(event, {
+      tracks: [request.track], options: { ...request.options, downloadFolder: request.folder }
+    });
+    return runAudioDownload(event, { urls: [request.url], folder: request.folder, options: request.options });
+  });
 
   ipcRouter.handle("localitfy:check-for-updates", async (_event, payload) => checkForUpdates(payload));
   ipcRouter.handle("localitfy:download-update", async () => downloadUpdate());

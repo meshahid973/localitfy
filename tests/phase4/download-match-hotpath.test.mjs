@@ -16,8 +16,8 @@ runInNewContext(outputText, {
 });
 
 function referenceMatch(result, librarySongs) {
-  const filePath = String(result.filePath || "").trim().toLowerCase();
-  const filename = String(result.filename || "").trim().toLowerCase();
+  const filePath = String(result.filePath || "").trim();
+  const filename = String(result.filename || "").trim();
   const spotifyTrackId = String(result.spotifyTrackId || "").trim();
   if (spotifyTrackId) {
     const match = librarySongs.find((song) =>
@@ -26,11 +26,11 @@ function referenceMatch(result, librarySongs) {
   }
   if (filePath) {
     const match = librarySongs.find((song) =>
-      String(song.filePath || "").trim().toLowerCase() === filePath);
+      String(song.filePath || "").trim() === filePath);
     if (match) return match;
   }
   if (filename && !filePath) {
-    const matches = librarySongs.filter(song => String(song.filePath || "").trim().toLowerCase().split(/[\\/]/).pop() === filename);
+    const matches = librarySongs.filter(song => String(song.filePath || "").trim().split(/[\\/]/).pop() === filename);
     return matches.length === 1 ? matches[0] : null;
   }
   return null;
@@ -110,4 +110,14 @@ test("ambiguous basenames and mismatched explicit files do not claim an import",
   assert.equal(exports.findDownloadedSongMatch({filename:"song.mp3"},songs,lookup),null);
   assert.equal(exports.findDownloadedSongMatch({filename:"other.mp3",filePath:"/missing/other.mp3"},songs,lookup),null);
   assert.equal(exports.findDownloadedSongMatch({filename:"other.mp3"},songs,lookup).id,"c");
+});
+
+
+test("Linux paths differing only by case cannot claim each other's imported metadata", () => {
+  const library = [song("upper", { filePath: "/music/Track.flac", sourceTrackId: "" }), song("lower", { filePath: "/music/track.flac", sourceTrackId: "" })];
+  const results = exports.enrichDownloadResultsWithLibraryMatches([
+    { ok: true, filePath: "/music/Track.flac" }, { ok: true, filePath: "/music/track.flac" }, { ok: true, filePath: "/music/TRACK.flac" }
+  ], library);
+  assert.deepEqual(Array.from(results, item => item.librarySongId), ["upper", "lower", ""]);
+  assert.equal(exports.findDownloadedSongMatch({ ok: true, filePath: "c:\\music\\TRACK.flac" }, [song("windows", { filePath: "C:\\Music\\Track.flac", sourceTrackId: "" })]).id, "windows");
 });

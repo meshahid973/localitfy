@@ -6,19 +6,39 @@ const { execFile, spawn } = require("node:child_process");
 const ffmpegStatic = require("ffmpeg-static");
 const sanitize = require("sanitize-filename");
 const { ensureYtDlpBinary, spawnYtDlp } = require("./runtime/yt-dlp.cjs");
+const { createDownloadJobStore } = require("./download-jobs.cjs");
+const { publishDownloadedFile } = require("./download-publication.cjs");
 
 let _userDataPath = null;
 let _ffmpegPath = ffmpegStatic || null;
 let _ytDlpBinaryPath = null;
 const activeDownloadProcesses = new Set();
 let activeDownloadCancelled = false;
+let activeDownloadInterrupted = false;
 let activeBatch = false;
+let downloadJobs = null;
+let downloadStorageError = "";
+const batchJobIds = new Set();
+const progressSavedAt = new Map();
 
 async function runDownloadBatch(work) {
   if (activeBatch) throw new Error("A download or conversion is already running");
   activeBatch = true;
   activeDownloadCancelled = false;
-  try { return await work(); } finally { activeBatch = false; }
+  activeDownloadInterrupted = false;
+  batchJobIds.clear();
+  try { return await work(); } finally {
+    for (const id of batchJobIds) {
+      const job = downloadJobs?.get(id);
+      if (["queued", "downloading", "converting", "importing"].includes(job?.status)) {
+        try { downloadJobs.update(id, { status: activeDownloadCancelled && !activeDownloadInterrupted ? "cancelled" : "interrupted", message: activeDownloadCancelled && !activeDownloadInterrupted ? "Download cancelled" : "Download interrupted. Resume when ready." }); }
+        catch (error) { console.error("[localtify download checkpoint]", error.message); }
+      }
+    }
+    batchJobIds.clear();
+    progressSavedAt.clear();
+    activeBatch = false;
+  }
 }
 
 const MEDIA_EXTENSIONS = new Set([
@@ -29,6 +49,46 @@ const MEDIA_EXTENSIONS = new Set([
 function initDownloader({ userDataPath, ffmpegPath }) {
   _userDataPath = userDataPath;
   if (ffmpegPath) _ffmpegPath = ffmpegPath;
+  try { downloadJobs = createDownloadJobStore(userDataPath); downloadStorageError = ""; }
+  catch (error) { downloadStorageError = String(error?.message || error); console.error("[localtify download recovery]", downloadStorageError); }
+}
+
+function prepareDownloadJob(request) {
+  if (!downloadJobs || downloadStorageError) throw new Error(downloadStorageError || "Download recovery storage is not initialized");
+  const job = downloadJobs.prepare(request);
+  batchJobIds.add(job.id);
+  return job;
+}
+
+function listDownloadJobs() {
+  return { error: downloadStorageError, jobs: downloadJobs ? downloadJobs.list().map(job => ({
+    id: job.id, recoveryId: job.id, url: job.request.url, source: job.request.source,
+    spotifyTrackId: job.request.track?.id, title: job.request.track?.title || job.result?.filename || "Saved download",
+    status: job.status, progress: job.progress, message: job.message,
+    filePath: job.result?.filePath, filename: job.result?.filename, error: job.result?.error
+  })) : [] };
+}
+
+function getDownloadRecoveryRequest(id) {
+  const job = downloadJobs?.get(String(id));
+  if (!job) throw new Error("Saved download not found");
+  if (["queued", "downloading", "converting", "importing"].includes(job.status)) throw new Error("This download is already running");
+  return job.request;
+}
+
+function clearDownloadJobs(ids) {
+  if (!Array.isArray(ids) || ids.length > 500 || ids.some(id => typeof id !== "string")) throw new Error("Invalid saved download selection");
+  for (const id of ids) downloadJobs?.remove(id);
+  return true;
+}
+
+function recordDownloadResult(job, result) {
+  if (!job?.recoveryId || !downloadJobs) return;
+  const status = result.ok ? "done" : activeDownloadInterrupted ? "interrupted" : /cancel/i.test(result.error || "") ? "cancelled" : "failed";
+  let identity = {};
+  if (result.ok) { const stat = fs.statSync(result.filePath); identity = { sizeBytes: stat.size, mtimeMs: stat.mtimeMs }; }
+  downloadJobs.update(job.recoveryId, { status, result, ...identity, progress: result.ok ? 100 : 0, message: result.ok ? "Downloaded" : result.error });
+  if (result.ok || status === "cancelled") downloadJobs.cleanWorkDirectory(job.recoveryId);
 }
 
 function isSupportedMediaPath(filePath) {
@@ -142,7 +202,8 @@ function getBaseArgs(url, outputTemplate, options = {}) {
     "--concurrent-fragments", "16",
     "--buffer-size", "32M",
     "--http-chunk-size", "10M",
-    "--no-part",
+    "--part",
+    "--continue",
     "--retries", "5",
     "--fragment-retries", "5",
     "--retry-sleep", "linear=1::2",
@@ -230,6 +291,7 @@ function buildProgressPayload(job, p) {
     type: "download",
     status: percent >= 99 ? "converting" : "downloading",
     id: job.id,
+    recoveryId: job.recoveryId,
     url: job.url,
     spotifyTrackId: job.spotifyTrackId,
     spotifyUrl: job.spotifyUrl,
@@ -275,7 +337,14 @@ function runYtDlp(ytDlp, args, onProgress, job) {
       outputBuffer = lines.pop() || "";
       for (const line of lines) {
         const progress = parseYtDlpProgressLine(line);
-        if (progress) onProgress?.(buildProgressPayload(job, progress));
+        if (progress) {
+          const payload = buildProgressPayload(job, progress);
+          if (job.recoveryId && Date.now() - (progressSavedAt.get(job.recoveryId) || 0) >= 1000) {
+            try { downloadJobs.update(job.recoveryId, { status: payload.status, progress: payload.progress, message: payload.message }); progressSavedAt.set(job.recoveryId, Date.now()); }
+            catch (error) { proc.kill(); return reject(error); }
+          }
+          onProgress?.(payload);
+        }
       }
     };
 
@@ -296,19 +365,26 @@ function runYtDlp(ytDlp, args, onProgress, job) {
 
 async function downloadYouTube(url, destinationDirectory, onProgress, options = {}, job = {}) {
   let tempId;
+  let workingDirectory = destinationDirectory;
   try {
     if (activeDownloadCancelled) throw new Error("Download cancelled");
     fs.mkdirSync(destinationDirectory, { recursive: true });
 
     const ytDlp = await getYtDlp();
     const format = safeDownloadFormat(options.format);
-    tempId = crypto.randomUUID();
-    const outputTemplate = path.join(destinationDirectory, `ytdl_${tempId}_%(title)s.%(ext)s`);
+    tempId = job.recoveryId || crypto.randomUUID();
+    if (job.recoveryId) {
+      workingDirectory = downloadJobs.workDirectory(job.recoveryId);
+      fs.mkdirSync(workingDirectory, { recursive: true });
+      downloadJobs.update(job.recoveryId, { status: "downloading", message: "Downloading audio" });
+    }
+    const outputTemplate = path.join(workingDirectory, `ytdl_${tempId}_%(title)s.%(ext)s`);
 
     onProgress?.({
       type: "download",
       status: "downloading",
       id: job.id,
+      recoveryId: job.recoveryId,
       url,
       index: job.index,
       total: job.total,
@@ -339,20 +415,26 @@ async function downloadYouTube(url, destinationDirectory, onProgress, options = 
 
     if (lastError) throw new Error("Download failed after trying all methods. The video may be private or unavailable.");
 
-    const allFiles = fs.readdirSync(destinationDirectory);
+    const allFiles = fs.readdirSync(workingDirectory);
     const downloaded =
       allFiles.find((f) => f.startsWith(`ytdl_${tempId}_`) && f.endsWith(`.${format}`)) ??
       allFiles.find((f) => f.startsWith(`ytdl_${tempId}_`) && isSupportedMediaPath(f) && !/\.part\b/i.test(f));
 
-    if (!downloaded || !fs.statSync(path.join(destinationDirectory, downloaded)).size) throw new Error("yt-dlp finished but usable output file not found");
+    if (!downloaded || !fs.statSync(path.join(workingDirectory, downloaded)).size) throw new Error("yt-dlp finished but usable output file not found");
 
     const rawTitle = downloaded.replace(`ytdl_${tempId}_`, "").replace(/\.[^.]+$/, "");
-    const safeTitle = options.cleanTitle === false ? sanitizeFilename(rawTitle) : cleanDownloadedTitle(rawTitle);
+    const safeTitle = job.outputName ? sanitizeFilename(job.outputName) : options.cleanTitle === false ? sanitizeFilename(rawTitle) : cleanDownloadedTitle(rawTitle);
     const ext = path.extname(downloaded) || `.${format}`;
-    const sourcePath = path.join(destinationDirectory, downloaded);
-    const finalPath = uniquePath(destinationDirectory, `${safeTitle}${ext}`);
+    const sourcePath = path.join(workingDirectory, downloaded);
     const savedFormat = ext.slice(1).toLowerCase() || format;
-    fs.renameSync(sourcePath, finalPath);
+    const finalPath = await publishDownloadedFile(sourcePath, destinationDirectory, `${safeTitle}${ext}`, identity => {
+      if (activeDownloadCancelled) throw new Error("Download cancelled");
+      if (job.recoveryId) downloadJobs.update(job.recoveryId, {
+        status: "importing", ...identity,
+        result: { ...job.resultMetadata, ok: true, url: job.resultMetadata?.url || url, filePath: identity.filePath, filename: identity.filename, format: savedFormat, recoveryId: job.recoveryId }
+      });
+    }, job.recoveryId);
+    try { fs.unlinkSync(sourcePath); } catch (error) { console.warn("[localtify downloaded source cleanup]", error.message); }
 
     onProgress?.({
       type: "download",
@@ -374,9 +456,9 @@ async function downloadYouTube(url, destinationDirectory, onProgress, options = 
     const message = error?.message || "YouTube download failed";
     return { ok: false, url, error: message };
   } finally {
-    if (tempId) {
-      try { for (const name of fs.readdirSync(destinationDirectory)) {
-        if (name.startsWith(`ytdl_${tempId}_`)) fs.rmSync(path.join(destinationDirectory, name), { force: true });
+    if (tempId && !job.recoveryId) {
+      try { for (const name of fs.readdirSync(workingDirectory)) {
+        if (name.startsWith(`ytdl_${tempId}_`)) fs.rmSync(path.join(workingDirectory, name), { force: true });
       } } catch (error) { console.warn("[localtify] download cleanup:", error?.message || error); }
     }
   }
@@ -918,6 +1000,11 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
   const seenTracks = new Set();
   tracks = tracks.filter(track => { const id = getSpotifyTrackId(track); if (!id) return true; if (seenTracks.has(id)) return false; seenTracks.add(id); return true; });
   const total = tracks.length;
+  const savedJobs = tracks.map(track => {
+    const id = getSpotifyTrackId(track) || crypto.createHash("sha256").update(JSON.stringify([track.title || track.name, track.artist || track.artists])).digest("hex").slice(0, 22);
+    return prepareDownloadJob({ source: "spotify", url: `https://open.spotify.com/track/${id}`, folder: destinationDirectory, options,
+      track: { ...track, id, title: String(track.title || track.name || "unknown"), artist: String(track.artist || track.artists || "") } });
+  });
 
   for (let index = 0; index < total; index++) {
     if (activeDownloadCancelled) break;
@@ -926,12 +1013,14 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
     const artist = String(track.artist || track.artists || "").trim();
     const spotifyTrackId = getSpotifyTrackId(track);
     const spotifyUrl = getSpotifyTrackUrl(track);
-    const id = `spt_${spotifyTrackId || Date.now()}_${index}`;
+    const saved = savedJobs[index];
+    const id = saved.id;
     const searchUrl = spotifyUrl || `spotify:track:${spotifyTrackId || id}`;
 
     const basePayload = {
       type: "download",
       id,
+      recoveryId: saved.id,
       url: searchUrl,
       spotifyTrackId,
       spotifyUrl,
@@ -944,6 +1033,13 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
       size: null,
       eta: null
     };
+
+    if (saved.status === "done") {
+      results.push({ ...saved.result, recoveryId: saved.id });
+      onProgress?.({ ...basePayload, status: "done", progress: 100, message: "Already downloaded; checking library import" });
+      continue;
+    }
+    downloadJobs.update(saved.id, { status: "downloading", message: "Finding a matching recording" });
 
     onProgress?.({
       ...basePayload,
@@ -975,12 +1071,14 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
         matchOk: false
       };
       results.push(failed);
+      recordDownloadResult(basePayload, failed);
       if (String(message).toLowerCase().includes("cancel")) break;
       continue;
     }
 
     if (!match?.matchOk || !match.providerUrl) {
       results.push(match);
+      recordDownloadResult(basePayload, match || { ok: false, error: "No safe matching recording found" });
       if (String(match?.error || "").toLowerCase().includes("cancel")) break;
       continue;
     }
@@ -993,70 +1091,22 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
       message: match.matchMode === "direct-search" ? `Searching YouTube directly: ${title}` : `Matched ${match.matchMode || "safely"} (${Math.round(match.matchScore)}): ${match.matchedTitle || title}`
     });
 
-    const dlResult = await downloadYouTube(
-      match.providerUrl,
-      destinationDirectory,
-      onProgress,
-      { ...options, cleanTitle: false },
-      {
-        ...basePayload,
-        url: match.providerUrl,
-        providerUrl: match.providerUrl,
-        file: title,
-        format: safeDownloadFormat(options.format)
-      }
-    );
-
-    const enrichedBase = {
-      ...dlResult,
-      url: searchUrl,
-      spotifyTrackId,
-      spotifyUrl,
-      source: "spotify",
-      provider: "youtube",
-      providerUrl: match.providerUrl,
-      matchedTitle: match.matchedTitle || "",
-      matchedArtist: match.matchedArtist || "",
-      matchedDurationMs: match.matchedDurationMs || 0,
-      matchScore: Math.round(match.matchScore || 0),
-      matchOk: Boolean(match.matchOk)
+    const resultMetadata = {
+      url: searchUrl, spotifyTrackId, spotifyUrl, source: "spotify", provider: "youtube",
+      providerUrl: match.providerUrl, matchedTitle: match.matchedTitle || "",
+      matchedArtist: match.matchedArtist || "", matchedDurationMs: match.matchedDurationMs || 0,
+      matchScore: Math.round(match.matchScore || 0), matchOk: Boolean(match.matchOk), recoveryId: saved.id
     };
-
-    if (dlResult.ok && dlResult.filePath && title) {
-      try {
-        const dir = path.dirname(dlResult.filePath);
-        const ext = path.extname(dlResult.filePath) || `.${safeDownloadFormat(options.format)}`;
-        const safeTrackId = sanitizeFilename(spotifyTrackId || crypto.createHash("sha1").update(`${artist}-${title}`).digest("hex").slice(0, 12));
-        const spotifyName = artist
-          ? sanitizeFilename(`spotify_${safeTrackId} - ${artist} - ${title}`)
-          : sanitizeFilename(`spotify_${safeTrackId} - ${title}`);
-        const newPath = uniquePath(dir, `${spotifyName}${ext}`);
-        fs.renameSync(dlResult.filePath, newPath);
-
-        const finalResult = {
-          ...enrichedBase,
-          filePath: newPath,
-          filename: path.basename(newPath)
-        };
-
-        results.push(finalResult);
-
-        onProgress?.({
-          ...basePayload,
-          status: "done",
-          progress: 100,
-          providerUrl: match.providerUrl,
-          file: path.basename(newPath),
-          message: "Adding Spotify track to library..."
-        });
-
-        continue;
-      } catch {
-        // Rename failed — keep the original filename but still keep identity fields.
-      }
-    }
+    const safeTrackId = sanitizeFilename(spotifyTrackId || saved.id);
+    const outputName = artist ? `spotify_${safeTrackId} - ${artist} - ${title}` : `spotify_${safeTrackId} - ${title}`;
+    const dlResult = await downloadYouTube(
+      match.providerUrl, destinationDirectory, onProgress, { ...options, cleanTitle: false },
+      { ...basePayload, url: match.providerUrl, file: title, outputName, resultMetadata }
+    );
+    const enrichedBase = { ...dlResult, ...resultMetadata };
 
     results.push(enrichedBase);
+    recordDownloadResult(basePayload, enrichedBase);
 
     if (!dlResult.ok) {
       onProgress?.({
@@ -1078,33 +1128,37 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
 async function downloadAudioUrls(input, destinationDirectory, onProgress, options = {}) {
   const urls = [...new Set(parseUrls(input).map(url => normalizeYouTubeUrl(url) || url))];
   const results = [];
+  const planned = urls.map(url => normalizeYouTubeUrl(url) ? prepareDownloadJob({ source: "youtube", url: normalizeYouTubeUrl(url), folder: destinationDirectory, options }) : null);
 
   for (let index = 0; index < urls.length; index += 1) {
     if (activeDownloadCancelled) break;
     const url = urls[index];
-    const id = `${Date.now()}-${index}`;
-    const job = { id, url, index, total: urls.length };
+    const saved = planned[index];
+    const id = saved?.id || `${Date.now()}-${index}`;
+    const job = { id, recoveryId: saved?.id, url, index, total: urls.length };
 
-    onProgress?.({ type: "download", status: "queued", id, url, index, total: urls.length, file: "queued track", progress: 0, message: "Queued..." });
+    onProgress?.({ type: "download", status: "queued", id, recoveryId: saved?.id, url, index, total: urls.length, file: "queued track", progress: 0, message: "Queued..." });
 
     const normalizedUrl = normalizeYouTubeUrl(url);
-    const result = normalizedUrl
+    const result = saved?.status === "done" ? saved.result : normalizedUrl
       ? await downloadYouTube(normalizedUrl, destinationDirectory, onProgress, options, job)
       : { ok: false, url, error: "Only HTTPS YouTube video URLs are supported" };
+    recordDownloadResult(job, result);
 
     if (!result.ok) {
-      onProgress?.({ type: "download", status: String(result.error || "").toLowerCase().includes("cancel") ? "cancelled" : "failed", id, url, index, total: urls.length, file: "track", progress: 100, error: result.error, message: String(result.error || "").toLowerCase().includes("cancel") ? "Download cancelled" : "Download failed — retry?" });
+      onProgress?.({ type: "download", status: String(result.error || "").toLowerCase().includes("cancel") ? "cancelled" : "failed", id, recoveryId: saved?.id, url, index, total: urls.length, file: "track", progress: 100, error: result.error, message: String(result.error || "").toLowerCase().includes("cancel") ? "Download cancelled" : "Download failed — retry?" });
     }
 
-    results.push(result);
+    results.push({ ...result, recoveryId: job.recoveryId });
     if (String(result.error || "").toLowerCase().includes("cancel")) break;
   }
 
   return { downloadFolder: destinationDirectory, downloads: results };
 }
 
-function cancelActiveDownloads() {
+function cancelActiveDownloads({ interrupted = false } = {}) {
   activeDownloadCancelled = true;
+  activeDownloadInterrupted = interrupted;
   let killed = false;
   for (const proc of activeDownloadProcesses) {
     try {
@@ -1112,6 +1166,12 @@ function cancelActiveDownloads() {
       killed = true;
     } catch {
       try { proc.kill(); killed = true; } catch { }
+    }
+  }
+  for (const id of batchJobIds) {
+    if (downloadJobs?.get(id)?.status === "queued") {
+      downloadJobs.update(id, { status: interrupted ? "interrupted" : "cancelled", message: interrupted ? "Download interrupted. Resume when ready." : "Download cancelled" });
+      if (!interrupted) downloadJobs.cleanWorkDirectory(id);
     }
   }
   return killed || activeBatch;
@@ -1128,6 +1188,9 @@ async function convertLocalMediaFiles(filePaths, destinationDirectory, options =
 }
 
 module.exports = {
+  listDownloadJobs,
+  getDownloadRecoveryRequest,
+  clearDownloadJobs,
   normalizeYouTubeUrl,
   initDownloader,
   downloadAudioUrls: (...args) => runDownloadBatch(() => downloadAudioUrls(...args)),

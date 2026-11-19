@@ -54,10 +54,11 @@ declare global {
   type LocalitfyDownloadProgressPayload = {
     type: string;
     id?: string;
+    recoveryId?: string;
     url?: string;
     index?: number;
     total?: number;
-    status?: "queued" | "downloading" | "converting" | "importing" | "done" | "failed" | "cancelled";
+    status?: "queued" | "downloading" | "converting" | "importing" | "done" | "failed" | "cancelled" | "interrupted";
     file?: string;
     filename?: string;
     progress?: number;
@@ -88,6 +89,7 @@ declare global {
 
   type LocalitfyDownloadResult = {
     ok: boolean;
+    recoveryId?: string;
     url?: string;
     filePath?: string;
     filename?: string;
@@ -586,6 +588,9 @@ declare global {
         autoAdd?: boolean;
       }>;
 
+      getDownloadJobs: () => Promise<{ error: string; jobs: import("./features/downloads/download.types").DownloadQueueItem[] }>;
+      resumeDownloadJob: (id: string) => Promise<{ downloadFolder: string; downloads: LocalitfyDownloadResult[]; changedCount: number; songs: Song[]; autoAdd?: boolean }>;
+      clearDownloadJobs: (ids: string[]) => Promise<boolean>;
       cancelDownload: () => Promise<{ cancelled: boolean }>;
       chooseDownloadFolder: () => Promise<{ canceled: boolean; folder: string }>;
       openDownloadsFolder: (folder?: string) => Promise<boolean>;

@@ -1,7 +1,8 @@
-export type DownloadStatus = "queued" | "downloading" | "converting" | "importing" | "done" | "failed" | "cancelled";
+export type DownloadStatus = "queued" | "downloading" | "converting" | "importing" | "done" | "failed" | "cancelled" | "interrupted";
 
 export type DownloadResult = {
   ok: boolean;
+  recoveryId?: string;
   url?: string;
   filePath?: string;
   filename?: string;
@@ -24,6 +25,7 @@ export type DownloadResult = {
 
 export type DownloadQueueItem = {
   id: string;
+  recoveryId?: string;
   url: string;
   title: string;
   status: DownloadStatus;

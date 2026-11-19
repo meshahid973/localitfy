@@ -76,6 +76,8 @@ export function createAndroidBridge(): Bridge {
   });
 
   const implemented: Partial<Bridge> = {
+    getDownloadJobs: async () => ({ error: "", jobs: [] }),
+    clearDownloadJobs: async () => true,
     bootstrap: async () => {
       await phoneLibrary.load();
       return { songs: phoneLibrary.songs(), settings: phoneLibrary.effectiveSettings(), playlists: phoneLibrary.playlists };

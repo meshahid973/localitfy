@@ -39,6 +39,9 @@ const seed=spawnSync(process.execPath,["-e",
   "const db=require(process.argv[1]);db.initDatabase(process.argv[2]);const songs=JSON.parse(process.argv[3]);db.insertSongs(songs);db.savePlaylists([{id:'qa-playlist',name:'qa playlist',songIds:songs.map(s=>s.id),createdAt:Date.now()}]);db.saveSettings({startWithWindows:false,idleScreensaverEnabled:false,discordRpcEnabled:false,reducedMotion:false,discoverEnabled:true,lyricsEnabled:true,lyricsOnlineLookup:false,coverColorSyncMode:'strong',homeBannerType:'dynamic',showAmbientGradient:true,playerBackgroundStyle:'coverBlur',homeHiddenSections:['dailyMixes','likedSongs','rediscover','notPlayedYet']});",
   path.join(root,"electron/db.cjs"),path.join(app.getPath("userData"),"localitfy.sqlite"),JSON.stringify(songs)],{env:{...process.env,ELECTRON_RUN_AS_NODE:"1"},encoding:"utf8"});
 if(seed.status!==0)throw Error("Synthetic database seed failed: "+seed.stderr);
+const recoveryStore=require("../electron/download-jobs.cjs").createDownloadJobStore(app.getPath("userData"));
+const recoveryJob=recoveryStore.prepare({source:"youtube",url:"https://www.youtube.com/watch?v=abcdefghijk",folder:dir,options:{autoAdd:false}});
+recoveryStore.update(recoveryJob.id,{status:"downloading",progress:37,message:"Recover this interrupted download"});
 const dist=path.join(root,"dist"),mime={".html":"text/html",".js":"text/javascript",".css":"text/css",".png":"image/png",".jpg":"image/jpeg",".gif":"image/gif",".webp":"image/webp",".svg":"image/svg+xml",".woff2":"font/woff2",".woff":"font/woff"};
 const server=http.createServer((req,res)=>{
   try{
@@ -292,6 +295,16 @@ server.listen(5173,async()=>{
         for (const view of ["home","library","artists","genres","playlists","discover","downloads","covers","analytics","settings"]) {
           await win.webContents.executeJavaScript(`document.querySelector('.sidebar [data-nav-id="${view}"]').click()`);
           await until(()=>win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return !!page?.firstElementChild&&!page.querySelector('.collectionLoading')&&!document.querySelector('.appCrashBoundary')})()`).catch(()=>false),view+" "+mode+" "+width);
+          if(view==="downloads") {
+            const saved=await win.webContents.executeJavaScript("window.localitfy.getDownloadJobs()");
+            assert.equal(saved.error, "", "download journal is available through the trusted preload");
+            const recovered=saved.jobs.find(job=>job.id===recoveryJob.id);
+            assert.equal(recovered?.status,"interrupted","restart restores interrupted downloads");
+            assert.equal(recovered?.progress,37,"restart retains recorded progress");
+            await until(()=>win.webContents.executeJavaScript("Array.from(document.querySelectorAll('.downloadQueueActions button')).some(button=>button.textContent==='resume')"),"resume action is visible");
+            const resumeUsable=await win.webContents.executeJavaScript("(()=>{const button=Array.from(document.querySelectorAll('.downloadQueueActions button')).find(button=>button.textContent==='resume');button.scrollIntoView({block:'center',behavior:'instant'});const box=button.getBoundingClientRect();return document.elementFromPoint(box.x+box.width/2,box.y+box.height/2)===button})()");
+            assert.equal(resumeUsable,true,"resume remains reachable above the player");
+          }
           if(view==="analytics") {
             const history=await win.webContents.executeJavaScript("window.localitfy.getListeningSummary({days:7})");
             assert.ok(history && Number.isFinite(history.totalMs) && history.totalMs>=0,"recorded listening summary");
