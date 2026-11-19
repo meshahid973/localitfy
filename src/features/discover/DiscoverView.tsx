@@ -7,7 +7,7 @@ import type { NotForMeKind } from "../analysis/notForMe";
 import type { SpotifyTrack } from "../downloads/download.types";
 import type { Settings } from "../settings/settings.types";
 import type { CatalogKind, DiscoverResult, DiscoverTrack } from "./discover.types";
-import { DiscoverCover } from "./DiscoverArtwork";
+import { DiscoverCover, getCachedDiscoverArtwork } from "./DiscoverArtwork";
 import type { Song } from "../library/song.types";
 import { Cover } from "../covers/Cover";
 import { buildDiscoverShelves } from "./discoverShelves";
@@ -34,7 +34,10 @@ function trackId(track: DiscoverTrack) {
   for (const char of `${track.artist}|${track.title}`.toLocaleLowerCase()) hash = Math.imul(hash ^ char.codePointAt(0)!, 16777619);
   return `lastfm-${(hash >>> 0).toString(36)}`;
 }
-const toDownload = (track: DiscoverTrack): SpotifyTrack => ({ id: trackId(track), title: track.title, artist: track.artist, providerUrl: track.url, albumName: track.album, coverUrl: track.coverUrl, durationMs: track.durationMs });
+const toDownload = (track: DiscoverTrack): SpotifyTrack => {
+  const artwork = getCachedDiscoverArtwork(track.title, track.artist);
+  return { id: trackId(track), title: track.title, artist: track.artist, providerUrl: track.url, albumName: track.album, coverUrl: artwork?.coverUrl || track.coverUrl, durationMs: track.durationMs || artwork?.durationMs };
+};
 const listNames = (names: string[]) => names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
 const openLink = (url: string) => { if (url) void window.localitfy.openExternal?.(url); };
 

@@ -10,10 +10,11 @@
   position: absolute;
   inset: 0;
   opacity: 0;
-  transition: opacity 360ms cubic-bezier(.22, 1, .36, 1);
+  transition: opacity 420ms ease;
 }
-.artworkBackdropLayer[data-visible="true"] { opacity: 1; animation: artworkReveal 360ms cubic-bezier(.22, 1, .36, 1); }
+.artworkBackdropLayer[data-visible="true"] { opacity: 1; animation: artworkReveal 420ms ease; }
 @keyframes artworkReveal { from { opacity: 0; } to { opacity: 1; } }
+.artworkBackdropLayer[data-hold="true"] { opacity: 1; }
 
 .artworkBackdrop .artworkBackdropCover {
   position: absolute;
@@ -67,5 +68,11 @@
   height: calc(100% + 128px);
   opacity: var(--workspace-art-opacity);
   filter: blur(64px) saturate(.95);
+}
+.artworkBackdrop .artworkBackdropLayer[data-raster="true"] .artworkBackdropCover {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  filter: none;
 }
 .workspaceArtworkBackdrop::after { background: none; }

@@ -93,9 +93,8 @@
 .discoverSongList li { display:flex; align-items:center; gap:10px; min-width:0; padding:7px 8px; border-radius:var(--lt-radius-item); }
 .discoverSongList li:hover, .discoverSongList li:focus-within { background:var(--lt-fill-hover); }
 .discoverCover { display:grid; place-items:center; flex:0 0 48px; width:48px; aspect-ratio:1; overflow:hidden; border-radius:var(--lt-radius-item); background:var(--lt-surface-soft); color:var(--lt-faint); }
-.discoverCover img { grid-area:1/1; display:block; width:100%; height:100%; object-fit:cover; }
+.discoverCover img { grid-area:1/1; display:block; width:100%; height:100%; object-fit:cover; opacity:1; transition:opacity 160ms ease; }
 .discoverCover > svg { grid-area:1/1; }
-.discoverCover img { opacity:1; transition:opacity 160ms ease; }
 .discoverCover img[data-ready="false"] { opacity:0; }
 @media (prefers-reduced-motion: reduce) { .discoverCover img { transition:none; } }
 .app.reducedMotion .discoverCover img { transition:none; }
