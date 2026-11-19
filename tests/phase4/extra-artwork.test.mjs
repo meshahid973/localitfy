@@ -53,3 +53,14 @@ test("Discover routes new providers through opt-in and preserves original catalo
  assert.equal((await get({title:"Artist",artist:"",kind:"artist"})).coverUrl,portrait);
  assert.equal((await get({title:"Bang Bang",artist:"B.A. Robertson"})).coverUrl,cover);assert.equal(calls,2);
 });
+
+
+test("fallback artwork still consults verified MusicBrainz after a catalog image fails",async()=>{
+ const {createArtworkLookup}=require("../../electron/discover/artwork.cjs");
+ const mbCover="https://coverartarchive.org/release/"+id+"/front-250";
+ const mb={searchRecordings:async()=>[{id,title:"Bang Bang","artist-credit":[{name:"B.A. Robertson"}],releases:[{id,status:"Official","release-group":{id}}]}]};
+ const lookup=createArtworkLookup(mb,Date.now,undefined,undefined,undefined,async()=>({coverUrl:cover}));
+ assert.equal((await lookup("Bang Bang","B.A. Robertson")).coverUrl,cover);
+ const fallback=await lookup("Bang Bang","B.A. Robertson",{fallback:true});
+ assert.equal(fallback.coverUrl,mbCover);assert.ok(fallback.coverAlternatives.includes(cover));
+});

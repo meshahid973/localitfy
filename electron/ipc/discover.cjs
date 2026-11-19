@@ -79,17 +79,19 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
         const value=matchArtistArtwork(await searchYouTubeArtwork("artist",cleaned.slice(0,160),{artwork:true}).catch(()=>[]),name);
         if(value.coverUrl)return value;
       }
-      if(lookupDeezer&&getSettings().discoverEnabled===true){
-        const value=await lookupDeezer("artist",cleaned).catch(()=>({}));
-        if(value.coverUrl)return value;
-      }
+      const additional=lookupDeezer&&getSettings().discoverEnabled===true?await lookupDeezer("artist",cleaned).catch(()=>({})):{};
+      if(additional.coverUrl&&!fallback)return additional;
       if(lookupFanart&&musicBrainzClient?.searchCatalog&&getSettings().discoverEnabled===true){
         const items=await musicBrainzClient.searchCatalog("artist",cleaned).catch(()=>[]);
         const exact=(Array.isArray(items)?items:[]).filter(i=>MBID.test(i?.id||"")&&cleanText(i.name).normalize("NFKC").toLowerCase()===cleaned.normalize("NFKC").toLowerCase());
         const ids=[...new Set(exact.map(i=>i.id))];
-        if(ids.length===1&&getSettings().discoverEnabled===true)return lookupFanart("artist",ids[0]);
+        if(ids.length===1&&getSettings().discoverEnabled===true){
+          const result=await lookupFanart("artist",ids[0]).catch(()=>({}));
+          const covers=[...new Set([result.coverUrl,...(result.coverAlternatives||[]),additional.coverUrl,...(additional.coverAlternatives||[])].filter(Boolean))].slice(0,6);
+          if(covers.length)return {coverUrl:covers[0],...(covers.length>1?{coverAlternatives:covers}:{})};
+        }
       }
-      return {};
+      return additional;
     }).then(value=>{if(value.coverUrl)artistArtworkCache.set(key,{at:now(),value});while(artistArtworkCache.size>256)artistArtworkCache.delete(artistArtworkCache.keys().next().value);return value;})
       .finally(()=>artistArtworkPending.delete(key));
     artistArtworkPending.set(key,task);return task;

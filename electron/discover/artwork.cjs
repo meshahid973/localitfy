@@ -79,28 +79,31 @@ function createArtworkLookup(client,now=Date.now,trackInfo,lookupAudioDb,lookupM
       const primary = lastfmArtwork(track,title,artist);
       const verified = norm(track?.name)===norm(title)&&norm(track?.artist?.name)===norm(artist);
       const release = verified && validId(track?.album?.mbid) ? url("release",track.album.mbid) : undefined;
-      if (primary.coverUrl) return {...primary,...(release?{fallbackCoverUrl:release}:{}),...(deezer.coverUrl?{coverAlternatives:[deezer.coverUrl,...(deezer.coverAlternatives||[])].slice(0,6)}:{})};
+      if (primary.coverUrl && !fallback) return {...primary,...(release?{fallbackCoverUrl:release}:{}),...(deezer.coverUrl?{coverAlternatives:[deezer.coverUrl,...(deezer.coverAlternatives||[])].slice(0,6)}:{})};
       const alternate = lookupAudioDb ? await lookupAudioDb(title,artist).catch(()=>({})) : {};
-      const known = [alternate.coverUrl,release,deezer.coverUrl,...(deezer.coverAlternatives||[])].filter(Boolean);
-      if (known.length) return {coverUrl:known[0],fallbackCoverUrl:known[1],coverAlternatives:known};
-      if (!client?.searchRecordings) return {};
-      const items=await client.searchRecordings(title,artist,{background:true});
+      const known = [...new Set([primary.coverUrl,alternate.coverUrl,release,deezer.coverUrl,...(deezer.coverAlternatives||[])].filter(Boolean))];
+      const knownArt=known.length?{coverUrl:known[0],fallbackCoverUrl:known[1],coverAlternatives:known.slice(0,6)}:{};
+      if (known.length && !fallback) return knownArt;
+      if (!client?.searchRecordings) return knownArt;
+      const items=await client.searchRecordings(title,artist,{background:true}).catch(error=>{if(known.length)return [];throw error;});
       const exact=(Array.isArray(items)?items:[]).filter(item=>norm(item?.title)===norm(title)&&norm(credit(item))===norm(artist));
       const identified=validId(track?.mbid)&&norm(track?.name)===norm(title)&&norm(track?.artist?.name)===norm(artist) ? exact.find(item=>item.id===track.mbid) : null;
       const matched = identified || (exact.length===1 ? exact[0] : null);
-      if(!matched)return {};
+      if(!matched)return knownArt;
       const result=catalogArtwork("recording",matched);
       if(lookupFanart){
         const groups=[...new Set((Array.isArray(matched.releases)?matched.releases:[]).filter(r=>!r.status||r.status==="Official").map(r=>r?.["release-group"]?.id).filter(validId))];
         if(groups.length===1){
           const supplemental=await lookupFanart("album",groups[0]).catch(()=>({}));
           if(supplemental.coverUrl){
-            const covers=[...new Set([supplemental.coverUrl,...(supplemental.coverAlternatives||[]),result.coverUrl,result.fallbackCoverUrl,...(result.coverAlternatives||[])].filter(Boolean))].slice(0,6);
+            const covers=[...new Set([supplemental.coverUrl,...(supplemental.coverAlternatives||[]),result.coverUrl,result.fallbackCoverUrl,...(result.coverAlternatives||[]),...known].filter(Boolean))].slice(0,6);
             return {...result,coverUrl:covers[0],fallbackCoverUrl:covers[1],coverAlternatives:covers};
           }
         }
       }
-      return result;
+      if(!known.length)return result;
+      const covers=[...new Set([result.coverUrl,result.fallbackCoverUrl,...(result.coverAlternatives||[]),...known].filter(Boolean))].slice(0,6);
+      return {...result,coverUrl:covers[0],fallbackCoverUrl:covers[1],coverAlternatives:covers};
     }).then(value=>{
       if(value.coverUrl||value.fallbackCoverUrl) cache.set(key,{at:now(),value});
       while(cache.size>512) cache.delete(cache.keys().next().value);
