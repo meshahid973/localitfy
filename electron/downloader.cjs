@@ -1,7 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const { execFile, spawn } = require("node:child_process");
 
 const ffmpegStatic = require("ffmpeg-static");
 const sanitize = require("sanitize-filename");
@@ -9,6 +8,7 @@ const { ensureYtDlpBinary, spawnYtDlp } = require("./runtime/yt-dlp.cjs");
 const { createDownloadJobStore } = require("./download-jobs.cjs");
 const { publishDownloadedFile, isPendingPublication } = require("./download-publication.cjs");
 const { filePathKey } = require("./runtime/path-identity.cjs");
+const { createMediaConverter } = require("./media-converter.cjs");
 
 let _userDataPath = null;
 let _ffmpegPath = ffmpegStatic || null;
@@ -20,6 +20,7 @@ let activeBatch = false;
 let activeDownloadOperation = false;
 let downloadJobs = null;
 let downloadStorageError = "";
+let mediaConverter = null;
 const batchJobIds = new Set();
 const progressSavedAt = new Map();
 
@@ -60,6 +61,9 @@ function initDownloader({ userDataPath, ffmpegPath }) {
   if (ffmpegPath) _ffmpegPath = ffmpegPath;
   try { downloadJobs = createDownloadJobStore(userDataPath); downloadStorageError = ""; }
   catch (error) { downloadStorageError = String(error?.message || error); console.error("[localtify download recovery]", downloadStorageError); }
+  try { mediaConverter = createMediaConverter({ workRoot: path.join(userDataPath, "download-jobs"), getFfmpegPath: () => _ffmpegPath,
+    processes: activeDownloadProcesses, isCancelled: () => activeBatch && activeDownloadCancelled, reportProgress }); }
+  catch (error) { mediaConverter = null; console.error("[localtify conversion storage]", error.message); }
 }
 
 function prepareDownloadJob(request) {
@@ -137,17 +141,6 @@ function isSupportedMediaPath(filePath) {
 function sanitizeFilename(name) {
   return sanitize(String(name || "audio"))
     .replace(/\s+/g, " ").trim().slice(0, 150) || "audio";
-}
-
-function uniquePath(directory, filename) {
-  const parsed = path.parse(filename);
-  let candidate = path.join(directory, filename);
-  let count = 1;
-  while (fs.existsSync(candidate)) {
-    candidate = path.join(directory, `${parsed.name} (${count})${parsed.ext}`);
-    count++;
-  }
-  return candidate;
 }
 
 /** Accept only real YouTube video URLs; never forward untrusted option-like text to yt-dlp. */
@@ -503,76 +496,9 @@ async function downloadYouTube(url, destinationDirectory, onProgress, options = 
   }
 }
 
-function parseFfmpegTimestampSeconds(value = "") {
-  const match = String(value || "").match(/(\d{1,3}):(\d{2}):(\d{2}(?:\.\d+)?)/);
-  if (!match) return 0;
-  return Number(match[1]) * 3600 + Number(match[2]) * 60 + Number(match[3]);
-}
-
-function probeMediaDurationSeconds(inputPath) {
-  return new Promise((resolve) => {
-    if (!_ffmpegPath || !fs.existsSync(_ffmpegPath)) return resolve(0);
-    execFile(
-      _ffmpegPath,
-      ["-hide_banner", "-nostdin", "-i", inputPath],
-      { windowsHide: true, timeout: 15000, maxBuffer: 4 * 1024 * 1024 },
-      (_error, stdout, stderr) => {
-        const match = `${stdout || ""}\n${stderr || ""}`.match(/Duration:\s*(\d{1,3}:\d{2}:\d{2}(?:\.\d+)?)/i);
-        resolve(match ? parseFfmpegTimestampSeconds(match[1]) : 0);
-      }
-    );
-  });
-}
-
-function convertOneToMp3(inputPath, outputDirectory, bitrate = 192, onProgress, deleteAfter = false) {
-  return new Promise(async (resolve) => {
-    if (!fs.existsSync(inputPath)) return resolve({ ok: false, error: "File not found" });
-    if (!_ffmpegPath || !fs.existsSync(_ffmpegPath)) return resolve({ ok: false, error: "FFmpeg is unavailable" });
-
-    fs.mkdirSync(outputDirectory, { recursive: true });
-    const baseName = sanitizeFilename(path.parse(inputPath).name);
-    const outputPath = uniquePath(outputDirectory, `${baseName}.mp3`);
-    const durationSeconds = await probeMediaDurationSeconds(inputPath);
-    if (activeBatch && activeDownloadCancelled) return resolve({ ok: false, error: "Conversion cancelled" });
-    const safeBitrate = Math.max(64, Math.min(320, Number(bitrate) || 192));
-    let lastPercent = -1;
-
-    reportProgress(onProgress, { type: "convert", file: baseName, progress: 0, speed: null, message: "Converting to MP3..." });
-
-    const proc = spawn(
-      _ffmpegPath,
-      ["-hide_banner", "-nostdin", "-y", "-i", inputPath, "-vn", "-c:a", "libmp3lame", "-b:a", `${safeBitrate}k`, "-threads", "0", outputPath],
-      { windowsHide: true, stdio: ["ignore", "ignore", "pipe"] }
-    );
-    activeDownloadProcesses.add(proc);
-
-    proc.stderr?.on("data", (chunk) => {
-      if (!durationSeconds) return;
-      for (const match of chunk.toString().matchAll(/time=(\d{1,3}:\d{2}:\d{2}(?:\.\d+)?)/g)) {
-        const elapsed = parseFfmpegTimestampSeconds(match[1]);
-        const percent = Math.max(0, Math.min(99, Math.floor((elapsed / durationSeconds) * 100)));
-        if (percent === lastPercent) continue;
-        lastPercent = percent;
-        reportProgress(onProgress, { type: "convert", file: baseName, progress: percent, speed: null, message: `Converting... ${percent}%` });
-      }
-    });
-
-    proc.on("error", (error) => {
-      activeDownloadProcesses.delete(proc);
-      resolve({ ok: false, error: error?.message || "FFmpeg failed" });
-    });
-    proc.on("close", (code) => {
-      activeDownloadProcesses.delete(proc);
-      if ((activeBatch && activeDownloadCancelled) || code !== 0 || !fs.existsSync(outputPath)) {
-        try { fs.rmSync(outputPath, { force: true }); } catch {}
-        resolve({ ok: false, error: `FFmpeg exited with code ${code}` });
-        return;
-      }
-      if (deleteAfter) { try { fs.unlinkSync(inputPath); } catch {} }
-      reportProgress(onProgress, { type: "convert", file: baseName, progress: 100, speed: null, message: "Done" });
-      resolve({ ok: true, filePath: outputPath, filename: path.basename(outputPath) });
-    });
-  });
+async function convertOneToMp3(inputPath, outputDirectory, bitrate = 192, onProgress) {
+  if (!mediaConverter) return { ok: false, sourcePath: inputPath, error: "Conversion storage is unavailable. Restart the application after checking storage permissions." };
+  return mediaConverter.convert(inputPath, outputDirectory, bitrate, onProgress);
 }
 
 function normalizeSpotifyMatchText(value = "") {
@@ -1220,9 +1146,15 @@ function cancelActiveDownloads({ interrupted = false } = {}) {
 async function convertLocalMediaFiles(filePaths, destinationDirectory, options = {}, onProgress) {
   const bitrate = Number(options.bitrate || 192);
   const results = [];
-  for (const file of filePaths) {
-    if (activeDownloadCancelled) break;
-    results.push(await convertOneToMp3(file, destinationDirectory, bitrate, onProgress));
+  for (let index = 0; index < filePaths.length; index++) {
+    const file = filePaths[index];
+    if (activeDownloadCancelled) {
+      results.push({ ok: false, sourcePath: file, error: "Conversion cancelled before starting" });
+      continue;
+    }
+    results.push(await convertOneToMp3(file, destinationDirectory, bitrate, progress => {
+      reportProgress(onProgress, { ...progress, index, total: filePaths.length, message: `${index + 1}/${filePaths.length}: ${progress.message}` });
+    }));
   }
   return { downloadFolder: destinationDirectory, conversions: results };
 }

@@ -44,9 +44,7 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
   const [downloadResults, setDownloadResults] = useState<DownloadResult[]>([]);
   const [downloadQueue, setDownloadQueue] = useState<DownloadQueueItem[]>([]);
   const [downloadFolderLabel, setDownloadFolderLabel] = useState("");
-  useEffect(() => window.localitfy.onDownloadProgress(payload => {
-    setDownloadQueue(current => mergeDownloadProgress(current, payload));
-  }), []);
+
 
 
   useEffect(() => {
@@ -69,6 +67,15 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
   const [convertBusy, setConvertBusy] = useState(false);
   const [convertProgress, setConvertProgress] = useState(0);
   const [convertMessage, setConvertMessage] = useState("");
+
+  useEffect(() => window.localitfy.onDownloadProgress(payload => {
+    if (payload.type === "convert") {
+      const percent = Number(payload.progress ?? 0);
+      setConvertProgress(Number.isFinite(percent) ? Math.max(0, Math.min(100, percent)) : 0);
+      setConvertMessage(payload.message || "Converting...");
+    } else setDownloadQueue(current => mergeDownloadProgress(current, payload));
+  }), []);
+
 
   const [downloadsTab, setDownloadsTab] = useState<DownloadsTab>("youtube");
   const [spotifyUrl, setSpotifyUrl] = useState("");

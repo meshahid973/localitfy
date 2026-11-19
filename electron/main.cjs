@@ -1,3 +1,4 @@
+const { registerMediaConversionIpc } = require("./ipc/media-conversion.cjs");
 const { finalizeDownloadImport } = require("./runtime/download-imports.cjs");
 const { filePathKey } = require("./runtime/path-identity.cjs");
 const { app, powerMonitor, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net, safeStorage } = require("electron");
@@ -67,8 +68,6 @@ const {
   isDownloadFileInProgress,
   getDownloadRecoveryRequest,
   clearDownloadJobs,
-  convertLocalMediaFiles,
-  isSupportedMediaPath,
   downloadSpotifyBatch
 } = require("./downloader.cjs");
 
@@ -2456,28 +2455,8 @@ app.whenReady().then(async () => {
   ipcRouter.handle("album:scan-folder", async (event, payload = {}) => { try { return await handleAlbumFolderScan(event, payload); } catch (error) { console.log("[localtify album folder scan error]", error?.stack || error?.message || error); return { ok: false, error: error?.message || "album folder scan failed", songs: listSongsShaped(), albums: [] }; } });
   ipcRouter.handle("album:import-folder", async (event, payload = {}) => { try { return await handleAlbumFolderImport(event, payload); } catch (error) { console.log("[localtify album folder import error]", error?.stack || error?.message || error); return { ok: false, error: error?.message || "album folder import failed", songs: listSongsShaped(), albums: [] }; } });
 
-  ipcRouter.handle("media:convert-pick", (event, payload) => runDownloadOperation(async () => {
-    try {
-      const senderWindow = BrowserWindow.fromWebContents(event.sender) || mainWindow;
-      const dialogOptions = { title: "choose videos or audio to convert", buttonLabel: "convert to mp3", defaultPath: app.getPath("downloads"), properties: ["openFile", "multiSelections"], filters: [{ name: "media files", extensions: ["mp4", "webm", "mkv", "mov", "avi", "m4v", "mp3", "wav", "ogg", "flac", "m4a", "aac"] }] };
-      const result = senderWindow && !senderWindow.isDestroyed() ? await dialog.showOpenDialog(senderWindow, dialogOptions) : await dialog.showOpenDialog(dialogOptions);
-      if (result.canceled || !result.filePaths.length) return { downloadFolder: getDownloadDirectory(), conversions: [], changedCount: 0, songs: listSongsShaped() };
-      const validFiles = result.filePaths.filter((f) => fileExists(f) && isSupportedMediaPath(f));
-      const converted = await convertLocalMediaFiles(validFiles, getDownloadDirectory(), { bitrate: payload?.bitrate || 192 }, (progress) => { event.sender.send("download:progress", progress); });
-      const successfulFiles = converted.conversions.filter((item) => item.ok && item.filePath && fileExists(item.filePath) && isAudioFile(item.filePath)).map((item) => item.filePath);
-      let changedCount = 0;
-      let afterSongs = listSongsShaped();
-      if (successfulFiles.length) {
-        const pixelArtFiles = getPixelArtFiles();
-        const usedCovers = new Set();
-        const existingPaths = new Set(getSongs().map(song => filePathKey(song.filePath)));
-        changedCount = insertSongs(await Promise.all(successfulFiles.filter(file => !existingPaths.has(filePathKey(file))).map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers))));
-        clearFileInfoCache();
-        afterSongs = listSongsShaped();
-      }
-      return { ...converted, changedCount, songs: afterSongs, downloadFolder: getDownloadDirectory() };
-    } catch (error) { console.log("[localitfy convert pick error]", error?.message); return { downloadFolder: getDownloadDirectory(), conversions: [], changedCount: 0, songs: listSongsShaped() }; }
-  }));
+  registerMediaConversionIpc(ipcRouter, { dialog, getWindow: event => BrowserWindow.fromWebContents(event.sender) || mainWindow,
+    getDownloadDirectory, fileExists, isAudioFile, importFiles: importNewAudioFiles, listSongsShaped });
 
   const runAudioDownload = async (event, payload) => {
     let downloaded;

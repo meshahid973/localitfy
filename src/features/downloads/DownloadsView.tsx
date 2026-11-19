@@ -442,8 +442,8 @@ export default function DownloadsView(props: DownloadsViewProps) {
                       <p>Convert audio and video to music files.</p>
                     </div>
 
-                    <button className="heroMain" onClick={convertLocalMedia} disabled={convertBusy}>
-                      {convertBusy ? "converting..." : "choose files"}
+                    <button className={convertBusy ? "heroGhost" : "heroMain"} onClick={convertBusy ? () => void cancelCurrentDownload() : convertLocalMedia} disabled={downloadBusy && !convertBusy}>
+                      {convertBusy ? "cancel conversion" : "choose files"}
                     </button>
 
 

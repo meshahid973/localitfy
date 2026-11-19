@@ -4606,7 +4606,7 @@ function MainModeApp() {
     cancelDownloadRetries();
     try {
       await window.localitfy.cancelDownload?.();
-      setStatusText("Cancelling downloads…");
+      setStatusText(convertBusy ? "Cancelling conversion…" : "Cancelling downloads…");
       setDownloadQueue((current) => current.map((item) => (
         item.status === "queued" || item.status === "downloading" || item.status === "converting"
           ? { ...item, status: "cancelled", progress: item.progress, message: "Download cancelled" }
@@ -5090,21 +5090,26 @@ function MainModeApp() {
       });
 
       const conversions = result.conversions || [];
+      if (!Array.isArray(result.songs)) throw new Error("Conversion results were incomplete. Reload the application before retrying.");
       const nextSongs = applyLibraryOrder(sanitizeSongList(result.songs || []));
 
       setSongs(nextSongs);
-      setLibraryScanMessage(`indexed ${nextSongs.length} tracks instantly`);
+      setLibraryScanMessage(`library refreshed: ${nextSongs.length} tracks`);
       setDownloadResults(
-        conversions.map((item) => ({
+        enrichDownloadResultsWithLibraryMatches(conversions.map((item) => ({
           ok: item.ok,
+          source: "local",
           filename: item.filename,
           filePath: item.filePath,
           error: item.error,
           url: item.sourcePath
-        }))
+        })), nextSongs)
       );
 
       const successCount = conversions.filter((item) => item.ok).length;
+      const failed = conversions.filter(item => !item.ok);
+      const failure = failed.find(item => !/cancel/i.test(item.error || ""));
+      if (failure) setPlayerError(failure.error || "Conversion failed");
 
       if (nextSongs.length && !currentId) {
         const firstSong = nextSongs[0];
@@ -5117,18 +5122,21 @@ function MainModeApp() {
 
       if (successCount > 0) {
         setConvertProgress(100);
-        setConvertMessage("conversion complete");
+        setConvertMessage(failed.length ? `converted ${successCount}; ${failed.length} failed or cancelled` : "conversion complete");
         setStatusText(
-          `converted ${successCount} file${successCount === 1 ? "" : "s"} and imported ${result.changedCount}`
+          `converted ${successCount} file${successCount === 1 ? "" : "s"} and imported ${result.changedCount}${failed.length ? `; ${failed.length} failed or cancelled` : ""}`
         );
-        changeView("library", "unknown");
+        if (!failed.length) changeView("library", "unknown");
+      } else if (failed.length) {
+        setStatusText(failure ? "conversion failed" : "conversion cancelled");
+        setConvertMessage(failure?.error || "Conversion cancelled");
       } else {
         setStatusText("nothing converted");
         setConvertMessage("no files converted");
       }
     } catch (error) {
       console.error("[localitfy convert failed]", error);
-      setPlayerError("conversion failed. check terminal.");
+      setPlayerError((error as Error)?.message || "Conversion failed");
       setConvertMessage("conversion failed");
       setStatusText("conversion failed");
     } finally {
@@ -7140,7 +7148,7 @@ function MainModeApp() {
   };
   const retryFailedDownloads = () => retryDownloads(
     [...failedDownloadQueueItems, ...failedDownloadResults],
-    item => retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "", item.recoveryId)
+    item => item.source === "local" ? convertLocalMedia() : retryDownload(item.url || "", item.source === "spotify" ? "spotify" : "youtube", item.spotifyTrackId || "", item.recoveryId)
   );
 
   const homeSettings = useMemo(() => ({

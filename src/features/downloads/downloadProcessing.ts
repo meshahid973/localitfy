@@ -37,11 +37,11 @@ export function mergeDownloadProgress(current: DownloadQueueItem[], payload: Dow
 }
 
 export function deduplicateDownloadRetries(items: readonly DownloadRetryItem[]) {
-  const key = (item: DownloadRetryItem) => item.spotifyTrackId ? `spotify:${item.spotifyTrackId}` : parseDownloadUrls(item.url || "")[0] || "";
+  const key = (item: DownloadRetryItem) => item.source === "local" ? "local:choose-files" : item.spotifyTrackId ? `spotify:${item.spotifyTrackId}` : parseDownloadUrls(item.url || "")[0] || "";
   const saved = new Set(items.filter(item => item.recoveryId).map(key));
   const seen = new Set<string>();
   return items.filter(item => {
-    if (!item.url) return false;
+    if (!item.url && item.source !== "local") return false;
     const identity = item.recoveryId ? `job:${item.recoveryId}` : `request:${key(item)}`;
     if (seen.has(identity) || !item.recoveryId && saved.has(key(item))) return false;
     seen.add(identity);
@@ -179,7 +179,9 @@ export function enrichDownloadResultsWithLibraryMatches(results: DownloadResult[
   return results.map((result) => {
     const match = result.ok ? findDownloadedSongMatch(result, librarySongs, lookup) : null;
     const importedToLibrary = Boolean(match);
-    const cleanedError = result.ok ? "" : friendlyDownloadError(result.error || result.url || "Download failed.");
+    const cleanedError = result.ok ? "" : result.source === "local"
+      ? String(result.error || "Conversion failed").slice(0, 300)
+      : friendlyDownloadError(result.error || result.url || "Download failed.");
 
     return {
       ...result,
