@@ -540,7 +540,13 @@ function createCoverThumbnailSync(filePath) {
     const resized = image.resize({ width: COVER_THUMBNAIL_SIZE, height: COVER_THUMBNAIL_SIZE, quality: "good" });
     if (!resized || resized.isEmpty()) return { ok: false, sourcePath: filePath, thumbnailPath: "", error: "Localtify could not resize this cover image. The original cover will still be used." };
     fs.mkdirSync(path.dirname(thumbnailPath), { recursive: true });
-    fs.writeFileSync(thumbnailPath, resized.toPNG());
+    const temporary = thumbnailPath + "." + crypto.randomUUID() + ".part";
+    try {
+      fs.writeFileSync(temporary, resized.toPNG(), { flag: "wx" });
+      fs.renameSync(temporary, thumbnailPath);
+    } finally {
+      fs.rmSync(temporary, { force: true });
+    }
     // The existence probe before creation cached a missing file. Invalidate it
     // before registering the media token for the newly written thumbnail.
     fileInfoCache.delete(thumbnailPath);

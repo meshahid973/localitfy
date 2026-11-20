@@ -4,6 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { randomUUID } = require("node:crypto");
 const { fetchCoverArt } = require("./client.cjs");
+const { createResourceCache } = require("../runtime/resource-cache.cjs");
 const { normalize, similarity, creditText, primaryArtist, artistScore, recordingScore, releaseRank, formatGenres, buildProposal, pickRecording, matchReleaseTracks } = require("./match.cjs");
 
 const DEFAULT_ALBUM = "local files";
@@ -24,19 +25,28 @@ const onTrack = (song, release, { track, medium, recording }, score) => ({
  * so previews and applied covers never load from the network afterwards.
  */
 function createTaggingLookup({ client, coverDir, userAgent, fetchImpl = fetch }) {
-  const genreCache = new Map();
+  const genreCache = createResourceCache({ maxEntries: 512, validate: value => typeof value === "string" });
+  const genrePending = new Map();
   const coverCache = new Map();
   const missingCovers = new Map();
 
   async function genresFor(releaseGroupId, artistIds = []) {
     const key = `${releaseGroupId || ""}|${artistIds[0] || ""}`;
-    if (!genreCache.has(key)) {
-      genreCache.set(key, (async () => {
-        const group = releaseGroupId ? formatGenres(await client.getReleaseGroupGenres(releaseGroupId).catch(() => [])) : "";
-        return group || (artistIds[0] ? formatGenres(await client.getArtistGenres(artistIds[0]).catch(() => [])) : "");
-      })());
-    }
-    return genreCache.get(key);
+    const cached = genreCache.get(key);
+    if (cached !== undefined) return cached;
+    if (genrePending.has(key)) return genrePending.get(key);
+    if (genrePending.size >= 64) return "";
+    const pending = (async () => {
+      let failed = false;
+      const recover = () => { failed = true; return []; };
+      const group = releaseGroupId ? formatGenres(await client.getReleaseGroupGenres(releaseGroupId).catch(recover)) : "";
+      const value = group || (artistIds[0] ? formatGenres(await client.getArtistGenres(artistIds[0]).catch(recover)) : "");
+      // An outage must not pin an empty or inferior result for the session.
+      genreCache.set(key, value, failed ? 30_000 : value ? 86400000 : 300_000);
+      return value;
+    })().finally(() => genrePending.delete(key));
+    genrePending.set(key, pending);
+    return pending;
   }
 
   async function coverFor(releaseId, releaseGroupId) {

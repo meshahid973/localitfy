@@ -13,6 +13,7 @@ function pumpArtwork() {
   }
 }
 function enqueueArtwork(job: ArtworkJob) {
+  if (waiting.length >= 128) return undefined;
   waiting.push(job);
   pumpArtwork();
   return () => {
@@ -32,8 +33,11 @@ function cachedArtwork(key: string) {
   cache.set(key, hit);
   return hit.value;
 }
+const normalizeKey = (value: string) => value.normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase();
+const artworkKey = (title: string, artist: string, person = false) =>
+  JSON.stringify([person ? "artist" : "recording", normalizeKey(title), normalizeKey(artist)]);
 export function getCachedDiscoverArtwork(title: string, artist: string) {
-  const key = JSON.stringify([title, artist]);
+  const key = artworkKey(title, artist);
   return cachedArtwork(key + ":fallback") || cachedArtwork(key);
 }
 const audioDbCover = /^https:\/\/(?:www\.|r2\.)?theaudiodb\.com\/images\/media\/album\/thumb\/[a-z0-9_-]+\.(?:jpg|jpeg|png)(?:\/(?:small|medium))?$/i;
@@ -54,11 +58,11 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
     observer.observe(ref.current);
     return () => observer.disconnect();
   }, []);
-  const key = JSON.stringify([title, artist]);
+  const key = artworkKey(title, artist, person);
   const [resolved, setResolved] = useState<{ key: string; value: DiscoverArtwork; fallback: boolean }>();
   const [loaded, setLoaded] = useState<{key:string; url:string}>();
   const [failure, setFailure] = useState<{key:string; urls:string[]}>({key:"",urls:[]});
-  const cover = resolved?.key === key ? resolved.value : undefined;
+  const cover = resolved?.key === key ? resolved.value : cachedArtwork(key + ":fallback") || cachedArtwork(key);
   const failed = failure.key === key ? failure.urls : [];
   const directUrls = [artwork?.coverUrl, artwork?.fallbackCoverUrl, ...(artwork?.coverAlternatives ?? []).slice(0,6)].map(safeCover).filter(Boolean);
   const resolvedUrls = [safeCover(cover?.coverUrl), safeCover(cover?.fallbackCoverUrl), ...(cover?.coverAlternatives ?? []).slice(0,6).map(safeCover)];
@@ -101,6 +105,7 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
         }
         if (live) setResolved({ key, value, fallback: exhausted });
       });
+      if (!cancelQueued && live && ++attempts < 3) retryTimer = window.setTimeout(start, attempts * 900);
     };
     start();
     return () => { live = false; cancelQueued?.(); if (retryTimer !== undefined) window.clearTimeout(retryTimer); };

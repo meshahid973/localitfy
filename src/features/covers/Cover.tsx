@@ -36,7 +36,8 @@ export function Cover({ song, className, priority = "auto", preferThumbnail = fa
   const directCover = useFullCover ? getFullCoverUrl(song) : getCardCoverUrl(song);
   const savedCover = String(song?.coverPath || "").trim();
   const savedCoverSrc = getRendererSafeImageUrl(savedCover);
-  const sourceCandidates = [directCover, preferThumbnail ? getFullCoverUrl(song) : "", savedCoverSrc];
+  // A broken thumbnail must fall back to the actual original, not a placeholder.
+  const sourceCandidates = [directCover, getFullCoverUrl(song), savedCoverSrc];
   let coverSrc = sourceCandidates.find(source => source && !failedSources[source]) || "";
   // Most tracks have real art; avoid hashing metadata and resolving fallback
   // assets unless the real cover is unavailable.

@@ -7,6 +7,7 @@ const { createLastfmClient } = require("../discover/lastfm.cjs");
 const { discover, withoutOwned } = require("../discover/recommend.cjs");
 const { catalogArtwork, createArtworkLookup, matchArtistArtwork, matchMusicArtwork } = require("../discover/artwork.cjs");
 const { rankCatalog, searchTerms } = require("../discover/catalog.cjs");
+const { createResourceCache } = require("../runtime/resource-cache.cjs");
 
 const RESULT_TTL_MS = 12 * 60 * 60 * 1000;
 // Biographies rarely change. Old ones are still shown while offline or when Last.fm fails.
@@ -42,6 +43,13 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
   let running = null;
   let catalogRunning = null;
   let artworkClient = null, artworkKey = "";
+  // Persist only positive provider lookup results, separate from user artwork.
+  const artworkResults = createResourceCache({
+    file: cacheFile ? cacheFile + ".resolved-artwork-v1" : "", now,
+    validate: value => Boolean(value && typeof value === "object" &&
+      [value.coverUrl, value.fallbackCoverUrl].some(url => typeof url === "string" && url.startsWith("https://") && url.length <= 2000))
+  });
+  const artworkRequests = new Map();
   async function lookupMusicArtwork(title,artist) {
     const cleanedArtist=artist.replace(/\s+[-–—]\s+Topic$/i,"").trim();
     const query=(title+" "+cleanedArtist).trim().slice(0,160);
@@ -104,7 +112,26 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
       if (!["artist","recording"].includes(kind) || typeof title !== "string" || typeof artist !== "string" || !title.trim() || (kind === "recording" && !artist.trim()) || title.length > 300 || artist.length > 300)
         return { status: "error", error: "Invalid artwork lookup." };
       try {
-        const artwork = kind === "artist" ? await lookupArtistArtwork(title.trim(),fallback===true) : await lookupArtwork(title.trim(), artist.trim(), {fallback:fallback===true});
+        const normalizeKey = value => value.normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase();
+        const key = JSON.stringify([kind, normalizeKey(title), normalizeKey(artist), fallback === true]);
+        let artwork = artworkResults.get(key);
+        if (!artwork) {
+          let pending = artworkRequests.get(key);
+          if (!pending) {
+            if (artworkRequests.size >= 8) throw Error("Artwork queue busy");
+            pending = Promise.resolve().then(() => kind === "artist"
+              ? lookupArtistArtwork(title.trim(), fallback === true)
+              : lookupArtwork(title.trim(), artist.trim(), { fallback: fallback === true }))
+              .then(value => {
+                if (getSettings().discoverEnabled === true && (value.coverUrl || value.fallbackCoverUrl)) {
+                  artworkResults.set(key, value, 86400000);
+                }
+                return value;
+              }).finally(() => artworkRequests.delete(key));
+            artworkRequests.set(key, pending);
+          }
+          artwork = await pending;
+        }
         return getSettings().discoverEnabled === true ? { status: "artwork", ...artwork } : { status: "off" };
       } catch { return { status: "error", error: "Artwork unavailable." }; }
     }
