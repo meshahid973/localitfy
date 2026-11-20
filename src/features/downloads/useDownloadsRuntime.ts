@@ -12,7 +12,7 @@ import {
   formatSpotifyPrivatePlaylistMessage,
   friendlyDownloadError,
   mergeDownloadProgress,
-  retryDownloadsInOrder, makeQueuedDownloads, parseDownloadUrls, reconcileDownloadResults
+  retryDownloadsInOrder, makeQueuedDownloads, parseDownloadUrls, reconcileDownloadResults, findDownloadedSongMatch
 } from "./downloadProcessing";
 
 export type DownloadsTab = "youtube" | "spotify";
@@ -351,7 +351,7 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
       return;
     }
 
-    const match = songsRef.current.find((song) => song.filePath === filePath);
+    const match = findDownloadedSongMatch(item as DownloadResult, songsRef.current);
     if (match) {
       setCurrentId(match.id);
       void rememberCurrentSong(match.id);

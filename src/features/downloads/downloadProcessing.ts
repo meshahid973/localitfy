@@ -218,40 +218,49 @@ export function formatSpotifyPrivatePlaylistMessage(rawMessage = "", hint = "") 
 export function reconcileDownloadResults(current: DownloadQueueItem[], results: DownloadResult[]): DownloadQueueItem[] {
   if (!results.length) return current;
   const next = [...current];
-  const byJob=new Map<string,number>(),bySpotify=new Map<string,number>(),byUrl=new Map<string,number>(),byPath=new Map<string,number>();
-  const remember=(map:Map<string,number>,key:string|undefined,index:number)=>{if(key&&!map.has(key))map.set(key,index);};
-  current.forEach((item,index)=>{if(item.recoveryId)remember(byJob,item.recoveryId,index);else{remember(bySpotify,item.spotifyTrackId,index);remember(byUrl,item.url,index);remember(byPath,item.filePath,index);}});
-  results.forEach((result) => {
-    const resultSpotifyTrackId = String(result.spotifyTrackId || "").trim();
-    const candidates = result.recoveryId ? [byJob.get(result.recoveryId)] : [
-      bySpotify.get(resultSpotifyTrackId), byUrl.get(result.url || ""), byPath.get(result.filePath || "")
-    ];
-    const index = Math.min(...candidates.filter((item): item is number=>item!==undefined));
-    if (!Number.isFinite(index)) return;
-
-    next[index] = {
-      ...next[index],
-      recoveryId: result.recoveryId || next[index].recoveryId,
-      status: result.status || (result.ok ? "done" : "failed"),
-      progress: 100,
-      message: result.ok
-        ? result.importedToLibrary
-          ? "Added to library"
-          : "Downloaded, but not imported"
-        : friendlyDownloadError(result.error || "Download failed."),
-      filePath: result.filePath,
-      filename: result.filename,
-      error: result.ok ? "" : friendlyDownloadError(result.error || "Download failed."),
-      importedToLibrary: result.importedToLibrary,
-      librarySongId: result.librarySongId,
-      statusLabel: result.statusLabel,
-      spotifyTrackId: result.spotifyTrackId || next[index].spotifyTrackId,
-      spotifyUrl: result.spotifyUrl || next[index].spotifyUrl,
-      providerUrl: result.providerUrl || next[index].providerUrl,
-      matchScore: result.matchScore,
-      title: result.filename || next[index].title
-    };
-    if(next[index].recoveryId)remember(byJob,next[index].recoveryId,index);
+  const byJob = new Map<string,number>();
+  const bySpotify = new Map<string,number|null>(), byUrl = new Map<string,number|null>();
+  const byPath = new Map<string,number|null>();
+  const remember = (map:Map<string,number|null>,key:string|undefined,index:number) => {
+    if (!key) return;
+    map.set(key, map.has(key) && map.get(key)!==index ? null : index);
+  };
+  current.forEach((item,index)=>{
+    if(item.recoveryId) { if(!byJob.has(item.recoveryId)) byJob.set(item.recoveryId,index); }
+    else { remember(bySpotify,item.spotifyTrackId,index); remember(byUrl,item.url,index); remember(byPath,downloadPathKey(item.filePath),index); }
   });
+  for (const result of results) {
+    const recordingId = String(result.spotifyTrackId || "").trim();
+    const durable = result.recoveryId ? byJob.get(result.recoveryId) : undefined;
+    const placeholder = recordingId ? bySpotify.get(recordingId) : byUrl.get(result.url || "") ?? byPath.get(downloadPathKey(result.filePath));
+    let index = durable ?? (typeof placeholder === "number" && !next[placeholder].recoveryId ? placeholder : undefined);
+    if(index===undefined && !result.recoveryId) continue;
+    if(index===undefined) index=next.length;
+    const previous = next[index];
+    const status = result.status || (result.ok ? "done" : "failed");
+    const error = result.ok ? "" : friendlyDownloadError(result.error || "Download failed.");
+    next[index] = {
+      ...previous,
+      id: result.recoveryId || previous?.id || result.url || "",
+      recoveryId: result.recoveryId || previous?.recoveryId,
+      url: previous?.url || result.url || result.spotifyUrl || "",
+      source: result.source || previous?.source,
+      status,
+      progress: status === "cancelled" || status === "interrupted" ? previous?.progress ?? 0 : 100,
+      message: result.ok ? result.importedToLibrary ? "Added to library" : "Downloaded, but not imported" : error,
+      filePath: result.filePath || previous?.filePath,
+      filename: result.filename || previous?.filename,
+      error,
+      importedToLibrary: result.importedToLibrary ?? previous?.importedToLibrary,
+      librarySongId: result.librarySongId ?? previous?.librarySongId,
+      statusLabel: result.statusLabel,
+      spotifyTrackId: result.spotifyTrackId || previous?.spotifyTrackId,
+      spotifyUrl: result.spotifyUrl || previous?.spotifyUrl,
+      providerUrl: result.providerUrl || previous?.providerUrl,
+      matchScore: result.matchScore ?? previous?.matchScore,
+      title: result.filename || previous?.title || result.url || "download"
+    };
+    if(next[index].recoveryId) byJob.set(next[index].recoveryId!,index);
+  }
   return next;
 }

@@ -182,4 +182,8 @@ test("saved formats and reordered results never claim another recording",()=>{
   assert.equal(merged[0].status,"interrupted");
   assert.equal(merged[1].librarySongId,"flac");
   assert.equal(merged[1].status,"done");
+  const recovered=exports.reconcileDownloadResults([{id:"temporary",url:"new-url",title:"Queued",status:"queued",progress:0,message:"Waiting"}],[{ok:true,recoveryId:"committed",url:"new-url",filePath:"/music/track.flac",librarySongId:"flac",importedToLibrary:true}]);
+  assert.equal(recovered.length,1);assert.equal(recovered[0].recoveryId,"committed");assert.equal(recovered[0].librarySongId,"flac");
+  const missed=exports.reconcileDownloadResults([], [{ok:true,recoveryId:"unseen",url:"new-url",filePath:"/music/track.flac"}]);
+  assert.equal(missed[0].id,"unseen");assert.equal(missed[0].status,"done");
 });
