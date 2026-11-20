@@ -192,7 +192,10 @@ async function syncFiles() {
   // Covers follow the Mac's: a new or changed cover is copied, one the Mac no longer has is removed.
   const wanted = songs.filter((song) => phoneLibrary.files[song.id]?.audio !== fileKey(song.file) ||
     (song.cover ? phoneLibrary.files[song.id]?.cover !== fileKey(song.cover) : Boolean(phoneLibrary.files[song.id]?.cover)));
-  if (!wanted.length) return 0;
+  if (!wanted.length) {
+    report({ done: 0, total: 0, bytesDone: 0, bytesTotal: 0 });
+    return 0;
+  }
   const bytesTotal = wanted.reduce((sum, song) => sum + (phoneLibrary.files[song.id]?.audio === fileKey(song.file) ? 0 : song.file.size) + (song.cover && phoneLibrary.files[song.id]?.cover !== fileKey(song.cover) ? song.cover.size : 0), 0);
   let bytesDone = 0;
   let done = 0;

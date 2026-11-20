@@ -154,10 +154,13 @@ server.listen(5173,async()=>{
     await screenshot(win,"desktop-home");
     const idle=await metrics("desktop idle");
     // Exercise actual rendered library navigation and playback.
+    const libraryNavigationStart=performance.now();
     const clicked=await win.webContents.executeJavaScript("(()=>{const b=document.querySelector('.sidebar [data-nav-id=library]');if(!b)return false;b.click();return true})()");
     assert.ok(clicked,"library navigation missing");
     await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.sidebar [data-nav-id=library].active') && !!document.querySelector('.songButton')").catch(()=>false),"library tracks");
     await screenshot(win,"desktop-library");
+    const libraryNavigationMs=performance.now()-libraryNavigationStart;
+    const playbackStart=performance.now();
     await win.webContents.executeJavaScript("document.querySelector('.songButton').click()");
     await until(()=>win.webContents.executeJavaScript("[...document.querySelectorAll('audio')].some(a=>!a.paused&&a.currentTime>0)").catch(()=>false),"audio playing");
     // Focus changes must not reload, seek or pause a healthy audio element.
@@ -169,6 +172,7 @@ server.listen(5173,async()=>{
     await sleep(700);
     const focusAudio=await win.webContents.executeJavaScript(`(()=>{const a=document.querySelector('audio'), q=window.qaFocusAudio;return {events:q.events,paused:a.paused,sameSource:a.src===q.src,advanced:a.currentTime-q.start}})()`);
     assert.ok(!focusAudio.paused && focusAudio.sameSource && focusAudio.advanced>0.3 && focusAudio.events.length===0,"focus interrupted playback: "+JSON.stringify(focusAudio));
+    const playbackStartMs=performance.now()-playbackStart;
     await screenshot(win,"desktop-playing");
     assert.equal(await win.webContents.executeJavaScript("typeof window.localitfy.onWatchedFoldersChange"), "function", "current preload exposes watched-folder events");
     assert.equal(await win.webContents.executeJavaScript("document.querySelector(\".app\")?.dataset.appVersion"), version, "renderer version matches package");
@@ -395,7 +399,7 @@ server.listen(5173,async()=>{
     assert.ok(collection.hero&&collection.row&&collection.play,"compact collections retain keyboard playback: "+JSON.stringify(collection));
     await screenshot(win,"collection-narrow");
     win.setSize(1280,800);
-    const result={startupMs,reloadMs,startupDefinition:"desktop entry to first rendered screen (onboarding or shell); excludes fixture creation and Electron process spawn",metrics:[idle,playing],memoryDefinition:"sum of Electron process working sets; may double count shared pages",platform:process.platform,fixtureSongs:songs.length,layouts,artworkTransitionLayers:samples};
+    const result={startupMs,reloadMs,libraryNavigationMs,playbackStartMs,interactionDefinition:"click to observed DOM/audio readiness, polling resolution 200ms",startupDefinition:"desktop entry to first rendered screen (onboarding or shell); excludes fixture creation and Electron process spawn",metrics:[idle,playing],memoryDefinition:"sum of Electron process working sets; may double count shared pages",platform:process.platform,fixtureSongs:songs.length,layouts,artworkTransitionLayers:samples};
     fs.writeFileSync(path.join(output,"desktop-runtime.json"),JSON.stringify(result,null,2));console.log("[desktop-qa]",JSON.stringify(result));
     clearTimeout(watchdog);server.close();app.exit(0);
   }catch(error){
