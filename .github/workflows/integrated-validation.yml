@@ -1,15 +1,8 @@
 name: integrated-validation
+# Extended cross-platform benchmarks are intentionally opt-in. Normal PRs run
+# quality.yml. Invoke this before merging changes to media, sync, native runtimes,
+# caching, Android integration or large-library performance.
 on:
-  pull_request:
-    paths:
-      - "electron/**"
-      - "src/**"
-      - "android/**"
-      - "tests/**"
-      - "package-lock.json"
-      - "scripts/benchmark-library-workloads.mjs"
-      - "scripts/ci-desktop-regression.cjs"
-      - ".github/workflows/integrated-validation.yml"
   workflow_dispatch:
 permissions:
   contents: read

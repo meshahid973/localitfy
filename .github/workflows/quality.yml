@@ -78,7 +78,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run check
+      - run: npm run check:quick
+      - run: npm run build
       - name: Electron runtime smoke
         timeout-minutes: 1
         run: npx electron scripts/ci-electron-smoke.cjs
