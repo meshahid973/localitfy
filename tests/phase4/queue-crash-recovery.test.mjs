@@ -32,7 +32,9 @@ test("bounded checkpoints use persisted SQLite patch but never rerender the libr
   assert.match(app, /wallClock - positionSaveRef\.current >= 5000/);
   assert.match(app, /window\.localitfy\.patchSong\(currentSong\.id, \{ playbackPosition: Math\.floor\(nextTime\) \}\)/);
   assert.match(app, /settingsRef\.current\.rememberPlaybackPosition && currentSong\.id/);
-  assert.match(app, /document\.addEventListener\("visibilitychange", handleProgressVisibility\)/);
-  assert.match(app, /document\.removeEventListener\("visibilitychange", handleProgressVisibility\)/);
+  const player = read("src/features/player/usePlayerRuntime.ts");
+  assert.match(app, /usePlaybackProgressLoop\(/);
+  assert.match(player, /document\.addEventListener\("visibilitychange", handleProgressVisibility\)/);
+  assert.match(player, /document\.removeEventListener\("visibilitychange", handleProgressVisibility\)/);
   assert.match(app, /document\.hidden \|\| isAppBackgroundedRef\.current/);
 });
