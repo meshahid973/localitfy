@@ -2,7 +2,7 @@ import type { Song, LibraryDropSide } from "./song.types";
 import { makeLocalId, readLocalJson, writeLocalJson } from "../../shared/storage/localStorage";
 import { CODERPIXEL_ARTIST_CHANCE, CODERPIXEL_ARTIST_EASTER_EGG, LIBRARY_ORDER_STORAGE_KEY } from "./library.constants";
 
-export function getSongPlaybackSourceKey(song: Pick<Song, "id" | "filePath" | "url"> | null | undefined) { return String(song?.filePath || song?.url || song?.id || "").trim().toLowerCase(); }
+export function getSongPlaybackSourceKey(song: Pick<Song, "id" | "filePath" | "url"> | null | undefined) { return String(song?.filePath || song?.url || song?.id || "").trim(); }
 export function isPlayableSong(song: Song | null | undefined): song is Song { return !!song && Boolean(song.filePath || song.url) && song.fileExists !== false; }
 export function stableSongSourceKey(song: Pick<Song, "filePath" | "url">) { return String(song.filePath || song.url || "").trim().toLowerCase(); }
 export function maybeApplyCoderpixelArtist(importedSongs: Song[], previousSongIds: Set<string>, previousSongSources: Set<string>) {

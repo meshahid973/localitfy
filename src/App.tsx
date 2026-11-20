@@ -5,6 +5,7 @@ import { createPlayerController } from "./features/player/engine/playerControlle
 import { useNativeMediaSession } from "./features/player/useNativeMediaSession";
 import type { ListeningOutcome } from "./features/player/listeningHistory";
 import { usePlayerRuntime } from "./features/player";
+import { resolveCachedPlaybackUrl } from "./features/player/playbackUrlCache";
 import { useSongRadio } from "./features/player/useSongRadio";
 import { useNotForMe } from "./features/analysis/notForMe";
 import { devPerfStart, devPerfEnd } from "./shared/perf/devPerf";
@@ -66,8 +67,7 @@ import {
   screensaverImage
 } from "./core/app.constants";
 import {
-  CODERPIXEL_ARTIST_EASTER_EGG,
-  PLAYBACK_URL_CACHE_TTL_MS
+  CODERPIXEL_ARTIST_EASTER_EGG
 } from "./features/library/library.constants";
 import {
   V013_RELEASE_DEFAULTS,
@@ -127,8 +127,6 @@ import { cleanPlaylistList } from "./features/playlists";
 import type {
   LibraryDropSide,
   LibraryDropTarget,
-  PlaybackUrlCacheEntry,
-  PlaybackUrlResult,
   Song
 } from "./features/library/song.types";
 import { getLibraryDropSideInfoForElement, getLibraryDropSideForElement, getLibraryDropSide, getLibraryDropElement } from "./features/library/dragGeometry";
@@ -2287,127 +2285,20 @@ function MainModeApp() {
   );
 
   const resolvePlaybackUrl = useCallback(
-    async (song: Song | null | undefined, options: { force?: boolean } = {}): Promise<PlaybackUrlResult> => {
-      if (!song) return { ok: false, fileExists: false, error: "missing song" };
-
-      const sourceKey = getSongPlaybackSourceKey(song);
-      const filePath = String(song.filePath || "");
-
-      if (!sourceKey) return { ok: false, fileExists: false, error: "missing file path" };
-      if (song.fileExists === false && !options.force) return { ok: false, fileExists: false, error: "file marked missing" };
-
-      const now = Date.now();
-      const pending = playbackUrlPendingRef.current;
-      const forceKey = `${sourceKey}:force`;
-      const normalKey = `${sourceKey}:normal`;
-      const pendingKey = options.force ? forceKey : normalKey;
-      const forced = pending.get(forceKey);
-      if (forced) return forced;
-      if (options.force) {
-        pending.delete(normalKey);
-        playbackUrlCacheRef.current.delete(sourceKey);
-      }
-      const existingPending = pending.get(pendingKey);
-      if (existingPending) return existingPending;
-      const cached = playbackUrlCacheRef.current.get(sourceKey);
-
-      if (!options.force && cached?.url && cached.fileExists && now - cached.checkedAt < PLAYBACK_URL_CACHE_TTL_MS) {
-        return {
-          ok: true,
-          url: cached.url,
-          filePath,
-          fileExists: true,
-          sizeBytes: cached.sizeBytes,
-          mtimeMs: cached.mtimeMs,
-          cacheTtlMs: PLAYBACK_URL_CACHE_TTL_MS
-        };
-      }
-
-      const bridge = window.localitfy as any;
-      const resolver = bridge?.resolvePlaybackUrl;
-
-      if (typeof resolver !== "function") {
-        if (song.url) {
-          return { ok: true, url: song.url, filePath, fileExists: true, cacheTtlMs: PLAYBACK_URL_CACHE_TTL_MS };
-        }
-
-        return { ok: false, filePath, fileExists: undefined, error: "playback resolver unavailable" };
-      }
-
-      const staleResult = (): PlaybackUrlResult => ({ ok: false, filePath, error: "playback source changed" });
-      const request: Promise<PlaybackUrlResult> = Promise.resolve().then(() =>
-        resolver({
-          songId: song.id,
-          filePath,
-          fallbackUrl: song.url || "",
-          force: Boolean(options.force)
-        })
-      )
-        .then((result: any): PlaybackUrlResult => {
-          if (pending.get(pendingKey) !== request) return staleResult();
-          const fileExists =
-            typeof result?.fileExists === "boolean"
-              ? result.fileExists
-              : typeof result?.exists === "boolean"
-                ? result.exists
-                : result?.ok ? true : undefined;
-
-          if (result?.ok && result?.url && fileExists !== false) {
-            const entry: PlaybackUrlCacheEntry = {
-              url: String(result.url),
-              checkedAt: Date.now(),
-              fileExists: true,
-              sizeBytes: typeof result.sizeBytes === "number" ? result.sizeBytes : undefined,
-              mtimeMs: typeof result.mtimeMs === "number" ? result.mtimeMs : undefined
-            };
-
-            playbackUrlCacheRef.current.set(sourceKey, entry);
-
-            return {
-              ok: true,
-              url: entry.url,
-              filePath: result.filePath || filePath,
-              fileExists: true,
-              sizeBytes: entry.sizeBytes,
-              mtimeMs: entry.mtimeMs,
-              cacheTtlMs: PLAYBACK_URL_CACHE_TTL_MS
-            };
-          }
-
-          playbackUrlCacheRef.current.delete(sourceKey);
-
-          if ((result?.fileExists === false || result?.exists === false) && song.id) {
-            setSongs((oldSongs) =>
-              oldSongs.map((item) => (item.id === song.id ? { ...item, fileExists: false, url: "" } : item))
-            );
-
-            void window.localitfy?.patchSong?.(song.id, { fileExists: false, url: "" }).catch(() => undefined);
-          }
-
-          return {
-            ok: false,
-            filePath,
-            fileExists,
-            error: String(result?.error || "could not resolve playback url")
-          };
-        })
-        .catch((error: unknown): PlaybackUrlResult => {
-          if (pending.get(pendingKey) !== request) return staleResult();
-          playbackUrlCacheRef.current.delete(sourceKey);
-          return {
-            ok: false,
-            filePath,
-            fileExists: undefined,
-            error: error instanceof Error ? error.message : String(error || "could not resolve playback url")
-          };
-        })
-        .finally(() => {
-          if (pending.get(pendingKey) === request) pending.delete(pendingKey);
-        });
-
-      pending.set(pendingKey, request);
-      return request;
-    },
+    (song: Song | null | undefined, options: { force?: boolean } = {}) => resolveCachedPlaybackUrl(song, {
+      sourceKey: getSongPlaybackSourceKey(song),
+      force: Boolean(options.force),
+      cache: playbackUrlCacheRef.current,
+      pending: playbackUrlPendingRef.current,
+      resolver: window.localitfy?.resolvePlaybackUrl,
+      onMissing: (missingSong, sourceKey) => setSongs(oldSongs => {
+        const index = oldSongs.findIndex(item => item.id === missingSong.id && getSongPlaybackSourceKey(item) === sourceKey);
+        if (index < 0 || oldSongs[index].fileExists === false) return oldSongs;
+        const next = oldSongs.slice();
+        next[index] = { ...next[index], fileExists: false, url: "" };
+        return next;
+      })
+    }),
     []
   );
 
