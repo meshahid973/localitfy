@@ -24,7 +24,7 @@ function enqueueArtwork(job: ArtworkJob) {
 }
 function cachedArtwork(key: string) {
   const hit = cache.get(key);
-  if (!hit || Date.now() - hit.at >= (hit.value.coverUrl || hit.value.fallbackCoverUrl ? 86400000 : 30000)) {
+  if (!hit || Date.now() - hit.at >= 86400000) {
     cache.delete(key);
     return undefined;
   }
@@ -62,7 +62,8 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
   const failed = failure.key === key ? failure.urls : [];
   const directUrls = [artwork?.coverUrl, artwork?.fallbackCoverUrl, ...(artwork?.coverAlternatives ?? []).slice(0,6)].map(safeCover).filter(Boolean);
   const resolvedUrls = [safeCover(cover?.coverUrl), safeCover(cover?.fallbackCoverUrl), ...(cover?.coverAlternatives ?? []).slice(0,6).map(safeCover)];
-  const src = [...(failed.length ? resolvedUrls : []), ...directUrls, ...resolvedUrls].find(url => url && !failed.includes(url));
+  const candidates = failed.length ? [...resolvedUrls, ...directUrls] : [...directUrls, ...resolvedUrls];
+  const src = candidates.find(url => url && !failed.includes(url));
   const needsLookup = lookup && (!directUrls.length || failed.length > 0);
   const imageReady = Boolean(src && loaded?.key === key && loaded.url === src);
   const exhausted = Boolean(resolved?.key === key && (resolved.fallback || (!src && failed.length > 0)));

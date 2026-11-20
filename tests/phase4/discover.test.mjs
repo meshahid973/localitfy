@@ -358,13 +358,15 @@ test("Discover permits opt-in with a blank key and sends explicit catalog search
 });
 
 test("artwork uses validated releases and rejects ambiguous tracks", async () => {
-  const { catalogArtwork, matchRecordingArtwork, createArtworkLookup } = require("../../electron/discover/artwork.cjs");
+  const { catalogArtwork, createArtworkLookup } = require("../../electron/discover/artwork.cjs");
   const id = "12345678-1234-1234-1234-123456789abc";
   const item = { title:"Track",length:123000,"artist-credit":[{name:"Artist"}],releases:[{id,status:"Official"}] };
   assert.equal(catalogArtwork("recording",item).coverUrl,"https://coverartarchive.org/release/"+id+"/front-250");
   assert.equal(catalogArtwork("album",{id}).coverUrl,"https://coverartarchive.org/release-group/"+id+"/front-250");
-  assert.deepEqual(matchRecordingArtwork([item],"Other","Artist"),{});
-  assert.deepEqual(matchRecordingArtwork([item,item],"Track","Artist"),{});
+  const wrong=createArtworkLookup({searchRecordings:async()=>[item]});
+  const ambiguous=createArtworkLookup({searchRecordings:async()=>[item,item]});
+  assert.deepEqual(await wrong("Other","Artist"),{});
+  assert.deepEqual(await ambiguous("Track","Artist"),{});
   assert.equal(catalogArtwork("recording",{releases:[{id:"bad"}]}).coverUrl,undefined);
   let calls=0;
   const lookup=createArtworkLookup({searchRecordings:async()=>{calls++;return [item];}});

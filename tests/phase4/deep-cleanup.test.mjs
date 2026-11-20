@@ -34,10 +34,13 @@ test("player morph icon has one implementation and one feature owner", () => {
 });
 
 test("unused CSS analysis can never mutate renderer styles", () => {
-  const audit = read("scripts/css-unused-selectors.mjs");
+  const audit = read("scripts/audit-unused.mjs");
+  const manifest = JSON.parse(read("package.json"));
+  assert.equal(manifest.scripts["css:unused:check"], "node scripts/audit-unused.mjs --css-only --full");
+  assert.equal(fs.existsSync(path.join(root, "scripts/css-unused-selectors.mjs")), false);
   const fixpoint = read("scripts/css-dedup-fixpoint.mjs");
   assert.doesNotMatch(audit, /writeFileSync|rmSync|unlinkSync/);
-  assert.doesNotMatch(fixpoint, /css-unused-selectors\.mjs/);
+  assert.doesNotMatch(fixpoint, /(?:css-unused-selectors|audit-unused)\.mjs/);
   assert.match(audit, /advisory only/i);
 });
 

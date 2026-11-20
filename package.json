@@ -22,7 +22,7 @@
     "css:dedup:check": "node scripts/css-comment-integrity.mjs && node scripts/css-retired-performance.mjs && node scripts/css-property-dedup.mjs && node scripts/css-shadow-dedup.mjs && node scripts/css-adjacent-merge.mjs && node scripts/css-cross-file-dedup.mjs && node scripts/css-animation-ownership.mjs && node scripts/css-hygiene.mjs && node scripts/audit-unused.mjs --strict-css && node scripts/css-cascade-overrides.mjs && node scripts/css-cascade-overrides.mjs --self-test",
     "css:dedup:cross": "node scripts/css-cross-file-dedup.mjs",
     "css:animation:check": "node scripts/css-animation-ownership.mjs",
-    "css:unused:check": "node scripts/css-unused-selectors.mjs",
+    "css:unused:check": "node scripts/audit-unused.mjs --css-only --full",
     "css:dedup:fix": "node scripts/css-dedup-fixpoint.mjs",
     "check:quick": "npm run bridge:check && npm run boundaries:check && npm run typecheck",
     "check": "npm run check:quick && npm run css:dedup:check && npm test && npm run build && npm run db:recovery-test",

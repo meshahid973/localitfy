@@ -298,6 +298,5 @@ async function readLocalAudioMetadata(filePath, options = {}) {
 
 module.exports = {
   initMetadataService,
-  readLocalAudioMetadata,
-  getDurationWithFfmpeg
+  readLocalAudioMetadata
 };

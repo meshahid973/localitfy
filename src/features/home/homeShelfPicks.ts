@@ -1,8 +1,8 @@
 import type { Song } from "../library/song.types";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-export const REDISCOVER_AFTER_DAYS = 30;
-export const REDISCOVER_MIN_PLAYS = 3;
+const REDISCOVER_AFTER_DAYS = 30;
+const REDISCOVER_MIN_PLAYS = 3;
 
 function playable(song: Song | null | undefined): song is Song {
   return !!song && Boolean(song.filePath || song.url) && song.fileExists !== false;

@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const full = process.argv.includes("--full");
 const strictCss = process.argv.includes("--strict-css");
+const cssOnly = process.argv.includes("--css-only");
 const ignored = new Set([".git", "node_modules", "dist", "release", ".vite"]);
 const codeExtensions = new Set([".ts", ".tsx", ".js", ".jsx", ".cjs", ".mjs"]);
 const allFiles = [];
@@ -55,70 +56,73 @@ for (const [file, body] of sources) {
   cssReports.push({ file, missing });
 }
 
-const codeFiles = [...sources.keys()].filter((p) => codeExtensions.has(path.posix.extname(p)));
-const codeSet = new Set(codeFiles);
-const imports = new Map();
-const inbound = new Map(codeFiles.map((file) => [file, []]));
-const possible = (file, specifier) => {
-  if (!specifier.startsWith(".")) return null;
-  const base = path.posix.normalize(path.posix.join(path.posix.dirname(file), specifier));
-  const candidates = [base, ...[...codeExtensions].map((ext) => base + ext), ...[...codeExtensions].map((ext) => base + "/index" + ext)];
-  return candidates.find((candidate) => codeSet.has(candidate)) || null;
-};
-for (const file of codeFiles) {
-  const body = sources.get(file);
-  const kind = file.endsWith(".tsx") || file.endsWith(".jsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
-  const ast = ts.createSourceFile(file, body, ts.ScriptTarget.Latest, true, kind);
-  const specifiers = new Set();
-  const add = (node) => {
-    if (node && ts.isStringLiteralLike(node)) specifiers.add(node.text);
+console.log("[audit-unused] Advisory only; dynamic classes, runtime entrypoints and external references need human verification.");
+if (!cssOnly) {
+  const codeFiles = [...sources.keys()].filter((p) => codeExtensions.has(path.posix.extname(p)));
+  const codeSet = new Set(codeFiles);
+  const imports = new Map();
+  const inbound = new Map(codeFiles.map((file) => [file, []]));
+  const possible = (file, specifier) => {
+    if (!specifier.startsWith(".")) return null;
+    const base = path.posix.normalize(path.posix.join(path.posix.dirname(file), specifier));
+    const candidates = [base, ...[...codeExtensions].map((ext) => base + ext), ...[...codeExtensions].map((ext) => base + "/index" + ext)];
+    return candidates.find((candidate) => codeSet.has(candidate)) || null;
   };
-  const visit = (node) => {
-    if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) {
-      add(node.moduleSpecifier);
-    } else if (ts.isImportEqualsDeclaration(node) && ts.isExternalModuleReference(node.moduleReference)) {
-      add(node.moduleReference.expression);
-    } else if (ts.isCallExpression(node)) {
-      if (node.expression.kind === ts.SyntaxKind.ImportKeyword ||
-          (ts.isIdentifier(node.expression) && node.expression.text === "require")) add(node.arguments[0]);
-    } else if (ts.isNewExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === "URL") {
-      // Vite emits Worker(new URL("./library.worker.ts", import.meta.url)).
-      add(node.arguments?.[0]);
-    }
-    ts.forEachChild(node, visit);
-  };
-  visit(ast);
-  const deps = [...specifiers].map((specifier) => possible(file, specifier)).filter(Boolean);
-  imports.set(file, deps);
-  for (const dep of deps) inbound.get(dep).push(file);
-}
-
-const entrypoints = ["src/main.tsx", "electron/main.cjs", "electron/preload.cjs", "electron/worker.cjs"]
-  .filter((file) => codeSet.has(file));
-const seen = new Set(entrypoints);
-const queue = [...entrypoints];
-while (queue.length) {
-  for (const dep of imports.get(queue.shift()) || []) {
-    if (seen.has(dep)) continue;
-    seen.add(dep);
-    queue.push(dep);
+  for (const file of codeFiles) {
+    const body = sources.get(file);
+    const kind = file.endsWith(".tsx") || file.endsWith(".jsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
+    const ast = ts.createSourceFile(file, body, ts.ScriptTarget.Latest, true, kind);
+    const specifiers = new Set();
+    const add = (node) => {
+      if (node && ts.isStringLiteralLike(node)) specifiers.add(node.text);
+    };
+    const visit = (node) => {
+      if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) {
+        add(node.moduleSpecifier);
+      } else if (ts.isImportEqualsDeclaration(node) && ts.isExternalModuleReference(node.moduleReference)) {
+        add(node.moduleReference.expression);
+      } else if (ts.isCallExpression(node)) {
+        if (node.expression.kind === ts.SyntaxKind.ImportKeyword ||
+            (ts.isIdentifier(node.expression) && node.expression.text === "require")) add(node.arguments[0]);
+      } else if (ts.isNewExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === "URL") {
+        // Vite emits Worker(new URL("./library.worker.ts", import.meta.url)).
+        add(node.arguments?.[0]);
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(ast);
+    const deps = [...specifiers].map((specifier) => possible(file, specifier)).filter(Boolean);
+    imports.set(file, deps);
+    for (const dep of deps) inbound.get(dep).push(file);
   }
-}
-const suspects = codeFiles.filter((file) =>
-  file.startsWith("src/") &&
-  !file.endsWith(".d.ts") &&
-  !seen.has(file)
-);
 
-console.log("[audit-unused] Advisory audit; dynamic classes, runtime entrypoints and external references need human verification.");
-console.log("[audit-unused] Source files: " + codeFiles.length + "; CSS files: " + [...sources.keys()].filter((p) => p.endsWith(".css")).length);
-console.log("[audit-unused] CSS class candidates: " + cssCandidates + "; possible unreachable source files: " + suspects.length);
+  const entrypoints = ["src/main.tsx", "electron/main.cjs", "electron/preload.cjs", "electron/worker.cjs"]
+    .filter((file) => codeSet.has(file));
+  const seen = new Set(entrypoints);
+  const queue = [...entrypoints];
+  while (queue.length) {
+    for (const dep of imports.get(queue.shift()) || []) {
+      if (seen.has(dep)) continue;
+      seen.add(dep);
+      queue.push(dep);
+    }
+  }
+  const suspects = codeFiles.filter((file) =>
+    file.startsWith("src/") &&
+    !file.endsWith(".d.ts") &&
+    !seen.has(file)
+  );
+  console.log("[audit-unused] Source files: " + codeFiles.length + "; CSS files: " + [...sources.keys()].filter((p) => p.endsWith(".css")).length);
+  console.log("[audit-unused] CSS class candidates: " + cssCandidates + "; possible unreachable source files: " + suspects.length);
+  for (const file of suspects) {
+    console.log("[audit-unused] SOURCE " + file + " (direct imports: " + (inbound.get(file)?.length || 0) + ")");
+  }
+} else {
+  console.log("[audit-unused] CSS class candidates: " + cssCandidates);
+}
 for (const { file, missing } of cssReports.sort((a, b) => b.missing.length - a.missing.length)) {
   console.log("[audit-unused] CSS " + file + ": " + missing.length + " names");
   if (full) console.log("    " + missing.join(", "));
-}
-for (const file of suspects) {
-  console.log("[audit-unused] SOURCE " + file + " (direct imports: " + (inbound.get(file)?.length || 0) + ")");
 }
 console.log("[audit-unused] No files changed.");
 if (strictCss && cssCandidates) process.exitCode = 1;

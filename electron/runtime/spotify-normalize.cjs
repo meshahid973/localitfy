@@ -1,12 +1,3 @@
-function safeImageExtensionFromUrlOrType(rawUrl = "", contentType = "") {
-  const cleanType = String(contentType || "").toLowerCase();
-  const cleanUrl = String(rawUrl || "").toLowerCase();
-  if (cleanType.includes("png") || cleanUrl.includes(".png")) return ".png";
-  if (cleanType.includes("webp") || cleanUrl.includes(".webp")) return ".webp";
-  if (cleanType.includes("gif") || cleanUrl.includes(".gif")) return ".gif";
-  return ".jpg";
-}
-
 function bestSpotifyImage(images = []) {
   if (!Array.isArray(images) || !images.length) return "";
   const sorted = images.filter((image) => image?.url).slice().sort((a, b) => Number(b?.width || 0) - Number(a?.width || 0));
@@ -67,7 +58,6 @@ function uniqSpotifyIds(ids = []) {
 
 
 module.exports = {
-  safeImageExtensionFromUrlOrType,
   bestSpotifyImage,
   parseSpotifyUrl,
   shapeSpotifyTrack,

@@ -6,7 +6,7 @@ import type { Song } from "../library/song.types";
 import { CollectionLoading } from "../../shared/ui/CollectionLoading";
 import { useHomeDailyMixes } from "./useHomeDailyMixes";
 import { pageArtworkSources, usePageAtmosphere } from "../covers/pageAtmosphere";
-import { HomeMixArtwork } from "./HomeMixArtwork";
+import { MixCoverArtwork } from "../covers/MixCoverArtwork";
 import { MediaCard } from "../../shared/ui/MediaCard";
 import { mixTarget, useAppActions } from "../shell/appActions";
 import { isAndroidApp } from "../../app/platform";
@@ -130,14 +130,14 @@ export function HomeDailyMixRail({ day, songsById, openDailyMixes, openAnalysisS
       />
       {mixes.length ? (
         <div className="homeReleaseRail homeMixRail" tabIndex={0} role="region" aria-labelledby="home-daily-mixes-title">
-          {mixes.map((mix, index) => {
+          {mixes.map((mix) => {
             const artists = [...new Set(mix.songs.map((song) => song.artist).filter(Boolean))];
             const target = mixTarget(mix, mix.songs);
             return (
               <MediaCard key={mix.id} className="homeReleaseCard" openLabel={`open ${mix.name}`} playLabel={`play ${mix.name}`}
                 onOpen={() => actions.openCollection(target)} onPlay={() => actions.playCollection(target)}
                 onContextMenu={(event) => actions.openCollectionMenu(event, target)}
-                cover={<HomeMixArtwork id={mix.id} name={mix.name} songs={mix.songs} ordinal={index + 1} />}>
+                cover={<MixCoverArtwork songs={mix.songs} className="homeReleaseCoverWrap" />}>
                 <span className="homeReleaseCopy">
                   <strong>{mix.name}</strong>
                   <small>{artists.slice(0, 2).map((artist) => prettyMeta(artist)).join(", ") || `${mix.songs.length} tracks`}</small>

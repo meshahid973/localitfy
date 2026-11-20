@@ -13,7 +13,7 @@ function load(path, dependencies = {}) {
   return exports;
 }
 const constants = {coverColorSyncOptions:["off","subtle","normal","strong"].map(id=>({id}))};
-const theme = load("src/features/settings/theme.utils.ts", {"./settings.constants":constants,"./theme.constants":{THEME_ID_SET:new Set(["light","dark"]),RETIRED_ANIMATED_THEME_IDS:new Set()}});
+const theme = load("src/features/settings/theme.utils.ts", {"./settings.constants":constants});
 const { migrateVisualSettings } = load("src/features/settings/visualCustomization.ts", {"./theme.utils":theme});
 const defaults = {theme:"dark",coverColorSyncMode:"normal",showAmbientGradient:true,animatedBackgrounds:true,animeVisuals:true,homeBannerType:"dynamic",mediaCardBackground:"glassy",homeLayoutMode:"balanced",libraryRowStyle:"comfyRows",sidebarBehavior:"slim",playerBackgroundStyle:"coverBlur",homeHeroCoverBrightness:1,catBuddyEnabled:false,volume:.75};
 

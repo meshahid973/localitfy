@@ -109,14 +109,3 @@ export type Settings = {
   /** Folders whose new audio files are imported automatically. */
   watchedFolders: string[];
 };
-
-export type CustomThemeColorKey = Exclude<keyof LegacyThemeSettings, "themePanelCollapsed" | "customThemeEnabled" | "simpleMode" | "starsIntensity" | "blurEffects" | "homeExpanded" | "quickLibraryMoreBlur" | "showRightColumn">;
-export type CustomThemeColorPatch = Required<Pick<LegacyThemeSettings, CustomThemeColorKey>>;
-export type CustomThemePreset = {
-  id: string;
-  name: string;
-  note: string;
-  colors: CustomThemeColorPatch;
-  custom?: boolean;
-  createdAt?: number;
-};

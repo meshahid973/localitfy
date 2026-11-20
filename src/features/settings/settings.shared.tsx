@@ -81,9 +81,6 @@ export function RangeRow({ label, value, min, max, step, suffix, onChange }: {
 }
 
 export type ChoiceOption = { id: string; label?: string; name?: string; note?: string };
-export type ThemeOption = { id: string; name: string; note?: string };
-export type CustomThemeTokenOption = { key: string; label: string; help?: string; value: string };
-export type CustomThemePresetOption = { id: string; name: string; note?: string; colors: { customThemeColor: string; [key: string]: string } };
 export type SongLike = { id?: string; title?: string; artist?: string; album?: string; [key: string]: unknown };
 export type PlatformInfoLike = Partial<LocaltifyPlatformInfo>;
 export type DiagnosticsInfo = { items: Array<{ label: string; value: string | number }>; copyText: string };
