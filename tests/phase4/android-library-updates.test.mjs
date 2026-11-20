@@ -4,7 +4,7 @@ import test from "node:test";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
 
-function library() {
+function library(options = {}) {
   const writes = [];
   const exports = {};
   const output = ts.transpileModule(fs.readFileSync("src/platform/android/library.ts", "utf8"), {
@@ -13,7 +13,10 @@ function library() {
   runInNewContext(output, { exports, structuredClone,
     require: (name) => {
       if (name === "./native") return { LocaltifyNative: {} };
-      if (name === "./store") return { writeValues: async (values) => { writes.push(values); } };
+      if (name === "./store") return {
+        writeValues: async (values) => { writes.push(values); },
+        readValue: options.readValue || (async (_key, fallback) => fallback)
+      };
       throw new Error(`Unexpected dependency ${name}`);
     }
   });
@@ -87,4 +90,16 @@ test("unchanged Android song edits do not rewrite IndexedDB", () => {
   assert.equal(writes.length, 1);
   phone.patchSong("a", { playbackPosition: 13 });
   assert.equal(writes.length, 2);
+});
+
+test("a failed Android IndexedDB bootstrap can retry without a page reload", async () => {
+  let failed = false;
+  const { phone } = library({ readValue: async (_key, fallback) => {
+    if (!failed) { failed = true; throw new Error("temporary indexedDB outage"); }
+    return fallback;
+  }});
+  await assert.rejects(phone.load(), /temporary indexedDB outage/);
+  await phone.load();
+  assert.equal(phone.remoteSongs.length, 0);
+  assert.equal(phone.pairing, null);
 });

@@ -90,7 +90,12 @@ export class PhoneLibrary {
         readValue<number>("clockOffset", 0)
       ]);
       Object.assign(this, { remoteSongs, edits, base, playlists, settings, macFeatures, pendingEvents, listeningCounts, files, pairing, lastSync, pendingSync, likeClock, clockOffset });
-    })();
+    })().catch(error => {
+      // A transient IndexedDB open or read failure must not permanently
+      // poison the boot promise for the lifetime of the WebView.
+      this.loading = null;
+      throw error;
+    });
     return this.loading;
   }
 
