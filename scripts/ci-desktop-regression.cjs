@@ -194,6 +194,8 @@ server.listen(5173,async()=>{
     const beforeHidden=await win.webContents.executeJavaScript("(()=>{const a=document.querySelector('audio');return {src:a.src,time:a.currentTime}})()");
     let hiddenPlayback, hiddenAudio;
     let syntheticBackgroundCss = false;
+    let backgroundAnimationsPaused = false;
+    const baselineProfile = String(process.env.LOCALTIFY_QA_OUTPUT || "").replaceAll("\\", "/").includes("/desktop-baseline");
     try {
       win.hide();
       assert.equal(win.isVisible(),false,"the Electron window is actually hidden");
@@ -206,9 +208,22 @@ server.listen(5173,async()=>{
         syntheticBackgroundCss = true;
         await win.webContents.executeJavaScript("document.body.classList.add('localtifyWindowBackgrounded')");
       }
-      const animationState = await win.webContents.executeJavaScript(
-        "getComputedStyle(document.querySelector('.playerBar'),'::before').animationPlayState");
-      assert.equal(animationState,"paused","hidden-window decorative animations must be suspended");
+      // A pseudo-element without generated content may report the default
+      // animation-play-state even when the corresponding CSS rule is correct.
+      // Test a real descendant with an inline running state instead.
+      backgroundAnimationsPaused = await win.webContents.executeJavaScript(`(()=>{
+        const root=document.querySelector('.app');
+        const probe=document.createElement('span');
+        probe.style.animationPlayState='running';
+        root.appendChild(probe);
+        const paused=getComputedStyle(probe).animationPlayState==='paused';
+        probe.remove();
+        return paused;
+      })()`);
+      // The same harness also benchmarks an older main-branch worktree that
+      // predates the performance policy; it must not require the new rule.
+      if (!baselineProfile) assert.equal(backgroundAnimationsPaused,true,
+        "candidate must pause decorative animations when its window is hidden");
       hiddenPlayback=await metrics("desktop hidden playback",3);
       hiddenAudio=await win.webContents.executeJavaScript(
         "(()=>{const a=document.querySelector('audio');return {src:a.src,time:a.currentTime,paused:a.paused,documentHidden:document.hidden,backgroundCssActive:document.body.classList.contains('localtifyWindowBackgrounded')||document.body.classList.contains('localtifyBackgroundMode')}})()");
@@ -220,6 +235,7 @@ server.listen(5173,async()=>{
     const hiddenPlaybackObservation={documentHidden:hiddenAudio.documentHidden,
       backgroundCssActive:hiddenAudio.backgroundCssActive,
       backgroundCssSimulated:syntheticBackgroundCss,
+      backgroundAnimationsPaused, baselineProfile,
       browserWindowHidden:true,
       sameSource:hiddenAudio.src===beforeHidden.src,
       advancedSeconds:hiddenAudio.time-beforeHidden.time,paused:hiddenAudio.paused};
