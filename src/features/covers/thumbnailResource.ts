@@ -3,10 +3,7 @@ import { useCallback, useSyncExternalStore } from "react";
 const urls = new Map<string, string>();
 const listeners = new Map<string, Set<() => void>>();
 let attached = false;
-function attach() {
-  if (attached || !window.localitfy?.onCoverThumbnailReady) return;
-  attached = true;
-  window.localitfy.onCoverThumbnailReady(({ source, url }) => {
+export function rememberCompletedThumbnail({ source, url }: {source: string; url: string}) {
     if (!source || !url) return;
     urls.delete(source);
     urls.set(source, url);
@@ -17,7 +14,11 @@ function attach() {
       listeners.get(oldest)?.forEach(notify => notify());
     }
     listeners.get(source)?.forEach(notify => notify());
-  });
+}
+function attach() {
+  if (attached || !window.localitfy?.onCoverThumbnailReady) return;
+  attached = true;
+  window.localitfy.onCoverThumbnailReady(rememberCompletedThumbnail);
 }
 function subscribe(source: string, notify: () => void) {
   attach();

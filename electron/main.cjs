@@ -11,6 +11,7 @@ let libraryWatcher = null;
 const { registerDuplicateIpc } = require("./ipc/library-duplicates.cjs");
 const { registerDiscoverIpc } = require("./ipc/discover.cjs");
 const { createRemoteArtworkCache } = require("./runtime/remote-artwork-cache.cjs");
+const { pruneThumbnails } = require("./runtime/thumbnail-retention.cjs");
 let remoteArtworkCache = null;
 const { startScrobbling } = require("./ipc/scrobble.cjs");
 let scrobbler = null;
@@ -110,6 +111,8 @@ let coverThumbnailWarmStarted = false;
 let thumbnailGeneration = 0;
 let discoverCacheLifecycle = null;
 const thumbnailJobs = new Map();
+let thumbnailPrune = null;
+let thumbnailWrites = 0;
 
 const APP_NAME = "localtify";
 const APP_USER_MODEL_ID = "com.meshahid973.localitfy";
@@ -164,7 +167,7 @@ function yieldToMainLoop() {
 }
 
 const genreMetadataBackfill = createGenreMetadataBackfill({
-  getSettings, saveSettings, getSongs, patchSong, fileExists, isAudioFile,
+  getSettings, saveSettings, getSongs, getSong, patchSong, fileExists, isAudioFile,
   readLocalAudioMetadata, yieldToMainLoop
 });
 
@@ -533,6 +536,30 @@ function getCoverThumbnailPath(filePath) {
   return path.join(dir, `${getCoverThumbnailCacheKey(filePath)}.png`);
 }
 
+function scheduleThumbnailPrune() {
+  if (thumbnailPrune) return thumbnailPrune;
+  const maxBytes = Math.max(16, Math.min(1024, Number(process.env.LOCALTIFY_THUMBNAIL_CACHE_MB) || 256)) * 1024 * 1024;
+  thumbnailPrune = pruneThumbnails(getCoverThumbnailDirectory(), {
+    maxBytes, active: file => thumbnailJobs.has(file) || [...thumbnailJobs.keys()].some(key => file.startsWith(key + ".")),
+    onRemove: file => fileInfoCache.delete(file)
+  }).catch(() => {}).finally(() => { thumbnailPrune = null; });
+  return thumbnailPrune;
+}
+
+async function readableThumbnail(file) {
+  let handle;
+  try {
+    handle = await fs.promises.open(file, "r");
+    const {size} = await handle.stat();
+    if (size < 33) return false;
+    const lead = Buffer.alloc(8), tail = Buffer.alloc(12);
+    await handle.read(lead, 0, 8, 0);
+    await handle.read(tail, 0, 12, size - 12);
+    return lead.equals(Buffer.from("89504e470d0a1a0a","hex")) && tail.equals(Buffer.from("0000000049454e44ae426082","hex"));
+  } catch { return false; }
+  finally { await handle?.close().catch(() => {}); }
+}
+
 // Decode and resize outside Electron's main process using the bundled FFmpeg.
 function createCoverThumbnail(filePath) {
   const thumbnailPath = getCoverThumbnailPath(filePath);
@@ -543,8 +570,7 @@ function createCoverThumbnail(filePath) {
   const generation = thumbnailGeneration;
   const task = (async () => {
     try {
-      const stat = await fs.promises.stat(thumbnailPath).catch(() => null);
-      if (stat?.isFile() && stat.size > 0) {
+      if (await readableThumbnail(thumbnailPath)) {
         fileInfoCache.delete(thumbnailPath);
         return { ok: true, sourcePath: filePath, thumbnailPath, cached: true, url: safeMediaUrl(thumbnailPath) };
       }
@@ -570,6 +596,7 @@ function createCoverThumbnail(filePath) {
       if (url && mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.webContents.send("covers:thumbnail-ready", { source: safeMediaUrl(filePath), url });
       }
+      if (++thumbnailWrites % 32 === 0) void scheduleThumbnailPrune();
       return { ok: true, sourcePath: filePath, thumbnailPath, cached: false, url, size: COVER_THUMBNAIL_SIZE };
     } catch (error) {
       console.log("[localtify thumbnail create error]", error?.message || error);
@@ -605,7 +632,7 @@ function getCoverThumbnailUrl(filePath) {
     rememberCoverThumbnail(key, thumbnailPath);
     return url;
   }
-  queueCoverThumbnail(filePath);
+  queueCoverThumbnail(filePath, true);
   return "";
 }
 
@@ -616,6 +643,7 @@ function getCoverThumbnailStatus() {
   try {
     if (dir && fs.existsSync(dir)) {
       for (const name of fs.readdirSync(dir)) {
+        if (!/^[a-f0-9]{40}\.png$/.test(name)) continue;
         const filePath = path.join(dir, name);
         if (!fileExists(filePath)) continue;
         const info = getFileInfoCached(filePath);
@@ -687,6 +715,7 @@ async function warmCoverThumbnails({ limit = 80, force = false } = {}) {
 function scheduleCoverThumbnailWarmup() {
   if (coverThumbnailWarmStarted) return;
   coverThumbnailWarmStarted = true;
+  void scheduleThumbnailPrune();
   setTimeout(() => {
     try {
       const seen = new Set();
@@ -2436,6 +2465,28 @@ app.whenReady().then(async () => {
       console.log("[localtify warm thumbnails error]", error?.message || error);
       return { ok: false, created: 0, cached: 0, warnings: ["Localtify could not prepare cover thumbnails right now. Covers will still load normally."], error: error?.message || "thumbnail warmup failed" };
     }
+  });
+  // Accept a library song ID, never a renderer-provided filesystem path.
+  ipcRouter.handle("covers:request-thumbnail", async (_event, payload) => {
+    if (!payload || typeof payload.id !== "string" || typeof payload.source !== "string") return null;
+    const song = getSong(payload.id);
+    if (!song) return null;
+    const file = getRuntimeCoverPath(song);
+    if (!file || safeMediaUrl(file) !== payload.source) return null;
+    const thumbnail = getCoverThumbnailPath(file);
+    if (!thumbnail) return null;
+    if (await readableThumbnail(thumbnail)) {
+      const url = safeMediaUrl(thumbnail);
+      if (url && payload.failed !== url) return { source: payload.source, url };
+    }
+    if (!thumbnailJobs.has(thumbnail)) {
+      // No await between the active check and invalidation/publication decision.
+      try { fs.rmSync(thumbnail, { force: true }); } catch {}
+      fileInfoCache.delete(thumbnail);
+      coverThumbnailUrlCache.delete(getCoverThumbnailCacheKey(file));
+      coverThumbnailQueue.enqueue(file);
+    }
+    return null;
   });
   ipcRouter.handle("covers:cleanup-cache", async () => { try { return cleanupCoverThumbnailCache(); } catch (error) { return { ok: false, error: error?.message || "cover cache cleanup failed" }; } });
   ipcRouter.handle("song:set-cover", async (_event, id, coverPath) => { const updated = patchSong(id, { coverPath }); return updated ? shapeSong(updated) : null; });

@@ -72,7 +72,7 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
   const src = candidates.find(url => url && !failed.includes(url));
   const needsLookup = lookup && (!directUrls.length || failed.length > 0);
   // The cache returns a display URL only; the provider URL remains the lookup/download identity.
-  const pendingLocal = Boolean(src && !near ? false : src && !isDisplayOnlyCover(src) && window.localitfy?.resolveRemoteArtwork && local?.source !== src);
+  const pendingLocal = Boolean(near && src && !isDisplayOnlyCover(src) && window.localitfy?.resolveRemoteArtwork && local?.source !== src);
   useEffect(() => {
     if (!near || !src || isDisplayOnlyCover(src) || !window.localitfy?.resolveRemoteArtwork) return;
     let active = true;

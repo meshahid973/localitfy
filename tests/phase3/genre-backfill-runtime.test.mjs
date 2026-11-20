@@ -59,3 +59,19 @@ test("genres backfill runs on demand instead of blocking normal startup", () => 
   assert.match(bootstrap, /options\?\.includeGenres === true\) await backfillGenres\(\)/);
   assert.match(genres, /bootstrap\(\{ includeGenres: true \}\)/);
 });
+
+
+test("genre backfill never overwrites edits made while metadata is being read", async () => {
+  let song = { id:"a", filePath:"/music/a.mp3", genre:"" };
+  let release;
+  const pending = new Promise(resolve => { release = resolve; });
+  const runtime = createGenreMetadataBackfill({
+    getSettings:()=>({}), saveSettings:()=>{}, getSongs:()=>[song], getSong:()=>song,
+    patchSong:()=>assert.fail("manual edit must win"), fileExists:()=>true,isAudioFile:()=>true,
+    readLocalAudioMetadata:()=>pending, yieldToMainLoop:async()=>{}, logger:{log(){}}
+  });
+  const work = runtime.run();
+  song = {...song,genre:"Manual genre"};
+  release({genre:"Automatic genre"});
+  assert.deepEqual(await work,{scannedCount:1,changedCount:0});
+});
