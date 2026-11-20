@@ -13,7 +13,6 @@ on:
       - "scripts/test-rust-kernels.cjs"
       - "scripts/check-rust-package.cjs"
       - "tests/phase4/rust-optional-integration.test.mjs"
-      - "package.json"
       - ".github/workflows/rust-kernels-experimental.yml"
   workflow_dispatch:
 
