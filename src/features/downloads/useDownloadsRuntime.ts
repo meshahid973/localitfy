@@ -12,7 +12,7 @@ import {
   formatSpotifyPrivatePlaylistMessage,
   friendlyDownloadError,
   mergeDownloadProgress,
-  retryDownloadsInOrder, makeQueuedDownloads, parseDownloadUrls
+  retryDownloadsInOrder, makeQueuedDownloads, parseDownloadUrls, reconcileDownloadResults
 } from "./downloadProcessing";
 
 export type DownloadsTab = "youtube" | "spotify";
@@ -75,7 +75,7 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
       const restored = jobs.map(item => item.status === "done" ? { ...item, ...byId.get(item.recoveryId) } : item);
       setDownloadQueue(current => {
         const ids = new Set(current.map(item => item.recoveryId || item.id));
-        return [...current, ...restored.filter(item => !ids.has(item.id) && !current.some(active => active.url === item.url))];
+        return [...current, ...restored.filter(item => !ids.has(item.recoveryId || item.id))];
       });
     }).catch(error => { if (!cancelled) setPlayerError(`Could not restore downloads: ${String(error)}`); });
     return () => { cancelled = true; };
@@ -293,50 +293,9 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
     }
   }
 
-  const syncDownloadFilesToQueue = useCallback((results: DownloadResult[], librarySongs: Song[] = songs) => {
-    if (!results.length) return;
-
-    const enrichedResults = enrichDownloadResultsWithLibraryMatches(results, librarySongs);
-
-    setDownloadQueue((current) => {
-      const next = [...current];
-      enrichedResults.forEach((result) => {
-        const resultSpotifyTrackId = String(result.spotifyTrackId || "").trim();
-        const index = result.recoveryId
-          ? next.findIndex(item => item.recoveryId === result.recoveryId)
-          : next.findIndex(item => !item.recoveryId && (
-              Boolean(resultSpotifyTrackId && item.spotifyTrackId === resultSpotifyTrackId) ||
-              Boolean(result.url && item.url === result.url) || Boolean(result.filePath && item.filePath === result.filePath)
-            ));
-
-        if (index === -1) return;
-
-        next[index] = {
-          ...next[index],
-          recoveryId: result.recoveryId || next[index].recoveryId,
-          status: result.status || (result.ok ? "done" : "failed"),
-          progress: 100,
-          message: result.ok
-            ? result.importedToLibrary
-              ? "Added to library"
-              : "Downloaded, but not imported"
-            : friendlyDownloadError(result.error || "Download failed."),
-          filePath: result.filePath,
-          filename: result.filename,
-          error: result.ok ? "" : friendlyDownloadError(result.error || "Download failed."),
-          importedToLibrary: result.importedToLibrary,
-          librarySongId: result.librarySongId,
-          statusLabel: result.statusLabel,
-          spotifyTrackId: result.spotifyTrackId || next[index].spotifyTrackId,
-          spotifyUrl: result.spotifyUrl || next[index].spotifyUrl,
-          providerUrl: result.providerUrl || next[index].providerUrl,
-          matchScore: result.matchScore,
-          title: result.filename || next[index].title
-        };
-      });
-      return next;
-    });
-  }, [songs]);
+  const syncDownloadFilesToQueue = useCallback((results: DownloadResult[]) => {
+    if (results.length) setDownloadQueue(current=>reconcileDownloadResults(current,results));
+  }, []);
 
   const chooseInitialSong = useStableCallback(async (nextSongs: Song[]) => {
     if (currentId || !nextSongs.length) return;
@@ -504,7 +463,7 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
 
       const enrichedDownloads = enrichDownloadResultsWithLibraryMatches(downloads, nextSongs);
       setDownloadResults(enrichedDownloads);
-      syncDownloadFilesToQueue(enrichedDownloads, nextSongs);
+      syncDownloadFilesToQueue(enrichedDownloads);
       setDownloadFolderLabel(result.downloadFolder || settings.downloadFolder || "");
       clearPlaybackCaches();
       setSongs(nextSongs);
@@ -646,7 +605,7 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
 
         const enrichedDownloads = enrichDownloadResultsWithLibraryMatches(downloads, nextSongs);
         setDownloadResults(enrichedDownloads);
-        syncDownloadFilesToQueue(enrichedDownloads, nextSongs);
+        syncDownloadFilesToQueue(enrichedDownloads);
 
         const enrichedDownloadsBySpotifyId = new Map(
           enrichedDownloads

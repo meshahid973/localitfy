@@ -19,15 +19,12 @@ function referenceMatch(result, librarySongs) {
   const filePath = String(result.filePath || "").trim();
   const filename = String(result.filename || "").trim();
   const spotifyTrackId = String(result.spotifyTrackId || "").trim();
-  if (spotifyTrackId) {
-    const match = librarySongs.find((song) =>
-      String(song.sourceTrackId || "").trim() === spotifyTrackId);
-    if (match) return match;
-  }
-  if (filePath) {
-    const match = librarySongs.find((song) =>
-      String(song.filePath || "").trim() === filePath);
-    if (match) return match;
+  if (filePath) return librarySongs.find(song=>String(song.filePath||"").trim()===filePath)||null;
+  const committed=librarySongs.find(song=>song.id===result.librarySongId);
+  if(committed && (!spotifyTrackId || String(committed.sourceTrackId||"").trim()===spotifyTrackId)) return committed;
+  if(spotifyTrackId){
+    const matches=librarySongs.filter(song=>String(song.sourceTrackId||"").trim()===spotifyTrackId);
+    return matches.length===1?matches[0]:null;
   }
   if (filename && !filePath) {
     const matches = librarySongs.filter(song => String(song.filePath || "").trim().split(/[\\/]/).pop() === filename);
@@ -41,7 +38,7 @@ function song(id, patch = {}) {
     sourceTrackId: "spotify-" + id, ...patch };
 }
 
-test("batch download lookup preserves Spotify > path > unique basename precedence", () => {
+test("batch download lookup prioritizes exact file identity over ambiguous provider IDs", () => {
   const songs = [
     song("a", { sourceTrackId: "double", filePath: "/music/MYSong.mp3" }),
     song("b", { sourceTrackId: "double", filePath: "/music/song.mp3" }),
@@ -72,7 +69,7 @@ test("batch download lookup preserves Spotify > path > unique basename precedenc
   }
 });
 
-test("first-match semantics hold with duplicate file paths and IDs", () => {
+test("explicit file identity is preserved with duplicate provider IDs", () => {
   const songs = Array.from({ length: 5000 }, (_, index) => song(index, {
     sourceTrackId: "track-" + (index % 79),
     filePath: "/music/folder-" + (index % 71) + "/song-" + (index % 103) + ".flac"
@@ -173,4 +170,16 @@ test("retries run one at a time and cancellation prevents the remaining jobs", a
   }, controller.signal);
   assert.deepEqual(calls, ["one", "two"]);
   assert.equal(maximum, 1);
+});
+
+
+test("saved formats and reordered results never claim another recording",()=>{
+  const library=[song("mp3",{sourceTrackId:"track",filePath:"/music/track.mp3"}),song("flac",{sourceTrackId:"track",filePath:"/music/track.flac"})];
+  const rows=[{ok:true,spotifyTrackId:"track",filePath:"/music/track.flac"},{ok:true,spotifyTrackId:"track"},{ok:true,spotifyTrackId:"track",filePath:"/missing.flac"},{ok:true,spotifyTrackId:"track",librarySongId:"mp3"}];
+  assert.deepEqual(Array.from(exports.enrichDownloadResultsWithLibraryMatches(rows,library),item=>item.librarySongId),["flac","","","mp3"]);
+  const queue=["mp3","flac"].map(id=>({id,recoveryId:id,url:"same-url",title:id,status:"importing",progress:95,message:"Importing"}));
+  const merged=exports.reconcileDownloadResults(queue,[{ok:true,recoveryId:"flac",librarySongId:"flac",importedToLibrary:true},{ok:false,recoveryId:"mp3",error:"interrupted",status:"interrupted"}]);
+  assert.equal(merged[0].status,"interrupted");
+  assert.equal(merged[1].librarySongId,"flac");
+  assert.equal(merged[1].status,"done");
 });
