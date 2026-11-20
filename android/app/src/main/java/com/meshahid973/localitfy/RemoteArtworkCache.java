@@ -1,6 +1,8 @@
 package com.meshahid973.localitfy;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
 import com.getcapacitor.JSObject;
@@ -19,6 +21,8 @@ final class RemoteArtworkCache {
     private static final String DIR = "remote-artwork-v1";
     private static final Pattern NAME = Pattern.compile("[a-f0-9]{64}\\.(jpg|png|webp|gif)");
     private final File root;
+    private final File localRoot, thumbnails;
+    private boolean thumbnailsInitialized;
     private final SharedPreferences index;
     private final Set<String> pending = new HashSet<>();
     private final Map<String,Long> retry = new LinkedHashMap<>();
@@ -27,7 +31,71 @@ final class RemoteArtworkCache {
 
     RemoteArtworkCache(Context context) {
         root = new File(context.getFilesDir(), DIR);
+        localRoot = new File(context.getFilesDir(), "covers");
+        thumbnails = new File(context.getFilesDir(), "artwork-thumbnails-v1");
         index = context.getSharedPreferences(DIR, Context.MODE_PRIVATE);
+    }
+
+    // Derived images are disposable and never replace original synced artwork.
+    synchronized JSObject thumbnail(String relative, String revision, int requested, String failed) throws Exception {
+        if(relative==null || !relative.matches("covers/[^/\\\\]{1,180}\\.(?i:jpg|jpeg|png|webp|gif|bmp)") ||
+           revision==null || revision.length()>256 || (requested!=96 && requested!=256 && requested!=512)) return new JSObject();
+        File source=new File(localRoot,relative.substring(7)).getCanonicalFile();
+        if(!localRoot.getCanonicalFile().equals(source.getParentFile()) || !source.isFile()) return new JSObject();
+        long length=source.length(), modified=source.lastModified();
+        if(length<=0||length>32L*1024*1024) return new JSObject();
+        String name=hash(("v1:"+relative+":"+revision+":"+length+":"+modified+":"+requested).getBytes(java.nio.charset.StandardCharsets.UTF_8))+".png";
+        String url="https://localhost"+LocalMediaHandler.PREFIX+"artwork-thumbnails-v1/"+name;
+        if(!thumbnails.isDirectory()&&!thumbnails.mkdirs())return new JSObject();
+        if(!thumbnailsInitialized){pruneThumbnails(null);thumbnailsInitialized=true;}
+        File target=new File(thumbnails,name);
+        BitmapFactory.Options bounds=new BitmapFactory.Options();
+        bounds.inJustDecodeBounds=true;
+        if(target.isFile()&&!url.equals(failed)){
+            BitmapFactory.decodeFile(target.getPath(),bounds);
+            if(bounds.outWidth>0&&bounds.outHeight>0&&Math.max(bounds.outWidth,bounds.outHeight)<=requested){
+                if(System.currentTimeMillis()-target.lastModified()>60000)target.setLastModified(System.currentTimeMillis());
+                JSObject out=new JSObject();out.put("url",url);return out;
+            }
+        }
+        BitmapFactory.decodeFile(source.getPath(),bounds);
+        if(bounds.outWidth<=0||bounds.outHeight<=0||(long)bounds.outWidth*bounds.outHeight>64000000L)return new JSObject();
+        BitmapFactory.Options options=new BitmapFactory.Options();
+        options.inSampleSize=1;
+        while(Math.max(bounds.outWidth,bounds.outHeight)/options.inSampleSize>requested*2)options.inSampleSize*=2;
+        Bitmap decoded=BitmapFactory.decodeFile(source.getPath(),options);
+        if(decoded==null)return new JSObject();
+        Bitmap scaled=decoded;
+        File temp=null;
+        try{
+            double ratio=Math.min(1.0,(double)requested/Math.max(decoded.getWidth(),decoded.getHeight()));
+            if(ratio<1)scaled=Bitmap.createScaledBitmap(decoded,Math.max(1,(int)Math.round(decoded.getWidth()*ratio)),Math.max(1,(int)Math.round(decoded.getHeight()*ratio)),true);
+            temp=File.createTempFile("thumb-",".part",thumbnails);
+            try(FileOutputStream out=new FileOutputStream(temp)){
+                if(!scaled.compress(Bitmap.CompressFormat.PNG,100,out))return new JSObject();
+            }
+            if(Thread.currentThread().isInterrupted()||source.length()!=length||source.lastModified()!=modified||temp.length()>2L*1024*1024)return new JSObject();
+            if(!temp.renameTo(target))return new JSObject();
+            pruneThumbnails(target);
+            JSObject out=new JSObject();out.put("url",url);return out;
+        }finally{
+            if(temp!=null)temp.delete();
+            if(scaled!=decoded)scaled.recycle();
+            decoded.recycle();
+        }
+    }
+
+    private void pruneThumbnails(File keep){
+        File[] files=thumbnails.listFiles((dir,name)->name.matches("[a-f0-9]{64}\\.png")||name.endsWith(".part"));
+        if(files==null)return;
+        Arrays.sort(files,Comparator.comparingLong(File::lastModified));
+        long bytes=0;int count=0;
+        for(File file:files){if(file.getName().endsWith(".part")){file.delete();continue;}bytes+=file.length();count++;}
+        for(File file:files){
+            if(bytes<=32L*1024*1024&&count<=2048)break;
+            if(file.equals(keep)||!file.getName().endsWith(".png"))continue;
+            long length=file.length();if(file.delete()){bytes-=length;count--;}
+        }
     }
 
     // Same download-eligible provider subset as Electron; display-only sources never enter disk cache.

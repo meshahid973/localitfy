@@ -33,9 +33,10 @@ function createElectronServiceRuntime(options = {}) {
 
     try { cancelActiveDownloads({ interrupted: true }); } catch { }
     try { flushMetadataCache(); } catch { }
-    try { await shutdownDiscordActivity(reason); } catch { }
+    // Electron's before-quit event does not await promises. Release synchronous resources first.
     try { cleanupNativeWindowsMedia?.(); } catch { }
     try { stopMediaServer?.(); } catch { }
+    try { await shutdownDiscordActivity(reason); } catch { }
     return true;
   }
 

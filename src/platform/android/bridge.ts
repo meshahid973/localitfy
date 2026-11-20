@@ -139,7 +139,15 @@ export function createAndroidBridge(): Bridge {
       const result = await LocaltifyNative.resolveRemoteArtwork({ url }).catch(() => null);
       return result?.url && phoneLibrary.effectiveSettings().discoverEnabled === true ? { url: result.url, cacheTtlMs: result.cacheTtlMs } : null;
     },
-    requestCoverThumbnail: undefined,
+    requestCoverThumbnail: async ({id,source,size=256,failed}) => {
+      const record=phoneLibrary.files[id];
+      if(!record?.cover||!record.coverExt)return null;
+      const path=phoneLibrary.coverPath(id,record.coverExt);
+      if(source!==phoneLibrary.paths.mediaPrefix+path+"?v="+record.cover)return null;
+      const result=await LocaltifyNative.requestCoverThumbnail({path,revision:record.cover,size,failed}).catch(()=>null);
+      const current=phoneLibrary.files[id];
+      return result?.url&&current?.cover===record.cover&&current?.coverExt===record.coverExt?{source,url:result.url,size}:null;
+    },
     getDiscoveries: (payload) => payload?.artwork ? cachedArtworkFromMac(payload.artwork) : payload?.catalog ? fromMac<DiscoverResult>("discover:get", payload, 60000) : fromMacOrKept<DiscoverResult>("discover:get", payload ?? {}, "mac:discover", { status: "off" }),
     getArtistBio: async (artist: string) => {
       if (phoneLibrary.effectiveSettings().discoverEnabled !== true) return { status: "off" };

@@ -29,14 +29,14 @@ function cleanWatchedFolders(value) {
 }
 
 /** Audio files under `root`, skipping hidden folders, partial downloads and the app's own download internals. */
-async function listAudioFiles(root, isAudioFile, limit = MAX_FILES) {
+async function listAudioFiles(root, isAudioFile, limit = MAX_FILES, cancelled = () => false) {
   const files = [];
   const walk = async (dir, depth) => {
-    if (files.length >= limit || depth > MAX_DEPTH) return;
+    if (cancelled() || files.length >= limit || depth > MAX_DEPTH) return;
     let entries;
     try { entries = await fsp.readdir(dir, { withFileTypes: true }); } catch { return; }
     for (const entry of entries) {
-      if (files.length >= limit) return;
+      if (cancelled() || files.length >= limit) return;
       const full = path.join(dir, entry.name);
       if (entry.isDirectory()) {
         if (!entry.name.startsWith(".") && !SKIPPED_FOLDERS.has(entry.name)) await walk(full, depth + 1);
@@ -62,7 +62,7 @@ function createLibraryWatcher({ isAudioFile, getLibraryPaths, importFiles, onCha
   let lastImport = null;
 
   // One pass at a time, so a launch scan and a burst of file events never import the same file twice.
-  const run = (task) => (queue = queue.then(task).catch((error) => log("[localtify watched folders error]", error?.message || error)));
+  const run = (task) => (queue = queue.then(() => disposed ? 0 : task()).catch((error) => log("[localtify watched folders error]", error?.message || error)));
 
   function schedule(file) {
     if (disposed) return;
@@ -86,7 +86,7 @@ function createLibraryWatcher({ isAudioFile, getLibraryPaths, importFiles, onCha
 
   async function add(files) {
     const fresh = [...new Set(files)];
-    if (!fresh.length) return 0;
+    if (disposed || !fresh.length) return 0;
     const { importedCount = 0 } = await importFiles(fresh) || {};
     if (importedCount) {
       lastImport = { count: importedCount, at: now() };
@@ -132,7 +132,7 @@ function createLibraryWatcher({ isAudioFile, getLibraryPaths, importFiles, onCha
         continue;
       }
       if (stat.isDirectory()) {
-        candidates.push(...await settledFiles(await listAudioFiles(file, isAudioFile), library));
+        candidates.push(...await settledFiles(await listAudioFiles(file, isAudioFile, MAX_FILES, () => disposed || !isWatched(file)), library));
       } else if (stat.isFile() && !PARTIAL_FILE.test(file) && !path.basename(file).startsWith(".") && isAudioFile(file)) {
         // A known file changed or came back after going missing.
         if (library.has(pathKey(file))) { libraryChanged = true; continue; }
@@ -142,7 +142,7 @@ function createLibraryWatcher({ isAudioFile, getLibraryPaths, importFiles, onCha
       }
     }
     const importedCount = await add(candidates.filter(isWatched));
-    if (importedCount || libraryChanged) onChange({ importedCount, libraryChanged });
+    if (!disposed && (importedCount || libraryChanged)) onChange({ importedCount, libraryChanged });
   }
 
   async function scan(folders) {
@@ -153,11 +153,11 @@ function createLibraryWatcher({ isAudioFile, getLibraryPaths, importFiles, onCha
         if (disposed) break;
         if (entries.get(pathKey(entry.folder)) !== entry) continue;
         const library = new Set(getLibraryPaths().map(pathKey));
-        const files = await settledFiles(await listAudioFiles(entry.folder, isAudioFile), library);
+        const files = await settledFiles(await listAudioFiles(entry.folder, isAudioFile, MAX_FILES, () => disposed || entries.get(pathKey(entry.folder)) !== entry), library);
         importedCount += await add(files.filter(isWatched));
         entry.checkedAt = now();
       }
-      if (importedCount) onChange({ importedCount, libraryChanged: false });
+      if (!disposed && importedCount) onChange({ importedCount, libraryChanged: false });
       return importedCount;
     } finally { scanning = false; }
   }
@@ -200,8 +200,9 @@ function startLibraryWatch(router, { dialog, getWindow, isAudioFile, getSongs, g
   const watcher = createLibraryWatcher({ isAudioFile, importFiles, getLibraryPaths: () => getSongs().map((song) => song.filePath),
     onChange: (change) => getWindow()?.webContents.send("library:watched-change", { ...change, songs: listSongsShaped() }) });
   registerLibraryWatchIpc(router, watcher, { dialog, getWindow });
-  setTimeout(() => watcher.setFolders(getSettings().watchedFolders), startDelayMs).unref?.();
-  return watcher;
+  const startup = setTimeout(() => watcher.setFolders(getSettings().watchedFolders), startDelayMs);
+  startup.unref?.();
+  return {...watcher, dispose() { clearTimeout(startup); watcher.dispose(); }};
 }
 
 module.exports = { createLibraryWatcher, startLibraryWatch, cleanWatchedFolders, listAudioFiles };

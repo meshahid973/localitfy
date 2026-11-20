@@ -19,6 +19,7 @@ export type MediaUpdate = {
 
 /** Native half of the Android app (android/app/src/main/java/.../LocaltifyNativePlugin.java). */
 export interface LocaltifyNativePlugin {
+  requestCoverThumbnail(options: {path: string; revision: string; size: 96|256|512; failed?: string}): Promise<{url?: string}>;
   resolveRemoteArtwork(options: { url: string }): Promise<{ url?: string; cacheTtlMs?: number }>;
   getPaths(): Promise<{ files: string; mediaPrefix: string; deviceName: string }>;
   request(options: { url: string; method?: string; headers?: Record<string, string>; body?: string; timeoutMs?: number }): Promise<{ status: number; body: string }>;
