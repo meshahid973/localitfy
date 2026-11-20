@@ -24,6 +24,7 @@ import "./App.css";
 import AppShell from "./features/shell/AppShell";
 import type { AppShellProps } from "./features/shell/appShell.contract";
 import { useAppToast } from "./features/shell/useAppToast";
+import { useShellResize } from "./features/shell/useShellResize";
 import { useScreensaverController } from "./features/shell/useScreensaverController";
 import { useDiagnosticsInfo } from "./features/shell/useDiagnosticsInfo";
 import { useFeedbackController } from "./features/feedback";
@@ -162,7 +163,7 @@ function MainModeApp() {
     listeningHistoryRef, audioRef, playerEngineRef, playerControllerRef, playbackTransitionRef,
     crossfadeIntervalRef, crossfadeAutoStartedRef, crossfadeAutoTargetRef, crossfadeMainPauseGuardRef,
     crossfadeLastStartAtRef, crossfadeHandoffClearTimerRef, crossfadeHandoffRef, fadeIntervalRef,
-    animationFrameRef, progressLoopTimeoutRef, playerResizeFrameRef,
+    animationFrameRef, progressLoopTimeoutRef,
     pendingPlayRef, countPlayRef, playCountSongIdRef, playCountListenedRef, playCountLastTimeRef,
     sleepTimerRef, positionSaveRef, nextAudioRef, playbackUrlCacheRef, playbackUrlPendingRef,
     lastQueueHistoryRef, songRef, timeRef, durationRef, playingRef, volumeRef, effectiveVolumeRef, lastNonZeroVolumeRef,
@@ -181,7 +182,6 @@ function MainModeApp() {
   } = usePlayerRuntime({ defaultVolume: defaultSettings.volume });
 
   const startupResumePositionRef = useRef<{ songId: string; time: number } | null>(null);
-  const sidebarResizeFrameRef = useRef<number | null>(null);
   const bootedRef = useRef(false);
   const importOverlayTimerRef = useRef<number | null>(null);
   const secretBufferRef = useRef("");
@@ -762,19 +762,9 @@ function MainModeApp() {
       document.body.classList.remove("isResizingSidebar");
       document.body.classList.remove("localitfyNoSelect");
 
-      if (playerResizeFrameRef.current !== null) {
-        window.cancelAnimationFrame(playerResizeFrameRef.current);
-        playerResizeFrameRef.current = null;
-      }
-
       if (volumeDraftFrameRef.current !== null) {
         window.cancelAnimationFrame(volumeDraftFrameRef.current);
         volumeDraftFrameRef.current = null;
-      }
-
-      if (sidebarResizeFrameRef.current !== null) {
-        window.cancelAnimationFrame(sidebarResizeFrameRef.current);
-        sidebarResizeFrameRef.current = null;
       }
 
       if (appRootRef.current) {
@@ -3560,200 +3550,9 @@ function MainModeApp() {
     setStatusText("paused");
   }
 
-  function startPlayerResize(event: PointerEvent<HTMLButtonElement>) {
-    event.preventDefault();
-
-    const resizeHandle = event.currentTarget;
-    const pointerId = event.pointerId;
-    const appRoot = appRootRef.current;
-    const startY = event.clientY;
-    const startSize = clamp(Number(discordSettingsRef.current.playerSize || settings.playerSize || 108), 74, 168);
-    let latestSize = startSize;
-    let saveDone = false;
-
-    const paintSize = () => {
-      playerResizeFrameRef.current = null;
-      appRoot?.style.setProperty("--player-size-live", `${latestSize}px`);
-    };
-
-    const queuePaint = () => {
-      if (playerResizeFrameRef.current !== null) return;
-      playerResizeFrameRef.current = window.requestAnimationFrame(paintSize);
-    };
-
-    const commitSize = () => {
-      if (saveDone) return;
-      saveDone = true;
-
-      const nextSettings = {
-        ...settingsRef.current,
-        playerSize: latestSize
-      };
-
-      discordSettingsRef.current = nextSettings;
-      settingsRef.current = nextSettings;
-      setSettings(nextSettings);
-
-      void saveSettingsSafely(nextSettings);
-
-      window.setTimeout(() => {
-        appRoot?.style.removeProperty("--player-size-live");
-      }, 90);
-    };
-
-    const finishResize = () => {
-      window.removeEventListener("pointermove", handleMove);
-      window.removeEventListener("pointerup", finishResize);
-      window.removeEventListener("pointercancel", finishResize);
-      window.removeEventListener("keydown", handleKeyDown);
-
-      document.body.classList.remove("isResizingPlayer");
-      document.body.classList.remove("localitfyNoSelect");
-
-      if (playerResizeFrameRef.current !== null) {
-        window.cancelAnimationFrame(playerResizeFrameRef.current);
-        playerResizeFrameRef.current = null;
-      }
-
-      appRoot?.style.setProperty("--player-size-live", `${latestSize}px`);
-
-      try {
-        if (resizeHandle.hasPointerCapture(pointerId)) resizeHandle.releasePointerCapture(pointerId);
-      } catch {
-        // Pointer capture can already be gone if Windows cancels the drag.
-      }
-
-      commitSize();
-    };
-
-    const cancelResize = () => {
-      latestSize = startSize;
-      appRoot?.style.setProperty("--player-size-live", `${startSize}px`);
-      finishResize();
-    };
-
-    const handleMove = (moveEvent: globalThis.PointerEvent) => {
-      latestSize = Math.round(clamp(startSize + startY - moveEvent.clientY, 74, 168));
-      queuePaint();
-    };
-
-    const handleKeyDown = (keyEvent: KeyboardEvent) => {
-      if (keyEvent.key === "Escape") cancelResize();
-    };
-
-    document.body.classList.add("isResizingPlayer");
-    document.body.classList.add("localitfyNoSelect");
-    appRoot?.style.setProperty("--player-size-live", `${startSize}px`);
-
-    try {
-      resizeHandle.setPointerCapture(pointerId);
-    } catch {
-      // Safe fallback for older Electron/Chromium edge cases.
-    }
-
-    window.addEventListener("pointermove", handleMove, { passive: true });
-    window.addEventListener("pointerup", finishResize, { once: true });
-    window.addEventListener("pointercancel", finishResize, { once: true });
-    window.addEventListener("keydown", handleKeyDown);
-  }
-
-  function startSidebarResize(event: PointerEvent<HTMLButtonElement>) {
-    event.preventDefault();
-
-    const resizeHandle = event.currentTarget;
-    const pointerId = event.pointerId;
-    const appRoot = appRootRef.current;
-    const startX = event.clientX;
-    const startWidth = clamp(Number(discordSettingsRef.current.sidebarWidth || settings.sidebarWidth || 249), 184, 340);
-    let latestWidth = startWidth;
-    let saveDone = false;
-
-    const paintWidth = () => {
-      sidebarResizeFrameRef.current = null;
-      appRoot?.style.setProperty("--sidebar-width-live", `${latestWidth}px`);
-    };
-
-    const queuePaint = () => {
-      if (sidebarResizeFrameRef.current !== null) return;
-      sidebarResizeFrameRef.current = window.requestAnimationFrame(paintWidth);
-    };
-
-    const commitWidth = () => {
-      if (saveDone) return;
-      saveDone = true;
-
-      const nextSettings = {
-        ...settingsRef.current,
-        sidebarWidth: latestWidth
-      };
-
-      discordSettingsRef.current = nextSettings;
-      settingsRef.current = nextSettings;
-      setSettings(nextSettings);
-
-      void saveSettingsSafely(nextSettings);
-
-      window.setTimeout(() => {
-        appRoot?.style.removeProperty("--sidebar-width-live");
-      }, 90);
-    };
-
-    const finishResize = () => {
-      window.removeEventListener("pointermove", handleMove);
-      window.removeEventListener("pointerup", finishResize);
-      window.removeEventListener("pointercancel", finishResize);
-      window.removeEventListener("keydown", handleKeyDown);
-
-      document.body.classList.remove("isResizingSidebar");
-      document.body.classList.remove("localitfyNoSelect");
-
-      if (sidebarResizeFrameRef.current !== null) {
-        window.cancelAnimationFrame(sidebarResizeFrameRef.current);
-        sidebarResizeFrameRef.current = null;
-      }
-
-      appRoot?.style.setProperty("--sidebar-width-live", `${latestWidth}px`);
-
-      try {
-        if (resizeHandle.hasPointerCapture(pointerId)) resizeHandle.releasePointerCapture(pointerId);
-      } catch {
-        // Pointer capture can already be gone if Windows cancels the drag.
-      }
-
-      commitWidth();
-    };
-
-    const cancelResize = () => {
-      latestWidth = startWidth;
-      appRoot?.style.setProperty("--sidebar-width-live", `${startWidth}px`);
-      finishResize();
-    };
-
-    const handleMove = (moveEvent: globalThis.PointerEvent) => {
-      latestWidth = Math.round(clamp(startWidth + moveEvent.clientX - startX, 184, 340));
-      queuePaint();
-    };
-
-    const handleKeyDown = (keyEvent: KeyboardEvent) => {
-      if (keyEvent.key === "Escape") cancelResize();
-    };
-
-    document.body.classList.add("isResizingSidebar");
-    document.body.classList.add("localitfyNoSelect");
-    appRoot?.style.setProperty("--sidebar-width-live", `${startWidth}px`);
-
-    try {
-      resizeHandle.setPointerCapture(pointerId);
-    } catch {
-      // Safe fallback for older Electron/Chromium edge cases.
-    }
-
-    window.addEventListener("pointermove", handleMove, { passive: true });
-    window.addEventListener("pointerup", finishResize, { once: true });
-    window.addEventListener("pointercancel", finishResize, { once: true });
-    window.addEventListener("keydown", handleKeyDown);
-  }
-
+  const {startPlayerResize,startSidebarResize}=useShellResize({
+    appRootRef, settingsRef, discordSettingsRef, setSettings, saveSettingsSafely
+  });
 
   async function rememberCurrentSong(id: string) {
     if (!id || !settingsRef.current.rememberLastSong) return;
