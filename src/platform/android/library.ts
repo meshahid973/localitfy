@@ -43,6 +43,18 @@ export class PhoneLibrary {
   revision = 0;
   private loading: Promise<void> | null = null;
   private checkpointDirty = false;
+  private indexedSongs: RemoteSong[] | null = null;
+  private songsById = new Map<string, RemoteSong>();
+
+  private remoteSong(id: string) {
+    // Sync adopts a new snapshot array; property-only like changes keep the
+    // indexed object identity. Never rebuild the map for each playback edit.
+    if (this.indexedSongs !== this.remoteSongs) {
+      this.indexedSongs = this.remoteSongs;
+      this.songsById = new Map(this.remoteSongs.map(song => [song.id, song]));
+    }
+    return this.songsById.get(id);
+  }
 
   load() {
     this.loading ??= (async () => {
@@ -129,7 +141,7 @@ export class PhoneLibrary {
   }
 
   patchSong(id: string, patch: Partial<Song>) {
-    const remote = this.remoteSongs.find((song) => song.id === id);
+    const remote = this.remoteSong(id);
     if (!remote) return null;
     this.edits[id] = { ...this.edits[id], ...patch };
     if (typeof patch.liked === "boolean") this.likeClock[id] = Date.now() + this.clockOffset;
@@ -144,7 +156,7 @@ export class PhoneLibrary {
    * way keeps its place. Returns whether the song's like changed.
    */
   adoptMacLike(id: string, liked: boolean, changedAt: number) {
-    const remote = this.remoteSongs.find((song) => song.id === id);
+    const remote = this.remoteSong(id);
     if (!remote || (this.likeClock[id] || 0) > changedAt) return false;
     const before = this.edits[id]?.liked ?? remote.liked;
     remote.liked = liked;

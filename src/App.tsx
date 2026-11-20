@@ -1423,9 +1423,6 @@ function MainModeApp() {
 
   useEffect(() => {
     songRef.current = currentSong;
-    if (!audioRef.current || audioRef.current.paused || !isPlaying) {
-      timeRef.current = currentTime;
-    }
     durationRef.current = currentDuration;
     playingRef.current = isPlaying;
     volumeRef.current = settings.volume;
@@ -1433,7 +1430,7 @@ function MainModeApp() {
     if (settings.volume > 0.01) {
       lastNonZeroVolumeRef.current = settings.volume;
     }
-  }, [currentSong, currentTime, currentDuration, isPlaying, settings.volume]);
+  }, [currentSong, currentDuration, isPlaying, settings.volume]);
 
 
   useEffect(() => {
@@ -2343,7 +2340,9 @@ function MainModeApp() {
       const backgroundMode = document.hidden || isAppBackgroundedRef.current;
       const busyUi = scrollBusyRef.current || performance.now() < rendererQuietUntilRef.current || Boolean(draggedSongIdRef.current) || themeSettlingRef.current;
 
-      if (audio && !audio.paused) {
+      const transition = playbackTransitionRef.current.snapshot();
+      if (audio && !audio.paused && transition.sourceId === currentSong.id &&
+          (transition.phase === "playing" || transition.phase === "crossfading")) {
         const nextTime = audio.currentTime || 0;
         const nextDuration = Number.isFinite(audio.duration) ? audio.duration : currentDuration;
 
@@ -3221,8 +3220,15 @@ function MainModeApp() {
     if (!playbackTransitionRef.current.paused(Boolean(
       crossfadeAutoStartedRef.current || crossfadeMainPauseGuardRef.current || crossfadeHandoffRef.current
     ))) return;
-    if (audioRef.current) listeningHistoryRef.current?.pause(audioRef.current);
-    if (!audioRef.current?.ended) setIsPlaying(false);
+    const audio = audioRef.current;
+    if (audio) {
+      listeningHistoryRef.current?.pause(audio);
+      if (!audio.ended && Number.isFinite(audio.currentTime)) {
+        setCurrentTime(audio.currentTime);
+        syncProgressDom(audio.currentTime, durationRef.current, true);
+      }
+    }
+    if (!audio?.ended) setIsPlaying(false);
   }
 
   function handleAudioEnded() {

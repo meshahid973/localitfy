@@ -208,3 +208,19 @@ test("all audio creation paths configure anonymous CORS before setting src", () 
   assert.match(app, /nextAudio\.crossOrigin = "anonymous";/);
   assert.match(engine, /this\.element\.crossOrigin = "anonymous";/);
 });
+
+test("stopping during pending listen settles the old start and allows a clean restart", async (t) => {
+  const { runtime } = makeRuntime();
+  t.after(() => runtime.stop());
+  const first = runtime.start();
+  assert.equal(runtime.start(), first);
+  runtime.stop();
+  assert.equal(await first, false);
+  assert.equal(runtime.getPort(), 0);
+  assert.equal(await runtime.start(), true);
+  assert.ok(runtime.getPort() > 0);
+  await new Promise(resolve => setImmediate(resolve));
+  assert.ok(runtime.getPort() > 0, "old callbacks cannot clear the restarted server");
+  runtime.stop();
+  assert.equal(runtime.getPort(), 0);
+});

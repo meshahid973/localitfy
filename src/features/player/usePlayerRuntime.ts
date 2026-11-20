@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ListeningHistory } from "./listeningHistory";
 import { AudioEffectRuntime } from "./audio/audioEffectRuntime";
 import { PlaybackTransitionCoordinator } from "./engine/playbackTransitionCoordinator";
@@ -94,7 +94,13 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
     const saved = readLocalJson<RepeatMode>(REPEAT_MODE_STORAGE_KEY, "all");
     return saved === "all" || saved === "one" || saved === "off" ? saved : "all";
   });
-  const [currentTime, setCurrentTime] = useState(0);
+  const [currentTime, setCurrentTimeSnapshot] = useState(0);
+  // Explicit seeks, selection resets and pauses update the live clock immediately;
+  // unrelated renders must not copy an older React snapshot back into that clock.
+  const setCurrentTime = useCallback((time: number) => {
+    timeRef.current = time;
+    setCurrentTimeSnapshot(time);
+  }, []);
   const [currentDuration, setCurrentDuration] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
   const [seekDraftPercent, setSeekDraftPercent] = useState(0);

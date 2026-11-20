@@ -47,3 +47,17 @@ test("an unknown Android song update has no persistence or revision side effects
   assert.equal(phone.revision, 0);
   assert.equal(writes.length, 0);
 });
+
+test("Android song lookup reuses the index and invalidates it when sync replaces the snapshot", () => {
+  const { phone } = library();
+  let reads = 0;
+  const make = (id, title) => ({ get id() { reads++; return id; }, title, liked: false, file: { size: 12, mtimeMs: 1, ext: "mp3" }, cover: null });
+  phone.remoteSongs = Array.from({ length: 2000 }, (_, i) => make(String(i), "old"));
+  phone.patchSong("1999", { liked: true });
+  reads = 0;
+  phone.patchSong("1999", { playbackPosition: 3 });
+  assert.ok(reads < 10, "second update must not scan the library");
+  phone.remoteSongs = [make("1999", "new")];
+  assert.equal(phone.patchSong("1999", { liked: false }).title, "new");
+  assert.equal(phone.patchSong("0", { liked: true }), null);
+});
