@@ -165,11 +165,12 @@ test("thumbnail cache refreshes media URLs and downloads shape the library once"
   assert.match(main, /webContents\.send\("covers:thumbnail-ready", payload\)/);
   assert.doesNotMatch(protocols, /bypassCSP\s*:\s*true/);
 
-  const download = main.slice(main.indexOf('const runAudioDownload ='), main.indexOf('ipcRouter.handle("download:cancel"'));
+  const downloadsIpc = fs.readFileSync(path.join(root, "electron", "ipc", "downloads.cjs"), "utf8");
+  const download = downloadsIpc.slice(downloadsIpc.indexOf('const runAudioDownload ='), downloadsIpc.indexOf('ipcRouter.handle("download:cancel"'));
   assert.equal((download.match(/listSongsShaped\(\)/g) || []).length, 2, "one success snapshot and one error fallback");
   assert.match(download, /importNewAudioFilesFromDirectory\(downloadFolder, \[\], \{ includeSongs: false \}\)/);
 
-  const spotify = main.slice(main.indexOf('const runSpotifyDownloadBatch ='), main.indexOf('ipcRouter.handle("spotify-download-batch"'));
+  const spotify = downloadsIpc.slice(downloadsIpc.indexOf('const runSpotifyDownloadBatch ='), downloadsIpc.indexOf('ipcRouter.handle("spotify-download-batch"'));
   assert.equal((spotify.match(/listSongsShaped\(\)/g) || []).length, 2, "one success snapshot and one error fallback");
 });
 

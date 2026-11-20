@@ -571,7 +571,7 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
       : spotifyTracks.filter((t) => spotifySelectedIds.has(t.id));
     if (!selected.length || !beginDownloadOperation()) return;
 
-    const selectedIndexById = new Map(selected.map((track,index)=>[track.id,index]));
+    const selectedIds = new Set(selected.map(track=>track.id));
     if (Array.isArray(trackOverride) && trackOverride.length) {
       setSpotifySelectedIds(new Set(trackOverride.map((track) => track.id)));
     }
@@ -582,12 +582,12 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
     setPlayerError("");
     setSpotifyFetchError("");
     setSpotifyTracks((items) => items.map((track: any) => (
-      selectedIndexById.has(track.id)
+      selectedIds.has(track.id)
         ? { ...track, downloadStatus: "queued", downloadError: "", downloadMessage: "Queued" }
         : track
     )));
     setDownloadQueue(items => [
-      ...items.filter(item => item.recoveryId || !selectedIndexById.has(item.spotifyTrackId || "")),
+      ...items.filter(item => item.recoveryId || !selectedIds.has(item.spotifyTrackId || "")),
       ...selected.map((t, i) => ({
         id: `spt_${t.id}_${i}`,
         spotifyTrackId: t.id,
@@ -607,7 +607,7 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
       if (!spotifyDownloadBridge) {
         const message = "Spotify downloading is unavailable in this build.";
         setSpotifyFetchError(message);
-        setDownloadQueue((items) => items.map((item) => !item.recoveryId && selectedIndexById.has(item.spotifyTrackId || "") ? ({ ...item, status: "failed", progress: 100, message, error: message, statusLabel: "Failed — retry available" }) : item));
+        setDownloadQueue((items) => items.map((item) => !item.recoveryId && selectedIds.has(item.spotifyTrackId || "") ? ({ ...item, status: "failed", progress: 100, message, error: message, statusLabel: "Failed — retry available" }) : item));
         setStatusText("spotify download failed");
         showAppToast("Spotify download bridge missing", "error");
         return;
@@ -660,14 +660,11 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
         );
 
         setSpotifyTracks((items) => items.map((track: any) => {
-          const selectedIndex = selectedIndexById.get(track.id);
-          if (selectedIndex === undefined) return track;
+          if (!selectedIds.has(track.id)) return track;
 
           const resultForTrack: any =
             enrichedDownloadsBySpotifyId.get(String(track.id || "").trim()) ||
             rawDownloadsBySpotifyId.get(String(track.id || "").trim()) ||
-            (enrichedDownloads[selectedIndex]?.spotifyTrackId ? null : enrichedDownloads[selectedIndex]) ||
-            (downloads[selectedIndex]?.spotifyTrackId ? null : downloads[selectedIndex]) ||
             null;
           if (!resultForTrack) {
             return {
@@ -742,7 +739,7 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
             }
           }
         }
-      await chooseInitialSong(nextSongs);
+        await chooseInitialSong(nextSongs);
 
         if (successCount > 0) {
           const importedCount = enrichedDownloads.filter((item: any) => item.ok && item.importedToLibrary).length;
@@ -780,7 +777,7 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
       console.error("[localtify spotify download failed]", error);
       setSpotifyFetchError(message);
       setSpotifyTracks((items) => items.map((track: any) => (
-        selectedIndexById.has(track.id)
+        selectedIds.has(track.id)
           ? { ...track, downloadStatus: "failed", downloadError: message, downloadMessage: "Failed — retry available" }
           : track
       )));
@@ -793,7 +790,7 @@ export function useDownloadsRuntime({ ready, songs, setStatusText, setPlayerErro
         statusLabel: "Failed — retry available"
       })) as any[];
       setDownloadResults(failedDownloads);
-      setDownloadQueue((items) => items.map((item) => !item.recoveryId && selectedIndexById.has(item.spotifyTrackId || "") ? ({
+      setDownloadQueue((items) => items.map((item) => !item.recoveryId && selectedIds.has(item.spotifyTrackId || "") ? ({
         ...item,
         status: "failed",
         progress: 100,
