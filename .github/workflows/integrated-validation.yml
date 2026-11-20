@@ -37,6 +37,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - name: Check live public artwork providers (advisory)
+        shell: bash
+        continue-on-error: true
+        run: |
+          mkdir -p qa-artifacts
+          node scripts/live-artwork-check.cjs | tee qa-artifacts/live-artwork.json
       - name: Compare production library modules with the PR baseline
         env:
           BASELINE_REF: ${{ github.event.pull_request.base.sha || inputs.baseline_ref }}
