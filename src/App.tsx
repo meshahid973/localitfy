@@ -155,7 +155,7 @@ function MainModeApp() {
   const {
     listeningHistoryRef, audioRef, playerEngineRef, playerControllerRef, playbackTransitionRef,
     crossfadeIntervalRef, crossfadeAutoStartedRef, crossfadeAutoTargetRef, crossfadeMainPauseGuardRef,
-    crossfadeLastStartAtRef, crossfadeHandoffClearTimerRef, crossfadeHandoffRef, fadeIntervalRef,
+    crossfadeLastStartAtRef, crossfadeHandoffClearTimerRef, crossfadeRecoveryTimerRef, crossfadeHandoffRef, fadeIntervalRef,
     animationFrameRef, progressLoopTimeoutRef,
     pendingPlayRef, countPlayRef, playCountSongIdRef, playCountListenedRef, playCountLastTimeRef,
     sleepTimerRef, positionSaveRef, nextAudioRef, playbackUrlCacheRef, playbackUrlPendingRef,
@@ -2800,6 +2800,10 @@ function MainModeApp() {
       crossfadeHandoffClearTimerRef.current = null;
     }
 
+    if (crossfadeRecoveryTimerRef.current !== null) {
+      window.clearTimeout(crossfadeRecoveryTimerRef.current);
+      crossfadeRecoveryTimerRef.current = null;
+    }
     crossfadeAutoStartedRef.current = false;
     crossfadeAutoTargetRef.current = "";
     crossfadeMainPauseGuardRef.current = false;
@@ -2914,7 +2918,12 @@ function MainModeApp() {
     if (!target?.song) return;
 
     if (target.kind === "queue" && typeof target.queuedIndex === "number") {
-      setPlayQueue((queue) => queue.slice(target.queuedIndex + 1));
+      // The queue can be reordered while the secondary element fades in.
+      // Consume the actual incoming track, not an index captured before that edit.
+      setPlayQueue((queue) => {
+        const index = queue.indexOf(target.song.id);
+        return index < 0 ? queue : [...queue.slice(0, index).filter(id => isPlayableSong(songsById.get(id))), ...queue.slice(index + 1)];
+      });
     } else if (target.kind === "source-loop") {
       setPlayQueue(target.rest);
     } else if (playQueue.length) {
@@ -2969,7 +2978,8 @@ function MainModeApp() {
 
       pendingPlayRef.current = false;
       armPlayCount(target.song.id, Math.max(0, handoffTime));
-      listeningHistoryRef.current?.play(target.song.id, handoffTime, activePlaylistId);
+      listeningHistoryRef.current?.play(target.song.id, handoffTime, target.playlistId ?? null);
+      pushQueueHistory(target.song);
       setCurrentId(target.song.id);
       setCrossfadePreviewSongId("");
       void rememberCurrentSong(target.song.id);
@@ -3028,8 +3038,8 @@ function MainModeApp() {
       playbackTransitionRef.current.crossfadeFinished(target.song.id);
 
       const recoveryGeneration = playbackTransitionRef.current.snapshot().generation;
-      crossfadeHandoffClearTimerRef.current = window.setTimeout(() => {
-        crossfadeHandoffClearTimerRef.current = null;
+      crossfadeRecoveryTimerRef.current = window.setTimeout(() => {
+        crossfadeRecoveryTimerRef.current = null;
         if (!playbackTransitionRef.current.isCurrent(recoveryGeneration, target.song.id)) return;
         try {
           nextAudio.pause();
@@ -3176,6 +3186,7 @@ function MainModeApp() {
 
   function handleAudioTimeUpdate(event: SyntheticEvent<HTMLAudioElement>) {
     const audio = event.currentTarget;
+    if (crossfadeMainPauseGuardRef.current && crossfadeHandoffRef.current?.songId !== currentSong?.id) return;
     const nextTime = audio.currentTime;
     const duration = Number.isFinite(audio.duration) ? audio.duration : durationRef.current || currentDuration || 0;
 
@@ -4883,6 +4894,8 @@ function MainModeApp() {
 
   function saveDuration(duration: number) {
     if (!currentSong || !Number.isFinite(duration) || duration <= 0) return;
+    // Incoming metadata may arrive before React commits the incoming song ID.
+    if (crossfadeMainPauseGuardRef.current && crossfadeHandoffRef.current?.songId !== currentSong.id) return;
 
     const rounded = Math.floor(duration);
     setCurrentDuration(rounded);
@@ -4917,6 +4930,7 @@ function MainModeApp() {
 
   function handlePlaying() {
     if (audioRef.current?.paused) return;
+    if (crossfadeMainPauseGuardRef.current && crossfadeHandoffRef.current?.songId !== currentSong?.id) return;
     if (playbackTransitionRef.current.snapshot().phase === "paused") {
       audioRef.current?.pause();
       return;

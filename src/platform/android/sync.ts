@@ -99,9 +99,11 @@ export async function pairWithMac(address: string, code: string) {
     if (hello.app !== "localtify") throw new Error("That address is not running localtify");
     const result = await call<{ token: string; name: string }>("/v1/pair", { base, token: "", method: "POST", body: { code: code.trim(), deviceName: phoneLibrary.paths.deviceName } });
     if (typeof result.token !== "string" || !result.token) throw new Error("The computer returned an invalid pairing token");
+    const previous = phoneLibrary.pairing;
     phoneLibrary.pairing = { url: base, token: result.token, name: result.name || hello.name || "computer", platform: hello.platform };
+    try { await phoneLibrary.save(["pairing"]); }
+    catch (error) { phoneLibrary.pairing = previous; throw error; }
     setPairedComputerPlatform(hello.platform);
-    await phoneLibrary.save(["pairing"]);
   } finally { changingPairing = false; }
 }
 
@@ -110,8 +112,10 @@ export async function forgetMac() {
   if (phoneLibrary.pendingSync) throw new Error("Finish the pending sync before unpairing so acknowledged edits are not sent twice");
   changingPairing = true;
   try {
+    const previous = phoneLibrary.pairing;
     phoneLibrary.pairing = null;
-    await phoneLibrary.save(["pairing"]);
+    try { await phoneLibrary.save(["pairing"]); }
+    catch (error) { phoneLibrary.pairing = previous; throw error; }
   } finally { changingPairing = false; }
 }
 

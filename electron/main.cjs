@@ -105,7 +105,6 @@ let mainWindow = null;
 let mainWindowRendererWatchdog = null;
 let mainWindowRendererRecoveredOnce = false;
 let startupLaunchStatus = { wasOpenedAtLogin: false, wasOpenedAsHidden: false };
-let lastAssignedCoverPath = "";
 
 const {
   getSavedWindowTranslucencySettings,
@@ -1157,7 +1156,6 @@ function pickLeastUsedCover(availableCovers = [], fallbackSongs = [], choices = 
   const minCount = usage.get(candidates[0]) || 0;
   const bestPool = candidates.filter((p) => (usage.get(p) || 0) === minCount);
   const selected = bestPool[Math.floor(Math.random() * bestPool.length)];
-  if (selected) lastAssignedCoverPath = selected;
   return selected || "";
 }
 
