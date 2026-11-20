@@ -93,7 +93,7 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
     if (displaySrc && imageRef.current?.complete && imageRef.current.naturalWidth > 0) setLoaded({key,url:displaySrc});
   }, [key, displaySrc]);
   const rejectLocal = () => { if (src) invalidateResolvedRemoteArtwork(src); setBadLocal(localSrc); };
-  const exhausted = Boolean(resolved?.key === key && (resolved.fallback || (!src && failed.length > 0)));
+  const exhausted = Boolean(resolved?.key === key && (resolved.fallback || !src));
   const requestKey = exhausted ? key + ":fallback" : key;
   useEffect(() => {
     if (!near || !src || !displaySrc || imageReady) return;
@@ -130,7 +130,12 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
             return;
           }
           value = answer;
-          if (!value.coverUrl && !value.fallbackCoverUrl && !value.coverAlternatives?.length) return;
+          if (!value.coverUrl && !value.fallbackCoverUrl && !value.coverAlternatives?.length) {
+            // A successful empty primary lookup must advance to the fallback
+            // providers. Keep misses component-local so future mounts can retry.
+            if (live) setResolved({ key, value, fallback: exhausted });
+            return;
+          }
           cache.set(requestKey, { at: Date.now(), value });
           const oldest = cache.keys().next().value;
           if (cache.size > 512 && oldest !== undefined) cache.delete(oldest);

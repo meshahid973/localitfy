@@ -36,12 +36,13 @@ function normalizePlayEvent(value, now = Date.now()) {
     endedAt: value.endedAt, msListened, outcome, contextType, contextId: contextType === "playlist" ? contextId : null };
 }
 
-function recordPlayEvent(database, payload) {
-  const event = normalizePlayEvent(payload);
-  if (!event) return false;
-  // Deleted songs must not be recreated by a late renderer checkpoint.
-  if (!database.prepare("SELECT 1 FROM songs WHERE id = ?").get(event.songId)) return false;
-  const result = database.prepare(`
+const statementsByConnection = new WeakMap();
+function statements(database) {
+  let cached = statementsByConnection.get(database);
+  if (!cached) {
+    cached = {
+      songExists: database.prepare("SELECT 1 FROM songs WHERE id = ?"),
+      write: database.prepare(`
     INSERT INTO play_events (id, sessionId, songId, startedAt, updatedAt, endedAt, msListened, outcome, contextType, contextId)
     VALUES (@id, @sessionId, @songId, @startedAt, @updatedAt, @endedAt, @msListened, @outcome, @contextType, @contextId)
     ON CONFLICT(id) DO UPDATE SET updatedAt = excluded.updatedAt, endedAt = excluded.endedAt,
@@ -49,14 +50,27 @@ function recordPlayEvent(database, payload) {
     WHERE play_events.endedAt IS NULL AND excluded.updatedAt >= play_events.updatedAt
       AND excluded.msListened >= play_events.msListened AND excluded.songId = play_events.songId
       AND excluded.sessionId = play_events.sessionId AND excluded.startedAt = play_events.startedAt
-  `).run(event);
+      `),
+      list: database.prepare("SELECT id, songId, startedAt, msListened FROM play_events WHERE updatedAt < ? AND startedAt >= ? ORDER BY startedAt")
+    };
+    statementsByConnection.set(database, cached);
+  }
+  return cached;
+}
+
+function recordPlayEvent(database, payload) {
+  const event = normalizePlayEvent(payload);
+  if (!event) return false;
+  // Deleted songs must not be recreated by a late renderer checkpoint.
+  const prepared = statements(database);
+  if (!prepared.songExists.get(event.songId)) return false;
+  const result = prepared.write.run(event);
   return result.changes > 0;
 }
 
 /** Plays last updated before `before` and started at or after `since`, oldest first. */
 function listPlayEvents(database, { before = Date.now(), since = 0 } = {}) {
-  return database.prepare("SELECT id, songId, startedAt, msListened FROM play_events WHERE updatedAt < ? AND startedAt >= ? ORDER BY startedAt")
-    .all(before, since);
+  return statements(database).list.all(before, since);
 }
 
 module.exports = { createPlayEventsTable, normalizePlayEvent, recordPlayEvent, listPlayEvents };
