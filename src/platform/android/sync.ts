@@ -96,10 +96,11 @@ export async function pairWithMac(address: string, code: string) {
   changingPairing = true;
   try {
     const hello = await call<{ app?: string; name?: string; platform?: string }>("/v1/hello", { base, token: "" });
-  if (hello.app !== "localtify") throw new Error("That address is not running localtify");
-  const result = await call<{ token: string; name: string }>("/v1/pair", { base, token: "", method: "POST", body: { code: code.trim(), deviceName: phoneLibrary.paths.deviceName } });
-  phoneLibrary.pairing = { url: base, token: result.token, name: result.name || hello.name || "computer", platform: hello.platform };
-  setPairedComputerPlatform(hello.platform);
+    if (hello.app !== "localtify") throw new Error("That address is not running localtify");
+    const result = await call<{ token: string; name: string }>("/v1/pair", { base, token: "", method: "POST", body: { code: code.trim(), deviceName: phoneLibrary.paths.deviceName } });
+    if (typeof result.token !== "string" || !result.token) throw new Error("The computer returned an invalid pairing token");
+    phoneLibrary.pairing = { url: base, token: result.token, name: result.name || hello.name || "computer", platform: hello.platform };
+    setPairedComputerPlatform(hello.platform);
     await phoneLibrary.save(["pairing"]);
   } finally { changingPairing = false; }
 }

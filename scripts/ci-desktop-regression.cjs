@@ -353,6 +353,9 @@ server.listen(5173,async()=>{
           }
           const geometry=await win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return {width:page.clientWidth,scroll:page.scrollWidth}})()`);
           assert.ok(geometry.width>0&&geometry.scroll<=geometry.width+3,"page overflow "+view+" "+mode+" "+JSON.stringify(geometry));
+          if(view==="artists") {
+            await until(()=>win.webContents.executeJavaScript(`(()=>{const covers=[...document.querySelectorAll(".artistCard .coverImage")].filter(img=>{const r=img.getBoundingClientRect();return r.width>0&&r.height>0&&r.bottom>0&&r.top<window.innerHeight});return covers.length>0&&covers.every(img=>img.complete&&img.naturalWidth>0&&img.classList.contains("isLoaded"))})()`).catch(()=>false),"visible artist fixture artwork "+mode+" "+width,10000);
+          }
           await screenshot(win,view+"-"+mode+"-"+width);
         }
         await win.webContents.executeJavaScript("document.querySelector('.playerLyricsButton').click()");

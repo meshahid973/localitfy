@@ -2803,6 +2803,7 @@ function MainModeApp() {
     crossfadeAutoStartedRef.current = false;
     crossfadeAutoTargetRef.current = "";
     crossfadeMainPauseGuardRef.current = false;
+    crossfadeHandoffRef.current = null;
     setCrossfadePreviewSongId("");
 
     const nextAudio = nextAudioRef.current;

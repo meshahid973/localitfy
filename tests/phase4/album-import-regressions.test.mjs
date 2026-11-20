@@ -26,6 +26,7 @@ test("bulk album scanning stays bounded and yields to Electron", () => {
 test("nested album scans prefer each album folder's own cover", () => {
   assert.match(main, /folderCoverPath\s*\|\|\s*albumEmbeddedCoverPath/, "folder cover is no longer preferred over embedded fallback");
   assert.match(main, /preferFolderCover:\s*Boolean\(folderCoverPath\)/, "folder-cover preference is not carried into metadata repair");
+  assert.match(main, /preferFolderCover:\s*Boolean\(options.preferFolderCover\)/, "import must forward the explicit folder preference");
   assert.match(main, /sourcePath:\s*folderPath/, "album preview must retain the exact child folder source path");
 });
 

@@ -1,5 +1,6 @@
 const { registerMediaConversionIpc } = require("./ipc/media-conversion.cjs");
 const { registerDownloadsIpc } = require("./ipc/downloads.cjs");
+const { registerCoverIpc } = require("./ipc/covers.cjs");
 const { filePathKey } = require("./runtime/path-identity.cjs");
 const { app, powerMonitor, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net, safeStorage } = require("electron");
 const { createIpcRouter } = require("./ipc/router.cjs");
@@ -1185,6 +1186,7 @@ async function makeSongFromFile(filePath, pixelArtFiles = [], usedCovers = new S
     metadata,
     filePath,
     folderCoverPath: options.folderCoverPath || "",
+    preferFolderCover: Boolean(options.preferFolderCover),
     albumEmbeddedCoverPath: options.albumEmbeddedCoverPath || options.albumCoverPath || "",
     spotifyCoverPath: options.spotifyCoverPath || "",
     fallbackCoverPath: fallbackCover
@@ -1291,7 +1293,9 @@ async function importNewAudioFiles(audioFiles, tracks = []) {
   const newFiles = audioFiles.filter((filePath) => {
     if (isDownloadFileInProgress(filePath)) return false;
     const key = filePathKey(String(filePath || ""));
-    return key && !existingPaths.has(key);
+    if (!key || existingPaths.has(key)) return false;
+    existingPaths.add(key);
+    return true;
   });
   if (!newFiles.length) return { changedCount: 0, importedCount: 0, files: [] };
   const pixelArtFiles = getPixelArtFiles();
@@ -2190,77 +2194,11 @@ app.whenReady().then(async () => {
     }
   });
 
-  const pixelListHandler = async () => getPixelArtFiles().map((filePath) => ({ name: path.parse(filePath).name, key: path.parse(filePath).name, path: filePath, url: safeMediaUrl(filePath) }));
-  ipcRouter.handle("pixel:list", pixelListHandler);
-  ipcRouter.handle("art:list-pixel", pixelListHandler);
-  ipcRouter.handle("covers:list-pixelart", async () => { try { return listPixelCoversDetailed(); } catch (e) { console.log("[localitfy list covers error]", e?.message); return []; } });
-  ipcRouter.handle("covers:stats", async () => { try { return getCoverStats(); } catch (e) { console.log("[localitfy covers stats error]", e?.message); return {}; } });
-  ipcRouter.handle("covers:rescan", async () => { clearPixelArtCache(); clearFileInfoCache(); await yieldToMainLoop(); return buildRandomizeMissingSongCovers(); });
-  ipcRouter.handle("covers:randomize-all", async () => {
-    await yieldToMainLoop();
-    const covers = getPixelArtFiles();
-    if (!covers.length) return listSongsShaped();
-    const songs = getSongs();
-    const allocator = createLeastUsedCoverAllocator(covers, songs);
-    for (const song of songs) {
-      const chosen = allocator.choose(song.coverPath);
-      if (!chosen) continue;
-      const updated = patchSong(song.id, { coverPath: chosen });
-      if (updated?.coverPath === chosen) allocator.record(song.coverPath, chosen);
-    }
-    return listSongsShaped();
-  });
-  ipcRouter.handle("covers:randomize-missing", async () => { await yieldToMainLoop(); return buildRandomizeMissingSongCovers(); });
-  ipcRouter.handle("covers:randomize-selected", async (_event, ids) => {
-    await yieldToMainLoop();
-    if (!Array.isArray(ids) || !ids.length) return listSongsShaped();
-    const covers = getPixelArtFiles();
-    if (!covers.length) return listSongsShaped();
-    const songs = getSongs();
-    const allocator = createLeastUsedCoverAllocator(covers, songs);
-    const songsById = new Map(songs.map(song => [song.id, song]));
-    for (const id of new Set(ids)) {
-      const song = songsById.get(id);
-      if (!song) continue;
-      const chosen = allocator.choose(song.coverPath);
-      if (!chosen) continue;
-      const updated = patchSong(id, { coverPath: chosen });
-      if (updated?.coverPath === chosen) allocator.record(song.coverPath, chosen);
-    }
-    return listSongsShaped();
-  });
-  ipcRouter.handle("covers:broken", async () => { try { return getCoverStats().brokenItems || []; } catch { return []; } });
-  ipcRouter.handle("covers:least-used", async () => { try { return pickLeastUsedCover(getPixelArtFiles()); } catch { return ""; } });
-  ipcRouter.handle("covers:thumbnail-status", async () => { try { return getCoverThumbnailStatus(); } catch (error) { return { ok: false, error: error?.message || "thumbnail status failed" }; } });
-  ipcRouter.handle("covers:warm-thumbnails", async (_event, payload = {}) => {
-    try {
-      await yieldToMainLoop();
-      return warmCoverThumbnails({ limit: Math.max(1, Math.min(500, Number(payload?.limit || 120))), force: Boolean(payload?.force) });
-    } catch (error) {
-      console.log("[localtify warm thumbnails error]", error?.message || error);
-      return { ok: false, created: 0, cached: 0, warnings: ["Localtify could not prepare cover thumbnails right now. Covers will still load normally."], error: error?.message || "thumbnail warmup failed" };
-    }
-  });
-  ipcRouter.handle("covers:request-thumbnail", async (_event, payload) => thumbnailRuntime.requestThumbnail(payload));
-  ipcRouter.handle("covers:cancel-thumbnail", async (_event, payload) => thumbnailRuntime.cancelThumbnail(payload));
-  ipcRouter.handle("covers:cleanup-cache", async () => { try { return cleanupCoverThumbnailCache(); } catch (error) { return { ok: false, error: error?.message || "cover cache cleanup failed" }; } });
-  ipcRouter.handle("song:set-cover", async (_event, id, coverPath) => { const updated = patchSong(id, { coverPath }); return updated ? shapeSong(updated) : null; });
-  ipcRouter.handle("song:pick-cover", async (event, id) => {
-    const song = (typeof id === "string" ? getSong(id) : null);
-    if (!song) return null;
-    try {
-      const senderWindow = BrowserWindow.fromWebContents(event.sender) || mainWindow;
-      const options = { title: "Choose localtify cover image", buttonLabel: "Use cover", properties: ["openFile"], filters: [{ name: "Images", extensions: ["png", "jpg", "jpeg", "webp", "gif", "bmp"] }] };
-      const result = senderWindow && !senderWindow.isDestroyed() ? await dialog.showOpenDialog(senderWindow, options) : await dialog.showOpenDialog(options);
-      if (result.canceled || !result.filePaths?.[0]) return shapeSong(song);
-      const chosen = result.filePaths[0];
-      if (!fileExists(chosen) || !isImageFile(chosen)) return shapeSong(song);
-      const updated = patchSong(id, { coverPath: chosen });
-      return updated ? shapeSong(updated) : shapeSong(song);
-    } catch (error) {
-      console.log("[localitfy pick cover error]", error?.message || error);
-      return shapeSong(song);
-    }
+  registerCoverIpc(ipcRouter, {
+    getPixelArtFiles, safeMediaUrl, listPixelCoversDetailed, getCoverStats, clearPixelArtCache, clearFileInfoCache, yieldToMainLoop,
+    buildRandomizeMissingSongCovers, listSongsShaped, getSongs, createLeastUsedCoverAllocator, patchSong, pickLeastUsedCover,
+    getCoverThumbnailStatus, warmCoverThumbnails, thumbnailRuntime, cleanupCoverThumbnailCache, shapeSong, getSong,
+    fileExists, isImageFile, getWindow: event => BrowserWindow.fromWebContents(event.sender) || mainWindow, dialog
   });
   ipcRouter.handle("song:analyze-volume", async (_event, id) => {
     const target = (typeof id === "string" ? getSong(id) : null);
@@ -2279,7 +2217,13 @@ app.whenReady().then(async () => {
       if (!validAudioFiles.length) return listSongsShaped();
       const pixelArtFiles = getPixelArtFiles();
       const usedCovers = new Set();
-      const importedSongs = await Promise.all(validAudioFiles.map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers)));
+      // Limit concurrent tag extraction and image decoding for large manual imports.
+      const uniqueFiles = [...new Map(validAudioFiles.map(file => [filePathKey(file), file])).values()];
+      const importedSongs = [];
+      for (let offset = 0; offset < uniqueFiles.length; offset += 4) {
+        importedSongs.push(...await Promise.all(uniqueFiles.slice(offset, offset + 4).map(file => makeSongFromFile(file, pixelArtFiles, usedCovers))));
+        await yieldToMainLoop();
+      }
       const changedCount = insertSongs(importedSongs);
       clearFileInfoCache();
       const afterSongs = listSongsShaped();
