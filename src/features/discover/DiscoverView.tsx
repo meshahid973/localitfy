@@ -232,14 +232,14 @@ export default function DiscoverView({ settings, updateSetting, sendToDownloads,
       {catalog?.status === "catalog" ? catalog.items.length ? <>
         <div className="discoverSectionHead"><h3 className="discoverHeading">{relatedTitle ? `Related to ${relatedTitle}` : "Top result"}</h3>{catalog.kind === "recording" && /^https:\/\/www\.youtube\.com\/watch\?v=[A-Za-z0-9_-]{11}$/.test(catalog.items[0].url) ? <button type="button" className="softButton" disabled={catalogLoading} onClick={() => void searchRelated(catalog.items[0])}>Similar songs</button> : null}</div>
         {catalog.items.slice(0,1).map(item => <div key={item.id} className="discoverTopResult">
-          <DiscoverCover title={item.title} artist={item.artist} artwork={item} lookup person={catalog.kind === "artist"} />
+          <DiscoverCover title={item.title} artist={item.artist} artwork={item} providerId={/^(?:ytmusic:(?:UC[A-Za-z0-9_-]{22}|[A-Za-z0-9_-]{11})|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})$/i.test(item.id) ? item.id : ""} lookup person={catalog.kind === "artist"} />
           <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => openLink(item.url)} title={item.title}>{item.title}</button><small>{item.subtitle}</small></span>
           {catalog.kind === "recording" ? <><span className="discoverDuration">{duration(item.durationMs)}</span>{pickButton(item)}</> : null}
         </div>)}
         {catalog.items.length > 1 ? <h3 className="discoverHeading">{relatedTitle ? "More related songs" : "More matches"}</h3> : null}
         <ul className="discoverSongList" aria-label="Search results">
         {catalog.items.slice(1).map(item => <li key={item.id}>
-          <DiscoverCover title={item.title} artist={item.artist} artwork={item} lookup person={catalog.kind === "artist"} />
+          <DiscoverCover title={item.title} artist={item.artist} artwork={item} providerId={/^(?:ytmusic:(?:UC[A-Za-z0-9_-]{22}|[A-Za-z0-9_-]{11})|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})$/i.test(item.id) ? item.id : ""} lookup person={catalog.kind === "artist"} />
           <span className="discoverSongText"><button type="button" className="discoverName" onClick={() => openLink(item.url)} title={item.title}>{item.title}</button><small title={item.subtitle}>{item.subtitle}</small></span>
           {catalog.kind === "recording" ? <><span className="discoverDuration">{duration(item.durationMs)}</span>{pickButton(item)}</> : null}
         </li>)}

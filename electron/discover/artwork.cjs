@@ -30,14 +30,17 @@ const musicKey = value => norm(value).replace(/[^\p{L}\p{N}\p{M}]+/gu," ").trim(
 const titleKey = value => musicKey(norm(value).replace(/\s*[([]\s*(?:official\s+(?:music\s+)?video|official\s+audio|lyric\s+video|official\s+lyric\s+video)\s*[)\]]\s*$/i,""));
 const artistKey = value => musicKey(norm(value).replace(/\s+[-–—]\s+topic$/i,""));
 const equivalentArtist=(a,b)=>artistKey(a)===artistKey(b) && Boolean(artistKey(b));
-function matchMusicArtwork(items,title,artist) {
+function matchMusicArtwork(items,title,artist,identity = {}) {
   const {safeThumbnail}=require("./youtube-music.cjs");
   const wantedArtist=artistKey(artist);
   const wantedTitle=titleKey(title);
   const artistPrefix=norm(title).split(/\s+-\s+/);
   const titleKeys=new Set([wantedTitle]);
   if(artistPrefix.length>1 && artistKey(artistPrefix[0])===wantedArtist) titleKeys.add(titleKey(artistPrefix.slice(1).join(" - ")));
-  const matches=(Array.isArray(items)?items:[]).filter(item=>titleKeys.has(titleKey(item?.title))&&equivalentArtist(item?.artist,artist))
+  const matches=(Array.isArray(items)?items:[]).filter(item=>titleKeys.has(titleKey(item?.title))&&equivalentArtist(item?.artist,artist) &&
+    (!identity.providerId || item.id === identity.providerId) &&
+    (!identity.album || !item.album || norm(item.album) === norm(identity.album)) &&
+    (!identity.durationMs || !Number.isFinite(item.durationMs) || Math.abs(item.durationMs-identity.durationMs) <= 5000))
     .map(item=>({...item,coverUrl:safeThumbnail(item.coverUrl)})).filter(item=>item.coverUrl);
   if(!wantedArtist||!wantedTitle||!matches.length)return {};
   // Different releases of the same exact song can have valid alternate art.
@@ -52,9 +55,9 @@ function matchMusicArtwork(items,title,artist) {
   }))].slice(0,6);
   return {coverUrl:item.coverUrl,...(covers.length>1?{coverAlternatives:covers}:{}),...(Number.isFinite(item.durationMs)&&item.durationMs>0?{durationMs:item.durationMs}:{})};
 }
-function matchArtistArtwork(items,name) {
+function matchArtistArtwork(items,name,providerId = "") {
   const {safeThumbnail}=require("./youtube-music.cjs");
-  const exact=(Array.isArray(items)?items:[]).filter(item=>artistKey(item?.title)===artistKey(name)&&/^ytmusic:UC[A-Za-z0-9_-]{22}$/.test(item.id||"")&&safeThumbnail(item.coverUrl));
+  const exact=(Array.isArray(items)?items:[]).filter(item=>artistKey(item?.title)===artistKey(name)&&(!providerId||item.id===providerId)&&/^ytmusic:UC[A-Za-z0-9_-]{22}$/.test(item.id||"")&&safeThumbnail(item.coverUrl));
   const unique=[...new Map(exact.map(item=>[item.id,item])).values()];
   return unique.length===1?{coverUrl:safeThumbnail(unique[0].coverUrl)}:{};
 }

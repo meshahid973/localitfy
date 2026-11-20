@@ -34,8 +34,8 @@ function cachedArtwork(key: string) {
   return hit.value;
 }
 const normalizeKey = (value: string) => value.normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase();
-const artworkKey = (title: string, artist: string, person = false) =>
-  JSON.stringify([person ? "artist" : "recording", normalizeKey(title), normalizeKey(artist)]);
+const artworkKey = (title: string, artist: string, person = false, providerId = "", album = "", durationMs = 0) =>
+  JSON.stringify([person ? "artist" : "recording", normalizeKey(title), normalizeKey(artist), providerId, normalizeKey(album), durationMs]);
 export function getCachedDiscoverArtwork(title: string, artist: string) {
   const key = artworkKey(title, artist);
   return cachedArtwork(key + ":fallback") || cachedArtwork(key);
@@ -46,8 +46,8 @@ const deezerCover = /^https:\/\/(?:e-cdns-images|cdns-images|cdn-images)\.dzcdn\
 const fanartCover = /^https:\/\/assets\.fanart\.tv\/fanart\/music\/[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}\/(?:albumcover|artistthumb)\/[-a-z0-9_.%]+\.(?:jpg|jpeg|png)\/preview$/i;
 export const isDisplayOnlyCover = (value?: string) => Boolean(value && (deezerCover.test(value) || fanartCover.test(value)));
 const safeCover = (value?: string) => value && (deezerCover.test(value) || fanartCover.test(value) || youtubeCover.test(value) || audioDbCover.test(value) || /^https:\/\/coverartarchive\.org\/(release|release-group)\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/front-250$/i.test(value) || (/^https:\/\/(?:lastfm\.freetls\.fastly\.net|lastfm-img2\.akamaized\.net)\/i\/u\/(?:[0-9]+x[0-9]+|[0-9]+s)\/[a-f0-9]{32}\.(?:png|jpe?g|webp)$/i.test(value) && !/2a96cbd8b46e442fc41c2b86b821562f|4128a6eb29f94943c9d206c08e625904/i.test(value))) ? value : undefined;
-export function DiscoverCover({ title, artist, artwork, lookup = false, person = false }: {
-  title: string; artist: string; artwork?: DiscoverArtwork; lookup?: boolean; person?: boolean;
+export function DiscoverCover({ title, artist, artwork, lookup = false, person = false, providerId = "" }: {
+  title: string; artist: string; artwork?: DiscoverArtwork & { album?: string }; lookup?: boolean; person?: boolean; providerId?: string;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [near, setNear] = useState(false);
@@ -58,7 +58,9 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
     observer.observe(ref.current);
     return () => observer.disconnect();
   }, []);
-  const key = artworkKey(title, artist, person);
+  const album = providerId ? artwork?.album || "" : "";
+  const durationMs = providerId ? artwork?.durationMs || 0 : 0;
+  const key = artworkKey(title, artist, person, providerId, album, durationMs);
   const [resolved, setResolved] = useState<{ key: string; value: DiscoverArtwork; fallback: boolean }>();
   const [loaded, setLoaded] = useState<{key:string; url:string}>();
   const [local, setLocal] = useState<{source:string; url:string}>();
@@ -109,7 +111,7 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
         let value = cachedArtwork(requestKey);
         if (!value) {
           attempts++;
-          const answer = await window.localitfy.getDiscoveries({ artwork: { title, artist, kind: person ? "artist" : "recording", fallback: exhausted } }).catch(() => null);
+          const answer = await window.localitfy.getDiscoveries({ artwork: { title, artist, kind: person ? "artist" : "recording", fallback: exhausted, providerId, album, durationMs } }).catch(() => null);
           if (answer?.status !== "artwork") {
             if (live && attempts < 3 && answer?.status !== "off") retryTimer = window.setTimeout(start, attempts * 900);
             return;
@@ -126,7 +128,7 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
     };
     start();
     return () => { live = false; cancelQueued?.(); if (retryTimer !== undefined) window.clearTimeout(retryTimer); };
-  }, [key, title, artist, needsLookup, near, person, exhausted, requestKey]);
+  }, [key, title, artist, needsLookup, near, person, exhausted, requestKey, providerId, album, durationMs]);
   return <span ref={ref} className="discoverCover" aria-hidden="true">
     {!imageReady ? (person ? <UserRound size={24} /> : <Disc3 size={24} />) : null}
     {near && src && displaySrc ? <img key={displaySrc} src={displaySrc} alt="" loading="eager" decoding="async" fetchPriority="auto" referrerPolicy="no-referrer" data-ready={imageReady}

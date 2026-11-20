@@ -548,3 +548,22 @@ test("persistent artwork cache separates entity types and preserves display-only
     assert.equal(validArtworkResult({ coverUrl: artistCover, status: "off" }), false);
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
+
+
+test("identified artwork never substitutes another catalog recording with the same title", async () => {
+  const { matchMusicArtwork } = require("../../electron/discover/artwork.cjs");
+  const same = {title:"Song",artist:"Artist",album:"Album",durationMs:123000};
+  const first={...same,id:"ytmusic:abcdefghijk", coverUrl:"https://lh3.googleusercontent.com/first=w256-h256-l90-rj"};
+  const second={...same,id:"ytmusic:lmnopqrstuv", coverUrl:"https://lh3.googleusercontent.com/second=w256-h256-l90-rj"};
+  assert.equal(matchMusicArtwork([first,second],"Song","Artist",{providerId:second.id,album:"Album",durationMs:123000}).coverUrl,second.coverUrl);
+  assert.deepEqual(matchMusicArtwork([first],"Song","Artist",{providerId:second.id}),{});
+  assert.deepEqual(matchMusicArtwork([first],"Song","Artist",{providerId:first.id,durationMs:999000}),{});
+  const handlers = new Map();
+  registerDiscoverIpc({handle:(name,handler)=>handlers.set(name,handler)},{
+    getSongs:()=>[],getSettings:()=>({discoverEnabled:true}),searchYouTubeArtwork:async()=>[first,second]
+  });
+  const get = providerId => handlers.get("discover:get")({}, {artwork:{title:"Song",artist:"Artist",providerId}});
+  assert.equal((await get(first.id)).coverUrl,first.coverUrl);
+  assert.equal((await get(second.id)).coverUrl,second.coverUrl);
+  assert.equal((await get("ytmusic:12345678901")).coverUrl,undefined);
+});
