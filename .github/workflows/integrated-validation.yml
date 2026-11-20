@@ -1,9 +1,23 @@
 name: integrated-validation
+# Cancel outdated automatic PR validation; preserve intentionally separate manual runs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 # Extended cross-platform benchmarks are intentionally opt-in. Normal PRs run
 # quality.yml. Invoke this before merging changes to media, sync, native runtimes,
 # caching, Android integration or large-library performance.
 on:
   workflow_dispatch:
+    inputs:
+      baseline_ref:
+        description: Baseline branch or commit (must differ from candidate)
+        default: origin/main
+        required: true
+        type: string
+  pull_request:
+    paths:
+      - '.github/workflows/integrated-validation.yml'
 permissions:
   contents: read
 env:
@@ -22,24 +36,45 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run release:check
+      - run: npm run build
+      - name: Check live public artwork providers (advisory)
+        shell: bash
+        continue-on-error: true
+        run: |
+          mkdir -p qa-artifacts
+          node scripts/live-artwork-check.cjs | tee qa-artifacts/live-artwork.json
       - name: Compare production library modules with the PR baseline
         env:
-          BASELINE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
+          BASELINE_REF: ${{ github.event.pull_request.base.sha || inputs.baseline_ref }}
         shell: bash
         run: |
           mkdir -p qa-artifacts
+          BASELINE_SHA="$(git rev-parse --verify "$BASELINE_REF^{commit}")"
+          test "$BASELINE_SHA" != "$(git rev-parse HEAD)" || { echo "Select a different baseline commit"; exit 1; }
           git worktree add --detach "$RUNNER_TEMP/localtify-baseline" "$BASELINE_SHA"
+          # Fresh Node processes and alternating order reduce warm-cache/order bias.
           for n in 1000 10000 50000 100000; do
-            node --expose-gc scripts/benchmark-library-workloads.mjs "$RUNNER_TEMP/localtify-baseline" "$n" | tee "qa-artifacts/baseline-$n.json"
-            node --expose-gc scripts/benchmark-library-workloads.mjs . "$n" | tee "qa-artifacts/current-$n.json"
+            for round in 1 2 3; do
+              if [ "$round" -eq 2 ]; then order="current baseline"; else order="baseline current"; fi
+              for kind in $order; do
+                target=.
+                if [ "$kind" = baseline ]; then target="$RUNNER_TEMP/localtify-baseline"; fi
+                node --expose-gc scripts/benchmark-library-workloads.mjs "$target" "$n" | tee "qa-artifacts/$kind-$n-$round.json"
+              done
+            done
           done
-          node -e 'const fs=require("fs");for(const n of [1000,10000,50000,100000]){const a=JSON.parse(fs.readFileSync("qa-artifacts/baseline-"+n+".json"));const b=JSON.parse(fs.readFileSync("qa-artifacts/current-"+n+".json"));for(let i=0;i<a.trials.length;i++)if(a.trials[i].digest!==b.trials[i].digest)throw Error("Output divergence: "+n+" "+a.trials[i].label);}'
+          node -e 'const fs=require("fs"),read=(k,n,r)=>JSON.parse(fs.readFileSync("qa-artifacts/"+k+"-"+n+"-"+r+".json")),median=v=>v.slice().sort((a,b)=>a-b)[1];for(const n of [1000,10000,50000,100000]){const a=[1,2,3].map(r=>read("baseline",n,r)),b=[1,2,3].map(r=>read("current",n,r));for(const v of [...a,...b])for(let i=0;i<a[0].trials.length;i++)if(v.trials[i].digest!==a[0].trials[i].digest)throw Error("Output divergence: "+n+" "+a[0].trials[i].label);for(const [kind,rows] of [["baseline",a],["current",b]]){const result={...rows[0],peakRssMiB:median(rows.map(x=>x.peakRssMiB)),rounds:3,trials:rows[0].trials.map((t,i)=>({...t,...Object.fromEntries(["wallMs","cpuMs","heapDeltaMiB","rssMiB","rssDeltaMiB"].map(key=>[key,median(rows.map(x=>x.trials[i][key]))]))}))};fs.writeFileSync("qa-artifacts/"+kind+"-"+n+".json",JSON.stringify(result,null,2));console.log(JSON.stringify(result));}}'
       - name: Actual Electron desktop renderer and audio smoke
         shell: bash
         run: |
-          sudo chown root:root node_modules/electron/dist/chrome-sandbox
-          sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
+          # Electron may install its executable lazily. Resolve the runtime before
+          # configuring its sandbox; never disable the sandbox to make CI pass.
+          node node_modules/electron/install.js
+          sandbox="$(node -p 'require("node:path").join(require("node:path").dirname(require("electron")), "chrome-sandbox")')"
+          test -f "$sandbox"
+          sudo chown root:root "$sandbox"
+          sudo chmod 4755 "$sandbox"
+          test "$(stat -c '%u:%a' "$sandbox")" = "0:4755"
           # Hosted Linux runners have no physical sound card. Use a real PulseAudio null sink.
           if ! command -v pulseaudio >/dev/null; then
             sudo apt-get update -o Acquire::Retries=3
@@ -55,8 +90,11 @@ jobs:
             ln -s "$GITHUB_WORKSPACE/node_modules" "$baseline/node_modules"
           else
             npm --prefix "$baseline" ci
-            sudo chown root:root "$baseline/node_modules/electron/dist/chrome-sandbox"
-            sudo chmod 4755 "$baseline/node_modules/electron/dist/chrome-sandbox"
+            (cd "$baseline" && node node_modules/electron/install.js)
+            sandbox="$(cd "$baseline" && node -p 'require("node:path").join(require("node:path").dirname(require("electron")), "chrome-sandbox")')"
+            test -f "$sandbox"
+            sudo chown root:root "$sandbox"
+            sudo chmod 4755 "$sandbox"
           fi
           npm --prefix "$baseline" run build
           cp scripts/ci-desktop-regression.cjs "$baseline/scripts/ci-desktop-regression.cjs"
@@ -95,8 +133,22 @@ jobs:
       - name: Build debug APK and run Android checks
         shell: bash
         run: |
+          mkdir -p qa-android
           sdkmanager "platforms;android-36" "build-tools;35.0.0"
-          bash android/gradlew -p android assembleDebug lintDebug testDebugUnitTest
+          # Maven Central may throttle shared hosted-runner IPs (HTTP 429).
+          # Retry only that infrastructure failure; never hide compilation,
+          # lint or unit-test failures, and retain the full Gradle diagnostics.
+          for attempt in 1 2 3; do
+            if bash android/gradlew -p android --max-workers=2 --no-parallel assembleDebug lintDebug testDebugUnitTest 2>&1 | tee qa-android/gradle-build.log; then
+              break
+            fi
+            if ! grep -Eq 'Received status code 429|Too Many Requests' qa-android/gradle-build.log || [ "$attempt" -eq 3 ]; then
+              echo "Android build failed; no further automatic retry is justified."
+              exit 1
+            fi
+            echo "Maven Central rate limited this runner; retry $((attempt+1))/3."
+            sleep "$((attempt * 35))"
+          done
       - name: Android emulator visual smoke (not physical-device QA)
         shell: bash
         run: |

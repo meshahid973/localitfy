@@ -38,3 +38,10 @@ export function topPlayedSongs<T extends Pick<Song, "playCount">>(songs: readonl
   }
   return best;
 }
+
+/** Shared collection view filtering; never changes saved ordering or queue state. */
+export function filterCollectionSongs<T extends Pick<Song,"title"|"artist"|"album">>(songs:T[], query:string):T[] {
+  const needle=query.trim().normalize("NFKC").toLocaleLowerCase();
+  if(!needle)return songs;
+  return songs.filter(song=>[song.title,song.artist,song.album].some(value=>(value||"").normalize("NFKC").toLocaleLowerCase().includes(needle)));
+}

@@ -1,5 +1,5 @@
 const { initDownloader, cancelActiveDownloads } = require("../downloader.cjs");
-const { initMetadataService } = require("../metadata-service.cjs");
+const { initMetadataService, flushMetadataCache } = require("../metadata-service.cjs");
 const { initCoverService } = require("../cover-service.cjs");
 const { shutdownDiscordActivity } = require("../rpc.cjs");
 
@@ -16,11 +16,11 @@ function createElectronServiceRuntime(options = {}) {
   let stopped = false;
 
   async function start() {
-    if (started) return false;
+    if (started || stopped) return false;
     started = true;
-    stopped = false;
 
     if (typeof startMediaServer === "function") await startMediaServer();
+    if (stopped) return false;
     initDownloader({ userDataPath, ffmpegPath });
     initMetadataService({ userDataPath, ffmpegPath });
     initCoverService({ userDataPath });
@@ -32,9 +32,11 @@ function createElectronServiceRuntime(options = {}) {
     stopped = true;
 
     try { cancelActiveDownloads({ interrupted: true }); } catch { }
-    try { await shutdownDiscordActivity(reason); } catch { }
+    try { flushMetadataCache(); } catch { }
+    // Electron's before-quit event does not await promises. Release synchronous resources first.
     try { cleanupNativeWindowsMedia?.(); } catch { }
     try { stopMediaServer?.(); } catch { }
+    try { await shutdownDiscordActivity(reason); } catch { }
     return true;
   }
 

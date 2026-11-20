@@ -68,6 +68,11 @@ try {
     db.savePlaylists([{ id: "smart", name: "Smart", songIds: ["legacy-song"], createdAt: now, rules },
       { id: "plain", name: "Plain", songIds: [], createdAt: now, rules: "not json" }]);
     const saved = db.getPlaylists();
+    for (const invalid of [null, {}, [null], [{ id: "smart", name: "Broken", songIds: null }]]) {
+      let rejected = false;
+      try { db.savePlaylists(invalid); } catch (error) { rejected = error instanceof TypeError; }
+      if (!rejected || JSON.stringify(db.getPlaylists()) !== JSON.stringify(saved)) throw new Error("Malformed playlist snapshot modified the library");
+    }
     if (JSON.stringify(saved.find((item) => item.id === "smart")?.rules) !== JSON.stringify(rules)) throw new Error("smart playlist rules were not persisted");
     if ("rules" in saved.find((item) => item.id === "plain")) throw new Error("malformed playlist rules were persisted");
     const vector = new Float32Array(512); vector[0] = 1;
@@ -76,6 +81,24 @@ try {
     if (db.saveSongAnalysis({ ...analysis, vector: new Float32Array(4) })) throw new Error("invalid embedding persisted");
     const Database = require("better-sqlite3");
     const inspect = new Database(process.argv[1]);
+    inspect.exec("CREATE TABLE patch_audit (n INTEGER); CREATE TRIGGER audit_song_patch AFTER UPDATE ON songs BEGIN INSERT INTO patch_audit VALUES (1); END;");
+    db.patchSong("legacy-song", { genre: "Synthpop" });
+    if (inspect.prepare("SELECT COUNT(*) AS n FROM patch_audit").get().n !== 0) throw new Error("Unchanged song patch wrote SQLite");
+    db.patchSong("legacy-song", { playbackPosition: 12 });
+    db.patchSong("legacy-song", { playbackPosition: 12 });
+    if (inspect.prepare("SELECT COUNT(*) AS n FROM patch_audit").get().n !== 1) throw new Error("Song patch did not suppress duplicate writes");
+    db.patchSong("legacy-song", { playbackPosition: 0 });
+    inspect.exec("DROP TRIGGER audit_song_patch; DROP TABLE patch_audit;");
+    const datePlan = inspect.prepare("EXPLAIN QUERY PLAN SELECT * FROM songs ORDER BY dateAdded DESC").all().map(row => row.detail).join(" ");
+    if (!datePlan.includes("idx_songs_dateAdded") || datePlan.includes("TEMP B-TREE")) throw new Error("Song listing uses an avoidable sort: " + datePlan);
+    const membershipPlan = inspect.prepare("EXPLAIN QUERY PLAN SELECT playlistId, songId FROM playlist_songs ORDER BY playlistId ASC, position ASC, addedAt ASC").all().map(row => row.detail).join(" ");
+    if (!membershipPlan.includes("COVERING INDEX idx_playlist_songs_order_cover") || membershipPlan.includes("TEMP B-TREE")) throw new Error("Playlist membership read requires an unnecessary sort: " + membershipPlan);
+    if (inspect.prepare("SELECT name FROM sqlite_master WHERE type='index' AND name='idx_playlist_songs_playlistId'").get()) throw new Error("Obsolete playlist index retained");
+    inspect.prepare("UPDATE playlist_songs SET addedAt = 1234 WHERE playlistId = ? AND songId = ?").run("smart","legacy-song");
+    db.savePlaylists(saved.map(item => item.id === "plain" ? {...item,name:"Renamed"} : item));
+    if(inspect.prepare("SELECT addedAt FROM playlist_songs WHERE playlistId=? AND songId=?").get("smart","legacy-song")?.addedAt!==1234) throw new Error("Unchanged membership was rewritten");
+    db.savePlaylists(db.getPlaylists().filter(item=>item.id!=="plain"));
+    if(inspect.prepare("SELECT COUNT(*) AS n FROM playlists WHERE id=?").get("plain").n!==0) throw new Error("Removed playlist retained");
     inspect.prepare("INSERT INTO daily_mixes (day, edition, fingerprint, result, generatedAt) VALUES (?, ?, ?, ?, ?)").run("2026-10-16", 0, "fixture", "{}", now);
     const backupPath = db.backupDatabase("phase3-restore-test");
     if (inspect.prepare("SELECT COUNT(*) AS n FROM play_events").get().n !== 1) throw new Error("duplicate events persisted");
@@ -113,6 +136,7 @@ try {
     if (status.schemaVersion !== status.expectedSchemaVersion) throw new Error("restored database schema is invalid");
     const Database = require("better-sqlite3");
     const inspect = new Database(process.argv[1]);
+    if(inspect.prepare("SELECT addedAt FROM playlist_songs WHERE playlistId=? AND songId=?").get("smart","legacy-song")?.addedAt!==1234) throw new Error("Playlist membership not restored");
     const event = inspect.prepare("SELECT * FROM play_events WHERE id = ?").get("listen-1");
     if (event?.msListened !== 8000 || event.outcome !== "ended") throw new Error("history backup/restore failed");
     const analysis = inspect.prepare("SELECT * FROM song_analysis WHERE songId = ?").get("legacy-song");

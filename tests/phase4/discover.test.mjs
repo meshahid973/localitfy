@@ -354,7 +354,7 @@ test("Discover permits opt-in with a blank key and sends explicit catalog search
   assert.match(view, /disabled=\{Boolean\(keyDraft.trim\(\)\) && !API_KEY.test/);
   assert.match(view, /getDiscoveries\(\{ catalog: \{ kind: catalogKind, term \} \}\)/);
   assert.match(view, /catalogRequestRef.current/);
-  assert.match(android, /payload\?\.catalog \|\| payload\?\.artwork\) \? fromMac<DiscoverResult>/);
+  assert.match(android, /payload\?\.artwork \? cachedArtworkFromMac\(payload.artwork\) : payload\?\.catalog \? fromMac<DiscoverResult>/);
 });
 
 test("artwork uses validated releases and rejects ambiguous tracks", async () => {

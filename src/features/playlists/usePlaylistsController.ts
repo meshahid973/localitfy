@@ -9,6 +9,7 @@ import { PLAYLIST_STORAGE_KEY } from "./playlist.constants";
 import type { Playlist } from "./playlist.types";
 import { prepareGeneratedPlaylist } from "./generatedPlaylist";
 import { cleanPlaylistArtwork, cleanPlaylistList } from "./playlist.utils";
+import { useStableCallback } from "../../shared/hooks/useStableCallback";
 import { cleanSmartRules, evaluateSmartRules, type ListeningCounts, type SmartRules } from "./smartPlaylist";
 
 export type PlaylistsControllerOptions = {
@@ -119,6 +120,26 @@ export function usePlaylistsController({
   const normalizePlaylistName = useCallback((sourceName: string, fallbackName: string) => {
     return (sourceName.trim() || fallbackName).slice(0, 120);
   }, []);
+
+  // React state updaters must not publish selection or toasts.
+  const upsertSpotifyPlaylistFromImport = useStableCallback((sourceName: string, importedSongs: Song[]) => {
+    const songIds = [...new Set(importedSongs.map(song => song.id).filter(Boolean))];
+    if (!songIds.length) return null;
+    const name = normalizePlaylistName(sourceName, `Spotify import ${new Date().toLocaleDateString()}`);
+    const existing = playlists.find(item => !item.rules && item.name.trim().toLowerCase() === name.toLowerCase());
+    const safeName = !existing && playlists.some(item=>item.name.trim().toLowerCase()===name.toLowerCase()) ? normalizePlaylistName(name.slice(0,100)+" (Spotify)",name) : name;
+    const previous = existing || playlists.find(item=>!item.rules&&item.name.trim().toLowerCase()===safeName.toLowerCase());
+    const id = previous?.id || makeLocalId("playlist");
+    const createdAt = Date.now();
+    setPlaylists(items => previous
+      ? items.map(item => item.id === id && !item.rules ? {...item,songIds} : item)
+      : [{id,name:safeName,songIds,createdAt},...items]);
+    setSelectedPlaylistId(id);
+    setActivePlaylistId(id);
+    setStatusText(`${previous?"fixed":"created"} Spotify playlist: ${safeName}`);
+    showAppToast(`${previous?"fixed":"created"} playlist: ${safeName}`, "success");
+    return id;
+  });
 
   const smartPlaylistLocked = useCallback((playlist: Playlist) => {
     if (!playlist.rules) return false;
@@ -396,6 +417,7 @@ export function usePlaylistsController({
     toggleSongPlaylist,
     handlePlaylistSongDrop,
     handlePlaylistSongAppend,
-    normalizePlaylistName
+    normalizePlaylistName,
+    upsertSpotifyPlaylistFromImport
   };
 }

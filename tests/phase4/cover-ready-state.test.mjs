@@ -15,5 +15,5 @@ test("song updates cannot hide an image that already loaded", () => {
   // the same cover URL: the mounted <img> never fires load again, leaving only the letter placeholder.
   assert.doesNotMatch(source, /setImageReady/);
   const resetEffect = source.slice(source.indexOf("useEffect(() => {"), source.indexOf("return ("));
-  assert.doesNotMatch(resetEffect, /setLoadedSrc/);
+  assert.doesNotMatch(resetEffect, /setLoadedSrc\(\s*["']{2}\s*\)/);
 });

@@ -113,7 +113,7 @@ const oneUpdate = largeLibrary.slice();
 oneUpdate[25000] = { ...oneUpdate[25000], playCount: 60 };
 const nextIndex = libraryIndex.reconcileLibraryIndex(oneUpdate, initialIndex);
 assert.equal(nextIndex.searchEntries[25000].song, oneUpdate[25000]);
-assert.equal(nextIndex.searchEntries[25000].tokens, initialIndex.searchEntries[25000].tokens);
+assert.equal(nextIndex.searchEntries[25000].haystack, initialIndex.searchEntries[25000].haystack);
 const updateMs = bench(() => libraryIndex.reconcileLibraryIndex(oneUpdate, initialIndex));
 const seeds = largeLibrary.slice(0, 500);
 const recommendationMs = bench(() => recommendations.relatedSongScores(seeds, largeLibrary), 3);

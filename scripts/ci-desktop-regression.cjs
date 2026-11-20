@@ -52,7 +52,7 @@ const server=http.createServer((req,res)=>{
   }catch{res.writeHead(400);res.end();}
 });
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-async function until(fn,label,timeout=35000){const end=Date.now()+timeout;while(Date.now()<end){const v=await fn();if(v)return v;await sleep(200);}throw Error("Timeout: "+label);}
+async function until(fn,label,timeout=35000,interval=200){const end=performance.now()+timeout;while(performance.now()<end){const v=await fn();if(v)return v;await sleep(interval);}throw Error("Timeout: "+label);}
 async function screenshot(win,name){await win.webContents.executeJavaScript("new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve(true))))");const image=await win.webContents.capturePage();assert.ok(!image.isEmpty());fs.writeFileSync(path.join(output,name+".png"),image.toPNG());}
 async function metrics(label,sampleCount=5){
   // Prime Electron's interval-based CPU counters before sampling.
@@ -77,7 +77,7 @@ async function metrics(label,sampleCount=5){
 const watchdog=setTimeout(()=>{console.error("Integrated visual smoke timed out");server.close();app.exit(1);},210000);
 server.listen(5173,async()=>{
   try{
-    const started=Date.now();
+    const started=performance.now();
     // Actual desktop entry, real preload and temp SQLite library. No user data.
     require(path.join(root,"electron/main.cjs"));
     await app.whenReady();
@@ -86,13 +86,13 @@ server.listen(5173,async()=>{
     await until(()=>win.webContents.executeJavaScript("document.readyState === 'complete' && !!document.querySelector('#root')").catch(()=>false),"document ready");
     // A fresh profile initially shows onboarding, not the workspace. Record
     // first-render latency separately, then dismiss onboarding in the fixture.
-    await until(()=>win.webContents.executeJavaScript("!document.querySelector('.appCrashBoundary') && (!!document.querySelector('.appShell') || !!document.querySelector('.onboardingLayer h2'))").catch(()=>false),"initial desktop render");
-    const startupMs=Date.now()-started;
+    await until(()=>win.webContents.executeJavaScript("!document.querySelector('.appCrashBoundary') && (!!document.querySelector('.appShell') || !!document.querySelector('.onboardingLayer h2'))").catch(()=>false),"initial desktop render",35000,16);
+    const startupMs=performance.now()-started;
     await win.webContents.executeJavaScript(`localStorage.setItem('localitfy.onboarding.v1','done');localStorage.setItem('localitfy.onboarding.release-showcase.' + ${JSON.stringify(version)},'done');localStorage.setItem('localitfy.whatsNewSeenVersion',${JSON.stringify(version)})`);
-    const reloadStarted=Date.now();
+    const reloadStarted=performance.now();
     win.webContents.reload();
-    await until(()=>win.webContents.executeJavaScript("!document.querySelector('.appCrashBoundary') && !!document.querySelector('.appShell')").catch(()=>false),"desktop shell");
-    const reloadMs=Date.now()-reloadStarted;
+    await until(()=>win.webContents.executeJavaScript("!document.querySelector('.appCrashBoundary') && !!document.querySelector('.appShell')").catch(()=>false),"desktop shell",35000,16);
+    const reloadMs=performance.now()-reloadStarted;
     win.setSize(1280,800);await sleep(700);
     assert.equal(await win.webContents.executeJavaScript("document.querySelector('.app').dataset.sidebarBehavior"), "slim", "fresh installs use collapsed navigation");
     async function assertShellChrome() {
@@ -165,17 +165,18 @@ server.listen(5173,async()=>{
     }
     await assertShellChrome();
     await screenshot(win,"desktop-home");
+    await sleep(2000); // Let initial artwork and layout work settle before the idle sample.
     const idle=await metrics("desktop idle");
     // Exercise actual rendered library navigation and playback.
     const libraryNavigationStart=performance.now();
     const clicked=await win.webContents.executeJavaScript("(()=>{const b=document.querySelector('.sidebar [data-nav-id=library]');if(!b)return false;b.click();return true})()");
     assert.ok(clicked,"library navigation missing");
-    await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.sidebar [data-nav-id=library].active') && !!document.querySelector('.songButton')").catch(()=>false),"library tracks");
+    await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.sidebar [data-nav-id=library].active') && !!document.querySelector('.songButton')").catch(()=>false),"library tracks",35000,16);
     const libraryNavigationMs=performance.now()-libraryNavigationStart;
     await screenshot(win,"desktop-library");
     const playbackStart=performance.now();
     await win.webContents.executeJavaScript("document.querySelector('.songButton').click()");
-    await until(()=>win.webContents.executeJavaScript("[...document.querySelectorAll('audio')].some(a=>!a.paused&&a.currentTime>0)").catch(()=>false),"audio playing");
+    await until(()=>win.webContents.executeJavaScript("[...document.querySelectorAll('audio')].some(a=>!a.paused&&a.currentTime>0)").catch(()=>false),"audio playing",35000,16);
     const playbackStartMs=performance.now()-playbackStart;
     // Focus changes must not reload, seek or pause a healthy audio element.
     await win.webContents.executeJavaScript(`(()=>{const audio=document.querySelector('audio');const q={start:audio.currentTime,src:audio.src,events:[]};window.qaFocusAudio=q;for(const type of ['pause','seeking','loadstart']) audio.addEventListener(type,()=>q.events.push(type),{once:true});window.dispatchEvent(new Event('blur'));})()`);
@@ -192,12 +193,52 @@ server.listen(5173,async()=>{
     const playing=await metrics("desktop playback",3);
     const beforeHidden=await win.webContents.executeJavaScript("(()=>{const a=document.querySelector('audio');return {src:a.src,time:a.currentTime}})()");
     let hiddenPlayback, hiddenAudio;
+    let syntheticBackgroundCss = false;
+    let backgroundAnimationsPaused = false;
+    const baselineProfile = String(process.env.LOCALTIFY_QA_OUTPUT || "").replaceAll("\\", "/").includes("/desktop-baseline");
     try {
       win.hide();
+      assert.equal(win.isVisible(),false,"the Electron window is actually hidden");
+      // Offscreen Xvfb does not consistently deliver Chromium's visibility/blur
+      // signals after BrowserWindow.hide(). When absent, activate only the
+      // production background CSS class for this controlled resource sample.
+      const backgroundCss = await win.webContents.executeJavaScript(
+        "document.body.classList.contains('localtifyWindowBackgrounded') || document.body.classList.contains('localtifyBackgroundMode')");
+      if (!backgroundCss) {
+        syntheticBackgroundCss = true;
+        await win.webContents.executeJavaScript("document.body.classList.add('localtifyWindowBackgrounded')");
+      }
+      // A pseudo-element without generated content may report the default
+      // animation-play-state even when the corresponding CSS rule is correct.
+      // Test a real descendant with an inline running state instead.
+      backgroundAnimationsPaused = await win.webContents.executeJavaScript(`(()=>{
+        const root=document.querySelector('.app');
+        const probe=document.createElement('span');
+        probe.style.animationPlayState='running';
+        root.appendChild(probe);
+        const paused=getComputedStyle(probe).animationPlayState==='paused';
+        probe.remove();
+        return paused;
+      })()`);
+      // The same harness also benchmarks an older main-branch worktree that
+      // predates the performance policy; it must not require the new rule.
+      if (!baselineProfile) assert.equal(backgroundAnimationsPaused,true,
+        "candidate must pause decorative animations when its window is hidden");
       hiddenPlayback=await metrics("desktop hidden playback",3);
-      hiddenAudio=await win.webContents.executeJavaScript("(()=>{const a=document.querySelector('audio');return {src:a.src,time:a.currentTime,paused:a.paused,documentHidden:document.hidden}})()");
-    } finally { win.show(); win.focus(); }
-    const hiddenPlaybackObservation={documentHidden:hiddenAudio.documentHidden,sameSource:hiddenAudio.src===beforeHidden.src,advancedSeconds:hiddenAudio.time-beforeHidden.time,paused:hiddenAudio.paused};
+      hiddenAudio=await win.webContents.executeJavaScript(
+        "(()=>{const a=document.querySelector('audio');return {src:a.src,time:a.currentTime,paused:a.paused,documentHidden:document.hidden,backgroundCssActive:document.body.classList.contains('localtifyWindowBackgrounded')||document.body.classList.contains('localtifyBackgroundMode')}})()");
+    } finally {
+      if (syntheticBackgroundCss) await win.webContents.executeJavaScript(
+        "document.body.classList.remove('localtifyWindowBackgrounded')").catch(()=>undefined);
+      win.show(); win.focus();
+    }
+    const hiddenPlaybackObservation={documentHidden:hiddenAudio.documentHidden,
+      backgroundCssActive:hiddenAudio.backgroundCssActive,
+      backgroundCssSimulated:syntheticBackgroundCss,
+      backgroundAnimationsPaused, baselineProfile,
+      browserWindowHidden:true,
+      sameSource:hiddenAudio.src===beforeHidden.src,
+      advancedSeconds:hiddenAudio.time-beforeHidden.time,paused:hiddenAudio.paused};
     await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=home]').click()");
     await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.homeFeatureCover') && document.querySelector('.app').dataset.workspaceArtwork==='on'").catch(()=>false),"artwork-led Home");
     async function homeGeometry(width,height) {
@@ -319,7 +360,7 @@ server.listen(5173,async()=>{
         await until(()=>win.webContents.executeJavaScript("window.innerWidth").then(actual=>actual===width),"viewport "+width,5000);
         for (const view of ["home","library","artists","genres","playlists","discover","downloads","covers","analytics","settings"]) {
           await win.webContents.executeJavaScript(`document.querySelector('.sidebar [data-nav-id="${view}"]').click()`);
-          await until(()=>win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return !!page?.firstElementChild&&!page.querySelector('.collectionLoading')&&!document.querySelector('.appCrashBoundary')})()`).catch(()=>false),view+" "+mode+" "+width);
+          await until(()=>win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return !!page?.firstElementChild&&!page.querySelector('.collectionLoading')&&!document.querySelector('.appCrashBoundary')&&Number(getComputedStyle(page).opacity)>=0.99})()`).catch(()=>false),view+" "+mode+" "+width);
           if(view==="downloads") {
             const saved=await win.webContents.executeJavaScript("window.localitfy.getDownloadJobs()");
             assert.equal(saved.error, "", "download journal is available through the trusted preload");
@@ -352,10 +393,13 @@ server.listen(5173,async()=>{
           }
           const geometry=await win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return {width:page.clientWidth,scroll:page.scrollWidth}})()`);
           assert.ok(geometry.width>0&&geometry.scroll<=geometry.width+3,"page overflow "+view+" "+mode+" "+JSON.stringify(geometry));
+          if(view==="artists") {
+            await until(()=>win.webContents.executeJavaScript(`(()=>{const covers=[...document.querySelectorAll(".artistCard .coverImage")].filter(img=>{const r=img.getBoundingClientRect();return r.width>0&&r.height>0&&r.bottom>0&&r.top<window.innerHeight});return covers.length>0&&covers.every(img=>img.complete&&img.naturalWidth>0&&img.classList.contains("isLoaded"))})()`).catch(()=>false),"visible artist fixture artwork "+mode+" "+width,10000);
+          }
           await screenshot(win,view+"-"+mode+"-"+width);
         }
         await win.webContents.executeJavaScript("document.querySelector('.playerLyricsButton').click()");
-        await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.lyricsView')&&!document.querySelector('.appCrashBoundary')").catch(()=>false),"lyrics "+mode+" "+width);
+        await until(()=>win.webContents.executeJavaScript(`(()=>{const panel=document.querySelector(".lyricsView");if(!panel||document.querySelector(".appCrashBoundary"))return false;const rect=panel.getBoundingClientRect();return rect.width>0&&rect.height>0&&Number(getComputedStyle(panel).opacity)>=0.99})()`).catch(()=>false),"visible lyrics "+mode+" "+width);
         await screenshot(win,"lyrics-"+mode+"-"+width);
         await win.webContents.executeJavaScript("document.querySelector('.lyricsView button[aria-label=\"close lyrics\"]').click()");
         await until(()=>win.webContents.executeJavaScript("!document.querySelector('.lyricsView')").catch(()=>false),"close lyrics");
@@ -420,7 +464,7 @@ server.listen(5173,async()=>{
     assert.ok(collection.hero&&collection.row&&collection.play,"compact collections retain keyboard playback: "+JSON.stringify(collection));
     await screenshot(win,"collection-narrow");
     win.setSize(1280,800);
-    const result={startupMs,reloadMs,libraryNavigationMs,playbackStartMs,interactionDefinition:"click to observed DOM/audio readiness, polling resolution 200ms",startupDefinition:"desktop entry to first rendered screen (onboarding or shell); excludes fixture creation and Electron process spawn",metrics:[idle,playing,hiddenPlayback],hiddenPlaybackObservation,gpuNote:"GPU process CPU and working set are reported by process type; these are not hardware GPU utilization",memoryDefinition:"sum of Electron process working sets; may double count shared pages",platform:process.platform,fixtureSongs:songs.length,layouts,artworkTransitionLayers:samples};
+    const result={startupMs,reloadMs,libraryNavigationMs,playbackStartMs,interactionDefinition:"click to observed DOM/audio readiness, polling interval 16ms plus IPC overhead",startupDefinition:"desktop entry to first rendered screen (onboarding or shell); excludes fixture creation and Electron process spawn",metrics:[idle,playing,hiddenPlayback],hiddenPlaybackObservation,gpuNote:"GPU process CPU and working set are reported by process type; these are not hardware GPU utilization",memoryDefinition:"sum of Electron process working sets; may double count shared pages",platform:process.platform,fixtureSongs:songs.length,layouts,artworkTransitionLayers:samples};
     fs.writeFileSync(path.join(output,"desktop-runtime.json"),JSON.stringify(result,null,2));console.log("[desktop-qa]",JSON.stringify(result));
     clearTimeout(watchdog);server.close();app.exit(0);
   }catch(error){

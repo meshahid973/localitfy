@@ -24,7 +24,7 @@ function registerTaggingIpc(router, deps) {
   const parseFile = deps.parseFile || loadParseFile;
   const shell = deps.shell || require("electron").shell;
   const ffmpegPath = deps.ffmpegPath || String(require("ffmpeg-static") || "").replace("app.asar", "app.asar.unpacked");
-  const userAgent = `localtify/${app.getVersion()} ( https://github.com/meshahid973/localitfy )`;
+  const userAgent = `localtify/${app.getVersion()} ( https://github.com/meshahid973/localtify )`;
   const fetchImpl = deps.fetchImpl || fetch;
   const auditor = createTagAuditor({ parseFile });
   const lookup = createTaggingLookup({ client: deps.musicBrainzClient || createMusicBrainzClient({ userAgent, fetchImpl, ...deps.clientOptions }), coverDir: path.join(app.getPath("userData"), "musicbrainz-covers"), userAgent, fetchImpl });

@@ -5,8 +5,8 @@ const CLIENT_ID = "1499896817138012271";
 const APP_NAME = "localtify";
 const DEFAULT_LOGO_ASSET = "earthglow";
 
-const DEFAULT_DOWNLOAD_URL = "https://github.com/meshahid973/localitfy/releases/latest";
-const DEFAULT_SOURCE_URL = "https://github.com/meshahid973/localitfy";
+const DEFAULT_DOWNLOAD_URL = "https://github.com/meshahid973/localtify/releases/latest";
+const DEFAULT_SOURCE_URL = "https://github.com/meshahid973/localtify";
 
 const ACTIVITY_THROTTLE_MS = 1400;
 const SAME_SONG_REFRESH_MS = 20000;

@@ -1,5 +1,5 @@
 import "./pages.css";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Save } from "lucide-react";
 import { CollectionLoading } from "../../shared/ui/CollectionLoading";
 import { LocaltifyStateCard } from "../../shared/ui/LocaltifyViewUi";
@@ -10,6 +10,7 @@ import { useHomeDailyMixes } from "../home/useHomeDailyMixes";
 import { useHomeDay } from "../home/useHomeDay";
 import { mixTarget, playableIds, useAppActions } from "../shell/appActions";
 import type { Song } from "../library/song.types";
+import { filterCollectionSongs, sortLibrarySongs, type LibrarySortMode } from "../library/librarySort";
 import { PageAtmosphere } from "../covers/pageAtmosphere";
 import CollectionHero from "./CollectionHero";
 import TrackList from "./TrackList";
@@ -27,11 +28,17 @@ export type MixPageProps = {
 /** One of today's daily mixes as a page. */
 export default function MixPage({ mixId, songs, currentId, isPlaying, toggleLike, openPlaylistPicker, savePlaylist }: MixPageProps) {
   const actions = useAppActions();
+  const [query,setQuery]=useState("");
+  const [sort,setSort]=useState<LibrarySortMode>("library");
+  useEffect(()=>{setQuery("");setSort("library");},[mixId]);
   const day = useHomeDay();
   const { result, failed } = useHomeDailyMixes(day);
   const songsById = useMemo(() => new Map(songs.map((song) => [song.id, song])), [songs]);
   const mix = result?.mixes.find((item) => item.id === mixId) || null;
   const members = useMemo(() => mix?.songIds.flatMap((id) => songsById.get(id) ?? []) ?? [], [mix, songsById]);
+
+  const sorted=useMemo(()=>sortLibrarySongs(members,sort),[members,sort]);
+  const filtered=useMemo(()=>filterCollectionSongs(sorted,query),[sorted,query]);
 
   if (!mix && !result && !failed) {
     return (
@@ -52,6 +59,7 @@ export default function MixPage({ mixId, songs, currentId, isPlaying, toggleLike
   }
 
   const target = mixTarget(mix, members);
+  const playbackTarget = sort === "library" ? target : {...target,songs:sorted};
   const playable = playableIds(members);
   const artists = [...new Set(members.map((song) => prettyMeta(song.artist)).filter(Boolean))];
   const duration = members.reduce((total, song) => total + Math.max(0, Number(song.duration) || 0), 0);
@@ -67,18 +75,21 @@ export default function MixPage({ mixId, songs, currentId, isPlaying, toggleLike
         byline={<span>{artists.slice(0, 3).join(", ")}{artists.length > 3 ? " and more" : ""}</span>}
         stats={`${members.length} track${members.length === 1 ? "" : "s"} · ${formatTime(duration)}`}
         playable={playable.length}
-        onPlay={() => actions.playCollection(target)}
+        onPlay={() => actions.playCollection(playbackTarget)}
         onShuffle={() => actions.playCollection(target, { shuffle: true })}
-        onQueue={() => actions.queueCollection(target)}
+        onQueue={() => actions.queueCollection(playbackTarget)}
         onMore={(event) => actions.openCollectionMenu(event, target)}
+        sort={{value:sort,onChange:setSort}}
+        search={<input type="search" className="pageHeaderSearch" aria-label="Search mix tracks" placeholder="Search tracks" value={query} onChange={event=>setQuery(event.currentTarget.value)} />}
       >
         <button className="collectionIconButton" type="button" disabled={!playable.length} aria-label={`save ${mix.name} as a playlist`} title="Save as playlist"
           onClick={() => savePlaylist(mix.name, playable)}>
           <Save size={16} strokeWidth={2.2} aria-hidden="true" />
         </button>
       </CollectionHero>
-      <TrackList songs={members} currentId={currentId} isPlaying={isPlaying}
-        playFrom={(songId) => actions.playCollection(target, { startId: songId })} toggleLike={toggleLike} openPlaylistPicker={openPlaylistPicker} />
+      {query.trim()&&!filtered.length?<p role="status">No matching tracks.</p>:null}
+      <TrackList songs={filtered} currentId={currentId} isPlaying={isPlaying}
+        playFrom={(songId) => actions.playCollection({...target,songs:filtered}, { startId: songId })} toggleLike={toggleLike} openPlaylistPicker={openPlaylistPicker} />
     </section>
   );
 }

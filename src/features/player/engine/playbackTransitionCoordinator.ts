@@ -48,6 +48,8 @@ export class PlaybackTransitionCoordinator {
   crossfadeCancelled() {
     if (!this.state.targetId) return;
     this.state.targetId = ""; this.state.phase = this.state.beforeCrossfade;
+    // Invalidate asynchronous work even if the same target is retried.
+    this.state.generation++;
   }
   ended(protectedHandoff = false): boolean {
     if (protectedHandoff || this.state.targetId) return false;

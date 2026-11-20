@@ -49,3 +49,10 @@ test("both renderer entry points use the compatibility guard", () => {
   assert.match(settings, /if \(!supported\) return </);
   assert.doesNotMatch(app + settings, /window\.localitfy\.onWatchedFoldersChange\(/);
 });
+
+test("watched-folder status refresh avoids fast IPC polling and stops when hidden", () => {
+  const settings = fs.readFileSync("src/features/library/WatchedFoldersSettings.tsx", "utf8");
+  assert.match(settings, /pendingStatusRef\.current/);
+  assert.match(settings, /setInterval\(refreshIfVisible, 20_000\)/);
+  assert.match(settings, /document\.hidden/);
+});

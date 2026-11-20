@@ -65,3 +65,22 @@ test("cover resolution prefers embedded art, avoids ambiguous images and shares 
   const empty=path.join(dir,"empty.jpg");fs.writeFileSync(empty,"");
   assert.equal((await resolveSongCover({song:{coverPath:empty,coverSource:"custom"},fallbackCoverPath:a})).coverPath,a);
 });
+
+test("explicit cover changes preserve custom provenance and reject invalid paths", async () => {
+  const { registerCoverIpc } = require("../../electron/ipc/covers.cjs");
+  const handlers = new Map(), writes = [];
+  const original = {id:"track", coverPath:"old", coverSource:"spotify"};
+  const selected = path.resolve("manual-cover.jpg");
+  registerCoverIpc({ handle: (name, handler) => handlers.set(name, handler) }, {
+    getSong: () => original, shapeSong: song => song,
+    fileExists: file => file === selected, isImageFile: file => file.endsWith(".jpg"),
+    patchSong: (id, patch) => { writes.push(patch); return {...original,...patch}; }
+  });
+  const setCover = handlers.get("song:set-cover");
+  assert.equal(await setCover({}, "track", "relative.jpg"), original);
+  assert.equal(writes.length, 0);
+  const result = await setCover({}, "track", selected);
+  assert.equal(result.coverSource, "custom");
+  assert.equal(result.coverPath, selected);
+  assert.ok(Number.isFinite(Date.parse(result.coverUpdatedAt)));
+});

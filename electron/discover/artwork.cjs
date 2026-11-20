@@ -16,7 +16,7 @@ function catalogArtwork(kind, item) {
 function findRecording(items,title,artist,recordingId) {
   const matches=(Array.isArray(items)?items:[]).filter(item=>norm(item?.title)===norm(title)&&norm(credit(item))===norm(artist));
   const identified=validId(recordingId)?matches.find(item=>item.id===recordingId):undefined;
-  return identified || (matches.length===1?matches[0]:undefined);
+  return validId(recordingId) ? identified : (matches.length===1?matches[0]:undefined);
 }
 function lastfmArtwork(track,title,artist) {
   if (norm(track?.name)!==norm(title) || norm(track?.artist?.name)!==norm(artist)) return {};
@@ -77,14 +77,18 @@ function createArtworkLookup(client,now=Date.now,trackInfo,lookupAudioDb,lookupM
         const direct = matchMusicArtwork(await lookupMusic(title,artist).catch(()=>[]),title,artist);
         if (direct.coverUrl) return direct;
       }
-      const deezer = lookupDeezer ? await lookupDeezer("recording",title,artist).catch(()=>({})) : {};
+      const deezerJob = () => lookupDeezer ? lookupDeezer("recording",title,artist).catch(()=>({})) : Promise.resolve({});
+      const trackJob = () => trackInfo ? trackInfo(title,artist).catch(()=>null) : Promise.resolve(null);
+      const alternateJob = () => lookupAudioDb ? lookupAudioDb(title,artist).catch(()=>({})) : Promise.resolve({});
+      const alternatives = fallback ? await Promise.all([deezerJob(),trackJob(),alternateJob()]) : null;
+      const deezer = alternatives ? alternatives[0] : await deezerJob();
       if(deezer.coverUrl && !fallback)return deezer;
-      const track = trackInfo ? await trackInfo(title,artist).catch(()=>null) : null;
+      const track = alternatives ? alternatives[1] : await trackJob();
       const primary = lastfmArtwork(track,title,artist);
       const verified = norm(track?.name)===norm(title)&&norm(track?.artist?.name)===norm(artist);
       const release = verified && validId(track?.album?.mbid) ? url("release",track.album.mbid) : undefined;
       if (primary.coverUrl && !fallback) return {...primary,...(release?{fallbackCoverUrl:release}:{})};
-      const alternate = lookupAudioDb ? await lookupAudioDb(title,artist).catch(()=>({})) : {};
+      const alternate = alternatives ? alternatives[2] : await alternateJob();
       const known = [...new Set([primary.coverUrl,alternate.coverUrl,release,deezer.coverUrl,...(deezer.coverAlternatives||[])].filter(Boolean))];
       const knownArt=known.length?{coverUrl:known[0],fallbackCoverUrl:known[1],coverAlternatives:known.slice(0,6)}:{};
       if (known.length && !fallback) return knownArt;

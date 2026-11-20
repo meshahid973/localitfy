@@ -37,7 +37,8 @@ test("artist cards open the artist page, play from their button, and share the c
   assert.doesNotMatch(source, /createPortal/, "no more side drawer");
   const page = fs.readFileSync("src/features/pages/SongGroupPage.tsx", "utf8");
   assert.match(page, /actions\.playCollection\(target, \{ shuffle: true \}\)/);
-  assert.match(page, /actions\.queueCollection\(target\)/);
+  assert.match(page, /actions\.queueCollection\(playbackTarget\)/);
+  assert.match(page, /const playbackTarget = sort === "library" \? target : \{\.\.\.target,songs:sorted\}/);
   assert.doesNotMatch(page, /<AlbumShelf/);
 });
 

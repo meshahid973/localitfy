@@ -1,6 +1,7 @@
 import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import { ListEnd, MoreHorizontal, Play, Shuffle } from "lucide-react";
 import type { Song } from "../library/song.types";
+import type { LibrarySortMode } from "../library/librarySort";
 import { IconButton } from "../../shared/ui/IconButton";
 import { Surface } from "../../shared/ui/Surface";
 
@@ -21,10 +22,11 @@ export type CollectionHeroProps = {
   /** Page-specific buttons after the shared ones (edit, more like this…). */
   children?: ReactNode;
   search?: ReactNode;
+  sort?: {value: LibrarySortMode; onChange: (value: LibrarySortMode) => void; defaultLabel?: string};
 };
 
 /** Top of every album, artist, genre, playlist and mix page: artwork, title, then play · shuffle · queue · more. */
-export default function CollectionHero({ typeLabel, title, cover, round = false, byline, stats, playable, onPlay, onShuffle, onQueue, onMore, children, search }: CollectionHeroProps) {
+export default function CollectionHero({ typeLabel, title, cover, round = false, byline, stats, playable, onPlay, onShuffle, onQueue, onMore, children, search, sort }: CollectionHeroProps) {
   return (
     <Surface as="header" variant="transparent" className={`collectionHero ${round ? "isRound" : ""}`}>
       <div className="collectionHeroArt">{cover}</div>
@@ -45,6 +47,11 @@ export default function CollectionHero({ typeLabel, title, cover, round = false,
           <ListEnd size={17} strokeWidth={2.2} aria-hidden="true" />
         </IconButton>
         {search ? <div className="collectionHeroSearch">{search}</div> : null}
+        {sort ? <select className="pageHeaderSearch collectionSort" aria-label="Sort collection tracks" value={sort.value} onChange={event=>sort.onChange(event.currentTarget.value as LibrarySortMode)}>
+          <option value="library">{sort.defaultLabel || "Default order"}</option>
+          <option value="title">Title</option><option value="artist">Artist</option>
+          <option value="recent">Recently added</option><option value="plays">Most played</option>
+        </select> : null}
         {children}
         <IconButton className="collectionIconButton" type="button" onClick={(event) => void onMore(event)} aria-label={`more options for ${title}`} title="More options">
           <MoreHorizontal size={18} strokeWidth={2.2} aria-hidden="true" />

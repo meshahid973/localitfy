@@ -1,4 +1,9 @@
 name: rust-kernels-experimental
+# Cancel outdated automatic PR validation; preserve intentionally separate manual runs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 
 on:
   pull_request:

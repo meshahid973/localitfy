@@ -13,7 +13,7 @@ runInNewContext(output, { exports, require: (id) => {
   assert.equal(id, "../library/library.constants");
   return { PLAYBACK_URL_CACHE_TTL_MS: TTL };
 } });
-const { PlaybackUrlCache } = exports;
+const { PlaybackUrlCache, resolveCachedPlaybackUrl } = exports;
 const entry = (checkedAt) => ({ url: "local://track", checkedAt, fileExists: true });
 
 test("playback URL cache bounds retention and refreshes LRU order", () => {
@@ -39,4 +39,43 @@ test("playback URL cache expires on access and supports invalidation", () => {
   cache.set("c", entry(now));
   cache.clear();
   assert.equal(cache.size, 0);
+});
+
+test("short-lived playback URLs expire at the provider TTL and distinct case-sensitive sources do not collide", () => {
+  let now = 0;
+  const cache = new PlaybackUrlCache(2, () => now);
+  cache.set("/music/Track.mp3", { ...entry(0), ttlMs: 50 });
+  cache.set("/music/track.mp3", { ...entry(0), url: "local://different" });
+  now = 50;
+  assert.equal(cache.get("/music/Track.mp3"), undefined);
+  assert.equal(cache.get("/music/track.mp3").url, "local://different");
+});
+
+test("forced resolution supersedes normal IPC and invalidated replies never mark songs missing", async () => {
+  const cache = new PlaybackUrlCache(), pending = new Map(), replies = [], missing = [];
+  const song = { id: "track", filePath: "/music/Track.mp3" };
+  const resolve = force => resolveCachedPlaybackUrl(song, {
+    sourceKey: song.filePath, force, cache, pending,
+    resolver: payload => new Promise(done => replies.push({ payload, done })),
+    onMissing: (...args) => missing.push(args)
+  });
+  const normal = resolve(false), duplicate = resolve(false);
+  await Promise.resolve();
+  assert.equal(replies.length, 1);
+  const force = resolve(true);
+  await Promise.resolve();
+  assert.equal(replies.length, 2);
+  replies[0].done({ ok: false, fileExists: false });
+  assert.equal((await normal).error, "playback source changed");
+  assert.equal((await duplicate).error, "playback source changed");
+  replies[1].done({ ok: true, url: "local://fresh", cacheTtlMs: 1000 });
+  assert.equal((await force).url, "local://fresh");
+  assert.equal(cache.get(song.filePath).url, "local://fresh");
+  assert.equal(missing.length, 0);
+  const invalidated = resolve(true);
+  await Promise.resolve();
+  pending.clear();
+  replies[2].done({ ok: false, fileExists: false });
+  assert.equal((await invalidated).error, "playback source changed");
+  assert.equal(missing.length, 0);
 });

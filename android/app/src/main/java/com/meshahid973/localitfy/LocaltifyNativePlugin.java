@@ -32,6 +32,8 @@ public class LocaltifyNativePlugin extends Plugin {
     // A few files at once: one stream at a time leaves most of a Wi-Fi link idle.
     private final ExecutorService downloads = Executors.newFixedThreadPool(4);
     private WifiManager.WifiLock wifiLock;
+    private RemoteArtworkCache artworkCache;
+    private final java.util.concurrent.ThreadPoolExecutor artworkRequests = new java.util.concurrent.ThreadPoolExecutor(1, 2, 30, java.util.concurrent.TimeUnit.SECONDS, new java.util.concurrent.ArrayBlockingQueue<>(6));
 
     // The live connection: one server-sent-events stream from the computer, read on its own thread so it keeps
     // going while the page is in the background. It reconnects with a growing pause, and at once on a new network.
@@ -44,11 +46,14 @@ public class LocaltifyNativePlugin extends Plugin {
     private String liveToken = "";
     private volatile HttpURLConnection liveConnection;
     private Network liveNetwork;
-    private boolean watchingNetwork = false;
+    private ConnectivityManager.NetworkCallback networkCallback;
+    private volatile boolean destroyed;
 
     @Override
     public void load() {
         active = this;
+        artworkCache = new RemoteArtworkCache(getContext());
+        artworkRequests.allowCoreThreadTimeOut(true);
     }
 
     /** Media controls from the notification, lock screen or headset, forwarded to the renderer. */
@@ -68,6 +73,41 @@ public class LocaltifyNativePlugin extends Plugin {
         result.put("mediaPrefix", "https://localhost" + LocalMediaHandler.PREFIX);
         result.put("deviceName", Build.MANUFACTURER + " " + Build.MODEL);
         call.resolve(result);
+    }
+
+    @PluginMethod
+    public void resolveRemoteArtwork(PluginCall call) {
+        try {
+            artworkRequests.execute(() -> {
+                try { call.resolve(artworkCache.resolve(call.getString("url"),artworkRequests)); }
+                catch (Exception error) { call.resolve(new JSObject()); }
+            });
+        } catch (java.util.concurrent.RejectedExecutionException busy) { call.resolve(new JSObject()); }
+    }
+
+    @PluginMethod
+    public void requestCoverThumbnail(PluginCall call) {
+        try {
+            artworkRequests.execute(() -> {
+                try { call.resolve(artworkCache.thumbnail(call.getString("path"),call.getString("revision"),call.getInt("size",256),call.getString("failed",""))); }
+                catch(Exception error){call.resolve(new JSObject());}
+            });
+        } catch(java.util.concurrent.RejectedExecutionException busy){call.resolve(new JSObject());}
+    }
+
+    @Override
+    protected void handleOnDestroy() {
+        destroyed=true;
+        if(active==this)active=null;
+        synchronized(liveLock){
+            liveWanted=false;closeLiveConnection();wakeLive();
+            ConnectivityManager manager=getContext().getSystemService(ConnectivityManager.class);
+            if(manager!=null&&networkCallback!=null){try{manager.unregisterNetworkCallback(networkCallback);}catch(IllegalArgumentException ignored){}}
+            networkCallback=null;
+        }
+        if(wifiLock!=null&&wifiLock.isHeld())wifiLock.release();
+        artworkRequests.shutdownNow();requests.shutdownNow();downloads.shutdownNow();
+        super.handleOnDestroy();
     }
 
     private File resolve(String relative) throws IOException {
@@ -93,6 +133,7 @@ public class LocaltifyNativePlugin extends Plugin {
             HttpURLConnection connection = null;
             try {
                 connection = (HttpURLConnection) new URL(call.getString("url")).openConnection();
+                connection.setInstanceFollowRedirects(false);
                 connection.setRequestMethod(call.getString("method", "GET"));
                 connection.setConnectTimeout(call.getInt("timeoutMs", 8000));
                 connection.setReadTimeout(call.getInt("timeoutMs", 30000));
@@ -140,6 +181,7 @@ public class LocaltifyNativePlugin extends Plugin {
                 if (parent != null && !parent.isDirectory() && !parent.mkdirs() && !parent.isDirectory()) throw new IOException("could not create folder");
                 temp = new File(parent, "." + target.getName() + ".part");
                 connection = (HttpURLConnection) new URL(call.getString("url")).openConnection();
+                connection.setInstanceFollowRedirects(false);
                 connection.setConnectTimeout(8000);
                 connection.setReadTimeout(30000);
                 applyHeaders(connection, call.getObject("headers"));
@@ -286,7 +328,8 @@ public class LocaltifyNativePlugin extends Plugin {
             int status = 0;
             try {
                 connection = (HttpURLConnection) new URL(url + "/v1/live").openConnection();
-                liveConnection = connection;
+                connection.setInstanceFollowRedirects(false);
+                synchronized(liveLock){if(destroyed||!liveWanted||!url.equals(liveUrl)||!token.equals(liveToken))continue;liveConnection=connection;}
                 connection.setConnectTimeout(5000);
                 // The computer sends a heartbeat every 25 s; a minute of silence means the link is gone.
                 connection.setReadTimeout(60000);
@@ -347,10 +390,12 @@ public class LocaltifyNativePlugin extends Plugin {
 
     /** Answers the computer's heartbeat from here, so it keeps working with the page asleep in the background. */
     private void pongLive(String url, String token) {
-        requests.execute(() -> {
+        if(destroyed)return;
+        try { requests.execute(() -> {
             HttpURLConnection connection = null;
             try {
                 connection = (HttpURLConnection) new URL(url + "/v1/live").openConnection();
+                connection.setInstanceFollowRedirects(false);
                 connection.setRequestMethod("POST");
                 connection.setConnectTimeout(5000);
                 connection.setReadTimeout(5000);
@@ -366,28 +411,29 @@ public class LocaltifyNativePlugin extends Plugin {
             } finally {
                 if (connection != null) connection.disconnect();
             }
-        });
+        }); } catch(java.util.concurrent.RejectedExecutionException ignored){}
     }
 
     /** Wi-Fi back after sleep, or a switch to another network: reconnect now rather than after the backoff. */
     private void watchNetwork() {
         synchronized (liveLock) {
-            if (watchingNetwork) return;
-            watchingNetwork = true;
-        }
-        ConnectivityManager manager = getContext().getSystemService(ConnectivityManager.class);
-        if (manager == null) return;
-        manager.registerDefaultNetworkCallback(new ConnectivityManager.NetworkCallback() {
+            if (destroyed || networkCallback!=null) return;
+            ConnectivityManager manager = getContext().getSystemService(ConnectivityManager.class);
+            if (manager == null) return;
+            networkCallback = new ConnectivityManager.NetworkCallback() {
             @Override
             public void onAvailable(Network network) {
                 synchronized (liveLock) {
+                    if(destroyed)return;
                     // The first call reports the network already in use; only a different one makes the old socket stale.
                     if (liveNetwork != null && !liveNetwork.equals(network)) closeLiveConnection();
                     liveNetwork = network;
                     wakeLive();
                 }
             }
-        });
+            };
+            try { manager.registerDefaultNetworkCallback(networkCallback); } catch(RuntimeException error){networkCallback=null;}
+        }
     }
 
     /** Mirrors navigator.mediaSession into the native session and its foreground service. */

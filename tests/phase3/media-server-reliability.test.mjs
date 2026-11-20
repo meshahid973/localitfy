@@ -160,16 +160,17 @@ test("thumbnail cache refreshes media URLs and downloads shape the library once"
   assert.match(thumbnails, /const freshUrl = safeMediaUrl\(cached\)/);
   assert.match(thumbnails, /rememberCoverThumbnail\(key, cached\)/);
   assert.match(thumbnails, /coverThumbnailUrlCache\.size > COVER_THUMBNAIL_URL_CACHE_LIMIT/);
-  assert.match(thumbnails, /invalidateFileInfo\(thumbnailPath\);\s*(?:const url = safeMediaUrl\(thumbnailPath\)|return \{ ok: true)/);
-  assert.match(thumbnails, /publish\(\{ source: safeMediaUrl\(filePath\), url \}\)/);
+  assert.match(thumbnails, /invalidateFileInfo\(thumbnailPath\);[\s\S]{0,240}const url = safeMediaUrl\(thumbnailPath\)/);
+  assert.match(thumbnails, /publish\(\{ source: safeMediaUrl\(filePath\), url, size \}\)/);
   assert.match(main, /webContents\.send\("covers:thumbnail-ready", payload\)/);
   assert.doesNotMatch(protocols, /bypassCSP\s*:\s*true/);
 
-  const download = main.slice(main.indexOf('const runAudioDownload ='), main.indexOf('ipcRouter.handle("download:cancel"'));
+  const downloadsIpc = fs.readFileSync(path.join(root, "electron", "ipc", "downloads.cjs"), "utf8");
+  const download = downloadsIpc.slice(downloadsIpc.indexOf('const runAudioDownload ='), downloadsIpc.indexOf('ipcRouter.handle("download:cancel"'));
   assert.equal((download.match(/listSongsShaped\(\)/g) || []).length, 2, "one success snapshot and one error fallback");
   assert.match(download, /importNewAudioFilesFromDirectory\(downloadFolder, \[\], \{ includeSongs: false \}\)/);
 
-  const spotify = main.slice(main.indexOf('const runSpotifyDownloadBatch ='), main.indexOf('ipcRouter.handle("spotify-download-batch"'));
+  const spotify = downloadsIpc.slice(downloadsIpc.indexOf('const runSpotifyDownloadBatch ='), downloadsIpc.indexOf('ipcRouter.handle("spotify-download-batch"'));
   assert.equal((spotify.match(/listSongsShaped\(\)/g) || []).length, 2, "one success snapshot and one error fallback");
 });
 
@@ -206,4 +207,20 @@ test("all audio creation paths configure anonymous CORS before setting src", () 
   assert.match(preloader, /nextAudioRef\.current = new Audio\(\);\s*nextAudioRef\.current\.crossOrigin = "anonymous";\s*nextAudioRef\.current\.preload/);
   assert.match(app, /nextAudio\.crossOrigin = "anonymous";/);
   assert.match(engine, /this\.element\.crossOrigin = "anonymous";/);
+});
+
+test("stopping during pending listen settles the old start and allows a clean restart", async (t) => {
+  const { runtime } = makeRuntime();
+  t.after(() => runtime.stop());
+  const first = runtime.start();
+  assert.equal(runtime.start(), first);
+  runtime.stop();
+  assert.equal(await first, false);
+  assert.equal(runtime.getPort(), 0);
+  assert.equal(await runtime.start(), true);
+  assert.ok(runtime.getPort() > 0);
+  await new Promise(resolve => setImmediate(resolve));
+  assert.ok(runtime.getPort() > 0, "old callbacks cannot clear the restarted server");
+  runtime.stop();
+  assert.equal(runtime.getPort(), 0);
 });

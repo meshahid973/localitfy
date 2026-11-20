@@ -146,3 +146,29 @@ test("asynchronous thumbnail jobs remain serialized and deduplicated during visi
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(timers.size, 0);
 });
+
+test("leaving the viewport cancels only queued visible artwork",()=>{
+  const processed=[];
+  const {scheduler,flush}=makeScheduler(file=>processed.push(file));
+  scheduler.enqueue("warm",{lowPriority:true});
+  scheduler.enqueue("gone");
+  scheduler.enqueue("still-visible");
+  assert.equal(scheduler.cancel("gone"),true);
+  assert.equal(scheduler.cancel("warm"),false);
+  while(flush()){}
+  assert.deepEqual(processed,["still-visible","warm"]);
+});
+
+test("cancelling a promoted visible job restores independently requested warmup", () => {
+  const processed = [];
+  const { scheduler, flush } = makeScheduler(file => processed.push(file));
+  scheduler.enqueue("warm-first", { lowPriority: true });
+  scheduler.enqueue("warm-first");
+  scheduler.enqueue("visible-first");
+  scheduler.enqueue("visible-first", { lowPriority: true });
+  scheduler.cancel("warm-first");
+  scheduler.cancel("visible-first");
+  scheduler.enqueue("still-visible");
+  while (flush()) {}
+  assert.deepEqual(processed, ["still-visible", "warm-first", "visible-first"]);
+});

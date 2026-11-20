@@ -5,25 +5,22 @@ import { createPlayerController } from "./features/player/engine/playerControlle
 import { useNativeMediaSession } from "./features/player/useNativeMediaSession";
 import type { ListeningOutcome } from "./features/player/listeningHistory";
 import { usePlayerRuntime } from "./features/player";
+import { usePlaybackProgressLoop } from "./features/player/usePlayerRuntime";
+import { resolveCachedPlaybackUrl } from "./features/player/playbackUrlCache";
 import { useSongRadio } from "./features/player/useSongRadio";
 import { useNotForMe } from "./features/analysis/notForMe";
-import { devPerfStart, devPerfEnd, measureDevTime } from "./shared/perf/devPerf";
+import { devPerfStart, devPerfEnd } from "./shared/perf/devPerf";
 import type { PlayerEngineSource } from "./features/player/engine/PlayerEngine";
 import { useAnalyticsRuntime } from "./features/analytics/useAnalyticsRuntime";
-import {
-  enrichDownloadResultsWithLibraryMatches,
-  friendlyDownloadError,
-  makeQueuedDownloads,
-  parseDownloadUrls
-} from "./features/downloads/downloadProcessing";
 import { useDownloadsRuntime } from "./features/downloads/useDownloadsRuntime";
 import { getDownloadPageState } from "./features/downloads/downloadState";
-import { downloadAudioOptions, downloadStatusLabel, spotifyTrackStatusLabel } from "./features/downloads/download.selectors";
+import { downloadStatusLabel, spotifyTrackStatusLabel } from "./features/downloads/download.selectors";
 import "./App.css";
 
 import AppShell from "./features/shell/AppShell";
 import type { AppShellProps } from "./features/shell/appShell.contract";
 import { useAppToast } from "./features/shell/useAppToast";
+import { useShellResize } from "./features/shell/useShellResize";
 import { useScreensaverController } from "./features/shell/useScreensaverController";
 import { useDiagnosticsInfo } from "./features/shell/useDiagnosticsInfo";
 import { useFeedbackController } from "./features/feedback";
@@ -33,9 +30,9 @@ import { updateStatusLabel, useUpdatesController } from "./features/updates";
 import { useSettingsController } from "./features/settings";
 import { useCoversController } from "./features/covers";
 import type { VirtualSongRowsProps } from "./features/library/components/SongRows";
-import { useLibraryController } from "./features/library";
+import { useLibraryController, useLibraryDerivedState } from "./features/library";
 import { subscribeWatchedFoldersChange } from "./features/library/watchedFolderBridge";
-import { reconcileLibraryIndex, patchLibrarySong, replaceLibrarySong } from "./features/search/incrementalLibraryIndex";
+import { patchLibrarySong, replaceLibrarySong } from "./features/search/incrementalLibraryIndex";
 import { pickRecentlyAdded, pickListenNow } from "./features/home/homeShelfPicks";
 import { createMetadataCleanPreview } from "./features/library/metadataCleanPreview";
 import {
@@ -51,7 +48,7 @@ import { runLocaltifyIdleTask } from "./app/runtime/idle";
 import { useBodyRuntimeClasses } from "./app/runtime/useBodyRuntimeClasses";
 import { useAppLifecycleRuntime } from "./app/runtime/useAppLifecycleRuntime";
 import { formatAnalyticsDuration, localtifyAnalyticsNumber, localtifyAnalyticsString } from "./features/analytics/formatters";
-import { applyVisualCustomizationDefaults, migrateVisualSettings, VISUAL_CUSTOMIZATION_DEFAULTS } from "./features/settings/visualCustomization";
+import { applyVisualCustomizationDefaults, migrateVisualSettings } from "./features/settings/visualCustomization";
 import { getLocaltifyPlatformInfo } from "./app/platform";
 import {
   FEEDBACK_MESSAGE_MAX_LENGTH,
@@ -71,8 +68,7 @@ import {
   screensaverImage
 } from "./core/app.constants";
 import {
-  CODERPIXEL_ARTIST_EASTER_EGG,
-  PLAYBACK_URL_CACHE_TTL_MS
+  CODERPIXEL_ARTIST_EASTER_EGG
 } from "./features/library/library.constants";
 import {
   V013_RELEASE_DEFAULTS,
@@ -104,15 +100,12 @@ import {
   maybeApplyCoderpixelArtist,
   reorderSongList,
   saveLibraryOrder,
-  sortLibrarySongs,
-  topPlayedSongs,
   stableSongSourceKey
 } from "./features/library";
 import {
   heroTitleDensityClass,
   prettyMeta,
   prettyTitle,
-  rankSongsForSearch,
   sanitizeSongList
 } from "./features/search";
 import {
@@ -135,8 +128,6 @@ import { cleanPlaylistList } from "./features/playlists";
 import type {
   LibraryDropSide,
   LibraryDropTarget,
-  PlaybackUrlCacheEntry,
-  PlaybackUrlResult,
   Song
 } from "./features/library/song.types";
 import { getLibraryDropSideInfoForElement, getLibraryDropSideForElement, getLibraryDropSide, getLibraryDropElement } from "./features/library/dragGeometry";
@@ -164,8 +155,8 @@ function MainModeApp() {
   const {
     listeningHistoryRef, audioRef, playerEngineRef, playerControllerRef, playbackTransitionRef,
     crossfadeIntervalRef, crossfadeAutoStartedRef, crossfadeAutoTargetRef, crossfadeMainPauseGuardRef,
-    crossfadeLastStartAtRef, crossfadeHandoffClearTimerRef, crossfadeHandoffRef, fadeIntervalRef,
-    animationFrameRef, progressLoopTimeoutRef, playerResizeFrameRef,
+    crossfadeLastStartAtRef, crossfadeHandoffClearTimerRef, crossfadeRecoveryTimerRef, crossfadeHandoffRef, fadeIntervalRef,
+    animationFrameRef, progressLoopTimeoutRef,
     pendingPlayRef, countPlayRef, playCountSongIdRef, playCountListenedRef, playCountLastTimeRef,
     sleepTimerRef, positionSaveRef, nextAudioRef, playbackUrlCacheRef, playbackUrlPendingRef,
     lastQueueHistoryRef, songRef, timeRef, durationRef, playingRef, volumeRef, effectiveVolumeRef, lastNonZeroVolumeRef,
@@ -184,7 +175,6 @@ function MainModeApp() {
   } = usePlayerRuntime({ defaultVolume: defaultSettings.volume });
 
   const startupResumePositionRef = useRef<{ songId: string; time: number } | null>(null);
-  const sidebarResizeFrameRef = useRef<number | null>(null);
   const bootedRef = useRef(false);
   const importOverlayTimerRef = useRef<number | null>(null);
   const secretBufferRef = useRef("");
@@ -217,18 +207,22 @@ function MainModeApp() {
   const [bootLogCopied, setBootLogCopied] = useState(false);
   const [bootRetryKey, setBootRetryKey] = useState(0);
   const [songs, setSongs] = useState<Song[]>([]);
+  const { appToast, showAppToast } = useAppToast();
   const {
     settings, setSettings, settingsRef,
     settingsCategory, setSettingsCategory,
     settingsSearch, setSettingsSearch, deferredSettingsSearch,
     themeSettling,
     themeMotionReady, setThemeMotionReady,
-    saveSettingsTimerRef, writeSettings,
+    writeSettings,
+    saveSettingsSafely, persistSettings, updateSetting, updateSettingsPatch, resetDiscordSettings, resetAppearanceSettings, resetPlayerLayoutSettings, resetLibraryLayoutSettings, resetAllSettingsSafely, updateCoverColorSyncMode,
     themeSettlingTimerRef,
     themePaintIdleTimerRef,
     themeSettlingRef
   } = useSettingsController({
-    initialSettings: () => applyVisualCustomizationDefaults(defaultSettings as Settings)
+    initialSettings: () => applyVisualCustomizationDefaults(defaultSettings as Settings),
+    bootedRef, volumeDraftRef, setStatusText, showAppToast,
+    applyLiveVolumePercent, kickThemeSettle
   });
   const [heroMotion, setHeroMotion] = useState<"idle" | "expanding" | "compacting">("idle");
   const [homeEntranceSettled, setHomeEntranceSettled] = useState(false);
@@ -276,7 +270,6 @@ function MainModeApp() {
     librarySongElementRefs, pointerLibraryDragRef, pointerLibraryDragFrameRef
   } = useLibraryController();
 
-  const { appToast, showAppToast } = useAppToast();
   const {
     updatePrompt,
     setUpdatePrompt,
@@ -309,33 +302,6 @@ function MainModeApp() {
     animatedBackgrounds: settings.animatedBackgrounds,
     idleEnabled: settings.idleScreensaverEnabled !== false
   });
-
-  const {
-    beginDownloadOperation, endDownloadOperation, retryDownloads, cancelDownloadRetries,
-    downloadText, setDownloadText,
-    downloadBusy, setDownloadBusy,
-    downloadResults, setDownloadResults,
-    downloadQueue, setDownloadQueue,
-    downloadFolderLabel, setDownloadFolderLabel,
-    convertBusy, setConvertBusy,
-    convertProgress, setConvertProgress,
-    convertMessage, setConvertMessage,
-    downloadsTab, setDownloadsTab,
-    spotifyUrl, setSpotifyUrl,
-    spotifyTracks, setSpotifyTracks,
-    spotifySourceName,
-    spotifySourceType,
-    spotifyFetchBusy,
-    spotifyFetchError, setSpotifyFetchError,
-    spotifySelectedIds, setSpotifySelectedIds,
-    spotifyDownloadBusy, setSpotifyDownloadBusy,
-    spotifyLoggedIn,
-    spotifyLoginBusy,
-    handleSpotifyLogin,
-    handleSpotifyLogout,
-    fetchSpotifyTracks,
-    syncDownloadFilesToQueue
-  } = useDownloadsRuntime({ ready, songs, setStatusText, setPlayerError });
 
   const [secretMode, setSecretMode] = useState<SecretMode>("none");
   const [secretToast, setSecretToast] = useState("");
@@ -624,13 +590,57 @@ function MainModeApp() {
     toggleSongPlaylist,
     handlePlaylistSongDrop,
     handlePlaylistSongAppend,
-    normalizePlaylistName
+    upsertSpotifyPlaylistFromImport
   } = usePlaylistsController({
     songs,
     bootedRef,
     changeView,
     setStatusText,
     showAppToast
+  });
+  const {
+    retryDownloads,
+    downloadText,
+    setDownloadText,
+    downloadBusy,
+    downloadResults,
+    downloadQueue,
+    downloadFolderLabel,
+    convertBusy,
+    convertProgress,
+    convertMessage,
+    downloadsTab,
+    setDownloadsTab,
+    spotifyUrl,
+    setSpotifyUrl,
+    spotifyTracks,
+    setSpotifyTracks,
+    spotifyFetchBusy,
+    spotifyFetchError,
+    setSpotifyFetchError,
+    spotifySelectedIds,
+    setSpotifySelectedIds,
+    spotifyDownloadBusy,
+    spotifyLoggedIn,
+    spotifyLoginBusy,
+    handleSpotifyLogin,
+    handleSpotifyLogout,
+    fetchSpotifyTracks,
+    clearFailedDownloads,
+    clearFinishedDownloads,
+    openDownloadedSongInLibrary,
+    chooseDownloadFolder,
+    cancelCurrentDownload,
+    retryDownload,
+    retrySpotifyTrack,
+    downloadAudioLinks,
+    downloadSpotifyTracks,
+    convertLocalMedia
+  } = useDownloadsRuntime({
+    ready, songs, settingsRef, setStatusText, setPlayerError, setSongs, setLibraryScanMessage,
+    currentId, setCurrentId, rememberCurrentSong, changeView, updateSetting, showAppToast,
+    upsertSpotifyPlaylistFromImport,
+    clearPlaybackCaches: () => { playbackUrlCacheRef.current.clear(); playbackUrlPendingRef.current.clear(); }
   });
   const songIdentity = useMemo(() => {
     if (!visualCurrentSong) return "empty";
@@ -762,19 +772,9 @@ function MainModeApp() {
       document.body.classList.remove("isResizingSidebar");
       document.body.classList.remove("localitfyNoSelect");
 
-      if (playerResizeFrameRef.current !== null) {
-        window.cancelAnimationFrame(playerResizeFrameRef.current);
-        playerResizeFrameRef.current = null;
-      }
-
       if (volumeDraftFrameRef.current !== null) {
         window.cancelAnimationFrame(volumeDraftFrameRef.current);
         volumeDraftFrameRef.current = null;
-      }
-
-      if (sidebarResizeFrameRef.current !== null) {
-        window.cancelAnimationFrame(sidebarResizeFrameRef.current);
-        sidebarResizeFrameRef.current = null;
       }
 
       if (appRootRef.current) {
@@ -1034,61 +1034,9 @@ function MainModeApp() {
   }
 
 
-  const libraryIndexRef = useRef<ReturnType<typeof reconcileLibraryIndex> | null>(null);
-  const libraryIndex = useMemo(() => {
-    const next = measureDevTime("library:index", () => reconcileLibraryIndex(songs, libraryIndexRef.current ?? undefined));
-    libraryIndexRef.current = next;
-    return next;
-  }, [songs]);
-  const librarySearchIndex = libraryIndex.searchEntries;
-
-  const filteredSongs = useMemo(() => {
-    if (!deferredQuery.trim()) return songs;
-    return rankSongsForSearch(librarySearchIndex, deferredQuery);
-  }, [librarySearchIndex, deferredQuery, songs]);
-
-  const likedSongs = useMemo(() => {
-    const seen = new Set<string>();
-
-    return songs.filter((song) => {
-      if (!song.liked) return false;
-
-      const key = String(song.id || stableSongSourceKey(song) || `${song.title}|${song.artist}|${song.duration}`).trim();
-      if (!key) return true;
-      if (seen.has(key)) return false;
-
-      seen.add(key);
-      return true;
-    });
-  }, [songs]);
-
-  const topSongs = useMemo(() => topPlayedSongs(songs, 6), [songs]);
-
-  const mostPlayed = topSongs[0] ?? null;
-  const missingSongsForLibrary = useMemo(() => songs.filter((song) => song.fileExists === false), [songs]);
-  const likedSongIds = useMemo(() => new Set(likedSongs.map(song => song.id)), [likedSongs]);
-  const unsortedVisibleSongs = useMemo(() => {
-    if (view === "liked") return deferredQuery.trim() ? filteredSongs.filter(song => likedSongIds.has(song.id)) : likedSongs;
-    if (view === "library" && libraryFilterMode === "missing") return deferredQuery.trim() ? filteredSongs.filter(song => song.fileExists === false) : missingSongsForLibrary;
-    return filteredSongs;
-  }, [view, libraryFilterMode, deferredQuery, filteredSongs, likedSongIds, likedSongs, missingSongsForLibrary]);
-  const visibleSongs = useMemo(
-    () => sortLibrarySongs(unsortedVisibleSongs, librarySortMode),
-    [unsortedVisibleSongs, librarySortMode]
-  );
-  const libraryOrderLocked = librarySortMode !== "library" && (view === "library" || view === "liked");
-
-  useEffect(() => {
-    libraryListLengthRef.current = visibleSongs.length;
-  }, [visibleSongs.length]);
-
-  useEffect(() => {
-    libraryRenderLimitRef.current = libraryRenderLimit;
-  }, [libraryRenderLimit]);
-
-  const songsById = libraryIndex.songsById;
-  const songIndexById = libraryIndex.songIndexById;
-  const playableSongs = useMemo(() => songs.filter(isPlayableSong), [songs]);
+  const { libraryIndex, filteredSongs, likedSongs, mostPlayed, missingSongsForLibrary, visibleSongs, libraryOrderLocked, songsById, songIndexById, playableSongs } = useLibraryDerivedState({
+    songs, deferredQuery, view, libraryFilterMode, librarySortMode, libraryRenderLimit, libraryListLengthRef, libraryRenderLimitRef
+  });
   const similarSeed = useMemo(() => resolveSimilarSeed(similarRequest, songsById, songs, playlists), [similarRequest, songsById, songs, playlists]);
   const activePlaylist = useMemo(
     () => playlists.find((playlist) => playlist.id === activePlaylistId) ?? null,
@@ -1476,9 +1424,6 @@ function MainModeApp() {
 
   useEffect(() => {
     songRef.current = currentSong;
-    if (!audioRef.current || audioRef.current.paused || !isPlaying) {
-      timeRef.current = currentTime;
-    }
     durationRef.current = currentDuration;
     playingRef.current = isPlaying;
     volumeRef.current = settings.volume;
@@ -1486,7 +1431,7 @@ function MainModeApp() {
     if (settings.volume > 0.01) {
       lastNonZeroVolumeRef.current = settings.volume;
     }
-  }, [currentSong, currentTime, currentDuration, isPlaying, settings.volume]);
+  }, [currentSong, currentDuration, isPlaying, settings.volume]);
 
 
   useEffect(() => {
@@ -2338,127 +2283,20 @@ function MainModeApp() {
   );
 
   const resolvePlaybackUrl = useCallback(
-    async (song: Song | null | undefined, options: { force?: boolean } = {}): Promise<PlaybackUrlResult> => {
-      if (!song) return { ok: false, fileExists: false, error: "missing song" };
-
-      const sourceKey = getSongPlaybackSourceKey(song);
-      const filePath = String(song.filePath || "");
-
-      if (!sourceKey) return { ok: false, fileExists: false, error: "missing file path" };
-      if (song.fileExists === false && !options.force) return { ok: false, fileExists: false, error: "file marked missing" };
-
-      const now = Date.now();
-      const pending = playbackUrlPendingRef.current;
-      const forceKey = `${sourceKey}:force`;
-      const normalKey = `${sourceKey}:normal`;
-      const pendingKey = options.force ? forceKey : normalKey;
-      const forced = pending.get(forceKey);
-      if (forced) return forced;
-      if (options.force) {
-        pending.delete(normalKey);
-        playbackUrlCacheRef.current.delete(sourceKey);
-      }
-      const existingPending = pending.get(pendingKey);
-      if (existingPending) return existingPending;
-      const cached = playbackUrlCacheRef.current.get(sourceKey);
-
-      if (!options.force && cached?.url && cached.fileExists && now - cached.checkedAt < PLAYBACK_URL_CACHE_TTL_MS) {
-        return {
-          ok: true,
-          url: cached.url,
-          filePath,
-          fileExists: true,
-          sizeBytes: cached.sizeBytes,
-          mtimeMs: cached.mtimeMs,
-          cacheTtlMs: PLAYBACK_URL_CACHE_TTL_MS
-        };
-      }
-
-      const bridge = window.localitfy as any;
-      const resolver = bridge?.resolvePlaybackUrl;
-
-      if (typeof resolver !== "function") {
-        if (song.url) {
-          return { ok: true, url: song.url, filePath, fileExists: true, cacheTtlMs: PLAYBACK_URL_CACHE_TTL_MS };
-        }
-
-        return { ok: false, filePath, fileExists: undefined, error: "playback resolver unavailable" };
-      }
-
-      const staleResult = (): PlaybackUrlResult => ({ ok: false, filePath, error: "playback source changed" });
-      const request: Promise<PlaybackUrlResult> = Promise.resolve().then(() =>
-        resolver({
-          songId: song.id,
-          filePath,
-          fallbackUrl: song.url || "",
-          force: Boolean(options.force)
-        })
-      )
-        .then((result: any): PlaybackUrlResult => {
-          if (pending.get(pendingKey) !== request) return staleResult();
-          const fileExists =
-            typeof result?.fileExists === "boolean"
-              ? result.fileExists
-              : typeof result?.exists === "boolean"
-                ? result.exists
-                : result?.ok ? true : undefined;
-
-          if (result?.ok && result?.url && fileExists !== false) {
-            const entry: PlaybackUrlCacheEntry = {
-              url: String(result.url),
-              checkedAt: Date.now(),
-              fileExists: true,
-              sizeBytes: typeof result.sizeBytes === "number" ? result.sizeBytes : undefined,
-              mtimeMs: typeof result.mtimeMs === "number" ? result.mtimeMs : undefined
-            };
-
-            playbackUrlCacheRef.current.set(sourceKey, entry);
-
-            return {
-              ok: true,
-              url: entry.url,
-              filePath: result.filePath || filePath,
-              fileExists: true,
-              sizeBytes: entry.sizeBytes,
-              mtimeMs: entry.mtimeMs,
-              cacheTtlMs: PLAYBACK_URL_CACHE_TTL_MS
-            };
-          }
-
-          playbackUrlCacheRef.current.delete(sourceKey);
-
-          if ((result?.fileExists === false || result?.exists === false) && song.id) {
-            setSongs((oldSongs) =>
-              oldSongs.map((item) => (item.id === song.id ? { ...item, fileExists: false, url: "" } : item))
-            );
-
-            void window.localitfy?.patchSong?.(song.id, { fileExists: false, url: "" }).catch(() => undefined);
-          }
-
-          return {
-            ok: false,
-            filePath,
-            fileExists,
-            error: String(result?.error || "could not resolve playback url")
-          };
-        })
-        .catch((error: unknown): PlaybackUrlResult => {
-          if (pending.get(pendingKey) !== request) return staleResult();
-          playbackUrlCacheRef.current.delete(sourceKey);
-          return {
-            ok: false,
-            filePath,
-            fileExists: undefined,
-            error: error instanceof Error ? error.message : String(error || "could not resolve playback url")
-          };
-        })
-        .finally(() => {
-          if (pending.get(pendingKey) === request) pending.delete(pendingKey);
-        });
-
-      pending.set(pendingKey, request);
-      return request;
-    },
+    (song: Song | null | undefined, options: { force?: boolean } = {}) => resolveCachedPlaybackUrl(song, {
+      sourceKey: getSongPlaybackSourceKey(song),
+      force: Boolean(options.force),
+      cache: playbackUrlCacheRef.current,
+      pending: playbackUrlPendingRef.current,
+      resolver: window.localitfy?.resolvePlaybackUrl,
+      onMissing: (missingSong, sourceKey) => setSongs(oldSongs => {
+        const index = oldSongs.findIndex(item => item.id === missingSong.id && getSongPlaybackSourceKey(item) === sourceKey);
+        if (index < 0 || oldSongs[index].fileExists === false) return oldSongs;
+        const next = oldSongs.slice();
+        next[index] = { ...next[index], fileExists: false, url: "" };
+        return next;
+      })
+    }),
     []
   );
 
@@ -2474,36 +2312,25 @@ function MainModeApp() {
     }
   }, [isVolumeDragging, settings.volume]);
 
-  useEffect(() => {
-    if (!isPlaying || !currentSong) {
-      stopProgressLoop();
-      syncProgressDom(timeRef.current || 0, durationRef.current || currentDuration, true);
-      return;
-    }
-
-    let lastPaintedDuration = currentDuration || 0;
-
-    const scheduleProgressTick = (delayMs: number) => {
-      if (progressLoopTimeoutRef.current !== null) {
-        window.clearTimeout(progressLoopTimeoutRef.current);
-      }
-
-      progressLoopTimeoutRef.current = window.setTimeout(() => {
-        progressLoopTimeoutRef.current = null;
-        // Hidden windows may suspend animation frames. Continue position
-        // checkpoints without painting progress UI.
-        if (document.hidden || isAppBackgroundedRef.current) tick(performance.now());
-        else animationFrameRef.current = window.requestAnimationFrame(tick);
-      }, delayMs);
-    };
-
-    const tick = (clock: number) => {
-      animationFrameRef.current = null;
+  usePlaybackProgressLoop({
+    enabled: isPlaying && Boolean(currentSong),
+    songId: currentSong?.id || "",
+    animationFrameRef,
+    progressLoopTimeoutRef,
+    isBackgrounded: () => isAppBackgroundedRef.current,
+    stopProgressLoop,
+    onInactive: () => syncProgressDom(timeRef.current || 0, durationRef.current || currentDuration, true),
+    onVisible: () => {
+      if (!isSeekingRef.current) syncProgressDom(timeRef.current, durationRef.current || currentDuration, true);
+    },
+    onTick: (clock) => {
       const audio = audioRef.current;
       const backgroundMode = document.hidden || isAppBackgroundedRef.current;
       const busyUi = scrollBusyRef.current || performance.now() < rendererQuietUntilRef.current || Boolean(draggedSongIdRef.current) || themeSettlingRef.current;
 
-      if (audio && !audio.paused) {
+      const transition = playbackTransitionRef.current.snapshot();
+      if (audio && !audio.paused && transition.sourceId === currentSong?.id &&
+          (transition.phase === "playing" || transition.phase === "crossfading")) {
         const nextTime = audio.currentTime || 0;
         const nextDuration = Number.isFinite(audio.duration) ? audio.duration : currentDuration;
 
@@ -2516,8 +2343,7 @@ function MainModeApp() {
           syncProgressDom(nextTime, nextDuration);
         }
 
-        if (!backgroundMode && Number.isFinite(nextDuration) && nextDuration > 0 && Math.abs(nextDuration - lastPaintedDuration) > 0.5) {
-          lastPaintedDuration = nextDuration;
+        if (!backgroundMode && Number.isFinite(nextDuration) && nextDuration > 0 && Math.abs(nextDuration - currentDuration) > 0.5) {
           setCurrentDuration(nextDuration);
           syncProgressDom(nextTime, nextDuration, true);
         }
@@ -2533,26 +2359,9 @@ function MainModeApp() {
         }
 
       }
-
-      scheduleProgressTick(backgroundMode ? 1800 : busyUi ? 520 : 180);
-    };
-
-    // Cancel a pending frame that may never run when the window is hidden.
-    const handleProgressVisibility = () => {
-      stopProgressLoop();
-      if (!document.hidden && !isSeekingRef.current) {
-        syncProgressDom(timeRef.current, durationRef.current || currentDuration, true);
-      }
-      scheduleProgressTick(document.hidden ? 1800 : 0);
-    };
-    document.addEventListener("visibilitychange", handleProgressVisibility);
-    scheduleProgressTick(140);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleProgressVisibility);
-      stopProgressLoop();
-    };
-  }, [isPlaying, currentSong?.id, currentDuration, syncProgressDom]);
+      return backgroundMode ? 1800 : busyUi ? 520 : 180;
+    }
+  });
 
   const discordSettingsRef = useRef(settings);
 
@@ -2991,9 +2800,14 @@ function MainModeApp() {
       crossfadeHandoffClearTimerRef.current = null;
     }
 
+    if (crossfadeRecoveryTimerRef.current !== null) {
+      window.clearTimeout(crossfadeRecoveryTimerRef.current);
+      crossfadeRecoveryTimerRef.current = null;
+    }
     crossfadeAutoStartedRef.current = false;
     crossfadeAutoTargetRef.current = "";
     crossfadeMainPauseGuardRef.current = false;
+    crossfadeHandoffRef.current = null;
     setCrossfadePreviewSongId("");
 
     const nextAudio = nextAudioRef.current;
@@ -3104,7 +2918,12 @@ function MainModeApp() {
     if (!target?.song) return;
 
     if (target.kind === "queue" && typeof target.queuedIndex === "number") {
-      setPlayQueue((queue) => queue.slice(target.queuedIndex + 1));
+      // The queue can be reordered while the secondary element fades in.
+      // Consume the actual incoming track, not an index captured before that edit.
+      setPlayQueue((queue) => {
+        const index = queue.indexOf(target.song.id);
+        return index < 0 ? queue : [...queue.slice(0, index).filter(id => isPlayableSong(songsById.get(id))), ...queue.slice(index + 1)];
+      });
     } else if (target.kind === "source-loop") {
       setPlayQueue(target.rest);
     } else if (playQueue.length) {
@@ -3124,9 +2943,10 @@ function MainModeApp() {
     }
   }
 
-  async function takeOverMainAudioFromCrossfade(target: ReturnType<typeof getAutoTransitionTarget>, nextAudio: HTMLAudioElement, safeVolume: number) {
+  async function takeOverMainAudioFromCrossfade(target: ReturnType<typeof getAutoTransitionTarget>, nextAudio: HTMLAudioElement, safeVolume: number, version: number) {
     const audio = audioRef.current;
-    if (!audio || !target?.song) return;
+    if (!audio || !target?.song || !playbackTransitionRef.current.isCurrentCrossfade(target.song.id, version)) return;
+    const ownsHandoff = () => playbackTransitionRef.current.isCurrentCrossfade(target.song.id, version);
 
     const handoffTime = Number.isFinite(nextAudio.currentTime) ? nextAudio.currentTime : 0;
     const handoffUrl = nextAudio.src;
@@ -3152,12 +2972,14 @@ function MainModeApp() {
       syncAudioEffectGraph(audio);
 
       await audio.play();
+      if (!ownsHandoff()) return;
 
       commitAutoTransitionTarget(target);
 
       pendingPlayRef.current = false;
       armPlayCount(target.song.id, Math.max(0, handoffTime));
-      listeningHistoryRef.current?.play(target.song.id, handoffTime, activePlaylistId);
+      listeningHistoryRef.current?.play(target.song.id, handoffTime, target.playlistId ?? null);
+      pushQueueHistory(target.song);
       setCurrentId(target.song.id);
       setCrossfadePreviewSongId("");
       void rememberCurrentSong(target.song.id);
@@ -3171,9 +2993,14 @@ function MainModeApp() {
 
       const blendMs = 420;
       const blendStart = performance.now();
+      const blendGeneration = playbackTransitionRef.current.snapshot().generation;
 
-      window.setTimeout(() => {
-        const blendTimer = window.setInterval(() => {
+      const blendTimer = window.setInterval(() => {
+          if (!playbackTransitionRef.current.isCurrent(blendGeneration, target.song.id)) {
+            window.clearInterval(blendTimer);
+            if (crossfadeIntervalRef.current === blendTimer) crossfadeIntervalRef.current = null;
+            return;
+          }
           const progressValue = clamp((performance.now() - blendStart) / blendMs, 0, 1);
           const eased = 1 - Math.pow(1 - progressValue, 2.6);
 
@@ -3182,6 +3009,7 @@ function MainModeApp() {
 
           if (progressValue >= 1) {
             window.clearInterval(blendTimer);
+            if (crossfadeIntervalRef.current === blendTimer) crossfadeIntervalRef.current = null;
             setAudioElementVolume(audio, safeVolume);
 
             try {
@@ -3196,8 +3024,9 @@ function MainModeApp() {
             clearCrossfadeHandoffSoon(target.song.id, 450);
           }
         }, 16);
-      }, 0);
+      crossfadeIntervalRef.current = blendTimer;
     } catch {
+      if (!ownsHandoff()) return;
       // Keep the already-playing hidden audio alive briefly so users do not hear a hard stop,
       // then let the normal playback state-sync recover.
       commitAutoTransitionTarget(target);
@@ -3208,7 +3037,10 @@ function MainModeApp() {
       crossfadeMainPauseGuardRef.current = false;
       playbackTransitionRef.current.crossfadeFinished(target.song.id);
 
-      window.setTimeout(() => {
+      const recoveryGeneration = playbackTransitionRef.current.snapshot().generation;
+      crossfadeRecoveryTimerRef.current = window.setTimeout(() => {
+        crossfadeRecoveryTimerRef.current = null;
+        if (!playbackTransitionRef.current.isCurrent(recoveryGeneration, target.song.id)) return;
         try {
           nextAudio.pause();
           nextAudio.currentTime = 0;
@@ -3216,6 +3048,7 @@ function MainModeApp() {
         } catch {
           // ignore cleanup errors
         }
+        clearCrossfadeHandoffSoon(target.song.id);
       }, 950);
     }
   }
@@ -3286,6 +3119,7 @@ function MainModeApp() {
       applyPlaybackRateSettings(nextAudio);
 
       await nextAudio.play();
+      if (!crossfadeAutoStartedRef.current || !playbackTransitionRef.current.isCurrentCrossfade(target.song.id, version)) return;
 
       setCrossfadePreviewSongId(target.song.id);
       stopFade();
@@ -3326,10 +3160,11 @@ function MainModeApp() {
           crossfadeAutoStartedRef.current = false;
           crossfadeAutoTargetRef.current = "";
 
-          void takeOverMainAudioFromCrossfade(target, nextAudio, safeVolume);
+          void takeOverMainAudioFromCrossfade(target, nextAudio, safeVolume, version);
         }
       }, 16);
     } catch {
+      if (!playbackTransitionRef.current.isCurrentCrossfade(target.song.id, version)) return;
       playbackTransitionRef.current.crossfadeCancelled();
       crossfadeAutoStartedRef.current = false;
       crossfadeAutoTargetRef.current = "";
@@ -3351,6 +3186,7 @@ function MainModeApp() {
 
   function handleAudioTimeUpdate(event: SyntheticEvent<HTMLAudioElement>) {
     const audio = event.currentTarget;
+    if (crossfadeMainPauseGuardRef.current && crossfadeHandoffRef.current?.songId !== currentSong?.id) return;
     const nextTime = audio.currentTime;
     const duration = Number.isFinite(audio.duration) ? audio.duration : durationRef.current || currentDuration || 0;
 
@@ -3381,8 +3217,15 @@ function MainModeApp() {
     if (!playbackTransitionRef.current.paused(Boolean(
       crossfadeAutoStartedRef.current || crossfadeMainPauseGuardRef.current || crossfadeHandoffRef.current
     ))) return;
-    if (audioRef.current) listeningHistoryRef.current?.pause(audioRef.current);
-    if (!audioRef.current?.ended) setIsPlaying(false);
+    const audio = audioRef.current;
+    if (audio) {
+      listeningHistoryRef.current?.pause(audio);
+      if (!audio.ended && Number.isFinite(audio.currentTime)) {
+        setCurrentTime(audio.currentTime);
+        syncProgressDom(audio.currentTime, durationRef.current, true);
+      }
+    }
+    if (!audio?.ended) setIsPlaying(false);
   }
 
   function handleAudioEnded() {
@@ -3612,460 +3455,9 @@ function MainModeApp() {
     setStatusText("paused");
   }
 
-  function settingsAreSame(left: Settings, right: Settings) {
-    const leftKeys = Object.keys(left || {});
-    const rightKeys = Object.keys(right || {});
-    if (leftKeys.length !== rightKeys.length) return false;
-    return leftKeys.every((key) => Object.is((left as any)[key], (right as any)[key]));
-  }
-
-  function isImmediateSettingsKey(key: string) {
-    return [
-      "theme",
-      "volume",
-      "playbackSpeed",
-      "crossfadeSeconds",
-      "crossfadeEnabled",
-      "gaplessPlayback",
-      "volumeNormalization",
-      "perSongVolumeMemory",
-      "sleepTimerMinutes",
-      "discordEnabled",
-      "discordPrivacyMode",
-      "discordButtons",
-      "discordArtMode",
-      "discordActivityStyle",
-      "discordTitleCleanup",
-      "discordSecondLine"
-    ].includes(key);
-  }
-
-  async function saveSettingsSafely(next: Settings, debounce = false) {
-    if (!bootedRef.current) return;
-
-    if (saveSettingsTimerRef.current !== null) {
-      window.clearTimeout(saveSettingsTimerRef.current);
-      saveSettingsTimerRef.current = null;
-    }
-
-    const runSave = () => writeSettings(settingsRef.current).catch(() => showAppToast("Could not save settings", "error"));
-
-    if (debounce) {
-      saveSettingsTimerRef.current = window.setTimeout(() => {
-        saveSettingsTimerRef.current = null;
-        void runSave();
-      }, 260);
-      return;
-    }
-
-    await writeSettings(next).catch(() => showAppToast("Could not save settings", "error"));
-  }
-
-  async function persistSettings(next: Settings, debounce = false, priority: "immediate" | "transition" = "transition") {
-    const previous = settingsRef.current;
-    if (settingsAreSame(previous, next)) return;
-
-    settingsRef.current = next;
-
-    if (priority === "immediate") {
-      setSettings(next);
-    } else {
-      startTransition(() => setSettings(next));
-    }
-
-    if (!bootedRef.current) return;
-
-    await saveSettingsSafely(next, debounce);
-  }
-
-  async function updateSetting<K extends keyof Settings>(key: K, value: Settings[K], debounce = false) {
-    const currentSettings = settingsRef.current;
-    const next: Settings = {
-      ...currentSettings,
-      [key]: value
-    };
-
-    if (key === "volume") {
-      const safeVolume = clamp(Number(value) || 0, 0, 1);
-      next.volume = safeVolume;
-      volumeDraftRef.current = Math.round(safeVolume * 100);
-      applyLiveVolumePercent(volumeDraftRef.current);
-      settingsRef.current = next;
-      setSettings(next);
-
-      if (bootedRef.current) {
-        if (saveSettingsTimerRef.current !== null) {
-          window.clearTimeout(saveSettingsTimerRef.current);
-        }
-
-        saveSettingsTimerRef.current = window.setTimeout(() => {
-          saveSettingsTimerRef.current = null;
-          void saveSettingsSafely(next, false);
-        }, debounce ? 420 : 120);
-      }
-
-      return;
-    }
-
-    if (key === "theme") {
-      next.theme = normalizeThemeId(value);
-      kickThemeSettle();
-    }
-
-    if (key === "coverColorSyncMode") {
-      next.coverColorSyncMode = normalizeCoverColorSyncMode(value);
-      next.showAmbientGradient = next.coverColorSyncMode !== "off";
-      kickThemeSettle();
-    }
-
-    if (key === "showAmbientGradient") {
-      next.coverColorSyncMode = value ? "normal" : "off";
-      kickThemeSettle();
-    }
-
-    if (
-      key === "homeBannerType" ||
-      key === "mediaCardBackground" ||
-      key === "homeLayoutMode" ||
-      key === "libraryRowStyle" ||
-      key === "sidebarBehavior" ||
-      key === "playerBackgroundStyle" ||
-      key === "catBuddyEnabled"
-    ) {
-      kickThemeSettle();
-    }
-
-    if (key === "animatedBackgrounds" || key === "animeVisuals") {
-      next.animatedBackgrounds = true;
-      next.animeVisuals = true;
-    }
-
-    await persistSettings(next, debounce, isImmediateSettingsKey(String(key)) ? "immediate" : "transition");
-
-    if (!debounce && bootedRef.current) {
-      if (key === "theme") {
-        showAppToast("Theme changed", "success");
-      } else if (String(key).startsWith("discord")) {
-        showAppToast("Discord presence updated", "success");
-      } else if (key === "autoUpdateEnabled" || key === "autoUpdateNotifyOnly") {
-        showAppToast("Settings saved", "success");
-      }
-    }
-  }
-
-  async function updateSettingsPatch(patch: Partial<Settings>, debounce = false) {
-    const currentSettings = settingsRef.current;
-    const next: Settings = {
-      ...currentSettings,
-      ...patch
-    };
-
-    if (Object.prototype.hasOwnProperty.call(patch, "coverColorSyncMode")) {
-      next.coverColorSyncMode = normalizeCoverColorSyncMode(patch.coverColorSyncMode);
-      next.showAmbientGradient = next.coverColorSyncMode !== "off";
-    } else if (Object.prototype.hasOwnProperty.call(patch, "showAmbientGradient")) {
-      next.coverColorSyncMode = patch.showAmbientGradient ? "normal" : "off";
-    }
-
-    if (patch.theme) {
-      next.theme = normalizeThemeId(patch.theme);
-    }
-
-
-    if (Object.prototype.hasOwnProperty.call(patch, "animatedBackgrounds") || Object.prototype.hasOwnProperty.call(patch, "animeVisuals")) {
-      next.animatedBackgrounds = true;
-      next.animeVisuals = true;
-    }
-    if (patch.theme) kickThemeSettle();
-
-    const patchKeys = Object.keys(patch || {});
-    const priority = patchKeys.some((key) => isImmediateSettingsKey(key)) ? "immediate" : "transition";
-    await persistSettings(next, debounce, priority);
-  }
-
-  function resetDiscordSettings() {
-    void updateSettingsPatch({
-      discordEnabled: defaultSettings.discordEnabled,
-      discordShowPausedIdle: defaultSettings.discordShowPausedIdle,
-      discordPrivacyMode: defaultSettings.discordPrivacyMode,
-      discordButtons: defaultSettings.discordButtons,
-      discordArtMode: defaultSettings.discordArtMode,
-      discordActivityStyle: defaultSettings.discordActivityStyle,
-      discordTitleCleanup: defaultSettings.discordTitleCleanup,
-      discordSecondLine: defaultSettings.discordSecondLine
-    });
-    setStatusText("Discord settings reset");
-    showAppToast("Discord settings reset", "success");
-  }
-
-  function resetAppearanceSettings() {
-    void updateSettingsPatch({
-      theme: defaultSettings.theme,
-      showAmbientGradient: defaultSettings.showAmbientGradient,
-      coverColorSyncMode: defaultSettings.coverColorSyncMode,
-      showFloatingNotes: defaultSettings.showFloatingNotes,
-      homeBannerType: VISUAL_CUSTOMIZATION_DEFAULTS.homeBannerType,
-      mediaCardBackground: VISUAL_CUSTOMIZATION_DEFAULTS.mediaCardBackground,
-      homeLayoutMode: VISUAL_CUSTOMIZATION_DEFAULTS.homeLayoutMode,
-      homeHeroCoverBrightness: defaultSettings.homeHeroCoverBrightness,
-      sidebarBehavior: VISUAL_CUSTOMIZATION_DEFAULTS.sidebarBehavior,
-      playerBackgroundStyle: VISUAL_CUSTOMIZATION_DEFAULTS.playerBackgroundStyle,
-      animeVisuals: true,
-      animatedBackgrounds: true,
-      gifVisualsMode: defaultSettings.gifVisualsMode,
-      animatedGlow: defaultSettings.animatedGlow,
-      softCorners: defaultSettings.softCorners,
-      reducedMotion: defaultSettings.reducedMotion,
-      catBuddyEnabled: defaultSettings.catBuddyEnabled,
-      idleScreensaverEnabled: defaultSettings.idleScreensaverEnabled
-    });
-    setStatusText("appearance reset");
-    showAppToast("Appearance reset", "success");
-  }
-
-  function resetPlayerLayoutSettings() {
-    void updateSettingsPatch({
-      playerSize: defaultSettings.playerSize,
-      compactPlayer: defaultSettings.compactPlayer,
-      showVisualizer: defaultSettings.showVisualizer,
-      volume: defaultSettings.volume,
-      playbackSpeed: defaultSettings.playbackSpeed
-    });
-    setStatusText("player layout reset");
-    showAppToast("Player layout reset", "success");
-  }
-
-  function resetLibraryLayoutSettings() {
-    void updateSettingsPatch({
-      sidebarWidth: defaultSettings.sidebarWidth,
-      denseList: defaultSettings.denseList,
-      heroExpanded: defaultSettings.heroExpanded,
-      showHeroBadge: defaultSettings.showHeroBadge
-    });
-    setStatusText("library layout reset");
-    showAppToast("Library layout reset", "success");
-  }
-
-  async function resetAllSettingsSafely() {
-    const confirmed = window.confirm("Reset all localtify settings? Your imported songs will stay in the library.");
-    if (!confirmed) return;
-
-    try {
-      await Promise.all([window.localitfy.setAnalysisEnabled(false), window.localitfy.setAnalysisOnBattery(false), window.localitfy.setListeningHistoryEnabled(true)]);
-      await updateSettingsPatch(defaultSettings);
-    } catch {
-      showAppToast("Could not reset experimental settings. Please try again.", "error");
-      return;
-    }
-    setStatusText("all settings reset");
-    showAppToast("All settings reset", "success");
-  }
-
-  function updateCoverColorSyncMode(mode: CoverColorSyncMode) {
-    const safeMode = normalizeCoverColorSyncMode(mode);
-    void updateSettingsPatch(
-      {
-        coverColorSyncMode: safeMode,
-        showAmbientGradient: safeMode !== "off"
-      },
-      true
-    );
-  }
-
-  function startPlayerResize(event: PointerEvent<HTMLButtonElement>) {
-    event.preventDefault();
-
-    const resizeHandle = event.currentTarget;
-    const pointerId = event.pointerId;
-    const appRoot = appRootRef.current;
-    const startY = event.clientY;
-    const startSize = clamp(Number(discordSettingsRef.current.playerSize || settings.playerSize || 108), 74, 168);
-    let latestSize = startSize;
-    let saveDone = false;
-
-    const paintSize = () => {
-      playerResizeFrameRef.current = null;
-      appRoot?.style.setProperty("--player-size-live", `${latestSize}px`);
-    };
-
-    const queuePaint = () => {
-      if (playerResizeFrameRef.current !== null) return;
-      playerResizeFrameRef.current = window.requestAnimationFrame(paintSize);
-    };
-
-    const commitSize = () => {
-      if (saveDone) return;
-      saveDone = true;
-
-      const nextSettings = {
-        ...settingsRef.current,
-        playerSize: latestSize
-      };
-
-      discordSettingsRef.current = nextSettings;
-      settingsRef.current = nextSettings;
-      setSettings(nextSettings);
-
-      void saveSettingsSafely(nextSettings);
-
-      window.setTimeout(() => {
-        appRoot?.style.removeProperty("--player-size-live");
-      }, 90);
-    };
-
-    const finishResize = () => {
-      window.removeEventListener("pointermove", handleMove);
-      window.removeEventListener("pointerup", finishResize);
-      window.removeEventListener("pointercancel", finishResize);
-      window.removeEventListener("keydown", handleKeyDown);
-
-      document.body.classList.remove("isResizingPlayer");
-      document.body.classList.remove("localitfyNoSelect");
-
-      if (playerResizeFrameRef.current !== null) {
-        window.cancelAnimationFrame(playerResizeFrameRef.current);
-        playerResizeFrameRef.current = null;
-      }
-
-      appRoot?.style.setProperty("--player-size-live", `${latestSize}px`);
-
-      try {
-        if (resizeHandle.hasPointerCapture(pointerId)) resizeHandle.releasePointerCapture(pointerId);
-      } catch {
-        // Pointer capture can already be gone if Windows cancels the drag.
-      }
-
-      commitSize();
-    };
-
-    const cancelResize = () => {
-      latestSize = startSize;
-      appRoot?.style.setProperty("--player-size-live", `${startSize}px`);
-      finishResize();
-    };
-
-    const handleMove = (moveEvent: globalThis.PointerEvent) => {
-      latestSize = Math.round(clamp(startSize + startY - moveEvent.clientY, 74, 168));
-      queuePaint();
-    };
-
-    const handleKeyDown = (keyEvent: KeyboardEvent) => {
-      if (keyEvent.key === "Escape") cancelResize();
-    };
-
-    document.body.classList.add("isResizingPlayer");
-    document.body.classList.add("localitfyNoSelect");
-    appRoot?.style.setProperty("--player-size-live", `${startSize}px`);
-
-    try {
-      resizeHandle.setPointerCapture(pointerId);
-    } catch {
-      // Safe fallback for older Electron/Chromium edge cases.
-    }
-
-    window.addEventListener("pointermove", handleMove, { passive: true });
-    window.addEventListener("pointerup", finishResize, { once: true });
-    window.addEventListener("pointercancel", finishResize, { once: true });
-    window.addEventListener("keydown", handleKeyDown);
-  }
-
-  function startSidebarResize(event: PointerEvent<HTMLButtonElement>) {
-    event.preventDefault();
-
-    const resizeHandle = event.currentTarget;
-    const pointerId = event.pointerId;
-    const appRoot = appRootRef.current;
-    const startX = event.clientX;
-    const startWidth = clamp(Number(discordSettingsRef.current.sidebarWidth || settings.sidebarWidth || 249), 184, 340);
-    let latestWidth = startWidth;
-    let saveDone = false;
-
-    const paintWidth = () => {
-      sidebarResizeFrameRef.current = null;
-      appRoot?.style.setProperty("--sidebar-width-live", `${latestWidth}px`);
-    };
-
-    const queuePaint = () => {
-      if (sidebarResizeFrameRef.current !== null) return;
-      sidebarResizeFrameRef.current = window.requestAnimationFrame(paintWidth);
-    };
-
-    const commitWidth = () => {
-      if (saveDone) return;
-      saveDone = true;
-
-      const nextSettings = {
-        ...settingsRef.current,
-        sidebarWidth: latestWidth
-      };
-
-      discordSettingsRef.current = nextSettings;
-      settingsRef.current = nextSettings;
-      setSettings(nextSettings);
-
-      void saveSettingsSafely(nextSettings);
-
-      window.setTimeout(() => {
-        appRoot?.style.removeProperty("--sidebar-width-live");
-      }, 90);
-    };
-
-    const finishResize = () => {
-      window.removeEventListener("pointermove", handleMove);
-      window.removeEventListener("pointerup", finishResize);
-      window.removeEventListener("pointercancel", finishResize);
-      window.removeEventListener("keydown", handleKeyDown);
-
-      document.body.classList.remove("isResizingSidebar");
-      document.body.classList.remove("localitfyNoSelect");
-
-      if (sidebarResizeFrameRef.current !== null) {
-        window.cancelAnimationFrame(sidebarResizeFrameRef.current);
-        sidebarResizeFrameRef.current = null;
-      }
-
-      appRoot?.style.setProperty("--sidebar-width-live", `${latestWidth}px`);
-
-      try {
-        if (resizeHandle.hasPointerCapture(pointerId)) resizeHandle.releasePointerCapture(pointerId);
-      } catch {
-        // Pointer capture can already be gone if Windows cancels the drag.
-      }
-
-      commitWidth();
-    };
-
-    const cancelResize = () => {
-      latestWidth = startWidth;
-      appRoot?.style.setProperty("--sidebar-width-live", `${startWidth}px`);
-      finishResize();
-    };
-
-    const handleMove = (moveEvent: globalThis.PointerEvent) => {
-      latestWidth = Math.round(clamp(startWidth + moveEvent.clientX - startX, 184, 340));
-      queuePaint();
-    };
-
-    const handleKeyDown = (keyEvent: KeyboardEvent) => {
-      if (keyEvent.key === "Escape") cancelResize();
-    };
-
-    document.body.classList.add("isResizingSidebar");
-    document.body.classList.add("localitfyNoSelect");
-    appRoot?.style.setProperty("--sidebar-width-live", `${startWidth}px`);
-
-    try {
-      resizeHandle.setPointerCapture(pointerId);
-    } catch {
-      // Safe fallback for older Electron/Chromium edge cases.
-    }
-
-    window.addEventListener("pointermove", handleMove, { passive: true });
-    window.addEventListener("pointerup", finishResize, { once: true });
-    window.addEventListener("pointercancel", finishResize, { once: true });
-    window.addEventListener("keydown", handleKeyDown);
-  }
-
+  const {startPlayerResize,startSidebarResize}=useShellResize({
+    appRootRef, settingsRef, discordSettingsRef, setSettings, saveSettingsSafely
+  });
 
   async function rememberCurrentSong(id: string) {
     if (!id || !settingsRef.current.rememberLastSong) return;
@@ -4477,610 +3869,6 @@ function MainModeApp() {
       hideImportAnimation(1700);
     } finally {
       setLibraryScanBusy(false);
-    }
-  }
-
-  async function clearFailedDownloads() {
-    const statuses = new Set(["failed", "cancelled", "interrupted"]);
-    const selected = downloadQueue.filter(item => statuses.has(item.status));
-    const ids = new Set(selected.map(item => item.id));
-    try { await window.localitfy.clearDownloadJobs(selected.flatMap(item => item.recoveryId ? [item.recoveryId] : [])); }
-    catch (error) { setPlayerError(String(error)); return; }
-    setDownloadQueue((items) => items.filter((item) => !ids.has(item.id)));
-    setDownloadResults((items) => items.filter((item: any) => item.ok));
-    setSpotifyTracks((items) => items.map((track: any) => (
-      track.downloadStatus === "failed"
-        ? { ...track, downloadStatus: "ready", downloadError: "", downloadMessage: "Ready" }
-        : track
-    )));
-    setSpotifyFetchError("");
-    setStatusText("cleared failed downloads");
-    showAppToast("cleared failed downloads", "success");
-  }
-
-  async function clearFinishedDownloads() {
-    const selected = downloadQueue.filter(item => item.status === "done");
-    const ids = new Set(selected.map(item => item.id));
-    try { await window.localitfy.clearDownloadJobs(selected.flatMap(item => item.recoveryId ? [item.recoveryId] : [])); }
-    catch (error) { setPlayerError(String(error)); return; }
-    setDownloadQueue((items) => items.filter((item) => !ids.has(item.id)));
-    setDownloadResults((items) => items.filter((item: any) => !item.ok));
-    setStatusText("cleared finished downloads");
-    showAppToast("cleared finished downloads", "success");
-  }
-
-  function openDownloadedSongInLibrary(item: DownloadResult | DownloadQueueItem) {
-    const filePath = "filePath" in item ? item.filePath : undefined;
-    if (!filePath) {
-      changeView("library", "unknown");
-      return;
-    }
-
-    const match = songs.find((song) => song.filePath === filePath);
-    if (match) {
-      setCurrentId(match.id);
-      void rememberCurrentSong(match.id);
-      changeView("library", "unknown");
-      setStatusText("opened downloaded song in library");
-    } else {
-      changeView("library", "unknown");
-      setStatusText("download is saved, but auto-add is off");
-    }
-  }
-
-  async function chooseDownloadFolder() {
-    try {
-      const result = await window.localitfy.chooseDownloadFolder?.();
-      if (!result || result.canceled || !result.folder) return;
-      await updateSetting("downloadFolder", result.folder);
-      setDownloadFolderLabel(result.folder);
-      showAppToast("download folder updated", "success");
-    } catch (error) {
-      console.error("[localtify choose download folder failed]", error);
-      showAppToast("could not choose download folder", "error");
-    }
-  }
-
-  async function cancelCurrentDownload() {
-    cancelDownloadRetries();
-    try {
-      await window.localitfy.cancelDownload?.();
-      setStatusText(convertBusy ? "Cancelling conversion…" : "Cancelling downloads…");
-      setDownloadQueue((current) => current.map((item) => (
-        item.status === "queued" || item.status === "downloading" || item.status === "converting"
-          ? { ...item, status: "cancelled", progress: item.progress, message: "Download cancelled" }
-          : item
-      )));
-    } catch (error) {
-      console.error("[localtify cancel download failed]", error);
-      showAppToast("could not cancel download", "error");
-    }
-  }
-
-  async function retryDownload(url: string, source: "youtube" | "spotify" | "auto" = "auto", spotifyTrackId = "", recoveryId?: string) {
-    if (!url) {
-      showAppToast("No URL saved for this failed item", "error");
-      return;
-    }
-
-    setStatusText("retrying failed download...");
-    showAppToast("retrying failed download", "info");
-
-    if (recoveryId) {
-      await downloadAudioLinks(url, recoveryId);
-      return;
-    }
-
-    if (source === "spotify" || url.startsWith("spotify:")) {
-      const track = spotifyTracks.find((item: any) => item.id === spotifyTrackId) ||
-        spotifyTracks.find((item: any) => url.toLowerCase().includes(String(item.title || "").toLowerCase()));
-      if (track) {
-        await downloadSpotifyTracks([track]);
-        return;
-      }
-
-      setDownloadsTab("spotify");
-      setSpotifyFetchError("Could not match this failed queue item back to a Spotify track. Fetch the playlist again, then retry the track.");
-      return;
-    }
-
-    setDownloadText(url);
-    await downloadAudioLinks(url);
-  }
-
-  async function retrySpotifyTrack(track: SpotifyTrack) {
-    if (!track?.id) return;
-    await downloadSpotifyTracks([track]);
-  }
-
-  async function downloadAudioLinks(overrideText?: string, recoveryId?: string) {
-    const urls = parseDownloadUrls(overrideText || downloadText);
-
-    if (!urls.length && !recoveryId) {
-      setPlayerError("paste at least one YouTube link first");
-      setStatusText("nothing to download");
-      return;
-    }
-
-    if (!beginDownloadOperation()) return;
-    setDownloadBusy(true);
-    setConvertBusy(false);
-    setConvertProgress(0);
-    setConvertMessage("");
-    setPlayerError("");
-    setStatusText("downloading audio...");
-    if (recoveryId) setDownloadQueue(items => items.map(item => item.recoveryId === recoveryId ? { ...item, status: "queued", statusLabel: "", error: "", message: "Resuming download" } : item));
-    else setDownloadQueue(items => [...items.filter(item => item.recoveryId || !urls.includes(item.url)), ...makeQueuedDownloads(urls)]);
-
-    try {
-      const result = recoveryId ? await window.localitfy.resumeDownloadJob(recoveryId) : await window.localitfy.downloadAudioUrls({
-        urls,
-        options: { ...downloadAudioOptions(settings), cleanTitle: settings.downloadCleanTitle }
-      });
-
-      let nextSongs = applyLibraryOrder(sanitizeSongList(result.songs || []));
-      const autoAdd = result.autoAdd ?? settings.downloadAutoAdd;
-      const downloads = result.downloads || [];
-      const successCount = downloads.filter((item) => item.ok).length;
-      const failCount = downloads.filter((item) => !item.ok).length;
-
-      // Electron already returns the final committed DB snapshot. Only recover via
-      // bootstrap for older/failing bridges that omitted that snapshot entirely.
-      if (!Array.isArray(result.songs) && (successCount > 0 || Number(result.changedCount || 0) > 0) && window.localitfy?.bootstrap) {
-        try {
-          const refreshed = await window.localitfy.bootstrap();
-          const refreshedSongs = applyLibraryOrder(sanitizeSongList(refreshed?.songs || []));
-          if (refreshedSongs.length) nextSongs = refreshedSongs;
-        } catch (refreshError) {
-          console.warn("[localtify download library refresh failed]", refreshError);
-        }
-      }
-
-      const enrichedDownloads = enrichDownloadResultsWithLibraryMatches(downloads, nextSongs);
-      setDownloadResults(enrichedDownloads);
-      syncDownloadFilesToQueue(enrichedDownloads, nextSongs);
-      setDownloadFolderLabel(result.downloadFolder || settings.downloadFolder || "");
-      playbackUrlCacheRef.current.clear();
-      playbackUrlPendingRef.current.clear();
-      setSongs(nextSongs);
-      setLibraryScanMessage(`library refreshed: ${nextSongs.length} tracks`);
-
-      if (nextSongs.length && !currentId) {
-        const firstSong = nextSongs[0];
-        if (firstSong) {
-          setCurrentId(firstSong.id);
-          await rememberCurrentSong(firstSong.id);
-        }
-      }
-
-      if (successCount > 0) {
-        const importedCount = enrichedDownloads.filter((item: any) => item.ok && item.importedToLibrary).length;
-        const notImportedCount = enrichedDownloads.filter((item: any) => item.ok && !item.importedToLibrary).length;
-        setStatusText(
-          autoAdd
-            ? notImportedCount > 0
-              ? `downloaded ${successCount}; ${notImportedCount} not imported`
-              : `downloaded ${successCount} and added ${importedCount || result.changedCount || successCount} to library`
-            : `downloaded ${successCount} file${successCount === 1 ? "" : "s"}`
-        );
-        showAppToast(
-          notImportedCount > 0
-            ? `${notImportedCount} downloaded file${notImportedCount === 1 ? "" : "s"} not imported`
-            : `added ${importedCount || successCount} to library`,
-          notImportedCount > 0 ? "info" : "success"
-        );
-        if (autoAdd) changeView("library", "unknown");
-      } else {
-        setStatusText("download failed");
-        setPlayerError("no audio files downloaded. check the results below.");
-      }
-
-      if (failCount > 0) {
-        console.warn("[localitfy download partial failures]", downloads);
-      }
-    } catch (error) {
-      console.error("[localitfy download failed]", error);
-      const message = friendlyDownloadError((error as Error)?.message || "Download failed.");
-      const failedDownloads = urls.map((url) => ({
-        ok: false,
-        url,
-        error: message,
-        statusLabel: "Failed — retry available"
-      })) as any[];
-
-      setDownloadResults(failedDownloads);
-      setDownloadQueue((items) => items.map((item) => (recoveryId ? item.recoveryId === recoveryId : !item.recoveryId && urls.includes(item.url)) ? ({
-        ...item,
-        status: "failed",
-        progress: 100,
-        message,
-        error: message,
-        statusLabel: "Failed — retry available"
-      }) : item));
-      setPlayerError(message);
-      setStatusText("download failed");
-      showAppToast("Download failed — retry from the queue", "error");
-    } finally {
-      setDownloadBusy(false);
-      endDownloadOperation();
-    }
-  }
-
-  // Spotify import/download orchestration stays here until playlist/library side effects are isolated.
-  function upsertSpotifyPlaylistFromImport(sourceName: string, importedSongs: Song[]) {
-    const cleanIds = Array.from(new Set(importedSongs.map((song) => song.id).filter(Boolean)));
-    if (!cleanIds.length) return null;
-
-    const safeName = normalizePlaylistName(sourceName, `Spotify import ${new Date().toLocaleDateString()}`);
-    let selectedId: string | null = null;
-    let created = false;
-
-    setPlaylists((items) => {
-      const existing = items.find((playlist) => playlist.name.trim().toLowerCase() === safeName.toLowerCase());
-
-      if (existing) {
-        selectedId = existing.id;
-
-        // Spotify auto playlists are replaced with the exact imported set.
-        // Do not merge, because merging was keeping old random songs in the playlist.
-        return items.map((playlist) =>
-          playlist.id === existing.id ? { ...playlist, songIds: cleanIds } : playlist
-        );
-      }
-
-      const playlist: Playlist = {
-        id: makeLocalId("playlist"),
-        name: safeName,
-        songIds: cleanIds,
-        createdAt: Date.now()
-      };
-
-      selectedId = playlist.id;
-      created = true;
-      return [playlist, ...items];
-    });
-
-    if (selectedId) {
-      setSelectedPlaylistId(selectedId);
-      setActivePlaylistId(selectedId);
-    }
-
-    setStatusText(`${created ? "created" : "fixed"} Spotify playlist: ${safeName}`);
-    showAppToast(`${created ? "created" : "fixed"} playlist: ${safeName}`, "success");
-    return selectedId;
-  }
-
-  async function downloadSpotifyTracks(trackOverride?: SpotifyTrack[]) {
-    const selected = Array.isArray(trackOverride) && trackOverride.length
-      ? trackOverride
-      : spotifyTracks.filter((t) => spotifySelectedIds.has(t.id));
-    if (!selected.length || !beginDownloadOperation()) return;
-
-    if (Array.isArray(trackOverride) && trackOverride.length) {
-      setSpotifySelectedIds(new Set(trackOverride.map((track) => track.id)));
-    }
-
-    setSpotifyDownloadBusy(true);
-    setDownloadBusy(true);
-    setDownloadResults([]);
-    setPlayerError("");
-    setSpotifyFetchError("");
-    setSpotifyTracks((items) => items.map((track: any) => (
-      selected.some((selectedTrack) => selectedTrack.id === track.id)
-        ? { ...track, downloadStatus: "queued", downloadError: "", downloadMessage: "Queued" }
-        : track
-    )));
-    setDownloadQueue(items => [
-      ...items.filter(item => item.recoveryId || !selected.some(track => track.id === item.spotifyTrackId)),
-      ...selected.map((t, i) => ({
-        id: `spt_${t.id}_${i}`,
-        spotifyTrackId: t.id,
-        source: "spotify",
-        url: (t as any).spotifyUrl || `spotify:track:${t.id}`,
-        title: t.artist ? `${t.artist} — ${t.title}` : t.title,
-        status: "queued" as const,
-        progress: 0,
-        message: "Waiting..."
-      }))
-    ]);
-    setStatusText(`downloading ${selected.length} track${selected.length !== 1 ? "s" : ""} from spotify...`);
-
-    try {
-      const bridge = (window.localitfy as any);
-      const spotifyDownloadBridge = bridge?.spotifyDownloadBatch || bridge?.spotdlDownloadBatch;
-      if (!spotifyDownloadBridge) {
-        const message = "Spotify downloading is unavailable in this build.";
-        setSpotifyFetchError(message);
-        setDownloadQueue((items) => items.map((item) => !item.recoveryId && selected.some(track => track.id === item.spotifyTrackId) ? ({ ...item, status: "failed", progress: 100, message, error: message, statusLabel: "Failed — retry available" }) : item));
-        setStatusText("spotify download failed");
-        showAppToast("Spotify download bridge missing", "error");
-        return;
-      }
-
-      const result = await spotifyDownloadBridge({
-        tracks: selected.map((t) => ({
-          id: t.id,
-          title: t.title,
-          artist: t.artist,
-          albumName: t.albumName,
-          coverUrl: t.coverUrl || (t as any).spotifyCoverUrl || (t as any).albumCoverUrl || "",
-          spotifyUrl: (t as any).spotifyUrl || "",
-          isrc: (t as any).isrc || "",
-          duration: t.duration,
-          durationMs: (t as any).durationMs
-        })),
-        sourceName: spotifySourceName,
-        sourceType: spotifySourceType,
-        options: {
-          ...downloadAudioOptions(settings),
-          sourceName: spotifySourceName,
-          sourceType: spotifySourceType
-        }
-      });
-
-      if (result) {
-        let nextSongs = applyLibraryOrder(sanitizeSongList(result.songs || []));
-        setDownloadFolderLabel(result.downloadFolder || settings.downloadFolder || "");
-
-        const downloads = result.downloads || [];
-        const successCount = downloads.filter((d: DownloadResult) => d.ok).length;
-        const failCount = downloads.filter((d: DownloadResult) => !d.ok).length;
-
-        // The batch response already contains a final committed DB snapshot.
-        // Bootstrap is a recovery path only when an older bridge omits it.
-        if (!Array.isArray(result.songs) && (successCount > 0 || Number(result.changedCount || 0) > 0) && bridge?.bootstrap) {
-          try {
-            const refreshed = await bridge.bootstrap();
-            const refreshedSongs = applyLibraryOrder(sanitizeSongList(refreshed?.songs || []));
-            if (refreshedSongs.length) {
-              nextSongs = refreshedSongs;
-              setLibraryScanMessage(`library refreshed: ${refreshedSongs.length} tracks`);
-            }
-          } catch (refreshError) {
-            console.warn("[localtify spotify library refresh failed]", refreshError);
-          }
-        }
-
-        const enrichedDownloads = enrichDownloadResultsWithLibraryMatches(downloads, nextSongs);
-        setDownloadResults(enrichedDownloads);
-        syncDownloadFilesToQueue(enrichedDownloads, nextSongs);
-
-        const enrichedDownloadsBySpotifyId = new Map(
-          enrichedDownloads
-            .map((item: DownloadResult): [string, DownloadResult] => [String(item.spotifyTrackId || "").trim(), item])
-            .filter(([id]) => Boolean(id))
-        );
-        const rawDownloadsBySpotifyId = new Map(
-          downloads
-            .map((item: DownloadResult): [string, DownloadResult] => [String(item.spotifyTrackId || "").trim(), item])
-            .filter(([id]) => Boolean(id))
-        );
-
-        setSpotifyTracks((items) => items.map((track: any) => {
-          const selectedIndex = selected.findIndex((selectedTrack) => selectedTrack.id === track.id);
-          if (selectedIndex === -1) return track;
-
-          const resultForTrack: any =
-            enrichedDownloadsBySpotifyId.get(String(track.id || "").trim()) ||
-            rawDownloadsBySpotifyId.get(String(track.id || "").trim()) ||
-            enrichedDownloads[selectedIndex] ||
-            downloads[selectedIndex] ||
-            null;
-          if (!resultForTrack) {
-            return {
-              ...track,
-              downloadStatus: "failed",
-              downloadError: "No result returned for this track.",
-              downloadMessage: "No result returned"
-            };
-          }
-
-          return {
-            ...track,
-            downloadStatus: resultForTrack.ok ? "done" : "failed",
-            downloadError: resultForTrack.ok ? "" : friendlyDownloadError(resultForTrack.error || "Spotify download failed."),
-            downloadMessage: resultForTrack.ok
-              ? resultForTrack.importedToLibrary
-                ? "Added to library"
-                : "Downloaded, not imported"
-              : "Failed — retry available",
-            downloadedFilePath: resultForTrack.filePath || "",
-            importedToLibrary: Boolean(resultForTrack.importedToLibrary),
-            librarySongId: resultForTrack.librarySongId || "",
-            matchScore: resultForTrack.matchScore,
-            providerUrl: resultForTrack.providerUrl || ""
-          };
-        }));
-
-        setSongs(nextSongs);
-
-        if (settings.downloadAutoAdd && successCount > 0) {
-          const exactImportedIds = Array.from(
-            new Set<string>(
-              Array.isArray(result.spotifyImportedSongIds)
-                ? result.spotifyImportedSongIds.map((id: unknown) => String(id || "").trim()).filter(Boolean)
-                : []
-            )
-          );
-
-          const playlistName =
-            spotifySourceName ||
-            result.spotifySourceName ||
-            result.playlistName ||
-            result.name ||
-            (spotifySourceType === "album" ? "Spotify Album" : "Spotify Playlist");
-
-          if (!exactImportedIds.length) {
-            const message = "Spotify import finished, but the backend did not return exact song IDs. Playlist creation skipped to avoid adding random songs.";
-            setSpotifyFetchError(message);
-            showAppToast(message, "error");
-            console.warn("[localtify spotify playlist skipped]", { reason: "missing exact imported song ids", result });
-          } else {
-            const songsById = new Map(nextSongs.map((song) => [song.id, song]));
-            const importedSpotifySongs = exactImportedIds
-              .map((id) => songsById.get(id))
-              .filter((song): song is Song => Boolean(song));
-
-            if (!importedSpotifySongs.length) {
-              const message = "Spotify import finished, but the imported songs were not found after library refresh. Playlist creation skipped.";
-              setSpotifyFetchError(message);
-              showAppToast(message, "error");
-              console.warn("[localtify spotify playlist skipped]", { reason: "imported ids missing after refresh", exactImportedIds });
-            } else {
-              if (importedSpotifySongs.length !== exactImportedIds.length) {
-                console.warn("[localtify spotify playlist partial id match]", {
-                  expected: exactImportedIds.length,
-                  matched: importedSpotifySongs.length,
-                  exactImportedIds
-                });
-              }
-
-              upsertSpotifyPlaylistFromImport(playlistName, importedSpotifySongs);
-            }
-          }
-        }
-
-        if (nextSongs.length && !currentId) {
-          const firstSong = nextSongs[0];
-          if (firstSong) {
-            setCurrentId(firstSong.id);
-            await rememberCurrentSong(firstSong.id);
-          }
-        }
-
-        if (successCount > 0) {
-          const importedCount = enrichedDownloads.filter((item: any) => item.ok && item.importedToLibrary).length;
-          const notImportedCount = enrichedDownloads.filter((item: any) => item.ok && !item.importedToLibrary).length;
-          setStatusText(
-            failCount > 0
-              ? `spotify finished: ${successCount} done, ${failCount} failed`
-              : notImportedCount > 0
-                ? `spotify finished: ${successCount} downloaded, ${notImportedCount} not imported`
-                : `spotify finished: ${importedCount || successCount} added to library`
-          );
-          showAppToast(
-            failCount > 0
-              ? `Spotify: ${successCount} done, ${failCount} failed`
-              : `Spotify added ${importedCount || successCount} to library`,
-            failCount > 0 ? "info" : "success"
-          );
-          if (settings.downloadAutoAdd && nextSongs.length) changeView("library", "unknown");
-        } else {
-          setStatusText("spotify download finished — no tracks added");
-          setPlayerError("no tracks downloaded. check the queue for errors.");
-          showAppToast("Spotify download failed — retry from the queue", "error");
-        }
-
-        if (failCount > 0) {
-          const firstFailure = enrichedDownloads.find((item: any) => !item.ok);
-          setSpotifyFetchError(firstFailure ? friendlyDownloadError(firstFailure.error || "Some Spotify tracks failed.") : "Some Spotify tracks failed. Retry failed items from the queue.");
-          console.warn("[localtify spotify partial failures]", enrichedDownloads);
-        } else {
-          setSpotifyFetchError("");
-        }
-      }
-    } catch (error) {
-      const message = friendlyDownloadError((error as Error)?.message || "Spotify download failed.");
-      console.error("[localtify spotify download failed]", error);
-      setSpotifyFetchError(message);
-      setSpotifyTracks((items) => items.map((track: any) => (
-        selected.some((selectedTrack) => selectedTrack.id === track.id)
-          ? { ...track, downloadStatus: "failed", downloadError: message, downloadMessage: "Failed — retry available" }
-          : track
-      )));
-      const failedDownloads = selected.map((track) => ({
-        ok: false,
-        url: (track as any).spotifyUrl || `spotify:track:${track.id}`,
-        source: "spotify",
-        spotifyTrackId: track.id,
-        error: message,
-        statusLabel: "Failed — retry available"
-      })) as any[];
-      setDownloadResults(failedDownloads);
-      setDownloadQueue((items) => items.map((item) => !item.recoveryId && selected.some(track => track.id === item.spotifyTrackId) ? ({
-        ...item,
-        status: "failed",
-        progress: 100,
-        message,
-        error: message,
-        statusLabel: "Failed — retry available"
-      }) : item));
-      setStatusText("spotify download failed");
-      showAppToast("Spotify download failed — retry from the queue", "error");
-    } finally {
-      setSpotifyDownloadBusy(false);
-      setDownloadBusy(false);
-      endDownloadOperation();
-    }
-  }
-  // ------------------------------------------------------------------------
-
-  async function convertLocalMedia() {
-    if (!beginDownloadOperation()) return;
-    setConvertBusy(true);
-    setConvertProgress(0);
-    setConvertMessage("choose files to convert...");
-    setPlayerError("");
-    setStatusText("opening converter...");
-
-    try {
-      const result = await window.localitfy.pickAndConvertMedia({
-        bitrate: 192
-      });
-
-      const conversions = result.conversions || [];
-      if (!Array.isArray(result.songs)) throw new Error("Conversion results were incomplete. Reload the application before retrying.");
-      const nextSongs = applyLibraryOrder(sanitizeSongList(result.songs || []));
-
-      setSongs(nextSongs);
-      setLibraryScanMessage(`library refreshed: ${nextSongs.length} tracks`);
-      setDownloadResults(
-        enrichDownloadResultsWithLibraryMatches(conversions.map((item) => ({
-          ok: item.ok,
-          source: "local",
-          filename: item.filename,
-          filePath: item.filePath,
-          error: item.error,
-          url: item.sourcePath
-        })), nextSongs)
-      );
-
-      const successCount = conversions.filter((item) => item.ok).length;
-      const failed = conversions.filter(item => !item.ok);
-      const failure = failed.find(item => !/cancel/i.test(item.error || ""));
-      if (failure) setPlayerError(failure.error || "Conversion failed");
-
-      if (nextSongs.length && !currentId) {
-        const firstSong = nextSongs[0];
-
-        if (firstSong) {
-          setCurrentId(firstSong.id);
-          await rememberCurrentSong(firstSong.id);
-        }
-      }
-
-      if (successCount > 0) {
-        setConvertProgress(100);
-        setConvertMessage(failed.length ? `converted ${successCount}; ${failed.length} failed or cancelled` : "conversion complete");
-        setStatusText(
-          `converted ${successCount} file${successCount === 1 ? "" : "s"} and imported ${result.changedCount}${failed.length ? `; ${failed.length} failed or cancelled` : ""}`
-        );
-        if (!failed.length) changeView("library", "unknown");
-      } else if (failed.length) {
-        setStatusText(failure ? "conversion failed" : "conversion cancelled");
-        setConvertMessage(failure?.error || "Conversion cancelled");
-      } else {
-        setStatusText("nothing converted");
-        setConvertMessage("no files converted");
-      }
-    } catch (error) {
-      console.error("[localitfy convert failed]", error);
-      setPlayerError((error as Error)?.message || "Conversion failed");
-      setConvertMessage("conversion failed");
-      setStatusText("conversion failed");
-    } finally {
-      setConvertBusy(false);
-      endDownloadOperation();
     }
   }
 
@@ -6106,6 +4894,8 @@ function MainModeApp() {
 
   function saveDuration(duration: number) {
     if (!currentSong || !Number.isFinite(duration) || duration <= 0) return;
+    // Incoming metadata may arrive before React commits the incoming song ID.
+    if (crossfadeMainPauseGuardRef.current && crossfadeHandoffRef.current?.songId !== currentSong.id) return;
 
     const rounded = Math.floor(duration);
     setCurrentDuration(rounded);
@@ -6140,6 +4930,7 @@ function MainModeApp() {
 
   function handlePlaying() {
     if (audioRef.current?.paused) return;
+    if (crossfadeMainPauseGuardRef.current && crossfadeHandoffRef.current?.songId !== currentSong?.id) return;
     if (playbackTransitionRef.current.snapshot().phase === "paused") {
       audioRef.current?.pause();
       return;
@@ -7037,7 +5828,7 @@ function MainModeApp() {
     getTime: () => timeRef.current, getDuration: () => durationRef.current, togglePlay, next: playNext, previous: playPrevious, playQueueItem,
     seek: (seconds) => handleSeek((seconds / (durationRef.current || 1)) * 100), setQueue: setPlayQueue, setShuffle: setIsShuffle, setRepeat: setRepeatMode,
     start: (songId, time, play) => { startupResumePositionRef.current = { songId, time }; void selectSong(songId, play, { source: null }); },
-    onLike: (id, liked) => setSongs((all) => all.map((song) => (song.id === id ? { ...song, liked } : song))), toast: showAppToast
+    onLike: (id, liked) => setSongs((all) => patchLibrarySong(all, id, { liked }, songIndexById.get(id))), toast: showAppToast
   });
 
   const downloadPageState = getDownloadPageState({

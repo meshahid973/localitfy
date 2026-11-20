@@ -368,11 +368,23 @@ export function usePlaybackConnect(local: LocalPlayer) {
   };
   useEffect(() => {
     if (!remote) return;
-    const draw = () => { if (!seekingRef.current) paint(livePositionMs(remote, serverNow()), remote.durationMs); };
+    // Playback state continues to synchronize while the window is hidden,
+    // but writing progress styles to invisible DOM at 4 Hz is unnecessary.
+    const draw = () => {
+      if (document.hidden || document.body.classList.contains("localtifyWindowBackgrounded") ||
+          document.body.classList.contains("localtifyBackgroundMode") || seekingRef.current) return;
+      paint(livePositionMs(remote, serverNow()), remote.durationMs);
+    };
     draw();
     if (!remote.playing) return;
     const timer = window.setInterval(draw, PAINT_EVERY_MS);
-    return () => window.clearInterval(timer);
+    document.addEventListener("visibilitychange", draw);
+    window.addEventListener("focus", draw);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", draw);
+      window.removeEventListener("focus", draw);
+    };
   }, [remote]);
 
   const command = (next: LiveCommand, optimistic?: Partial<LiveState>) => {

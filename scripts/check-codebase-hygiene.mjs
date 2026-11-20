@@ -28,11 +28,8 @@ const forbiddenFiles = [
 ];
 
 const allowedExactDuplicateGroups = [
-  new Set(["build/icon.png", "src/assets/logo.png"]),
-  // Android expects the same adaptive icon under both launcher names, and same-size legacy icons for both.
-  new Set(["android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml", "android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml"]),
-  ...["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"].map((density) =>
-    new Set([`android/app/src/main/res/mipmap-${density}/ic_launcher.png`, `android/app/src/main/res/mipmap-${density}/ic_launcher_round.png`]))
+  // The app renderer and desktop packager each require their own logo path.
+  new Set(["build/icon.png", "src/assets/logo.png"])
 ];
 
 const textExtensions = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".css", ".md", ".json", ".html"]);

@@ -73,14 +73,9 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
   }, lookupAudioDb ? (title, artist) => getSettings().discoverEnabled === true ? lookupAudioDb(title, artist) : Promise.resolve({}) : undefined, searchYouTubeArtwork ? lookupMusicArtwork : undefined,
     lookupDeezer ? (...args) => getSettings().discoverEnabled===true ? lookupDeezer(...args) : Promise.resolve({}) : undefined,
     lookupFanart ? (...args) => getSettings().discoverEnabled===true ? lookupFanart(...args) : Promise.resolve({}) : undefined);
-  const artistArtworkCache=new Map(), artistArtworkPending=new Map();
+  // The outer resource cache owns retention and coalescing for both entity types.
   async function lookupArtistArtwork(name,fallback=false) {
-    const key=JSON.stringify([name.normalize("NFKC").toLowerCase(),fallback]);
-    const hit=artistArtworkCache.get(key);
-    if(hit&&now()-hit.at<(hit.value.coverUrl?86400000:60000))return hit.value;
-    if(artistArtworkPending.has(key))return artistArtworkPending.get(key);
-    if(artistArtworkPending.size>=4)throw Error("Artwork queue busy");
-    const task=Promise.resolve().then(async()=>{
+    return (async()=>{
       const cleaned=name.replace(/\s+[-–—]\s+Topic$/i,"").trim();
       if(getSettings().discoverEnabled!==true)return {};
       if(searchYouTubeArtwork&&!fallback){
@@ -100,9 +95,7 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
         }
       }
       return additional;
-    }).then(value=>{if(value.coverUrl)artistArtworkCache.set(key,{at:now(),value});while(artistArtworkCache.size>256)artistArtworkCache.delete(artistArtworkCache.keys().next().value);return value;})
-      .finally(()=>artistArtworkPending.delete(key));
-    artistArtworkPending.set(key,task);return task;
+    })();
   }
   // Explicit catalog IDs are authoritative. Never borrow another recording's
   // artwork just because its name and artist happen to match.
@@ -153,6 +146,7 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
         const normalizeKey = value => value.normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase();
         const identity = { providerId, album: normalizeKey(album), durationMs };
         const key = JSON.stringify([kind, normalizeKey(title), normalizeKey(artist), providerId, identity.album, durationMs, fallback === true]);
+        await artworkResults.hydrate();
         let artwork = artworkResults.get(key);
         if (!artwork) {
           let pending = artworkRequests.get(key);

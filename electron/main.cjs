@@ -1,5 +1,6 @@
 const { registerMediaConversionIpc } = require("./ipc/media-conversion.cjs");
-const { finalizeDownloadImport } = require("./runtime/download-imports.cjs");
+const { registerDownloadsIpc } = require("./ipc/downloads.cjs");
+const { registerCoverIpc } = require("./ipc/covers.cjs");
 const { filePathKey } = require("./runtime/path-identity.cjs");
 const { app, powerMonitor, BrowserWindow, dialog, ipcMain, shell, session, Menu, Tray, nativeImage, globalShortcut, screen, protocol, net, safeStorage } = require("electron");
 const { createIpcRouter } = require("./ipc/router.cjs");
@@ -64,18 +65,9 @@ const getPlaylists = databaseRepositories.playlists.get;
 const savePlaylists = databaseRepositories.playlists.save;
 
 const { setDiscordActivity, clearDiscordActivity, getDiscordStatus, resetDiscordActivityCache } = require("./rpc.cjs");
-const {
-  downloadAudioUrls,
-  cancelActiveDownloads,
-  listDownloadJobs,
-  runDownloadOperation,
-  isDownloadFileInProgress,
-  getDownloadRecoveryRequest,
-  clearDownloadJobs,
-  downloadSpotifyBatch
-} = require("./downloader.cjs");
+const { isDownloadFileInProgress } = require("./downloader.cjs");
 
-const { readLocalAudioMetadata } = require("./metadata-service.cjs");
+const { readLocalAudioMetadata, guardMetadataRepairPatch } = require("./metadata-service.cjs");
 const { findFolderCover, resolveSongCover, createLeastUsedCoverAllocator } = require("./cover-service.cjs");
 
 const ipcRouter = createIpcRouter(ipcMain, {
@@ -113,7 +105,6 @@ let mainWindow = null;
 let mainWindowRendererWatchdog = null;
 let mainWindowRendererRecoveredOnce = false;
 let startupLaunchStatus = { wasOpenedAtLogin: false, wasOpenedAsHidden: false };
-let lastAssignedCoverPath = "";
 
 const {
   getSavedWindowTranslucencySettings,
@@ -1138,18 +1129,29 @@ function getPixelArtFiles(options = {}) {
   }
 }
 
-function listPixelCoversDetailed() {
-  const songs = getSongs();
+function listPixelCoversDetailed(songs = getSongs()) {
   const usage = new Map();
   for (const song of songs) if (song.coverPath) usage.set(song.coverPath, (usage.get(song.coverPath) || 0) + 1);
-  return getPixelArtFiles().map((coverPath) => ({ name: path.basename(coverPath), key: path.parse(coverPath).name, path: coverPath, url: safeMediaUrl(coverPath), usageCount: usage.get(coverPath) || 0, exists: fileExists(coverPath), broken: !fileExists(coverPath) }));
+  return getPixelArtFiles().map((coverPath) => {
+    const exists = fileExists(coverPath);
+    return { name: path.basename(coverPath), key: path.parse(coverPath).name, path: coverPath,
+      url: safeMediaUrl(coverPath), usageCount: usage.get(coverPath) || 0, exists, broken: !exists };
+  });
 }
 
 function getCoverStats() {
   const songs = getSongs();
-  const covers = listPixelCoversDetailed();
-  const brokenSongs = songs.filter((song) => song.coverPath && !fileExists(song.coverPath)).map((song) => ({ id: song.id, title: song.title, coverPath: song.coverPath }));
-  return { pixelDir: getPixelArtDirectory(), coverCount: covers.length, songCount: songs.length, songsWithCovers: songs.filter((song) => Boolean(song.coverPath)).length, songsMissingCovers: songs.filter((song) => !song.coverPath).length, songsWithBrokenCovers: brokenSongs.length, brokenItems: brokenSongs };
+  const covers = listPixelCoversDetailed(songs);
+  const brokenSongs = [];
+  let songsWithCovers = 0;
+  for (const song of songs) {
+    if (!song.coverPath) continue;
+    songsWithCovers++;
+    if (!fileExists(song.coverPath)) brokenSongs.push({ id: song.id, title: song.title, coverPath: song.coverPath });
+  }
+  return { pixelDir: getPixelArtDirectory(), coverCount: covers.length, songCount: songs.length,
+    songsWithCovers, songsMissingCovers: songs.length - songsWithCovers,
+    songsWithBrokenCovers: brokenSongs.length, brokenItems: brokenSongs };
 }
 
 function pickLeastUsedCover(availableCovers = [], fallbackSongs = [], choices = {}) {
@@ -1165,10 +1167,12 @@ function pickLeastUsedCover(availableCovers = [], fallbackSongs = [], choices = 
   const minCount = usage.get(candidates[0]) || 0;
   const bestPool = candidates.filter((p) => (usage.get(p) || 0) === minCount);
   const selected = bestPool[Math.floor(Math.random() * bestPool.length)];
-  if (selected) lastAssignedCoverPath = selected;
   return selected || "";
 }
 
+// All files in one import share cover usage. Avoid a full SQLite library
+// read for every track when assigning fallback artwork.
+const importCoverAllocators = new WeakMap();
 async function makeSongFromFile(filePath, pixelArtFiles = [], usedCovers = new Set(), options = {}) {
   const parsed = path.parse(filePath);
   const parts = parsed.name.split(" - ").map((item) => item.trim());
@@ -1185,20 +1189,29 @@ async function makeSongFromFile(filePath, pixelArtFiles = [], usedCovers = new S
   const album = String(metadata?.album || options.album || "").trim();
   const genre = String(metadata?.genre || options.genre || "").trim();
   let fallbackCover = "";
+  let importAllocator = null;
   if (pixelArtFiles.length) {
-    const available = pixelArtFiles.filter((p) => !usedCovers.has(p));
-    fallbackCover = pickLeastUsedCover(available.length ? available : pixelArtFiles);
+    importAllocator = importCoverAllocators.get(usedCovers);
+    if (!importAllocator) {
+      importAllocator = createLeastUsedCoverAllocator(pixelArtFiles, getSongs());
+      importCoverAllocators.set(usedCovers, importAllocator);
+    }
+    fallbackCover = importAllocator.choose();
   }
   const coverResult = await resolveSongCover({
     song: { id, title, artist, album, filePath, coverPath: options.coverPath || "", coverSource: options.coverSource || "" },
     metadata,
     filePath,
     folderCoverPath: options.folderCoverPath || "",
+    preferFolderCover: Boolean(options.preferFolderCover),
     albumEmbeddedCoverPath: options.albumEmbeddedCoverPath || options.albumCoverPath || "",
     spotifyCoverPath: options.spotifyCoverPath || "",
     fallbackCoverPath: fallbackCover
   });
-  if (coverResult.coverSource === "fallback" && coverResult.coverPath) usedCovers.add(coverResult.coverPath);
+  if (coverResult.coverSource === "fallback" && coverResult.coverPath) {
+    usedCovers.add(coverResult.coverPath);
+    importAllocator?.record("", coverResult.coverPath);
+  }
   const durationMs = Math.max(0, Number(metadata?.durationMs || options.durationMs || 0));
   const duration = Math.max(0, Number(metadata?.duration || Math.round(durationMs / 1000) || options.duration || 0));
   return { id, title, artist, album, genre, filePath, coverPath: coverResult.coverPath || "", coverSource: coverResult.coverSource || "none", coverUpdatedAt: coverResult.coverUpdatedAt || new Date().toISOString(), duration, durationMs: durationMs || (duration > 0 ? duration * 1000 : 0), track: Number(metadata?.track || 0) || 0, disc: Number(metadata?.disc || 0) || 0, year: metadata?.year || "", bitrate: 0, addedAt: Date.now() };
@@ -1300,7 +1313,9 @@ async function importNewAudioFiles(audioFiles, tracks = []) {
   const newFiles = audioFiles.filter((filePath) => {
     if (isDownloadFileInProgress(filePath)) return false;
     const key = filePathKey(String(filePath || ""));
-    return key && !existingPaths.has(key);
+    if (!key || existingPaths.has(key)) return false;
+    existingPaths.add(key);
+    return true;
   });
   if (!newFiles.length) return { changedCount: 0, importedCount: 0, files: [] };
   const pixelArtFiles = getPixelArtFiles();
@@ -1670,24 +1685,28 @@ async function repairMissingSongMetadata(payload = {}) {
   const durationOnly = Boolean(payload?.durationOnly);
   const allSongs = getSongs();
   const pixelArtFiles = getPixelArtFiles();
-  const targets = allSongs.filter((song) => {
-    if (!song?.filePath || !fileExists(song.filePath) || !isAudioFile(song.filePath)) return false;
+  const targets = [];
+  for (const song of allSongs) {
+    if (!song?.filePath || !isAudioFile(song.filePath)) continue;
     const durationMissing = Number(song.duration || 0) <= 0 || Number(song.durationMs || 0) <= 0;
-    const coverMissing = !song.coverPath || !fileExists(song.coverPath) || !song.coverSource || song.coverSource === "fallback" || song.coverSource === "none" || song.coverSource === "unknown";
-    if (force) return true;
-    if (coverOnly) return coverMissing;
-    if (durationOnly) return durationMissing;
-    return durationMissing || coverMissing;
-  }).slice(0, limit);
+    const coverMissing = !durationOnly && (!song.coverPath || !song.coverSource || ["fallback", "none", "unknown"].includes(song.coverSource) || !fileExists(song.coverPath));
+    if (!(force || (coverOnly ? coverMissing : durationOnly ? durationMissing : durationMissing || coverMissing))) continue;
+    if (!fileExists(song.filePath)) continue;
+    targets.push(song);
+    if (targets.length >= limit) break;
+  }
 
   let changedCount = 0;
   let durationFixedCount = 0;
   let coverFixedCount = 0;
   const changedIds = [];
   for (const song of targets) {
-    const metadata = await readLocalAudioMetadata(song.filePath);
-    const fallbackCover = pickStablePixelCoverForSong(song, pixelArtFiles);
-    const coverResult = await resolveSongCover({ song, metadata, filePath: song.filePath, folderCoverPath: findFolderCover(song.filePath), fallbackCoverPath: fallbackCover });
+    const before = await fs.promises.stat(song.filePath).catch(() => null);
+    if (!before?.isFile() || getSong(song.id)?.filePath !== song.filePath) continue;
+    const metadata = await readLocalAudioMetadata(song.filePath, { readCover: !durationOnly, readDuration: !coverOnly });
+    const coverResult = durationOnly ? {} : await resolveSongCover({
+      song, metadata, filePath: song.filePath, fallbackCoverPath: pickStablePixelCoverForSong(song, pixelArtFiles)
+    });
     const patch = {};
     const title = String(metadata?.title || "").trim();
     const artist = String(metadata?.artist || "").trim();
@@ -1710,10 +1729,13 @@ async function repairMissingSongMetadata(payload = {}) {
       patch.coverUpdatedAt = coverResult.coverUpdatedAt;
     }
     if (Object.keys(patch).length) {
-      patchSong(song.id, patch);
+      const after = await fs.promises.stat(song.filePath).catch(() => null);
+      if (!after?.isFile() || before.size !== after.size || before.mtimeMs !== after.mtimeMs || before.ctimeMs !== after.ctimeMs) continue;
+      const guarded = guardMetadataRepairPatch(song, getSong(song.id), patch);
+      if (!Object.keys(guarded).length || !patchSong(song.id, guarded)) continue;
       changedCount += 1;
-      if (Object.prototype.hasOwnProperty.call(patch, "duration") || Object.prototype.hasOwnProperty.call(patch, "durationMs")) durationFixedCount += 1;
-      if (Object.prototype.hasOwnProperty.call(patch, "coverPath")) coverFixedCount += 1;
+      if (Object.prototype.hasOwnProperty.call(guarded, "duration") || Object.prototype.hasOwnProperty.call(guarded, "durationMs")) durationFixedCount += 1;
+      if (Object.prototype.hasOwnProperty.call(guarded, "coverPath")) coverFixedCount += 1;
       changedIds.push(song.id);
     }
   }
@@ -2123,8 +2145,12 @@ async function sendLocaltifyFeedback(payload = {}) {
 }
 
 let serviceRuntime = null;
+let shutdownStarted = false;
+let startupWindowTimer = null;
+let startupUpdateTimer = null;
 
 app.whenReady().then(async () => {
+  if (shutdownStarted) return;
   registerLocaltifyRendererProtocol();
   registerLocaltifyMediaProtocol();
   serviceRuntime = createElectronServiceRuntime({
@@ -2135,6 +2161,7 @@ app.whenReady().then(async () => {
     cleanupNativeWindowsMedia
   });
   await serviceRuntime.start();
+  if (shutdownStarted) return;
   const databaseRecovery = restoreDatabaseFromOldUserDataIfNeeded();
   initDatabase(databaseRecovery.dbPath || path.join(app.getPath("userData"), userDataRuntime.sqliteFileName));
   try {
@@ -2187,76 +2214,11 @@ app.whenReady().then(async () => {
     }
   });
 
-  const pixelListHandler = async () => getPixelArtFiles().map((filePath) => ({ name: path.parse(filePath).name, key: path.parse(filePath).name, path: filePath, url: safeMediaUrl(filePath) }));
-  ipcRouter.handle("pixel:list", pixelListHandler);
-  ipcRouter.handle("art:list-pixel", pixelListHandler);
-  ipcRouter.handle("covers:list-pixelart", async () => { try { return listPixelCoversDetailed(); } catch (e) { console.log("[localitfy list covers error]", e?.message); return []; } });
-  ipcRouter.handle("covers:stats", async () => { try { return getCoverStats(); } catch (e) { console.log("[localitfy covers stats error]", e?.message); return {}; } });
-  ipcRouter.handle("covers:rescan", async () => { clearPixelArtCache(); clearFileInfoCache(); await yieldToMainLoop(); return buildRandomizeMissingSongCovers(); });
-  ipcRouter.handle("covers:randomize-all", async () => {
-    await yieldToMainLoop();
-    const covers = getPixelArtFiles();
-    if (!covers.length) return listSongsShaped();
-    const songs = getSongs();
-    const allocator = createLeastUsedCoverAllocator(covers, songs);
-    for (const song of songs) {
-      const chosen = allocator.choose(song.coverPath);
-      if (!chosen) continue;
-      const updated = patchSong(song.id, { coverPath: chosen });
-      if (updated?.coverPath === chosen) allocator.record(song.coverPath, chosen);
-    }
-    return listSongsShaped();
-  });
-  ipcRouter.handle("covers:randomize-missing", async () => { await yieldToMainLoop(); return buildRandomizeMissingSongCovers(); });
-  ipcRouter.handle("covers:randomize-selected", async (_event, ids) => {
-    await yieldToMainLoop();
-    if (!Array.isArray(ids) || !ids.length) return listSongsShaped();
-    const covers = getPixelArtFiles();
-    if (!covers.length) return listSongsShaped();
-    const songs = getSongs();
-    const allocator = createLeastUsedCoverAllocator(covers, songs);
-    const songsById = new Map(songs.map(song => [song.id, song]));
-    for (const id of new Set(ids)) {
-      const song = songsById.get(id);
-      if (!song) continue;
-      const chosen = allocator.choose(song.coverPath);
-      if (!chosen) continue;
-      const updated = patchSong(id, { coverPath: chosen });
-      if (updated?.coverPath === chosen) allocator.record(song.coverPath, chosen);
-    }
-    return listSongsShaped();
-  });
-  ipcRouter.handle("covers:broken", async () => { try { return getCoverStats().brokenItems || []; } catch { return []; } });
-  ipcRouter.handle("covers:least-used", async () => { try { return pickLeastUsedCover(getPixelArtFiles()); } catch { return ""; } });
-  ipcRouter.handle("covers:thumbnail-status", async () => { try { return getCoverThumbnailStatus(); } catch (error) { return { ok: false, error: error?.message || "thumbnail status failed" }; } });
-  ipcRouter.handle("covers:warm-thumbnails", async (_event, payload = {}) => {
-    try {
-      await yieldToMainLoop();
-      return warmCoverThumbnails({ limit: Math.max(1, Math.min(500, Number(payload?.limit || 120))), force: Boolean(payload?.force) });
-    } catch (error) {
-      console.log("[localtify warm thumbnails error]", error?.message || error);
-      return { ok: false, created: 0, cached: 0, warnings: ["Localtify could not prepare cover thumbnails right now. Covers will still load normally."], error: error?.message || "thumbnail warmup failed" };
-    }
-  });
-  ipcRouter.handle("covers:request-thumbnail", async (_event, payload) => thumbnailRuntime.requestThumbnail(payload));
-  ipcRouter.handle("covers:cleanup-cache", async () => { try { return cleanupCoverThumbnailCache(); } catch (error) { return { ok: false, error: error?.message || "cover cache cleanup failed" }; } });
-  ipcRouter.handle("song:set-cover", async (_event, id, coverPath) => { const updated = patchSong(id, { coverPath }); return updated ? shapeSong(updated) : null; });
-  ipcRouter.handle("song:pick-cover", async (event, id) => {
-    const song = (typeof id === "string" ? getSong(id) : null);
-    if (!song) return null;
-    try {
-      const senderWindow = BrowserWindow.fromWebContents(event.sender) || mainWindow;
-      const options = { title: "Choose localtify cover image", buttonLabel: "Use cover", properties: ["openFile"], filters: [{ name: "Images", extensions: ["png", "jpg", "jpeg", "webp", "gif", "bmp"] }] };
-      const result = senderWindow && !senderWindow.isDestroyed() ? await dialog.showOpenDialog(senderWindow, options) : await dialog.showOpenDialog(options);
-      if (result.canceled || !result.filePaths?.[0]) return shapeSong(song);
-      const chosen = result.filePaths[0];
-      if (!fileExists(chosen) || !isImageFile(chosen)) return shapeSong(song);
-      const updated = patchSong(id, { coverPath: chosen });
-      return updated ? shapeSong(updated) : shapeSong(song);
-    } catch (error) {
-      console.log("[localitfy pick cover error]", error?.message || error);
-      return shapeSong(song);
-    }
+  registerCoverIpc(ipcRouter, {
+    getPixelArtFiles, safeMediaUrl, listPixelCoversDetailed, getCoverStats, clearPixelArtCache, clearFileInfoCache, yieldToMainLoop,
+    buildRandomizeMissingSongCovers, listSongsShaped, getSongs, createLeastUsedCoverAllocator, patchSong, pickLeastUsedCover,
+    getCoverThumbnailStatus, warmCoverThumbnails, thumbnailRuntime, cleanupCoverThumbnailCache, shapeSong, getSong,
+    fileExists, isImageFile, getWindow: event => BrowserWindow.fromWebContents(event.sender) || mainWindow, dialog
   });
   ipcRouter.handle("song:analyze-volume", async (_event, id) => {
     const target = (typeof id === "string" ? getSong(id) : null);
@@ -2275,7 +2237,13 @@ app.whenReady().then(async () => {
       if (!validAudioFiles.length) return listSongsShaped();
       const pixelArtFiles = getPixelArtFiles();
       const usedCovers = new Set();
-      const importedSongs = await Promise.all(validAudioFiles.map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers)));
+      // Limit concurrent tag extraction and image decoding for large manual imports.
+      const uniqueFiles = [...new Map(validAudioFiles.map(file => [filePathKey(file), file])).values()];
+      const importedSongs = [];
+      for (let offset = 0; offset < uniqueFiles.length; offset += 4) {
+        importedSongs.push(...await Promise.all(uniqueFiles.slice(offset, offset + 4).map(file => makeSongFromFile(file, pixelArtFiles, usedCovers))));
+        await yieldToMainLoop();
+      }
       const changedCount = insertSongs(importedSongs);
       clearFileInfoCache();
       const afterSongs = listSongsShaped();
@@ -2287,7 +2255,7 @@ app.whenReady().then(async () => {
   libraryWatcher = startLibraryWatch(ipcRouter, { dialog, isAudioFile, getSongs, getSettings, listSongsShaped,
     importFiles: (files) => importNewAudioFiles(files), getWindow: () => (mainWindow && !mainWindow.isDestroyed() ? mainWindow : null) });
   scrobbler = startScrobbling(ipcRouter, { file: path.join(app.getPath("userData"), "scrobbles.json"), getSong: databaseRepositories.songs.get, listPlays: databaseRepositories.listening.list, safeStorage, shell });
-  const musicBrainzClient = require("./musicbrainz/client.cjs").createMusicBrainzClient({ userAgent: `localtify/${app.getVersion()} ( https://github.com/meshahid973/localitfy )` });
+  const musicBrainzClient = require("./musicbrainz/client.cjs").createMusicBrainzClient({ userAgent: `localtify/${app.getVersion()} ( https://github.com/meshahid973/localtify )` });
   remoteArtworkCache = createRemoteArtworkCache({
     dir: path.join(app.getPath("userData"), "disposable-remote-artwork-v1"),
     maxBytes: Math.max(16, Math.min(512, Number(process.env.LOCALTIFY_ARTWORK_CACHE_MB) || 128)) * 1024 * 1024
@@ -2297,7 +2265,7 @@ app.whenReady().then(async () => {
     const file = await remoteArtworkCache.resolve(url);
     if (!file || getSettings().discoverEnabled !== true) return null;
     const local = safeMediaUrl(file);
-    return local ? { url: local } : null;
+    return local ? { url: local, cacheTtlMs: remoteArtworkCache.remainingTtl(url) } : null;
   });
   discoverCacheLifecycle = registerDiscoverIpc(ipcRouter, { musicBrainzClient, searchYouTubeMusic: require("./discover/youtube-music.cjs").createYouTubeMusicSearch(), searchYouTubeMusicRadio: require("./discover/youtube-music.cjs").createYouTubeMusicRadio(), searchYouTubeArtwork: require("./discover/youtube-music.cjs").createYouTubeMusicSearch(globalThis.fetch, Date.now, 4), searchStore: require("./discover/catalog.cjs").createStoreSearch(),
     lookupDeezer: require("./discover/extra-artwork.cjs").createDeezerArtwork(), lookupFanart: require("./discover/extra-artwork.cjs").createFanartArtwork({apiKey:process.env.LOCALTIFY_FANART_API_KEY}),
@@ -2316,56 +2284,12 @@ app.whenReady().then(async () => {
   registerMediaConversionIpc(ipcRouter, { dialog, getWindow: event => BrowserWindow.fromWebContents(event.sender) || mainWindow,
     getDownloadDirectory, fileExists, isAudioFile, importFiles: importNewAudioFiles, listSongsShaped });
 
-  const runAudioDownload = async (event, payload) => {
-    let downloaded;
-    try {
-      const urls = Array.isArray(payload?.urls) ? payload.urls : [payload?.url].filter(Boolean);
-      const options = payload?.options && typeof payload.options === "object" ? payload.options : {};
-      const { quality, format, cleanTitle, keepOriginal } = options;
-      const autoAdd = typeof payload?.autoAdd === "boolean" ? payload.autoAdd : options.autoAdd !== false;
-      const downloadFolder = getDownloadDirectory(payload?.folder ?? options.downloadFolder);
-      const result = await downloadAudioUrls(urls, downloadFolder, (progress) => {
-        if (!event.sender || event.sender.isDestroyed()) return;
-        event.sender.send("download:progress", progress);
-      }, { bitrate: payload?.bitrate || 192, proxy: payload?.proxy || "", quality, format, cleanTitle, keepOriginal: keepOriginal === true, autoAdd });
-      downloaded = result;
-      const successfulFiles = result.downloads.filter((item) => item.ok && item.filePath && fileExists(item.filePath) && isAudioFile(item.filePath)).map((item) => item.filePath);
-      let changedCount = 0;
-      if (autoAdd && successfulFiles.length) {
-        const pixelArtFiles = getPixelArtFiles();
-        const usedCovers = new Set();
-        const existingPaths = new Set(getSongs().map(song => filePathKey(song.filePath)));
-        changedCount = insertSongs(await Promise.all(successfulFiles.filter(file => !existingPaths.has(filePathKey(file))).map((f) => makeSongFromFile(f, pixelArtFiles, usedCovers))));
-        clearFileInfoCache();
-      }
-      if (autoAdd) {
-        const refresh = await importNewAudioFilesFromDirectory(downloadFolder, [], { includeSongs: false });
-        changedCount += refresh.changedCount;
-      }
-      const afterSongs = listSongsShaped();
-      finalizeDownloadImport(event, result.downloads, afterSongs);
-      console.log(`[localitfy download] downloaded=${successfulFiles.length}, changed=${changedCount}, autoAdd=${autoAdd}`);
-      return { ...result, changedCount, songs: afterSongs, autoAdd };
-    } catch (error) {
-      console.log("[localitfy download error]", error?.stack || error?.message);
-      const songs = listSongsShaped();
-      const message = error?.message || "download failed";
-      const downloads = finalizeDownloadImport(event, downloaded?.downloads, songs, message);
-      return { downloadFolder: downloaded?.downloadFolder || getDownloadDirectory(), downloads, changedCount: 0, songs, autoAdd: true };
-    }
-  };
-  ipcRouter.handle("download:audio", (event, payload) => runDownloadOperation(() => runAudioDownload(event, payload)));
-  ipcRouter.handle("download:jobs", () => listDownloadJobs());
-  ipcRouter.handle("download:clear-jobs", (_event, ids) => clearDownloadJobs(ids));
-
-  ipcRouter.handle("download:cancel", async () => ({ cancelled: cancelActiveDownloads() }));
-  ipcRouter.handle("download:choose-folder", async () => {
-    const owner = mainWindow && !mainWindow.isDestroyed() ? mainWindow : undefined;
-    const result = await dialog.showOpenDialog(owner, { title: "Choose localtify download folder", properties: ["openDirectory", "createDirectory"] });
-    if (result.canceled || !result.filePaths?.[0]) return { canceled: true, folder: "" };
-    return { canceled: false, folder: result.filePaths[0] };
+  registerDownloadsIpc(ipcRouter, {
+    dialog, shell, getWindow: () => mainWindow && !mainWindow.isDestroyed() ? mainWindow : undefined,
+    getDownloadDirectory, getPixelArtFiles, getSongs, insertSongs, patchSong, fileExists, isAudioFile,
+    makeSongFromFile, makeSongFromFileWithExactSpotifyTrack, importNewAudioFilesFromDirectory,
+    clearFileInfoCache, listSongsShaped
   });
-  ipcRouter.handle("download:open-folder", async (_event, folder) => { await shell.openPath(getDownloadDirectory(folder)); return true; });
   registerAnalysisIpc(ipcRouter, { app, powerMonitor, repositories: databaseRepositories, ffmpegPath: ffmpegStatic?.replace("app.asar", "app.asar.unpacked") });
   require("./ipc/lyrics.cjs").registerLyricsIpc(ipcRouter, app, databaseRepositories);
   require("./ipc/tagging.cjs").registerTaggingIpc(ipcRouter, { app, musicBrainzClient, songs: databaseRepositories.songs, getSettings, readLocalAudioMetadata, listSongsShaped, safeMediaUrl, clearFileInfoCache, getWindow: () => mainWindow });
@@ -2470,86 +2394,6 @@ app.whenReady().then(async () => {
   ipcRouter.handle("spotify-logout", async () => { clearSpotifyOAuthToken(); console.log("[localitfy spotify] oauth token cleared"); return { ok: true, ready: true, loggedIn: false, publicOnly: true, fallbackAvailable: true, mode: SPOTIFY_CLIENT_ID ? "oauth-pkce" : "public-fallback", needsClientId: false }; });
   ipcRouter.handle("spotdl-check", async () => ({ ok: true, installed: true, engine: "localtify-ytdlp-bridge", message: "Spotify downloads use localtify's bundled yt-dlp bridge after metadata is fetched." }));
 
-  const runSpotifyDownloadBatch = async (event, payload = {}) => {
-    const tracks = Array.isArray(payload?.tracks) ? payload.tracks : [];
-    const options = payload?.options && typeof payload.options === "object" ? payload.options : payload;
-    let downloaded;
-    try {
-      const downloadFolder = getDownloadDirectory(options?.downloadFolder || options?.outputDir || options?.folder);
-      const autoAdd = typeof options?.autoAdd === "boolean" ? options.autoAdd : true;
-      const progressCallback = (progress) => {
-        if (!event.sender || event.sender.isDestroyed()) return;
-        event.sender.send("download:progress", progress);
-        if (progress?.status === "done") event.sender.send("spotdl-track-done", progress);
-      };
-      const result = await downloadSpotifyBatch(tracks, downloadFolder, progressCallback, options);
-      downloaded = result;
-      const tracksBySpotifyId = new Map(tracks.map((track) => [String(track?.spotifyTrackId || track?.id || "").trim(), track]).filter(([id]) => Boolean(id)));
-      const successfulDownloads = (result.downloads || []).map((item, index) => {
-        const spotifyTrackId = String(item?.spotifyTrackId || "").trim();
-        const track = tracksBySpotifyId.get(spotifyTrackId) || tracks[index] || (item?.filePath ? matchSpotifyTrackForFile(item.filePath, tracks) : null) || {};
-        return { item, track };
-      }).filter(({ item }) => item?.ok && item.filePath && item.matchOk !== false && fileExists(item.filePath) && isAudioFile(item.filePath));
-      let changedCount = 0;
-      const importedFilePaths = [];
-      const importedSongIds = [];
-      const spotifyImportMap = [];
-      if (autoAdd && successfulDownloads.length) {
-        const pixelArtFiles = getPixelArtFiles();
-        const usedCovers = new Set();
-        const importedSongs = [];
-        const existingByPath = new Map(getSongs().map(song => [filePathKey(song.filePath), song]));
-        for (const { item, track } of successfulDownloads) {
-          const filePath = item.filePath;
-          importedFilePaths.push(filePath);
-          const spotifyTrackId = String(item.spotifyTrackId || track?.spotifyTrackId || track?.id || "").trim();
-          const existing = existingByPath.get(filePathKey(filePath));
-          if (existing) {
-            importedSongIds.push(existing.id);
-            spotifyImportMap.push({ spotifyTrackId, songId: existing.id, filePath });
-            continue;
-          }
-          const sourceInfo = { sourceTrackId: spotifyTrackId, sourceUrl: String(item.spotifyUrl || track?.spotifyUrl || (spotifyTrackId ? `https://open.spotify.com/track/${spotifyTrackId}` : "")).trim(), sourceProvider: String(item.provider || "youtube"), sourceProviderUrl: String(item.providerUrl || ""), sourceMatchScore: Number(item.matchScore || 0), matchedArtist: item.matchedArtist };
-          const song = await makeSongFromFileWithExactSpotifyTrack(filePath, track, pixelArtFiles, usedCovers, sourceInfo);
-          importedSongs.push(song);
-          importedSongIds.push(song.id);
-          spotifyImportMap.push({ spotifyTrackId, songId: song.id, filePath });
-        }
-        changedCount = insertSongs(importedSongs);
-        for (const song of importedSongs) {
-          try {
-            patchSong(song.id, { title: song.title, artist: song.artist, album: song.album, coverPath: song.coverPath, duration: song.duration, sourceType: song.sourceType, sourceTrackId: song.sourceTrackId, sourceUrl: song.sourceUrl, sourceProvider: song.sourceProvider, sourceProviderUrl: song.sourceProviderUrl, sourceMatchScore: song.sourceMatchScore });
-          } catch (error) { console.log("[localitfy spotify metadata patch error]", error?.message || error); }
-        }
-        clearFileInfoCache();
-      }
-      const importMapBySpotifyId = new Map(spotifyImportMap.map((item) => [String(item.spotifyTrackId || "").trim(), item]).filter(([id]) => Boolean(id)));
-      const importMapByFilePath = new Map(spotifyImportMap.map((item) => [filePathKey(String(item.filePath || "")), item]).filter(([filePath]) => Boolean(filePath)));
-      const finalDownloads = (result.downloads || []).map((item) => {
-        const imported = importMapBySpotifyId.get(String(item?.spotifyTrackId || "").trim()) || (item?.filePath ? importMapByFilePath.get(filePathKey(String(item.filePath))) : null) || null;
-        return { ...item, importedToLibrary: Boolean(imported), librarySongId: imported?.songId || item.librarySongId || "" };
-      });
-      const songs = listSongsShaped();
-      finalizeDownloadImport(event, finalDownloads, songs);
-      return { ...result, downloads: finalDownloads, changedCount, songs, autoAdd, downloadFolder, importedFilePaths: Array.from(new Set(importedFilePaths.filter(Boolean))), spotifyImportedSongIds: Array.from(new Set(importedSongIds.filter(Boolean))), spotifyImportMap, spotifySourceName: payload?.sourceName || options?.sourceName || "", spotifySourceType: payload?.sourceType || options?.sourceType || "" };
-    } catch (error) {
-      console.log("[localitfy spotify batch download error]", error?.message || error);
-      const songs = listSongsShaped();
-      const message = error?.message || "batch download failed";
-      const downloads = finalizeDownloadImport(event, downloaded?.downloads, songs, message);
-      return { downloadFolder: downloaded?.downloadFolder || getDownloadDirectory(options?.downloadFolder || options?.outputDir || options?.folder), downloads, changedCount: 0, songs, spotifyImportedSongIds: [], spotifyImportMap: [], importedFilePaths: [] };
-    }
-  };
-  ipcRouter.handle("spotify-download-batch", (event, payload) => runDownloadOperation(() => runSpotifyDownloadBatch(event, payload)));
-  ipcRouter.handle("spotdl-download-batch", (event, payload) => runDownloadOperation(() => runSpotifyDownloadBatch(event, payload)));
-  ipcRouter.handle("download:resume-job", (event, id) => runDownloadOperation(async () => {
-    const request = getDownloadRecoveryRequest(id);
-    if (request.source === "spotify") return runSpotifyDownloadBatch(event, {
-      tracks: [request.track], options: { ...request.options, downloadFolder: request.folder }
-    });
-    return runAudioDownload(event, { urls: [request.url], folder: request.folder, options: request.options });
-  }));
-
   ipcRouter.handle("localitfy:check-for-updates", async (_event, payload) => checkForUpdates(payload));
   ipcRouter.handle("localitfy:download-update", async () => downloadUpdate());
   ipcRouter.handle("localitfy:install-update", async () => installUpdate());
@@ -2569,13 +2413,24 @@ app.whenReady().then(async () => {
   ipcRouter.handle("window:close", async (event) => { BrowserWindow.fromWebContents(event.sender)?.close(); return true; });
 
   const startupCreateDelayMs = process.platform === "win32" && startupLaunchStatus?.wasOpenedAtLogin ? 1600 : 0;
-  setTimeout(() => { createWindow(); setupNativeWindowsMedia(); }, startupCreateDelayMs);
-  setTimeout(() => { checkForUpdates({ silent: true }).catch((e) => console.log("[localitfy updater startup error]", e?.message)); }, UPDATE_CHECK_STARTUP_DELAY_MS);
-  app.on("activate", () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
+  startupWindowTimer = setTimeout(() => {
+    startupWindowTimer = null;
+    if (!shutdownStarted) { createWindow(); setupNativeWindowsMedia(); }
+  }, startupCreateDelayMs);
+  startupUpdateTimer = setTimeout(() => {
+    startupUpdateTimer = null;
+    if (!shutdownStarted) checkForUpdates({ silent: true }).catch((e) => console.log("[localitfy updater startup error]", e?.message));
+  }, UPDATE_CHECK_STARTUP_DELAY_MS);
+  app.on("activate", () => { if (!shutdownStarted && BrowserWindow.getAllWindows().length === 0) createWindow(); });
 });
 
 app.on("before-quit", async () => {
+  if (shutdownStarted) return;
+  shutdownStarted = true;
   allowQuit = true;
+  clearTimeout(startupWindowTimer);
+  clearTimeout(startupUpdateTimer);
+  startupWindowTimer = startupUpdateTimer = null;
   discoverCacheLifecycle?.flush();
   remoteArtworkCache?.close();
   thumbnailRuntime.stop();

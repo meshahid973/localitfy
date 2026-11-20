@@ -49,6 +49,7 @@ export type PlaybackUrlResult = {
 export type PlaybackUrlCacheEntry = {
   url: string;
   checkedAt: number;
+  ttlMs?: number;
   fileExists: boolean;
   sizeBytes?: number;
   mtimeMs?: number;

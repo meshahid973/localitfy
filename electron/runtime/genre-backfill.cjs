@@ -25,13 +25,15 @@ function createGenreMetadataBackfill({
 
     let cursor = 0;
     let changedCount = 0;
-    const workers = Array.from({ length: Math.min(8, targets.length) }, async () => {
+    let failedCount = 0;
+    const workers = Array.from({ length: Math.min(4, targets.length) }, async () => {
       while (cursor < targets.length) {
         const index = cursor;
         cursor += 1;
         const song = targets[index];
         try {
           const metadata = await readLocalAudioMetadata(song.filePath, { readCover: false, readDuration: false });
+          if (!metadata?.ok || metadata.error) { failedCount++; if (index > 0 && index % 100 === 0) await yieldToMainLoop(); continue; }
           const genre = String(metadata?.genre || "").trim();
           if (genre) {
             // Tag edits or file replacement may have occurred during parsing.
@@ -42,6 +44,7 @@ function createGenreMetadataBackfill({
             }
           }
         } catch (error) {
+          failedCount++;
           logger.log("[localtify genre backfill item error]", song.filePath, error?.message || error);
         }
         if (index > 0 && index % 100 === 0) await yieldToMainLoop();
@@ -49,7 +52,9 @@ function createGenreMetadataBackfill({
     });
 
     await Promise.all(workers);
-    saveSettings({ genreMetadataBackfillVersion: 1 });
+    // A transient parse failure must not permanently mark all tags as migrated.
+    if (!failedCount) saveSettings({ genreMetadataBackfillVersion: 1 });
+    else backfillPromise = null;
     logger.log(`[localtify genre backfill] scanned ${targets.length}, tagged ${changedCount}`);
     return { scannedCount: targets.length, changedCount };
   }

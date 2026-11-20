@@ -62,9 +62,15 @@ test("single-song edits preserve untouched references and handle out-of-date ind
 
 test("download and Spotify refresh use final result snapshots before bootstrap fallback", () => {
   const app = fs.readFileSync(path.join(root, "src/App.tsx"), "utf8");
-  assert.match(app, /if \(!Array\.isArray\(result\.songs\) && \(successCount > 0 \|\| Number\(result\.changedCount \|\| 0\) > 0\) && window\.localitfy\?\.bootstrap\)/);
-  assert.match(app, /if \(!Array\.isArray\(result\.songs\) && \(successCount > 0 \|\| Number\(result\.changedCount \|\| 0\) > 0\) && bridge\?\.bootstrap\)/);
-  assert.match(app, /reconcileLibraryIndex\(songs, libraryIndexRef\.current/);
+  const downloads = fs.readFileSync(path.join(root, "src/features/downloads/useDownloadsRuntime.ts"), "utf8");
+  const snapshot = downloads.slice(downloads.indexOf("async function resolveLibrarySnapshot"), downloads.indexOf("async function clearFailedDownloads"));
+  assert.ok(snapshot.indexOf("if (Array.isArray(snapshot)) return") < snapshot.indexOf("await window.localitfy.bootstrap()"));
+  assert.match(snapshot, /if \(changed && window\.localitfy\?\.bootstrap\)/);
+  assert.match(snapshot, /return songsRef\.current;/);
+  assert.equal((downloads.match(/await resolveLibrarySnapshot\(result\.songs,/g)||[]).length,2);
+  assert.match(app, /useLibraryDerivedState\(/);
+  const controller = fs.readFileSync(path.join(root, "src/features/library/useLibraryController.ts"), "utf8");
+  assert.match(controller, /reconcileLibraryIndex\(songs, libraryIndexRef\.current/);
 });
 
 
@@ -124,9 +130,33 @@ test("same-order playback updates share positions and preserve old snapshots", (
   assert.equal(first.songsById.get("b"),b);
   assert.equal(next.songsById.get("b"),edited);
   assert.equal(next.searchEntries[0],first.searchEntries[0]);
-  assert.equal(next.searchEntries[1].tokens,first.searchEntries[1].tokens);
+  assert.equal(next.searchEntries[1].haystack,first.searchEntries[1].haystack);
   const shuffled=reconcileLibraryIndex([edited,a],next);
   assert.notEqual(shuffled.songIndexById,next.songIndexById);
   assert.equal(shuffled.songIndexById.get("b"),0);
   assert.equal(next.songIndexById.get("b"),1);
+});
+
+test("one-song updates preserve snapshots and avoid rescanning the unchanged library", () => {
+  const firstSongs = Array.from({ length: 5000 }, (_, i) => song("track-" + i));
+  const first = reconcileLibraryIndex(firstSongs);
+  const changed = patchLibrarySong(firstSongs, "track-4999", {playCount:4}, 4999);
+  const optimized = reconcileLibraryIndex(changed,first);
+  assert.equal(optimized.songsById.get("track-4999"),changed[4999]);
+  assert.equal(optimized.searchEntries[0],first.searchEntries[0]);
+  assert.equal(optimized.albumOccurrences,first.albumOccurrences);
+  assert.equal(optimized.artistOccurrences,first.artistOccurrences);
+  assert.equal(optimized.sourceSongs, changed);
+  assert.equal(first.songsById.get("track-4999").playCount,0);
+});
+
+test("single-track hint never survives a reorder or an intervening patch", () => {
+  const songs = [song("a"),song("b"),song("c")];
+  const first = reconcileLibraryIndex(songs);
+  const next = patchLibrarySong(songs,"b",{playCount:3},1);
+  const reorder = [next[2],next[0],next[1]];
+  const nextIndex = reconcileLibraryIndex(reorder,first);
+  assert.deepEqual([...nextIndex.songIndexById.keys()],["c","a","b"]);
+  assert.equal(nextIndex.searchEntries[2].song.playCount,3);
+  assert.equal(first.searchEntries[1].song.playCount,0);
 });

@@ -39,6 +39,8 @@ public class MediaPlaybackService extends Service {
     private MediaSessionCompat session;
     private String artworkPath = "";
     private Bitmap artwork;
+    private String metadataTitle, metadataArtist, metadataAlbum;
+    private long metadataDuration = Long.MIN_VALUE;
     private boolean foreground = false;
     private boolean noisyRegistered = false;
     private boolean shuffle = false;
@@ -103,22 +105,40 @@ public class MediaPlaybackService extends Service {
 
         String nextArtwork = intent.getStringExtra("artwork");
         if (nextArtwork == null) nextArtwork = "";
-        if (!nextArtwork.equals(artworkPath)) {
+        boolean artworkChanged = !nextArtwork.equals(artworkPath);
+        if (artworkChanged) {
             artworkPath = nextArtwork;
             artwork = null;
             if (!artworkPath.isEmpty() && new File(artworkPath).isFile()) {
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inSampleSize = 2;
-                artwork = BitmapFactory.decodeFile(artworkPath, options);
+                BitmapFactory.Options bounds = new BitmapFactory.Options();
+                bounds.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(artworkPath, bounds);
+                int largest = Math.max(bounds.outWidth, bounds.outHeight);
+                if (bounds.outWidth > 0 && bounds.outHeight > 0) {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inSampleSize = 1;
+                    while ((long) largest > 512L * options.inSampleSize) options.inSampleSize *= 2;
+                    artwork = BitmapFactory.decodeFile(artworkPath, options);
+                }
             }
         }
-        session.setMetadata(new MediaMetadataCompat.Builder()
-            .putString(MediaMetadataCompat.METADATA_KEY_TITLE, intent.getStringExtra("title"))
-            .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, intent.getStringExtra("artist"))
-            .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, intent.getStringExtra("album"))
-            .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration > 0 ? duration : -1)
-            .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, artwork)
-            .build());
+        String title = intent.getStringExtra("title"), artist = intent.getStringExtra("artist"), album = intent.getStringExtra("album");
+        long effectiveDuration = duration > 0 ? duration : -1;
+        if (artworkChanged || !java.util.Objects.equals(metadataTitle, title) ||
+            !java.util.Objects.equals(metadataArtist, artist) || !java.util.Objects.equals(metadataAlbum, album) ||
+            metadataDuration != effectiveDuration) {
+            session.setMetadata(new MediaMetadataCompat.Builder()
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist)
+                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
+                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, effectiveDuration)
+                .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, artwork)
+                .build());
+            metadataTitle = title;
+            metadataArtist = artist;
+            metadataAlbum = album;
+            metadataDuration = effectiveDuration;
+        }
         session.setPlaybackState(new PlaybackStateCompat.Builder()
             .setActions(PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PAUSE | PlaybackStateCompat.ACTION_PLAY_PAUSE
                 | PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
@@ -220,6 +240,7 @@ public class MediaPlaybackService extends Service {
         if (noisyRegistered) unregisterReceiver(noisy);
         session.setActive(false);
         session.release();
+        artwork = null;
         super.onDestroy();
     }
 

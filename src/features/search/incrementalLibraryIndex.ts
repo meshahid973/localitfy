@@ -11,7 +11,12 @@ export type LibraryIndex = {
   albumOccurrences: Map<string, number>;
   artistCount: number;
   albumCount: number;
+  sourceSongs: readonly Song[];
 };
+
+// One immutable patch tells reconciliation which position changed. Weak keys
+// avoid retaining entire previous libraries once React releases their arrays.
+const edits = new WeakMap<readonly Song[], {before: readonly Song[]; index: number}>();
 
 function artistKeys(song: Song): string[] {
   return [...new Set(splitArtistCredits(song.artist).map(name => name.toLocaleLowerCase()))];
@@ -34,11 +39,18 @@ function count(map: Map<string, number>, key: string, delta: number) {
  * normalization and facet updates run only on changed/added/removed songs.
  */
 export function reconcileLibraryIndex(songs: readonly Song[], previous?: LibraryIndex): LibraryIndex {
-  // The frequent playback/like edit keeps order and IDs stable. Reuse the
-  // previous position map and avoid per-song hash lookups and map insertion.
-  const stableOrder = previous && previous.searchEntries.length === songs.length &&
+  // A known single-song patch preserves the order and all other identities
+  // by construction. Fall back to the full validation for arbitrary arrays.
+  const edit = previous && edits.get(songs);
+  const editedIndex = edit && previous?.sourceSongs === edit.before &&
+    previous.searchEntries.length === songs.length &&
     previous.songIndexById.size === songs.length &&
-    songs.every((song, i) => previous.searchEntries[i].song.id === song.id);
+    previous.searchEntries[edit.index]?.song.id === songs[edit.index]?.id
+    ? edit.index : -1;
+  const stableOrder = previous && (editedIndex >= 0 ||
+    (previous.searchEntries.length === songs.length &&
+     previous.songIndexById.size === songs.length &&
+     songs.every((song, i) => previous.searchEntries[i].song.id === song.id)));
   let songsById = stableOrder ? previous.songsById : new Map<string, Song>();
   const songIndexById = stableOrder ? previous.songIndexById : new Map<string, number>();
   let searchEntries = stableOrder ? previous.searchEntries : new Array<SongSearchEntry>(songs.length);
@@ -55,7 +67,9 @@ export function reconcileLibraryIndex(songs: readonly Song[], previous?: Library
     return albumOccurrences;
   };
 
-  for (let index = 0; index < songs.length; index++) {
+  const workLength = editedIndex >= 0 ? 1 : songs.length;
+  for (let offset = 0; offset < workLength; offset++) {
+    const index = editedIndex >= 0 ? editedIndex : offset;
     const song = songs[index];
     const oldIndex = stableOrder ? index : previous?.songIndexById.get(song.id);
     const oldEntry = oldIndex === undefined ? undefined : previous?.searchEntries[oldIndex];
@@ -93,7 +107,8 @@ export function reconcileLibraryIndex(songs: readonly Song[], previous?: Library
   return {
     songsById, songIndexById, searchEntries,
     artistOccurrences, albumOccurrences,
-    artistCount: artistOccurrences.size, albumCount: albumOccurrences.size
+    artistCount: artistOccurrences.size, albumCount: albumOccurrences.size,
+    sourceSongs: songs
   };
 }
 
@@ -114,6 +129,7 @@ export function patchLibrarySong(
   if (keys.every(key => Object.prototype.hasOwnProperty.call(songs[index], key) && Object.is(songs[index][key], patch[key]))) return songs as Song[];
   const next = songs.slice();
   next[index] = { ...next[index], ...patch };
+  edits.set(next, {before:songs,index});
   return next;
 }
 
@@ -128,5 +144,6 @@ export function replaceLibrarySong(
     Object.prototype.hasOwnProperty.call(previous, key) && Object.is(previous[key], updated[key]))) return songs as Song[];
   const next = songs.slice();
   next[index] = updated;
+  edits.set(next, {before:songs,index});
   return next;
 }

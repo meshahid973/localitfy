@@ -28,10 +28,12 @@ export function useNativeMediaSession({
 }: NativeMediaSessionOptions) {
   const actionsRef = useRef({ onPlay, onPause, onStop, onPrevious, onNext, onSeek });
   actionsRef.current = { onPlay, onPause, onStop, onPrevious, onNext, onSeek };
+  const durationRef = useRef(duration);
+  durationRef.current = duration;
 
   useEffect(() => {
     if (!("mediaSession" in navigator)) return;
-    const seekLimit = (audio: HTMLAudioElement) => [duration, audio.duration].find(value => Number.isFinite(value) && value > 0) || 0;
+    const seekLimit = (audio: HTMLAudioElement) => [audio.duration, durationRef.current].find(value => Number.isFinite(value) && value > 0) || 0;
     const seekBy = (seconds: number) => {
       const audio = audioRef.current;
       if (!audio || !Number.isFinite(audio.currentTime)) return;
@@ -42,23 +44,6 @@ export function useNativeMediaSession({
     const setActionHandler = (action: MediaSessionAction, handler: MediaSessionActionHandler) => {
       try { navigator.mediaSession.setActionHandler(action, handler); registered.push(action); } catch { /* Unsupported actions must not disable the remaining controls. */ }
     };
-    try {
-      const mediaArtworkSrc = getRendererSafeImageUrl(song?.coverUrl);
-      const artwork = mediaArtworkSrc
-        ? ([{ src: mediaArtworkSrc }] as MediaImage[])
-        : [];
-      navigator.mediaSession.metadata = song
-        ? new MediaMetadata({
-          title: song.title || "Unknown song",
-          artist: prettyMeta(song.artist) || "Unknown artist",
-          album: song.album || "localtify",
-          artwork
-        })
-        : null;
-      navigator.mediaSession.playbackState = song ? (isPlaying ? "playing" : "paused") : "none";
-    } catch {
-      // Native metadata is optional and must never interrupt playback.
-    }
     const offset = (details: MediaSessionActionDetails) => Number.isFinite(details.seekOffset) && Number(details.seekOffset) > 0 ? Number(details.seekOffset) : 10;
     setActionHandler("play", () => actionsRef.current.onPlay());
     setActionHandler("pause", () => actionsRef.current.onPause());
@@ -77,7 +62,32 @@ export function useNativeMediaSession({
         try { navigator.mediaSession.setActionHandler(action, null); } catch { /* Optional action. */ }
       }
     };
-  }, [song?.id, song?.coverUrl, song?.title, song?.artist, song?.album, isPlaying, duration]);
+  }, [audioRef]);
+
+  useEffect(() => {
+    if (!("mediaSession" in navigator)) return;
+    try {
+      const mediaArtworkSrc = getRendererSafeImageUrl(song?.coverUrl);
+      const artwork = mediaArtworkSrc
+        ? ([{ src: mediaArtworkSrc }] as MediaImage[])
+        : [];
+      navigator.mediaSession.metadata = song
+        ? new MediaMetadata({
+          title: song.title || "Unknown song",
+          artist: prettyMeta(song.artist) || "Unknown artist",
+          album: song.album || "localtify",
+          artwork
+        })
+        : null;
+    } catch {
+      // Native metadata is optional and must never interrupt playback.
+    }
+  }, [song?.id, song?.coverUrl, song?.title, song?.artist, song?.album]);
+
+  useEffect(() => {
+    if (!("mediaSession" in navigator)) return;
+    try { navigator.mediaSession.playbackState = song ? (isPlaying ? "playing" : "paused") : "none"; } catch {}
+  }, [song?.id, isPlaying]);
 
   useEffect(() => {
     if (!("mediaSession" in navigator) || !song) return;
@@ -93,5 +103,5 @@ export function useNativeMediaSession({
     } catch {
       // Windows media progress is optional.
     }
-  }, [song?.id, duration, playbackSpeed, isPlaying]);
+  }, [song?.id, duration, playbackSpeed, isPlaying, currentTime]);
 }

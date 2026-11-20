@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { MutableRefObject } from "react";
+import { useStableCallback } from "../../shared/hooks/useStableCallback";
 import { ListeningHistory } from "./listeningHistory";
 import { AudioEffectRuntime } from "./audio/audioEffectRuntime";
 import { PlaybackTransitionCoordinator } from "./engine/playbackTransitionCoordinator";
@@ -42,11 +44,11 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
   const crossfadeMainPauseGuardRef = useRef(false);
   const crossfadeLastStartAtRef = useRef(0);
   const crossfadeHandoffClearTimerRef = useRef<number | null>(null);
+  const crossfadeRecoveryTimerRef = useRef<number | null>(null);
   const crossfadeHandoffRef = useRef<{ songId: string; url: string; time: number; volume: number } | null>(null);
   const fadeIntervalRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const progressLoopTimeoutRef = useRef<number | null>(null);
-  const playerResizeFrameRef = useRef<number | null>(null);
   const pendingPlayRef = useRef(false);
   const countPlayRef = useRef(false);
   const playCountSongIdRef = useRef("");
@@ -95,7 +97,13 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
     const saved = readLocalJson<RepeatMode>(REPEAT_MODE_STORAGE_KEY, "all");
     return saved === "all" || saved === "one" || saved === "off" ? saved : "all";
   });
-  const [currentTime, setCurrentTime] = useState(0);
+  const [currentTime, setCurrentTimeSnapshot] = useState(0);
+  // Explicit seeks, selection resets and pauses update the live clock immediately;
+  // unrelated renders must not copy an older React snapshot back into that clock.
+  const setCurrentTime = useCallback((time: number) => {
+    timeRef.current = time;
+    setCurrentTimeSnapshot(time);
+  }, []);
   const [currentDuration, setCurrentDuration] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
   const [seekDraftPercent, setSeekDraftPercent] = useState(0);
@@ -169,9 +177,9 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
   return {
     listeningHistoryRef, audioRef, playerEngineRef, playerControllerRef, playbackTransitionRef,
     crossfadeIntervalRef, crossfadeAutoStartedRef, crossfadeAutoTargetRef, crossfadeMainPauseGuardRef,
-    crossfadeLastStartAtRef, crossfadeHandoffClearTimerRef, crossfadeHandoffRef,
+    crossfadeLastStartAtRef, crossfadeHandoffClearTimerRef, crossfadeRecoveryTimerRef, crossfadeHandoffRef,
     fadeIntervalRef, animationFrameRef, progressLoopTimeoutRef,
-    playerResizeFrameRef, pendingPlayRef, countPlayRef, playCountSongIdRef, playCountListenedRef,
+    pendingPlayRef, countPlayRef, playCountSongIdRef, playCountListenedRef,
     playCountLastTimeRef, sleepTimerRef, positionSaveRef, nextAudioRef, playbackUrlCacheRef,
     playbackUrlPendingRef, lastQueueHistoryRef, songRef, timeRef, durationRef, playingRef,
     volumeRef, effectiveVolumeRef, lastNonZeroVolumeRef, beatFrameRef, beatFrameTimerRef,
@@ -189,4 +197,61 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
     playQueue, setPlayQueue, queueHistory, setQueueHistory, repeatPlaylist, setRepeatPlaylist,
     queueDropHot, setQueueDropHot, queueDropHotRef
   };
+}
+
+type ProgressLoopOptions = {
+  enabled: boolean;
+  songId: string;
+  animationFrameRef: MutableRefObject<number | null>;
+  progressLoopTimeoutRef: MutableRefObject<number | null>;
+  isBackgrounded: () => boolean;
+  stopProgressLoop: () => void;
+  onInactive: () => void;
+  onVisible: () => void;
+  onTick: (clock: number) => number;
+};
+
+/** One timer/frame owner per playback session. Metadata/seek/UI changes update
+ * callbacks, rather than continually tearing down and restarting the loop. */
+export function usePlaybackProgressLoop(options: ProgressLoopOptions) {
+  const { enabled, songId, animationFrameRef, progressLoopTimeoutRef } = options;
+  const isBackgrounded = useStableCallback(options.isBackgrounded);
+  const stopProgressLoop = useStableCallback(options.stopProgressLoop);
+  const onInactive = useStableCallback(options.onInactive);
+  const onVisible = useStableCallback(options.onVisible);
+  const onTick = useStableCallback(options.onTick);
+  useEffect(() => {
+    if (!enabled || !songId) {
+      stopProgressLoop();
+      onInactive();
+      return;
+    }
+    let active = true;
+    const scheduleProgressTick = (delay: number) => {
+      if (!active) return;
+      if (progressLoopTimeoutRef.current !== null) window.clearTimeout(progressLoopTimeoutRef.current);
+      progressLoopTimeoutRef.current = window.setTimeout(() => {
+        progressLoopTimeoutRef.current = null;
+        if (!active) return;
+        if (document.hidden || isBackgrounded()) tick(performance.now());
+        else animationFrameRef.current = window.requestAnimationFrame(tick);
+      }, delay);
+    };
+    const tick = (clock: number) => {
+      animationFrameRef.current = null;
+      if (active) scheduleProgressTick(onTick(clock));
+    };
+    const handleProgressVisibility = () => {
+      stopProgressLoop();
+      if (!document.hidden) onVisible();
+      scheduleProgressTick(document.hidden ? 1800 : 0);
+    };
+    document.addEventListener("visibilitychange", handleProgressVisibility);
+    scheduleProgressTick(140);
+    return () => {
+      active = false;
+      document.removeEventListener("visibilitychange", handleProgressVisibility);
+      stopProgressLoop();
+    };
+  }, [enabled, songId, animationFrameRef, progressLoopTimeoutRef, isBackgrounded, stopProgressLoop, onInactive, onVisible, onTick]);
 }

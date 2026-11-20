@@ -29,3 +29,12 @@ test("Linux manual update path uses the canonical event helper", () => {
   assert.doesNotMatch(source, /sendLinuxManualUpdateOnlyEvent/);
   assert.match(source, /linux-manual-only-update-available/);
 });
+
+
+test("updater and packaged publishing use the canonical repository", () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+  const expected = "meshahid973/localtify";
+  assert.equal(pkg.build.publish[0].owner + "/" + pkg.build.publish[0].repo, expected);
+  assert.equal(pkg.repository.url, "git+https://github.com/" + expected + ".git");
+  assert.equal(updater.LOCALTIFY_LINUX_RELEASES_URL, "https://github.com/" + expected + "/releases/latest");
+});

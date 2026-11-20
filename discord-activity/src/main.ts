@@ -4,8 +4,8 @@ const CLIENT_ID = import.meta.env.VITE_DISCORD_CLIENT_ID || "1499896817138012271
 const APP_VERSION = "0.5.1";
 
 const LOCALITFY_WEBSITE = "https://localtify.com";
-const LOCALITFY_GITHUB = "https://github.com/meshahid973/localitfy";
-const LOCALITFY_RELEASES = "https://github.com/meshahid973/localitfy/releases";
+const LOCALITFY_GITHUB = "https://github.com/meshahid973/localtify";
+const LOCALITFY_RELEASES = "https://github.com/meshahid973/localtify/releases";
 
 type StatusTone = "idle" | "good" | "warn" | "bad";
 type DiscordAuth = { user?: { username?: string; global_name?: string }; scopes?: string[] };

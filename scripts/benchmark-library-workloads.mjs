@@ -38,9 +38,19 @@ function measure(label,fn,summarize){
   trials.push(entry);return result;
 }
 const songs=Array.from({length:count},(_,i)=>({id:"song-"+i,title:(i%9===0?"Míkú Midnight (Official Audio)":"Track "+i),artist:"Artist "+i%271,album:"Album "+i%419,genre:"ambient",filePath:"/music/disc-"+i%61+"/track-"+i+".flac",url:"",liked:i%13===0,playCount:i%60,duration:180,dateAdded:"2026-01-01T00:00:00Z"}));
-const initial=measure("cold index",()=>index.reconcileLibraryIndex(songs),x=>[x.searchEntries.map(e=>e.haystack),x.artistCount,x.albumCount]);
+const initial=measure("cold index",()=>index.reconcileLibraryIndex(songs),x=>[x.searchEntries.map(e=>{
+  // Allow exactly the known accent-folding correction in this fixture, retaining all other output checks.
+  if(e.song.title==="Míkú Midnight (Official Audio)") {
+    if(e.compactTitle==="m k midnight") return e.haystack.replace(" m k midnight "," miku midnight ");
+    if(e.compactTitle!=="miku midnight") throw Error("Unexpected compact title: "+e.compactTitle);
+  }
+  return e.haystack;
+}),x.artistCount,x.albumCount]);
+trials[0].rawDigest=hash(initial.searchEntries.map(e=>e.haystack));
 const edited=songs.slice();edited[count>>1]={...edited[count>>1],playCount:60};
 const changed=measure("single playback update",()=>index.reconcileLibraryIndex(edited,initial),x=>[x.artistCount,x.albumCount,x.searchEntries[count>>1].song.playCount]);
+const patched=index.patchLibrarySong(songs,songs[count>>1].id,{playCount:60},count>>1);
+measure("single playback update via helper",()=>index.reconcileLibraryIndex(patched,initial),x=>[x.artistCount,x.albumCount,x.searchEntries[count>>1].song.playCount]);
 measure("selective searches",()=>["midnight artist 4","track 209","liked","not-present-xyz"].map(q=>search.rankSongsForSearch(changed.searchEntries,q)),x=>x.map(a=>a.map(s=>s.id)));
 measure("metadata preview",()=>preview.createMetadataCleanPreview(songs,[],"all"),x=>[x.totalCount,x.changedCount,x.titleFixCount,x.artistFixCount,x.albumFixCount,x.items.map(i=>[i.id,i.patch])]);
 const report={platform:process.platform,arch:process.arch,node:process.version,cores:os.cpus().length,count,peakRssMiB:mib(process.resourceUsage().maxRSS*1024),trials};

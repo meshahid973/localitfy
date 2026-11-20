@@ -3,31 +3,35 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { createHash, randomUUID } = require("node:crypto");
 const { safeProviderCover, imageExtension } = require("./remote-cover.cjs");
-
 const imageName = /^[a-f0-9]{64}\.(?:jpg|png|webp|gif)$/;
 const hash = bytes => createHash("sha256").update(bytes).digest("hex");
 const MAX_IMAGE = 2 * 1024 * 1024;
 const MAX_TTL = 7 * 86400000;
+const MAX_STALE = 24 * 3600000;
 function eligible(url) {
-  // Display-only providers and arbitrary URLs must never enter this cache.
   return typeof url === "string" && safeProviderCover(url) === url && url.startsWith("https://");
 }
-function lifetime(headers) {
-  const cc = headers.get("cache-control") || "";
-  if (/(?:^|,)\s*(?:no-store|no-cache|private)(?:\s*[=,]|\s*$)/i.test(cc)) return 0;
+function policy(headers, prior) {
+  const cc = headers.get("cache-control");
   const vary = headers.get("vary");
-  if (vary && vary.trim()) return 0;
-  const seconds = Number(cc.match(/(?:^|,)\s*max-age\s*=\s*(\d+)/i)?.[1] || 0);
-  const age = Math.max(0, Number(headers.get("age")) || 0);
-  return Math.min(MAX_TTL, Math.max(0, (seconds - age) * 1000));
+  if (vary?.trim() || /(?:^|,)\s*(?:no-store|no-cache|private)(?:\s*[=,]|\s*$)/i.test(cc || "")) return { ttl:0, stale:0 };
+  const seconds = Number((cc || "").match(/(?:^|,)\s*max-age\s*=\s*(\d+)/i)?.[1] || 0);
+  const age = Math.max(0, Number(headers.get("age")) || 0) * 1000;
+  const ttl = Math.max(0, Math.min(MAX_TTL, cc === null && prior ? (prior.ttl || 0) : seconds * 1000) - age);
+  const swr = Number((cc || "").match(/(?:^|,)\s*stale-while-revalidate\s*=\s*(\d+)/i)?.[1] || 0);
+  const stale = /(?:^|,)\s*(?:must-revalidate|proxy-revalidate)\s*(?:,|$)/i.test(cc || "") ? 0 :
+    Math.min(MAX_STALE, cc === null && prior ? (prior.stale || 0) : swr * 1000);
+  return {ttl, stale};
 }
+function lifetime(headers) { return policy(headers).ttl; }
+function headerValue(value) { return typeof value === "string" && value.length <= 512 && !/[\r\n]/.test(value) ? value : ""; }
 
-// Dedicated disposable cache. Never points to library files or user-assigned covers.
 function createRemoteArtworkCache({ dir, maxBytes = 128 * 1024 * 1024, maxEntries = 2048, fetchImpl = globalThis.fetch, now = Date.now }) {
   if (!path.isAbsolute(dir)) throw Error("Artwork cache requires an absolute directory");
   maxBytes = Math.max(1, Math.min(512 * 1024 * 1024, Number(maxBytes) || 128 * 1024 * 1024));
   maxEntries = Math.max(1, Math.min(4096, Number(maxEntries) || 2048));
-  const index = path.join(dir, "index.json"), rows = new Map(), pending = new Map();
+  const index = path.join(dir, "index.json"), rows = new Map(), pending = new Map(), verified = new Map(), retryAt = new Map();
+  const shutdown = new AbortController();
   let ready, serial = Promise.resolve(), closed = false;
   const withLock = work => {
     const result = serial.then(work);
@@ -41,106 +45,178 @@ function createRemoteArtworkCache({ dir, maxBytes = 128 * 1024 * 1024, maxEntrie
       await fs.rename(temporary, index);
     } finally { await fs.rm(temporary, { force: true }).catch(() => {}); }
   }
-  async function prune() {
-    const clock = now();
-    for (const [url, row] of rows) if (row.expiresAt <= clock) rows.delete(url);
-    // Multiple URLs can reference the same content-addressed image.
-    const totals = () => {
-      const files = new Map([...rows.values()].map(row => [row.file, row.bytes]));
-      return [...files.values()].reduce((sum, bytes) => sum + bytes, 0);
-    };
-    while (rows.size > maxEntries || totals() > maxBytes) rows.delete(rows.keys().next().value);
-    await save();
-    const used = new Set([...rows.values()].map(row => row.file));
-    for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
-      if (!entry.isFile() || used.has(entry.name)) continue;
-      if (imageName.test(entry.name) || /^(?:index\.json|[a-f0-9]{64}\.(?:jpg|png|webp|gif))\.[a-f0-9-]{36}\.part$/.test(entry.name))
-        await fs.rm(path.join(dir, entry.name), { force: true }).catch(() => {});
+  // Retain validators briefly after expiry without ever displaying stale bytes
+  // outside the provider-authorized stale-while-revalidate window.
+  const retainUntil = row => Math.max(row.staleUntil, (row.etag || row.lastModified) ? row.expiresAt + MAX_STALE : row.expiresAt);
+  async function removeFile(name) {
+    if (!imageName.test(name)) return;
+    verified.delete(name);
+    await fs.rm(path.join(dir,name),{force:true}).catch(() => {});
+  }
+  async function prune(orphaned = [], startup = false) {
+    const refs = new Map();
+    let bytes = 0;
+    for (const row of rows.values()) {
+      const ref = refs.get(row.file);
+      if (ref) ref.count++;
+      else { refs.set(row.file,{count:1,bytes:row.bytes}); bytes += row.bytes; }
     }
+    function drop(url, row) {
+      rows.delete(url);
+      retryAt.delete(url);
+      const ref = refs.get(row.file);
+      if (ref && --ref.count === 0) { refs.delete(row.file); bytes -= ref.bytes; orphaned.push(row.file); }
+    }
+    for (const [url,row] of rows) if (retainUntil(row) <= now()) drop(url,row);
+    while (rows.size > maxEntries || bytes > maxBytes) {
+      const [url,row] = rows.entries().next().value;
+      drop(url,row);
+    }
+    await save();
+    if (startup) {
+      for (const entry of await fs.readdir(dir,{withFileTypes:true})) {
+        if (!entry.isFile()) continue;
+        if (imageName.test(entry.name)) orphaned.push(entry.name);
+        else if (/^(?:index\.json|[a-f0-9]{64}\.(?:jpg|png|webp|gif))\.[a-f0-9-]{36}\.part$/.test(entry.name)) await fs.rm(path.join(dir,entry.name),{force:true}).catch(()=>{});
+      }
+    }
+    for (const name of new Set(orphaned)) if (!refs.has(name)) await removeFile(name);
   }
   function init() {
     if (!ready) ready = (async () => {
-      await fs.mkdir(dir, { recursive: true });
+      await fs.mkdir(dir,{recursive:true});
       try {
         if ((await fs.stat(index)).size > 12 * 1024 * 1024) throw Error("Oversized index");
-        const parsed = JSON.parse(await fs.readFile(index, "utf8"));
-        for (const [url, row] of Array.isArray(parsed) ? parsed.slice(-4096) : []) {
-          if (eligible(url) && imageName.test(row?.file || "") && Number.isInteger(row.bytes) && row.bytes > 0 &&
-              row.bytes <= MAX_IMAGE && Number.isFinite(row.expiresAt) && row.expiresAt > now()) rows.set(url, row);
+        const parsed = JSON.parse(await fs.readFile(index,"utf8"));
+        for (const item of Array.isArray(parsed) ? parsed.slice(-4096) : []) {
+          if (!Array.isArray(item)) continue;
+          const [url,row] = item;
+          if (!eligible(url) || !imageName.test(row?.file || "") || !Number.isInteger(row.bytes) || row.bytes <= 0 ||
+              row.bytes > MAX_IMAGE || !Number.isFinite(row.expiresAt)) continue;
+          const staleUntil = Math.min(row.expiresAt + MAX_STALE, Number.isFinite(row.staleUntil) ? row.staleUntil : row.expiresAt);
+          if (retainUntil({...row,staleUntil}) <= now()) continue;
+          rows.set(url,{file:row.file,bytes:row.bytes,expiresAt:row.expiresAt,staleUntil,
+            ttl:Math.min(MAX_TTL,Math.max(0,Number(row.ttl)||0)),stale:Math.min(MAX_STALE,Math.max(0,Number(row.stale)||0)),
+            etag:headerValue(row.etag),lastModified:headerValue(row.lastModified)});
         }
       } catch { rows.clear(); }
-      await prune();
+      await prune([],true);
     })();
     return ready;
   }
+  async function validateFile(row) {
+    const file = path.join(dir,row.file);
+    try {
+      const stat = await fs.lstat(file,{bigint:true});
+      if (!stat.isFile() || stat.size !== BigInt(row.bytes)) return "";
+      const stamp = [stat.ino,stat.size,stat.mtimeNs,stat.ctimeNs].join(":");
+      if (verified.get(row.file) !== stamp) {
+        if (hash(await fs.readFile(file)) !== row.file.split(".")[0]) return "";
+        verified.set(row.file,stamp);
+      }
+      return file;
+    } catch { return ""; }
+  }
   async function cached(url) {
     const row = rows.get(url);
-    if (!row) return "";
-    const file = path.join(dir, row.file);
-    try {
-      if (row.expiresAt > now() && (await fs.stat(file)).size === row.bytes) {
-        const bytes = await fs.readFile(file);
-        if (hash(bytes) === row.file.split(".")[0]) {
-          rows.delete(url); rows.set(url, row);
-          return file;
-        }
-      }
-    } catch {}
-    rows.delete(url);
-    return "";
+    if (!row) return null;
+    const file = await validateFile(row);
+    if (!file) { rows.delete(url); verified.delete(row.file); return null; }
+    rows.delete(url); rows.set(url,row);
+    return { row, file };
   }
-  async function fetchImage(url) {
-    const response = await fetchImpl(url, {
-      redirect: "error", credentials: "omit", signal: AbortSignal.timeout(4500),
-      headers: { Accept: "image/png,image/jpeg,image/webp,image/gif" }
+  async function fetchImage(url, prior) {
+    const headers = {Accept:"image/png,image/jpeg,image/webp,image/gif"};
+    if (prior?.etag) headers["If-None-Match"] = prior.etag;
+    if (prior?.lastModified) headers["If-Modified-Since"] = prior.lastModified;
+    const response = await fetchImpl(url,{
+      redirect:"error",credentials:"omit",signal:AbortSignal.any([shutdown.signal,AbortSignal.timeout(prior ? 4500 : 1600)]),headers
     });
-    const ttl = lifetime(response.headers);
+    const {ttl,stale} = policy(response.headers, response.status === 304 ? prior : undefined);
+    if (response.status === 304 && prior) {
+      return withLock(async () => {
+        if (closed) return "";
+        if (ttl <= 0) { rows.delete(url); await prune([prior.file]); return ""; }
+        const file = await validateFile(prior);
+        if (!file) { rows.delete(url); await prune([prior.file]); return ""; }
+        rows.delete(url);
+        rows.set(url,{...prior,ttl,stale,expiresAt:now()+ttl,staleUntil:now()+ttl+stale,etag:headerValue(response.headers.get("etag")) || prior.etag,lastModified:headerValue(response.headers.get("last-modified")) || prior.lastModified});
+        await prune(); return file;
+      });
+    }
     const declared = Number(response.headers.get("content-length") || 0);
     if (!response.ok || ttl <= 0 || declared > MAX_IMAGE || !response.body) {
       await response.body?.cancel().catch(() => {});
+      if (response.ok && ttl <= 0 && prior) await withLock(async()=>{ rows.delete(url); await prune([prior.file]); });
       return "";
     }
     const reader = response.body.getReader(), chunks = [];
     let total = 0;
     try {
       while (true) {
-        const { value, done } = await reader.read();
+        const {value,done} = await reader.read();
         if (done) break;
         total += value.byteLength;
         if (total > MAX_IMAGE || total > maxBytes) { await reader.cancel(); return ""; }
         chunks.push(Buffer.from(value));
       }
     } finally { reader.releaseLock(); }
-    const bytes = Buffer.concat(chunks), ext = imageExtension(bytes, response.headers.get("content-type"));
+    const bytes = Buffer.concat(chunks), ext = imageExtension(bytes,response.headers.get("content-type"));
     if (!ext || closed) return "";
     return withLock(async () => {
       if (closed) return "";
-      const name = hash(bytes) + ext, file = path.join(dir, name);
-      const temporary = file + "." + randomUUID() + ".part";
+      const name = hash(bytes)+ext, file = path.join(dir,name), temporary = file+"."+randomUUID()+".part";
       try {
-        // Replace a damaged prior copy; identical content shares one file.
-        let valid = false;
-        try { valid = (await fs.stat(file)).size === bytes.length && hash(await fs.readFile(file)) === hash(bytes); } catch {}
-        if (!valid) {
-          await fs.writeFile(temporary, bytes, { flag: "wx", mode: 0o600 });
-          await fs.rename(temporary, file);
+        if (!await validateFile({file:name,bytes:bytes.length})) {
+          await fs.writeFile(temporary,bytes,{flag:"wx",mode:0o600});
+          await fs.rename(temporary,file);
+          verified.delete(name);
         }
+        const replaced = rows.get(url);
         rows.delete(url);
-        rows.set(url, { file: name, bytes: bytes.length, expiresAt: now() + ttl });
-        await prune();
+        rows.set(url,{file:name,bytes:bytes.length,ttl,stale,expiresAt:now()+ttl,staleUntil:now()+ttl+stale,
+          etag:headerValue(response.headers.get("etag")),lastModified:headerValue(response.headers.get("last-modified"))});
+        await prune(replaced ? [replaced.file] : []);
         return rows.has(url) ? file : "";
-      } finally { await fs.rm(temporary, { force: true }).catch(() => {}); }
+      } finally { await fs.rm(temporary,{force:true}).catch(()=>{}); }
     });
   }
-  function resolve(url) {
-    if (closed || !eligible(url)) return Promise.resolve("");
+  function refresh(url,prior) {
+    if (closed) return Promise.resolve("");
     if (pending.has(url)) return pending.get(url);
-    if (pending.size >= 4) return Promise.resolve("");
-    const task = init().then(() => withLock(() => cached(url))).then(file => file || fetchImage(url))
-      .catch(() => "").finally(() => pending.delete(url));
-    pending.set(url, task);
+    if (pending.size >= 4 || (retryAt.get(url)||0) > now()) return Promise.resolve("");
+    const task = fetchImage(url,prior).catch(()=> "").then(file=>{
+      if (file) retryAt.delete(url);
+      else {
+        retryAt.set(url,now()+30_000);
+        while(retryAt.size>512) retryAt.delete(retryAt.keys().next().value);
+      }
+      return file;
+    }).finally(()=>pending.delete(url));
+    pending.set(url,task);
     return task;
   }
-  return { resolve, close() { closed = true; }, get pendingCount() { return pending.size; } };
+  async function resolve(url) {
+    if (closed || !eligible(url)) return "";
+    try {
+      await init();
+      const hit = await withLock(()=>cached(url));
+      if (closed) return "";
+      if (hit && hit.row.expiresAt > now()) return hit.file;
+      if (hit && hit.row.staleUntil > now()) { void refresh(url,hit.row); return hit.file; }
+      return await refresh(url,hit?.row);
+    } catch { return ""; }
+  }
+  return {resolve, remainingTtl(url){
+    const row = rows.get(url);
+    if (!row || closed) return 0;
+    const timestamp = now();
+    if (row.expiresAt > timestamp) return row.expiresAt - timestamp;
+    // Stale-while-revalidate grants a brief *display* grace period, not a
+    // fresh renderer cache lease. Recheck promptly for the refreshed image.
+    if (row.staleUntil <= timestamp) return 0;
+    const nextRetry = Math.max(timestamp + 1000, retryAt.get(url) || 0);
+    return Math.min(row.staleUntil - timestamp, nextRetry - timestamp);
+  }, close(){closed=true;shutdown.abort();},get pendingCount(){return pending.size;}};
 }
-module.exports = { createRemoteArtworkCache, lifetime, eligible };
+module.exports = {createRemoteArtworkCache,lifetime,eligible};

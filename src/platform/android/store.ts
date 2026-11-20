@@ -8,8 +8,13 @@ function open() {
   opening ??= new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, 1);
     request.onupgradeneeded = () => request.result.createObjectStore(STORE);
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      const db = request.result;
+      db.onversionchange = () => { db.close(); opening = null; };
+      db.onclose = () => { opening = null; };
+      resolve(db);
+    };
+    request.onerror = () => { opening = null; reject(request.error); };
   });
   return opening;
 }

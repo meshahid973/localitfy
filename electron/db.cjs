@@ -157,7 +157,7 @@ function setStoredSchemaVersion(database, version = SCHEMA_VERSION) {
     .prepare(`
       INSERT INTO schema_meta (key, value)
       VALUES ('schemaVersion', ?)
-      ON CONFLICT(key) DO UPDATE SET value = excluded.value
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value WHERE schema_meta.value IS NOT excluded.value
     `)
     .run(String(version));
 
@@ -178,6 +178,7 @@ function createSongsIndexes(database) {
     CREATE UNIQUE INDEX IF NOT EXISTS idx_songs_filePath ON songs(filePath);
     CREATE INDEX IF NOT EXISTS idx_songs_title ON songs(title);
     CREATE INDEX IF NOT EXISTS idx_songs_lastPlayed ON songs(lastPlayed);
+    CREATE INDEX IF NOT EXISTS idx_songs_dateAdded ON songs(dateAdded DESC);
     CREATE INDEX IF NOT EXISTS idx_songs_sourceType ON songs(sourceType);
     CREATE INDEX IF NOT EXISTS idx_songs_sourceTrackId ON songs(sourceTrackId);
     CREATE INDEX IF NOT EXISTS idx_songs_coverSource ON songs(coverSource);
@@ -230,9 +231,6 @@ function createPlaylistsTables(database) {
       PRIMARY KEY (playlistId, songId)
     );
 
-    CREATE INDEX IF NOT EXISTS idx_playlists_sortOrder ON playlists(sortOrder);
-    CREATE INDEX IF NOT EXISTS idx_playlist_songs_playlistId ON playlist_songs(playlistId, position);
-    CREATE INDEX IF NOT EXISTS idx_playlist_songs_songId ON playlist_songs(songId);
   `);
 }
 
@@ -604,6 +602,7 @@ function migrateSongsTable(database) {
     CREATE UNIQUE INDEX IF NOT EXISTS idx_songs_filePath ON songs(filePath);
     CREATE INDEX IF NOT EXISTS idx_songs_title ON songs(title);
     CREATE INDEX IF NOT EXISTS idx_songs_lastPlayed ON songs(lastPlayed);
+    CREATE INDEX IF NOT EXISTS idx_songs_dateAdded ON songs(dateAdded DESC);
     CREATE INDEX IF NOT EXISTS idx_songs_sourceType ON songs(sourceType);
     CREATE INDEX IF NOT EXISTS idx_songs_sourceTrackId ON songs(sourceTrackId);
     CREATE INDEX IF NOT EXISTS idx_songs_coverSource ON songs(coverSource);
@@ -639,7 +638,8 @@ function migratePlaylistsTables(database) {
 
   database.exec(`
     CREATE INDEX IF NOT EXISTS idx_playlists_sortOrder ON playlists(sortOrder);
-    CREATE INDEX IF NOT EXISTS idx_playlist_songs_playlistId ON playlist_songs(playlistId, position);
+    CREATE INDEX IF NOT EXISTS idx_playlist_songs_order_cover ON playlist_songs(playlistId, position, addedAt, songId);
+    DROP INDEX IF EXISTS idx_playlist_songs_playlistId;
     CREATE INDEX IF NOT EXISTS idx_playlist_songs_songId ON playlist_songs(songId);
   `);
 
@@ -733,13 +733,31 @@ function safeAll(database, sql, params = []) {
   }
 }
 
+// Statements belong to a database connection and cannot survive a repair/reopen.
+const songReadStatements = new WeakMap();
+function songReads(database) {
+  let statements = songReadStatements.get(database);
+  if (!statements) {
+    statements = {
+      all: database.prepare("SELECT * FROM songs ORDER BY dateAdded DESC"),
+      byId: database.prepare("SELECT * FROM songs WHERE id = ?")
+    };
+    songReadStatements.set(database, statements);
+  }
+  return statements;
+}
+
 function getSongs() {
   const database = ensureDb();
   const profiling = process.env.LOCALTIFY_PROFILE_DB === "1";
   const started = profiling ? performance.now() : 0;
-  const songs = safeAll(database, "SELECT * FROM songs ORDER BY dateAdded DESC")
-    .map(rowToSong)
-    .filter(Boolean);
+  let rows;
+  try { rows = songReads(database).all.all(); }
+  catch (error) {
+    lastMigrationReport.errors.push(`query failed: ${error?.message || error}`);
+    throw error;
+  }
+  const songs = rows.map(rowToSong).filter(Boolean);
   if (profiling) {
     console.info("[localtify profile] db:getSongs", (performance.now() - started).toFixed(2) + "ms", songs.length + " songs");
   }
@@ -751,7 +769,7 @@ function getSong(id) {
   if (!id) return null;
 
   try {
-    const row = database.prepare("SELECT * FROM songs WHERE id = ?").get(id);
+    const row = songReads(database).byId.get(id);
     return rowToSong(row);
   } catch {
     return null;
@@ -874,6 +892,23 @@ function relinkSongPaths(items) {
   })(updates);
 }
 
+// Patch statements are cached by canonical field order, bounded per connection.
+const songPatchStatements = new WeakMap();
+function songPatchStatement(database, keys) {
+  let cache = songPatchStatements.get(database);
+  if (!cache) { cache = new Map(); songPatchStatements.set(database, cache); }
+  const signature = keys.join(",");
+  let statement = cache.get(signature);
+  if (!statement) {
+    const sets = keys.map(key => key + " = ?").join(", ");
+    const differs = keys.map(key => key + " IS NOT ?").join(" OR ");
+    statement = database.prepare("UPDATE songs SET " + sets + " WHERE id = ? AND (" + differs + ")");
+    if (cache.size >= 64) cache.delete(cache.keys().next().value);
+    cache.set(signature, statement);
+  }
+  return statement;
+}
+
 function patchSong(id, patch) {
   const database = ensureDb();
 
@@ -905,14 +940,12 @@ function patchSong(id, patch) {
     "sourceMatchScore"
   ];
 
-  const entries = Object.entries(patch).filter(([key]) => allowed.includes(key));
+  const entries = allowed.filter(key => Object.prototype.propertyIsEnumerable.call(patch, key)).map(key => [key, patch[key]]);
   if (!entries.length) return getSong(id);
 
-  const sets = [];
   const values = [];
 
   for (const [key, value] of entries) {
-    sets.push(`${key} = ?`);
 
     if (key === "liked") values.push(asBoolInt(value));
     else if (key === "playCount") values.push(Math.max(0, Math.floor(asNumber(value, 0))));
@@ -922,10 +955,8 @@ function patchSong(id, patch) {
     else values.push(value ?? null);
   }
 
-  values.push(id);
-
   try {
-    database.prepare(`UPDATE songs SET ${sets.join(", ")} WHERE id = ?`).run(...values);
+    songPatchStatement(database, entries.map(([key]) => key)).run(...values, id, ...values);
   } catch (error) {
     lastMigrationReport.errors.push(`patch failed: ${error?.message || error}`);
     throw error;
@@ -948,8 +979,10 @@ function deleteSong(id) {
 
 function clearLibrary() {
   const database = ensureDb();
-  database.prepare("DELETE FROM songs").run();
-  database.prepare("DELETE FROM daily_mixes").run();
+  database.transaction(() => {
+    database.prepare("DELETE FROM songs").run();
+    database.prepare("DELETE FROM daily_mixes").run();
+  })();
 }
 
 function getSettings() {
@@ -974,7 +1007,7 @@ function saveSettings(settings) {
   const stmt = database.prepare(`
     INSERT INTO settings (key, value)
     VALUES (?, ?)
-    ON CONFLICT(key) DO UPDATE SET value = excluded.value
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value WHERE settings.value IS NOT excluded.value
   `);
 
   const tx = database.transaction((items) => {
@@ -1019,53 +1052,68 @@ function getPlaylists() {
 
 function savePlaylists(playlists) {
   const database = ensureDb();
-  const list = Array.isArray(playlists) ? playlists : [];
-  const normalized = list
-    .map((playlist, index) => normalizePlaylist(playlist, index))
-    .filter(Boolean);
+  // A malformed IPC payload must never be interpreted as a request to
+  // clear every playlist. Only an explicit empty array may clear the library.
+  if (!Array.isArray(playlists) ||
+      playlists.some(playlist => !playlist || Array.isArray(playlist) ||
+        typeof playlist !== "object" || !Array.isArray(playlist.songIds))) {
+    throw new TypeError("Invalid playlists snapshot");
+  }
+  const normalized = playlists.map((playlist, index) => normalizePlaylist(playlist, index));
+  if (normalized.some(playlist => !playlist)) throw new TypeError("Invalid playlist");
 
   const insertPlaylist = database.prepare(`
     INSERT INTO playlists (id, name, createdAt, sortOrder, rules, coverArtwork)
     VALUES (@id, @name, @createdAt, @sortOrder, @rules, @coverArtwork)
     ON CONFLICT(id) DO UPDATE SET
-      name = excluded.name,
-      createdAt = excluded.createdAt,
-      sortOrder = excluded.sortOrder,
-      rules = excluded.rules,
-      coverArtwork = excluded.coverArtwork
+      name = excluded.name, createdAt = excluded.createdAt, sortOrder = excluded.sortOrder,
+      rules = excluded.rules, coverArtwork = excluded.coverArtwork
+    WHERE playlists.name IS NOT excluded.name OR playlists.createdAt IS NOT excluded.createdAt
+      OR playlists.sortOrder IS NOT excluded.sortOrder OR playlists.rules IS NOT excluded.rules
+      OR playlists.coverArtwork IS NOT excluded.coverArtwork
   `);
-
   const insertPlaylistSong = database.prepare(`
     INSERT INTO playlist_songs (playlistId, songId, position, addedAt)
-    VALUES (@playlistId, @songId, @position, @addedAt)
-    ON CONFLICT(playlistId, songId) DO UPDATE SET
-      position = excluded.position,
-      addedAt = excluded.addedAt
+    VALUES (?, ?, ?, ?)
+    ON CONFLICT(playlistId, songId) DO UPDATE SET position = excluded.position
+    WHERE playlist_songs.position IS NOT excluded.position
   `);
-
-  const tx = database.transaction((items) => {
-    database.prepare("DELETE FROM playlist_songs").run();
-    database.prepare("DELETE FROM playlists").run();
-
-    items.forEach((playlist, playlistIndex) => {
-      insertPlaylist.run({
-        id: playlist.id,
-        name: playlist.name,
-        createdAt: playlist.createdAt,
-        sortOrder: playlistIndex,
-        rules: playlist.rules,
-        coverArtwork: playlist.coverArtwork
-      });
-
-      playlist.songIds.forEach((songId, songIndex) => {
-        insertPlaylistSong.run({
-          playlistId: playlist.id,
-          songId,
-          position: songIndex,
-          addedAt: Date.now()
-        });
-      });
+  const deletePlaylist = database.prepare("DELETE FROM playlists WHERE id = ?");
+  const deleteMembers = database.prepare("DELETE FROM playlist_songs WHERE playlistId = ?");
+  const deleteMember = database.prepare("DELETE FROM playlist_songs WHERE playlistId = ? AND songId = ?");
+  const tx = database.transaction(items => {
+    // Preserve last-write-wins playlist metadata and union membership for duplicate
+    // IDs, matching the previous full-snapshot upsert semantics.
+    const targets = new Map();
+    items.forEach((playlist, sortOrder) => {
+      const songPositions = targets.get(playlist.id)?.songPositions || new Map();
+      playlist.songIds.forEach((id, position) => songPositions.set(id, position));
+      targets.set(playlist.id, {playlist, sortOrder, songPositions});
     });
+    const existing = new Map(database.prepare("SELECT * FROM playlists").all().map(row => [row.id,row]));
+    const memberRows = database.prepare("SELECT playlistId,songId,position FROM playlist_songs").all();
+    const members = new Map();
+    for (const row of memberRows) {
+      let group = members.get(row.playlistId);
+      if (!group) { group = new Map(); members.set(row.playlistId, group); }
+      group.set(row.songId, row.position);
+    }
+    for (const id of new Set([...existing.keys(), ...members.keys()])) {
+      if (!targets.has(id)) { deleteMembers.run(id); deletePlaylist.run(id); }
+    }
+    const addedAt = Date.now();
+    for (const [id, {playlist, sortOrder, songPositions}] of targets) {
+      const previous = existing.get(id);
+      if (!previous || previous.name !== playlist.name || previous.createdAt !== playlist.createdAt ||
+          previous.sortOrder !== sortOrder || previous.rules !== playlist.rules || previous.coverArtwork !== playlist.coverArtwork) {
+        insertPlaylist.run({id,name:playlist.name,createdAt:playlist.createdAt,sortOrder,rules:playlist.rules,coverArtwork:playlist.coverArtwork});
+      }
+      const old = members.get(id);
+      if (old) for (const songId of old.keys()) if (!songPositions.has(songId)) deleteMember.run(id,songId);
+      for (const [songId, position] of songPositions) {
+        if (old?.get(songId) !== position) insertPlaylistSong.run(id,songId,position,addedAt);
+      }
+    }
   });
 
   try {
@@ -1138,9 +1186,10 @@ module.exports = {
   getListeningSummary: (options) => require("./db/listening-summary.cjs").getRecordedListeningSummary(ensureDb(), options),
   listPlayEvents: (options) => playEvents.listPlayEvents(ensureDb(), options),
   recordPlayEvent: (payload) => {
-    const settings = getSettings();
+    const database = ensureDb();
+    const settings = Object.fromEntries(database.prepare("SELECT key,value FROM settings WHERE key IN ('listeningHistoryEnabled','listeningHistoryClearedAt')").all().map(row=>[row.key,safeJsonParse(row.value,row.value)]));
     if (settings.listeningHistoryEnabled === false || !(payload?.startedAt > Number(settings.listeningHistoryClearedAt || 0))) return false;
-    return playEvents.recordPlayEvent(ensureDb(), payload);
+    return playEvents.recordPlayEvent(database, payload);
   },
   initDatabase,
   getSongs,

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import type { ScrobbleAnswer, ScrobbleService, ScrobbleStatus } from "./scrobble.types";
 import "./scrobbling.css";
@@ -19,14 +19,30 @@ export default function ScrobbleSettings({ lastfmApiKey, saveLastfmApiKey }: Scr
   const [busy, setBusy] = useState<"" | ScrobbleService | "send" | `history-${ScrobbleService}`>("");
   const [error, setError] = useState("");
 
-  const refresh = useCallback(() => { void window.localitfy.getScrobbleStatus().then(setStatus).catch(() => undefined); }, []);
+  const pendingStatusRef = useRef(false);
+  const statusGenerationRef = useRef(0);
+  const refresh = useCallback(() => {
+    if (pendingStatusRef.current || document.hidden) return;
+    pendingStatusRef.current = true;
+    const generation = statusGenerationRef.current;
+    void window.localitfy.getScrobbleStatus()
+      .then(next => { if (generation === statusGenerationRef.current) setStatus(next); })
+      .catch(() => undefined)
+      .finally(() => { pendingStatusRef.current = false; });
+  }, []);
   useEffect(() => {
     refresh();
-    const timer = window.setInterval(refresh, 5000);
-    return () => window.clearInterval(timer);
+    const timer = window.setInterval(refresh, 15_000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", refresh);
+    };
   }, [refresh]);
 
   async function run(kind: typeof busy, task: () => Promise<ScrobbleAnswer>) {
+    // Ignore an older status poll completing after this user action.
+    statusGenerationRef.current++;
     setBusy(kind); setError("");
     try {
       const answer = await task();
@@ -42,7 +58,10 @@ export default function ScrobbleSettings({ lastfmApiKey, saveLastfmApiKey }: Scr
     if (key !== lastfmApiKey) saveLastfmApiKey(key);
   }
 
-  const disconnect = async (service: ScrobbleService) => setStatus(await window.localitfy.disconnectScrobbling(service));
+  const disconnect = async (service: ScrobbleService) => {
+    statusGenerationRef.current++;
+    setStatus(await window.localitfy.disconnectScrobbling(service));
+  };
   if (!status) return null;
   const waiting = status.lastfm.waiting + status.listenbrainz.waiting;
   const history = (service: ScrobbleService) => status[service].history ? <div className="scrobbleRow">

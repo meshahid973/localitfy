@@ -53,7 +53,9 @@ function mixState(state) {
  const output=ts.transpileModule(fs.readFileSync('src/features/pages/MixPage.tsx','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,target:ts.ScriptTarget.ES2022}}).outputText;
  const loading=({label})=>React.createElement('div',{role:'status'},label);
  const card=({title,message,actions})=>React.createElement('div',null,React.createElement('h1',null,title),React.createElement('p',null,message),actions);
+ const sortExports={};runInNewContext(ts.transpileModule(fs.readFileSync('src/features/library/librarySort.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports:sortExports});
  const dependencies={
+  '../library/librarySort':sortExports,
   './pages.css':{},
   '../../shared/ui/CollectionLoading':{CollectionLoading:loading},
   '../../shared/ui/LocaltifyViewUi':{LocaltifyStateCard:card},

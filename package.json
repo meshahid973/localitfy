@@ -11,7 +11,7 @@
   "main": "electron/main.cjs",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/meshahid973/localitfy.git"
+    "url": "git+https://github.com/meshahid973/localtify.git"
   },
   "scripts": {
     "dev": "concurrently -k \"vite --host 127.0.0.1\" \"wait-on tcp:5173 && electron .\"",
@@ -62,7 +62,6 @@
     "sanitize-filename": "^1.6.3"
   },
   "devDependencies": {
-    "@animateicons/react": "^0.3.3",
     "@capacitor/android": "8.6.0",
     "@capacitor/cli": "8.6.0",
     "@capacitor/core": "8.6.0",
@@ -74,7 +73,6 @@
     "concurrently": "^9.2.5",
     "electron": "42.11.16",
     "electron-builder": "^26.8.1",
-    "fast-average-color": "^9.5.2",
     "js-yaml": "4.3.2",
     "lucide-react": "^1.14.0",
     "motion": "^12.40.0",
@@ -214,7 +212,7 @@
       {
         "provider": "github",
         "owner": "meshahid973",
-        "repo": "localitfy"
+        "repo": "localtify"
       }
     ],
     "compression": "maximum",

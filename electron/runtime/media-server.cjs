@@ -229,10 +229,15 @@ function createMediaServerRuntime({ protocol, net, getFileInfoCached, fileExists
     fs.createReadStream(filePath).on("error", () => res.destroy()).pipe(res);
   }
 
+  let startGeneration = 0;
+  let cancelStart = null;
+
   function start() {
     if (mediaServerReadyPromise) return mediaServerReadyPromise;
+    const generation = ++startGeneration;
 
     mediaServerReadyPromise = new Promise((resolve) => {
+      cancelStart = () => resolve(false);
       const server = http.createServer((req, res) => {
         addCorsHeaders(res);
         try {
@@ -259,14 +264,22 @@ function createMediaServerRuntime({ protocol, net, getFileInfoCached, fileExists
 
       server.once("error", (error) => {
         console.log("[localtify media server error]", error?.message || error);
-        mediaServer = null;
-        mediaServerPort = 0;
-        mediaServerReadyPromise = null;
+        if (generation === startGeneration) {
+          mediaServer = null;
+          mediaServerPort = 0;
+          mediaServerReadyPromise = null;
+          cancelStart = null;
+        }
         resolve(false);
       });
 
+      mediaServer = server;
       server.listen(0, MEDIA_SERVER_HOST, () => {
-        mediaServer = server;
+        if (generation !== startGeneration) {
+          server.close(() => undefined);
+          return;
+        }
+        cancelStart = null;
         const address = server.address();
         mediaServerPort = typeof address === "object" && address ? address.port : 0;
         console.log(`[localtify media server] http://${MEDIA_SERVER_HOST}:${mediaServerPort}`);
@@ -278,16 +291,17 @@ function createMediaServerRuntime({ protocol, net, getFileInfoCached, fileExists
   }
 
   function stop() {
-    if (!mediaServer) {
-      mediaServerReadyPromise = null;
-      mediaServerPort = 0;
-      return;
-    }
+    ++startGeneration;
+    cancelStart?.();
+    cancelStart = null;
     const server = mediaServer;
     mediaServer = null;
     mediaServerPort = 0;
     mediaServerReadyPromise = null;
-    server.close(() => undefined);
+    if (server) {
+      server.close(() => undefined);
+      server.closeAllConnections?.();
+    }
   }
 
   function registerProtocol() {

@@ -67,3 +67,50 @@ export async function fromMac<T>(channel: string, payload: unknown, timeoutMs?: 
   if (answer.ok) return answer.result as T;
   throw new Error(answer.error || `Connect to the same Wi-Fi as your ${computerName()} (with Phone sync on) to use this`);
 }
+
+// Artwork metadata is public provider information, not a desktop media token.
+// Keep one bounded offline registry rather than one IndexedDB key per lookup.
+import type { DiscoverResult } from "../../features/discover/discover.types";
+type ArtworkQuery = NonNullable<NonNullable<Parameters<Window["localitfy"]["getDiscoveries"]>[0]>["artwork"]>;
+type ArtworkRow = { at: number; result: Extract<DiscoverResult, {status:"artwork"}> };
+const ARTWORK_KEY = "mac:artwork-index-v1";
+const artworkRows = new Map<string,ArtworkRow>();
+const artworkPending = new Map<string,Promise<DiscoverResult>>();
+let artworkHydration: Promise<void> | undefined;
+function hydrateArtwork() {
+  return artworkHydration ??= readValue<[string,ArtworkRow][]>(ARTWORK_KEY,[]).then(rows=>{
+    if (!Array.isArray(rows)) return;
+    for (const pair of rows.slice(-256)) {
+      if (!Array.isArray(pair)) continue;
+      const [key,row]=pair;
+      if (typeof key==="string" && key.length<=2048 && Number.isFinite(row?.at) && row.at> Date.now()-7*86400000 && row.result?.status==="artwork") artworkRows.set(key,row);
+    }
+  }).catch(()=>{});
+}
+export async function cachedArtworkFromMac(artwork: ArtworkQuery): Promise<DiscoverResult> {
+  if (phoneLibrary.effectiveSettings().discoverEnabled !== true) return {status:"off"};
+  const key=JSON.stringify([artwork.kind||"recording",artwork.providerId||"",artwork.title,artwork.artist,artwork.album||"",artwork.durationMs||0,!!artwork.fallback]);
+  if (key.length>2048) return {status:"error",error:"Artwork query too long"};
+  await hydrateArtwork();
+  const row=artworkRows.get(key);
+  if (row && Date.now()-row.at<86400000) { artworkRows.delete(key); artworkRows.set(key,row); return row.result; }
+  const pending=artworkPending.get(key);
+  if(pending) return pending;
+  if(artworkPending.size>=8) return row?.result ?? {status:"artwork"};
+  const job=callMac<DiscoverResult>("discover:get",{artwork},15000).then(async answer=>{
+    if(phoneLibrary.effectiveSettings().discoverEnabled!==true) return {status:"off"} as const;
+    const result=answer.result;
+    if(answer.ok && result?.status==="artwork" && (result.coverUrl || result.fallbackCoverUrl || result.coverAlternatives?.length)) {
+      if(JSON.stringify(result).length<=14000) {
+        artworkRows.delete(key); artworkRows.set(key,{at:Date.now(),result});
+        while(artworkRows.size>256 || JSON.stringify([...artworkRows]).length>512*1024) artworkRows.delete(artworkRows.keys().next().value!);
+        await writeValues({[ARTWORK_KEY]:[...artworkRows]}).catch(()=>{});
+      }
+      return result;
+    }
+    if(!answer.ok && row && Date.now()-row.at<7*86400000) return row.result;
+    return result ?? {status:"artwork"} as const;
+  }).finally(()=>artworkPending.delete(key));
+  artworkPending.set(key,job);
+  return job;
+}

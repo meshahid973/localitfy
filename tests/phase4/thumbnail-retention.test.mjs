@@ -17,3 +17,18 @@ test("thumbnail retention evicts only derived files and leaves user artwork inta
     assert.equal(await fs.readFile(permanent,"utf8"),"original");
   } finally { await fs.rm(dir,{recursive:true,force:true}); }
 });
+
+test("active thumbnails count against retention budgets without being deleted", async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "localtify-thumbnail-active-"));
+  try {
+    const active = path.join(dir, "a".repeat(40) + ".png");
+    const ordinary = path.join(dir, "b".repeat(40) + ".png");
+    await fs.writeFile(active, "1234");
+    await fs.writeFile(ordinary, "5678");
+    const result = await pruneThumbnails(dir, { maxBytes: 4, maxFiles: 1, active: file => file === active });
+    assert.equal(result.removed, 1);
+    assert.equal(result.bytes, 4);
+    assert.equal(result.count, 1);
+    assert.deepEqual(await fs.readdir(dir), [path.basename(active)]);
+  } finally { await fs.rm(dir, { recursive: true, force: true }); }
+});

@@ -123,25 +123,28 @@ function downloadPathKey(value: string | undefined) {
 }
 
 type DownloadSongLookup = {
-  spotifyIds: Map<string, Song>;
+  spotifyIds: Map<string, Song | null>;
+  songIds: Map<string, Song>;
   filePaths: Map<string, Song>;
   basenames: Map<string, Song | null>;
 };
 
-/** Build the two exact-match indexes once for a batch, preserving first-match order. */
+/** Index exact files and uniquely identified recordings once per batch. */
 export function buildDownloadSongLookup(librarySongs: readonly Song[]): DownloadSongLookup {
-  const spotifyIds = new Map<string, Song>();
+  const spotifyIds = new Map<string, Song | null>();
+  const songIds = new Map<string, Song>();
   const filePaths = new Map<string, Song>();
   const basenames = new Map<string, Song | null>();
   for (const song of librarySongs) {
     const spotifyId = String((song as Song & { sourceTrackId?: string }).sourceTrackId || "").trim();
     const filePath = downloadPathKey(song.filePath);
-    if (spotifyId && !spotifyIds.has(spotifyId)) spotifyIds.set(spotifyId, song);
+    if (song.id) songIds.set(song.id, song);
+    if (spotifyId) spotifyIds.set(spotifyId, spotifyIds.has(spotifyId) ? null : song);
     if (filePath && !filePaths.has(filePath)) filePaths.set(filePath, song);
     const name = filePath.split(/[\\/]/).pop();
     if (name) basenames.set(name, basenames.has(name) ? null : song);
   }
-  return { spotifyIds, filePaths, basenames };
+  return { spotifyIds, songIds, filePaths, basenames };
 }
 
 export function findDownloadedSongMatch(result: DownloadResult, librarySongs: Song[], lookup?: DownloadSongLookup) {
@@ -149,22 +152,21 @@ export function findDownloadedSongMatch(result: DownloadResult, librarySongs: So
   const filename = String(result.filename || "").trim();
   const spotifyTrackId = String(result.spotifyTrackId || "").trim();
 
-  if (spotifyTrackId) {
-    const exactSpotify = lookup
-      ? lookup.spotifyIds.get(spotifyTrackId)
-      : librarySongs.find((song) => String((song as Song & { sourceTrackId?: string }).sourceTrackId || "").trim() === spotifyTrackId);
-    if (exactSpotify) return exactSpotify;
-  }
-
+  // Explicit downloaded file identity must win over another format of the same recording.
+  const committedId = String(result.librarySongId || "").trim();
+  const committed = committedId ? (lookup ? lookup.songIds.get(committedId) : librarySongs.find(song=>song.id===committedId)) : undefined;
   if (filePath) {
-    const exact = lookup
-      ? lookup.filePaths.get(filePath)
-      : librarySongs.find((song) => downloadPathKey(song.filePath) === filePath);
-    if (exact) return exact;
+    if (committed && downloadPathKey(committed.filePath) === filePath) return committed;
+    return (lookup ? lookup.filePaths.get(filePath) : librarySongs.find(song=>downloadPathKey(song.filePath)===filePath)) || null;
+  }
+  if (committed && (!spotifyTrackId || String(committed.sourceTrackId || "").trim()===spotifyTrackId)) return committed;
+  if (spotifyTrackId) {
+    if (lookup) return lookup.spotifyIds.get(spotifyTrackId) || null;
+    const matches=librarySongs.filter(song=>String(song.sourceTrackId||"").trim()===spotifyTrackId);
+    return matches.length===1 ? matches[0] : null;
   }
 
   if (filename) {
-    if (filePath) return null; // An explicit path must not be confused with an unrelated file.
     if (lookup) return lookup.basenames.get(filename) || null;
     const matches = librarySongs.filter(song => downloadPathKey(song.filePath).split(/[\\/]/).pop() === filename);
     return matches.length === 1 ? matches[0] : null;
@@ -211,3 +213,54 @@ export function formatSpotifyPrivatePlaylistMessage(rawMessage = "", hint = "") 
   ].join("\n");
 }
 
+
+/** Merge already enriched results into the durable queue in a single indexed pass. */
+export function reconcileDownloadResults(current: DownloadQueueItem[], results: DownloadResult[]): DownloadQueueItem[] {
+  if (!results.length) return current;
+  const next = [...current];
+  const byJob = new Map<string,number>();
+  const bySpotify = new Map<string,number|null>(), byUrl = new Map<string,number|null>();
+  const byPath = new Map<string,number|null>();
+  const remember = (map:Map<string,number|null>,key:string|undefined,index:number) => {
+    if (!key) return;
+    map.set(key, map.has(key) && map.get(key)!==index ? null : index);
+  };
+  current.forEach((item,index)=>{
+    if(item.recoveryId) { if(!byJob.has(item.recoveryId)) byJob.set(item.recoveryId,index); }
+    else { remember(bySpotify,item.spotifyTrackId,index); remember(byUrl,item.url,index); remember(byPath,downloadPathKey(item.filePath),index); }
+  });
+  for (const result of results) {
+    const recordingId = String(result.spotifyTrackId || "").trim();
+    const durable = result.recoveryId ? byJob.get(result.recoveryId) : undefined;
+    const placeholder = recordingId ? bySpotify.get(recordingId) : byUrl.get(result.url || "") ?? byPath.get(downloadPathKey(result.filePath));
+    let index = durable ?? (typeof placeholder === "number" && !next[placeholder].recoveryId ? placeholder : undefined);
+    if(index===undefined && !result.recoveryId) continue;
+    if(index===undefined) index=next.length;
+    const previous = next[index];
+    const status = result.status || (result.ok ? "done" : "failed");
+    const error = result.ok ? "" : friendlyDownloadError(result.error || "Download failed.");
+    next[index] = {
+      ...previous,
+      id: result.recoveryId || previous?.id || result.url || "",
+      recoveryId: result.recoveryId || previous?.recoveryId,
+      url: previous?.url || result.url || result.spotifyUrl || "",
+      source: result.source || previous?.source,
+      status,
+      progress: status === "cancelled" || status === "interrupted" ? previous?.progress ?? 0 : 100,
+      message: result.ok ? result.importedToLibrary ? "Added to library" : "Downloaded, but not imported" : error,
+      filePath: result.filePath || previous?.filePath,
+      filename: result.filename || previous?.filename,
+      error,
+      importedToLibrary: result.importedToLibrary ?? previous?.importedToLibrary,
+      librarySongId: result.librarySongId ?? previous?.librarySongId,
+      statusLabel: result.statusLabel,
+      spotifyTrackId: result.spotifyTrackId || previous?.spotifyTrackId,
+      spotifyUrl: result.spotifyUrl || previous?.spotifyUrl,
+      providerUrl: result.providerUrl || previous?.providerUrl,
+      matchScore: result.matchScore ?? previous?.matchScore,
+      title: result.filename || previous?.title || result.url || "download"
+    };
+    if(next[index].recoveryId) byJob.set(next[index].recoveryId!,index);
+  }
+  return next;
+}
