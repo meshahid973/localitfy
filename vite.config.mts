@@ -24,8 +24,7 @@ export default defineConfig({
           if (!id.includes("node_modules")) return undefined;
           if (/[\\/]node_modules[\\/](?:react|react-dom|scheduler)[\\/]/.test(id)) return "vendor-react";
           if (/[\\/]node_modules[\\/](?:motion|motion-dom|motion-utils|framer-motion)[\\/]/.test(id)) return "vendor-motion";
-          if (id.includes("lucide-react") || id.includes("@animateicons")) return "vendor-icons";
-          if (id.includes("fast-average-color")) return "vendor-cover-tools";
+          if (id.includes("lucide-react")) return "vendor-icons";
           return undefined;
         }
       }

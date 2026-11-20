@@ -1129,18 +1129,29 @@ function getPixelArtFiles(options = {}) {
   }
 }
 
-function listPixelCoversDetailed() {
-  const songs = getSongs();
+function listPixelCoversDetailed(songs = getSongs()) {
   const usage = new Map();
   for (const song of songs) if (song.coverPath) usage.set(song.coverPath, (usage.get(song.coverPath) || 0) + 1);
-  return getPixelArtFiles().map((coverPath) => ({ name: path.basename(coverPath), key: path.parse(coverPath).name, path: coverPath, url: safeMediaUrl(coverPath), usageCount: usage.get(coverPath) || 0, exists: fileExists(coverPath), broken: !fileExists(coverPath) }));
+  return getPixelArtFiles().map((coverPath) => {
+    const exists = fileExists(coverPath);
+    return { name: path.basename(coverPath), key: path.parse(coverPath).name, path: coverPath,
+      url: safeMediaUrl(coverPath), usageCount: usage.get(coverPath) || 0, exists, broken: !exists };
+  });
 }
 
 function getCoverStats() {
   const songs = getSongs();
-  const covers = listPixelCoversDetailed();
-  const brokenSongs = songs.filter((song) => song.coverPath && !fileExists(song.coverPath)).map((song) => ({ id: song.id, title: song.title, coverPath: song.coverPath }));
-  return { pixelDir: getPixelArtDirectory(), coverCount: covers.length, songCount: songs.length, songsWithCovers: songs.filter((song) => Boolean(song.coverPath)).length, songsMissingCovers: songs.filter((song) => !song.coverPath).length, songsWithBrokenCovers: brokenSongs.length, brokenItems: brokenSongs };
+  const covers = listPixelCoversDetailed(songs);
+  const brokenSongs = [];
+  let songsWithCovers = 0;
+  for (const song of songs) {
+    if (!song.coverPath) continue;
+    songsWithCovers++;
+    if (!fileExists(song.coverPath)) brokenSongs.push({ id: song.id, title: song.title, coverPath: song.coverPath });
+  }
+  return { pixelDir: getPixelArtDirectory(), coverCount: covers.length, songCount: songs.length,
+    songsWithCovers, songsMissingCovers: songs.length - songsWithCovers,
+    songsWithBrokenCovers: brokenSongs.length, brokenItems: brokenSongs };
 }
 
 function pickLeastUsedCover(availableCovers = [], fallbackSongs = [], choices = {}) {
@@ -1159,6 +1170,9 @@ function pickLeastUsedCover(availableCovers = [], fallbackSongs = [], choices = 
   return selected || "";
 }
 
+// All files in one import share cover usage. Avoid a full SQLite library
+// read for every track when assigning fallback artwork.
+const importCoverAllocators = new WeakMap();
 async function makeSongFromFile(filePath, pixelArtFiles = [], usedCovers = new Set(), options = {}) {
   const parsed = path.parse(filePath);
   const parts = parsed.name.split(" - ").map((item) => item.trim());
@@ -1175,9 +1189,14 @@ async function makeSongFromFile(filePath, pixelArtFiles = [], usedCovers = new S
   const album = String(metadata?.album || options.album || "").trim();
   const genre = String(metadata?.genre || options.genre || "").trim();
   let fallbackCover = "";
+  let importAllocator = null;
   if (pixelArtFiles.length) {
-    const available = pixelArtFiles.filter((p) => !usedCovers.has(p));
-    fallbackCover = pickLeastUsedCover(available.length ? available : pixelArtFiles);
+    importAllocator = importCoverAllocators.get(usedCovers);
+    if (!importAllocator) {
+      importAllocator = createLeastUsedCoverAllocator(pixelArtFiles, getSongs());
+      importCoverAllocators.set(usedCovers, importAllocator);
+    }
+    fallbackCover = importAllocator.choose();
   }
   const coverResult = await resolveSongCover({
     song: { id, title, artist, album, filePath, coverPath: options.coverPath || "", coverSource: options.coverSource || "" },
@@ -1189,7 +1208,10 @@ async function makeSongFromFile(filePath, pixelArtFiles = [], usedCovers = new S
     spotifyCoverPath: options.spotifyCoverPath || "",
     fallbackCoverPath: fallbackCover
   });
-  if (coverResult.coverSource === "fallback" && coverResult.coverPath) usedCovers.add(coverResult.coverPath);
+  if (coverResult.coverSource === "fallback" && coverResult.coverPath) {
+    usedCovers.add(coverResult.coverPath);
+    importAllocator?.record("", coverResult.coverPath);
+  }
   const durationMs = Math.max(0, Number(metadata?.durationMs || options.durationMs || 0));
   const duration = Math.max(0, Number(metadata?.duration || Math.round(durationMs / 1000) || options.duration || 0));
   return { id, title, artist, album, genre, filePath, coverPath: coverResult.coverPath || "", coverSource: coverResult.coverSource || "none", coverUpdatedAt: coverResult.coverUpdatedAt || new Date().toISOString(), duration, durationMs: durationMs || (duration > 0 ? duration * 1000 : 0), track: Number(metadata?.track || 0) || 0, disc: Number(metadata?.disc || 0) || 0, year: metadata?.year || "", bitrate: 0, addedAt: Date.now() };

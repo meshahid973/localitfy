@@ -62,7 +62,6 @@
     "sanitize-filename": "^1.6.3"
   },
   "devDependencies": {
-    "@animateicons/react": "^0.3.3",
     "@capacitor/android": "8.6.0",
     "@capacitor/cli": "8.6.0",
     "@capacitor/core": "8.6.0",
@@ -74,7 +73,6 @@
     "concurrently": "^9.2.5",
     "electron": "42.11.16",
     "electron-builder": "^26.8.1",
-    "fast-average-color": "^9.5.2",
     "js-yaml": "4.3.2",
     "lucide-react": "^1.14.0",
     "motion": "^12.40.0",
