@@ -251,7 +251,12 @@ final class RemoteArtworkCache {
                         try{executor.execute(()->{try{refresh(url,key,prior);}catch(Exception ignored){}});}
                         catch(java.util.concurrent.RejectedExecutionException busy){pending.remove(key);}
                     }
-                    return result(previous.optString("file"),staleUntil(previous));
+                    // The stale window permits display while background revalidation
+                    // runs; it must not lock the renderer into stale bytes for
+                    // the entire stale-while-revalidate period.
+                    long recheckAt=Math.min(staleUntil(previous),
+                        Math.max(now+1000,retry.getOrDefault(key,0L)));
+                    return result(previous.optString("file"),recheckAt);
                 }
             }else previous=null;
             if(pending.contains(key)||retry.getOrDefault(key,0L)>now)return new JSObject();
