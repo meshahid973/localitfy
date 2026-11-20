@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import type { Song } from "../library/song.types";
 import { getRendererSafeImageUrl } from "./cover.ambient";
@@ -6,7 +6,7 @@ import { nextPixelArtForSong, pixelArtForSong } from "./cover.runtime";
 import { runtimePixelArtImageUrl } from "./pixelArt";
 import { prettyTitle } from "../search/search.utils";
 import { toCssUrl } from "../../shared/utils/format";
-import { rememberCompletedThumbnail, useCompletedThumbnail } from "./thumbnailResource";
+import { observeArtwork, requestThumbnail, useCompletedThumbnail, type ThumbnailSize } from "./thumbnailResource";
 
 export type CoverImagePriority = "auto" | "high" | "low";
 export function getCardCoverUrl(song?: Song | null) {
@@ -23,7 +23,7 @@ export function getCardCoverCssUrl(song?: Song | null) {
   return `url("${coverUrl.replace(/["\\]/g, "\\$&")}")`;
 }
 
-export function Cover({ song, className, priority = "auto", preferThumbnail = false }: { song: Song | null; className: string; priority?: CoverImagePriority; preferThumbnail?: boolean }) {
+export const Cover = memo(function Cover({ song, className, priority = "auto", preferThumbnail = false }: { song: Song | null; className: string; priority?: CoverImagePriority; preferThumbnail?: boolean }) {
   const [failedSources, setFailedSources] = useState<Record<string, boolean>>({});
   // Readiness is tied to the URL that actually loaded. A song update that keeps the same URL must not
   // hide the image again: the mounted <img> would never fire another load event.
@@ -32,7 +32,8 @@ export function Cover({ song, className, priority = "auto", preferThumbnail = fa
   const coverLoadingMode = isImmediateCover ? "eager" : "lazy";
   const coverFetchPriority = isImmediateCover ? "high" : "low";
   const useFullCover = isImmediateCover && !preferThumbnail;
-  const coverIntrinsicSize = useFullCover ? 512 : 260;
+  const [viewport, setViewport] = useState<{near: boolean; size: ThumbnailSize}>({near: false, size: 256});
+  const coverIntrinsicSize = useFullCover ? 512 : viewport.size;
 
   const directCover = useFullCover ? getFullCoverUrl(song) : getCardCoverUrl(song);
   const savedCover = String(song?.coverPath || "").trim();
@@ -40,31 +41,21 @@ export function Cover({ song, className, priority = "auto", preferThumbnail = fa
   // A broken thumbnail must fall back to the actual original, not a placeholder.
   const sourceCandidates = [directCover, getFullCoverUrl(song), savedCoverSrc];
   const fullSource = getFullCoverUrl(song);
-  const completedThumbnail = useCompletedThumbnail(useFullCover ? "" : fullSource);
+  const completedThumbnail = useCompletedThumbnail(useFullCover ? "" : fullSource, viewport.size);
   const anchor = useRef<HTMLDivElement>(null);
-  const thumbnailSource = completedThumbnail || (directCover !== fullSource ? directCover : "");
+  const thumbnailSource = completedThumbnail || (viewport.size === 256 && directCover !== fullSource ? directCover : "");
   const thumbnailFailed = Boolean(thumbnailSource && failedSources[thumbnailSource]);
   const songId = song?.id;
   useEffect(() => {
-    if (useFullCover || !songId || !fullSource || (thumbnailSource && !thumbnailFailed) || !window.localitfy?.requestCoverThumbnail) return;
-    let live = true;
-    let requested = false;
-    const request = () => {
-      if (!live || requested) return;
-      requested = true;
-      void window.localitfy.requestCoverThumbnail?.({id: songId, source: fullSource, failed: thumbnailFailed ? thumbnailSource : undefined})
-        .then(result => { if (result && live) rememberCompletedThumbnail(result); }).catch(() => {});
-    };
-    if (!anchor.current || typeof IntersectionObserver === "undefined") request();
-    else {
-      const observer = new IntersectionObserver(entries => {
-        if (entries.some(entry => entry.isIntersecting)) { request(); observer.disconnect(); }
-      }, { rootMargin: "160px" });
-      observer.observe(anchor.current);
-      return () => { live = false; observer.disconnect(); };
-    }
-    return () => { live = false; };
-  }, [useFullCover, songId, fullSource, thumbnailSource, thumbnailFailed]);
+    if (!anchor.current || useFullCover || !window.localitfy?.requestCoverThumbnail) return;
+    return observeArtwork(anchor.current, (near, size) => {
+      setViewport(previous => previous.near === near && previous.size === size ? previous : {near, size});
+    });
+  }, [useFullCover]);
+  useEffect(() => {
+    if (useFullCover || !viewport.near || !songId || !fullSource || (thumbnailSource && !thumbnailFailed)) return;
+    void requestThumbnail(songId, fullSource, viewport.size, thumbnailFailed ? thumbnailSource : undefined);
+  }, [useFullCover, viewport, songId, fullSource, thumbnailSource, thumbnailFailed]);
   if (completedThumbnail) sourceCandidates.unshift(completedThumbnail);
   let coverSrc = sourceCandidates.find(source => source && !failedSources[source]) || "";
   // Most tracks have real art; avoid hashing metadata and resolving fallback
@@ -79,6 +70,12 @@ export function Cover({ song, className, priority = "auto", preferThumbnail = fa
   }
   const hasCover = Boolean(coverSrc);
   const imageReady = hasCover && loadedSrc === coverSrc;
+  const imageRef = useRef<HTMLImageElement>(null);
+  // A memory/disk-cached image may already be complete before its load handler.
+  useLayoutEffect(() => {
+    const image = imageRef.current;
+    if (image?.complete && image.naturalWidth > 0) setLoadedSrc(coverSrc);
+  }, [coverSrc]);
   const fallback = song ? prettyTitle(song.title, 1).slice(0, 1) || "?" : "?";
   const style = hasCover ? ({ "--cover-art-url": toCssUrl(coverSrc), "--cover-url": toCssUrl(coverSrc) } as CSSProperties) : undefined;
 
@@ -100,6 +97,7 @@ export function Cover({ song, className, priority = "auto", preferThumbnail = fa
       {hasCover ? (
         <img
           key={coverSrc}
+          ref={imageRef}
           className={`coverImage ${imageReady ? "isLoaded" : ""}`}
           src={coverSrc}
           alt=""
@@ -116,4 +114,4 @@ export function Cover({ song, className, priority = "auto", preferThumbnail = fa
       ) : null}
     </div>
   );
-}
+});

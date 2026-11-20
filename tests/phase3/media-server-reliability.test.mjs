@@ -160,8 +160,8 @@ test("thumbnail cache refreshes media URLs and downloads shape the library once"
   assert.match(thumbnails, /const freshUrl = safeMediaUrl\(cached\)/);
   assert.match(thumbnails, /rememberCoverThumbnail\(key, cached\)/);
   assert.match(thumbnails, /coverThumbnailUrlCache\.size > COVER_THUMBNAIL_URL_CACHE_LIMIT/);
-  assert.match(thumbnails, /invalidateFileInfo\(thumbnailPath\);\s*(?:const url = safeMediaUrl\(thumbnailPath\)|return \{ ok: true)/);
-  assert.match(thumbnails, /publish\(\{ source: safeMediaUrl\(filePath\), url \}\)/);
+  assert.match(thumbnails, /invalidateFileInfo\(thumbnailPath\);[\s\S]{0,240}const url = safeMediaUrl\(thumbnailPath\)/);
+  assert.match(thumbnails, /publish\(\{ source: safeMediaUrl\(filePath\), url, size \}\)/);
   assert.match(main, /webContents\.send\("covers:thumbnail-ready", payload\)/);
   assert.doesNotMatch(protocols, /bypassCSP\s*:\s*true/);
 

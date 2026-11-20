@@ -2,7 +2,7 @@ export type DiscoverArtwork = { coverUrl?: string; fallbackCoverUrl?: string; co
 export type DiscoverTrack = { title: string; artist: string; url: string; album?: string } & DiscoverArtwork;
 export type DiscoverArtist = { name: string; url: string; because: string[]; seedCount: number; topTracks: DiscoverTrack[] };
 export type CatalogKind = "recording" | "artist";
-export type CatalogItem = { id: string; title: string; artist: string; subtitle: string; url: string } & DiscoverArtwork;
+export type CatalogItem = { id: string; title: string; artist: string; album?: string; subtitle: string; url: string } & DiscoverArtwork;
 export type DiscoverResult =
   | ({ status: "artwork" } & DiscoverArtwork)
   | { status: "catalog"; kind: CatalogKind; items: CatalogItem[] }

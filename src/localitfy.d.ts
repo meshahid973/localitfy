@@ -650,8 +650,8 @@ declare global {
       listBrokenCovers?: () => Promise<LocalitfyCoverBrokenItem[]>;
       getLeastUsedCover?: () => Promise<string | null>;
       resolveRemoteArtwork?: (url: string) => Promise<{ url: string } | null>;
-      requestCoverThumbnail?: (payload: { id: string; source: string; failed?: string }) => Promise<{ source: string; url: string } | null>;
-      onCoverThumbnailReady?: (callback: (result: { source: string; url: string }) => void) => () => void;
+      requestCoverThumbnail?: (payload: { id: string; source: string; size?: 96 | 256 | 512; failed?: string }) => Promise<{ source: string; url: string; size?: 96 | 256 | 512 } | null>;
+      onCoverThumbnailReady?: (callback: (result: { source: string; url: string; size?: 96 | 256 | 512 }) => void) => () => void;
       getCoverThumbnailStatus?: () => Promise<LocalitfyCoverThumbnailStatus>;
       warmCoverThumbnails?: (payload?: { limit?: number; force?: boolean }) => Promise<LocalitfyCoverThumbnailWarmResult>;
       cleanupCoverCache: () => Promise<LocalitfyCoverThumbnailCleanupResult>;

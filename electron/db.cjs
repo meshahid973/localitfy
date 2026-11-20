@@ -178,6 +178,7 @@ function createSongsIndexes(database) {
     CREATE UNIQUE INDEX IF NOT EXISTS idx_songs_filePath ON songs(filePath);
     CREATE INDEX IF NOT EXISTS idx_songs_title ON songs(title);
     CREATE INDEX IF NOT EXISTS idx_songs_lastPlayed ON songs(lastPlayed);
+    CREATE INDEX IF NOT EXISTS idx_songs_dateAdded ON songs(dateAdded DESC);
     CREATE INDEX IF NOT EXISTS idx_songs_sourceType ON songs(sourceType);
     CREATE INDEX IF NOT EXISTS idx_songs_sourceTrackId ON songs(sourceTrackId);
     CREATE INDEX IF NOT EXISTS idx_songs_coverSource ON songs(coverSource);
@@ -604,6 +605,7 @@ function migrateSongsTable(database) {
     CREATE UNIQUE INDEX IF NOT EXISTS idx_songs_filePath ON songs(filePath);
     CREATE INDEX IF NOT EXISTS idx_songs_title ON songs(title);
     CREATE INDEX IF NOT EXISTS idx_songs_lastPlayed ON songs(lastPlayed);
+    CREATE INDEX IF NOT EXISTS idx_songs_dateAdded ON songs(dateAdded DESC);
     CREATE INDEX IF NOT EXISTS idx_songs_sourceType ON songs(sourceType);
     CREATE INDEX IF NOT EXISTS idx_songs_sourceTrackId ON songs(sourceTrackId);
     CREATE INDEX IF NOT EXISTS idx_songs_coverSource ON songs(coverSource);
@@ -733,13 +735,31 @@ function safeAll(database, sql, params = []) {
   }
 }
 
+// Statements belong to a database connection and cannot survive a repair/reopen.
+const songReadStatements = new WeakMap();
+function songReads(database) {
+  let statements = songReadStatements.get(database);
+  if (!statements) {
+    statements = {
+      all: database.prepare("SELECT * FROM songs ORDER BY dateAdded DESC"),
+      byId: database.prepare("SELECT * FROM songs WHERE id = ?")
+    };
+    songReadStatements.set(database, statements);
+  }
+  return statements;
+}
+
 function getSongs() {
   const database = ensureDb();
   const profiling = process.env.LOCALTIFY_PROFILE_DB === "1";
   const started = profiling ? performance.now() : 0;
-  const songs = safeAll(database, "SELECT * FROM songs ORDER BY dateAdded DESC")
-    .map(rowToSong)
-    .filter(Boolean);
+  let rows;
+  try { rows = songReads(database).all.all(); }
+  catch (error) {
+    lastMigrationReport.errors.push(`query failed: ${error?.message || error}`);
+    throw error;
+  }
+  const songs = rows.map(rowToSong).filter(Boolean);
   if (profiling) {
     console.info("[localtify profile] db:getSongs", (performance.now() - started).toFixed(2) + "ms", songs.length + " songs");
   }
@@ -751,7 +771,7 @@ function getSong(id) {
   if (!id) return null;
 
   try {
-    const row = database.prepare("SELECT * FROM songs WHERE id = ?").get(id);
+    const row = songReads(database).byId.get(id);
     return rowToSong(row);
   } catch {
     return null;

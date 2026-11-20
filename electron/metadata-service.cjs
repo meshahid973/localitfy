@@ -2,19 +2,54 @@
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { execFile } = require("node:child_process");
+const { createResourceCache } = require("./runtime/resource-cache.cjs");
 
 let serviceUserDataPath = "";
 let serviceFfmpegPath = "";
 let musicMetadataModulePromise = null;
-const metadataCache = new Map();
+let metadataCache = createResourceCache({maxEntries: 4096, maxBytes: 8 * 1024 * 1024, validate: validMetadataSnapshot});
 const metadataPending = new Map();
-const METADATA_CACHE_LIMIT = 1024;
+let activeParses = 0;
+const waiters = [];
+const MAX_ACTIVE_PARSES = 4;
+const METADATA_TTL = 30 * 86400000;
+
+function validMetadataSnapshot(value) {
+  if (!value || value.ok !== true || value.source !== "music-metadata" || value.error) return false;
+  const strings = ["filePath","title","artist","album","genre","year","embeddedCoverPath","durationSource","coverSource","source","error"];
+  if (!strings.every(key => typeof value[key] === "string" && value[key].length <= 8192)) return false;
+  if (!["duration","durationMs","track","disc"].every(key => Number.isFinite(value[key]) && value[key] >= 0)) return false;
+  if (typeof value.hasEmbeddedCover !== "boolean") return false;
+  if (value.embeddedCoverPath) {
+    const base = path.resolve(getEmbeddedCoverCacheDirectory());
+    if (path.dirname(path.resolve(value.embeddedCoverPath)) !== base || !/^[a-f0-9]{40,64}\.(?:jpg|png|gif|webp|bmp)$/.test(path.basename(value.embeddedCoverPath))) return false;
+  }
+  return true;
+}
+async function withParseSlot(work) {
+  if (activeParses >= MAX_ACTIVE_PARSES) await new Promise(resolve => waiters.push(resolve));
+  else activeParses++;
+  try { return await work(); }
+  finally {
+    const next = waiters.shift();
+    if (next) next();
+    else activeParses--;
+  }
+}
 
 const AUDIO_EXTENSIONS = new Set([".mp3", ".flac", ".m4a", ".aac", ".ogg", ".opus", ".wav", ".aiff", ".aif"]);
 const COVER_CACHE_DIR = "metadata-covers-v040";
 
 function initMetadataService(options = {}) {
-  serviceUserDataPath = String(options.userDataPath || serviceUserDataPath || "").trim();
+  const nextPath = String(options.userDataPath || serviceUserDataPath || "").trim();
+  if (nextPath !== serviceUserDataPath) {
+    metadataCache.flush();
+    serviceUserDataPath = nextPath;
+    metadataCache = createResourceCache({
+      file: nextPath ? path.join(nextPath, "disposable-local-metadata-v1.json") : "",
+      maxEntries: 4096, maxBytes: 8 * 1024 * 1024, validate: validMetadataSnapshot
+    });
+  }
   serviceFfmpegPath = String(options.ffmpegPath || serviceFfmpegPath || "").trim();
 
   if (serviceUserDataPath) {
@@ -60,31 +95,31 @@ function extensionFromMime(mime = "") {
   return ".jpg";
 }
 
-function saveEmbeddedCover(filePath, picture) {
+async function saveEmbeddedCover(filePath, picture) {
   try {
     const rawData = picture?.data || picture;
     if (!rawData?.length) return "";
 
-    const stat = fs.statSync(filePath);
+    // Full-content identity deduplicates identical album artwork across tracks.
+    // Existing persisted cover paths are left intact, so library references stay valid.
     const buffer = Buffer.from(rawData);
-    const hash = crypto
-      .createHash("sha1")
-      .update(String(filePath))
-      .update(String(stat.mtimeMs || ""))
-      .update(String(stat.size || ""))
-      .update(buffer.subarray(0, Math.min(buffer.length, 8192)))
-      .digest("hex");
-
+    const hash = crypto.createHash("sha256").update(buffer).digest("hex");
     const dir = getEmbeddedCoverCacheDirectory();
-    fs.mkdirSync(dir, { recursive: true });
+    await fs.promises.mkdir(dir, { recursive: true });
 
     const ext = extensionFromMime(picture?.format || picture?.mime || "");
     const targetPath = path.join(dir, `${hash}${ext}`);
 
-    if (!fs.existsSync(targetPath) || fs.statSync(targetPath).size !== buffer.length) {
+    let existing = false;
+    try {
+      const stat = await fs.promises.lstat(targetPath);
+      existing = stat.isFile() && stat.size === buffer.length &&
+        crypto.createHash("sha256").update(await fs.promises.readFile(targetPath)).digest("hex") === hash;
+    } catch {}
+    if (!existing) {
       const temporary = `${targetPath}.${crypto.randomUUID()}.tmp`;
-      try { fs.writeFileSync(temporary, buffer, { flag: "wx" }); fs.renameSync(temporary, targetPath); }
-      finally { fs.rmSync(temporary, { force: true }); }
+      try { await fs.promises.writeFile(temporary, buffer, { flag: "wx" }); await fs.promises.rename(temporary, targetPath); }
+      finally { await fs.promises.rm(temporary, { force: true }).catch(() => {}); }
     }
 
     return targetPath;
@@ -255,7 +290,7 @@ async function readLocalAudioMetadataUncached(filePath, options = {}) {
       if (readCover) {
         const picture = getPrimaryPicture(common);
         if (picture) {
-          const coverPath = saveEmbeddedCover(target, picture);
+          const coverPath = await saveEmbeddedCover(target, picture);
           if (coverPath) {
             output.embeddedCoverPath = coverPath;
             output.hasEmbeddedCover = true;
@@ -305,24 +340,21 @@ async function readLocalAudioMetadata(filePath, options = {}) {
   let stat;
   try { stat = await fs.promises.stat(target); } catch {}
   if (!stat?.isFile() || !isAudioFile(target)) return readLocalAudioMetadataUncached(target, options);
-  const key = JSON.stringify([target, stat.size, stat.mtimeMs, stat.ctimeMs, options.readCover !== false, options.readDuration !== false]);
-  const cached = metadataCache.get(key);
-  if (cached && (!cached.embeddedCoverPath || fileExists(cached.embeddedCoverPath))) {
-    metadataCache.delete(key);
-    metadataCache.set(key, cached);
+  const key = crypto.createHash("sha256").update(JSON.stringify([target, stat.size, stat.mtimeMs, stat.ctimeMs, options.readCover !== false, options.readDuration !== false])).digest("hex");
+  const cache = metadataCache;
+  const cached = cache.get(key);
+  if (cached?.filePath === target && (!cached.embeddedCoverPath || fileExists(cached.embeddedCoverPath))) {
     return { ...cached };
   }
-  metadataCache.delete(key);
   let pending = metadataPending.get(key);
   if (!pending) {
-    if (metadataPending.size >= 64) return readLocalAudioMetadataUncached(target, options);
-    pending = readLocalAudioMetadataUncached(target, options).then(async result => {
+    if (metadataPending.size >= 64) return withParseSlot(() => readLocalAudioMetadataUncached(target, options));
+    pending = withParseSlot(() => readLocalAudioMetadataUncached(target, options)).then(async result => {
       const current = await fs.promises.stat(target).catch(() => null);
       if (result.ok && result.source === "music-metadata" && !result.error &&
           (options.readDuration === false || result.durationMs > 0) &&
           current?.size === stat.size && current.mtimeMs === stat.mtimeMs && current.ctimeMs === stat.ctimeMs) {
-        metadataCache.set(key, { ...result });
-        while (metadataCache.size > METADATA_CACHE_LIMIT) metadataCache.delete(metadataCache.keys().next().value);
+        cache.set(key, { ...result }, METADATA_TTL);
       }
       return result;
     }).finally(() => metadataPending.delete(key));
@@ -333,5 +365,6 @@ async function readLocalAudioMetadata(filePath, options = {}) {
 
 module.exports = {
   initMetadataService,
+  flushMetadataCache: () => metadataCache.flush(),
   readLocalAudioMetadata
 };

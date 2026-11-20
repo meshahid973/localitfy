@@ -16,7 +16,7 @@ function catalogArtwork(kind, item) {
 function findRecording(items,title,artist,recordingId) {
   const matches=(Array.isArray(items)?items:[]).filter(item=>norm(item?.title)===norm(title)&&norm(credit(item))===norm(artist));
   const identified=validId(recordingId)?matches.find(item=>item.id===recordingId):undefined;
-  return identified || (matches.length===1?matches[0]:undefined);
+  return validId(recordingId) ? identified : (matches.length===1?matches[0]:undefined);
 }
 function lastfmArtwork(track,title,artist) {
   if (norm(track?.name)!==norm(title) || norm(track?.artist?.name)!==norm(artist)) return {};

@@ -1,5 +1,5 @@
 const { initDownloader, cancelActiveDownloads } = require("../downloader.cjs");
-const { initMetadataService } = require("../metadata-service.cjs");
+const { initMetadataService, flushMetadataCache } = require("../metadata-service.cjs");
 const { initCoverService } = require("../cover-service.cjs");
 const { shutdownDiscordActivity } = require("../rpc.cjs");
 
@@ -32,6 +32,7 @@ function createElectronServiceRuntime(options = {}) {
     stopped = true;
 
     try { cancelActiveDownloads({ interrupted: true }); } catch { }
+      flushMetadataCache();
     try { await shutdownDiscordActivity(reason); } catch { }
     try { cleanupNativeWindowsMedia?.(); } catch { }
     try { stopMediaServer?.(); } catch { }
