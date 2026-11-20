@@ -7,6 +7,7 @@ import { runInNewContext } from "node:vm";
 const sortSource = fs.readFileSync("src/features/library/librarySort.ts", "utf8");
 const view = fs.readFileSync("src/features/library/LibraryView.tsx", "utf8");
 const app = fs.readFileSync("src/App.tsx", "utf8");
+const controller = fs.readFileSync("src/features/library/useLibraryController.ts", "utf8");
 
 function loadSortLibrarySongs() {
   const compiled = ts.transpileModule(sortSource, {
@@ -40,8 +41,8 @@ test("library view exposes the sort and blocks reordering while sorted", () => {
   assert.match(view, /<ArcDropdownMenu/);
   assert.match(view, /value: "artist", label: "artist A–Z"/);
   assert.match(view, /onValueChange=\{setLibrarySortMode\}/);
-  assert.match(app, /sortLibrarySongs\(unsortedVisibleSongs, librarySortMode\)/);
-  assert.match(app, /const libraryOrderLocked = librarySortMode !== "library" && \(view === "library" \|\| view === "liked"\)/);
+  assert.match(controller, /sortLibrarySongs\(unsortedVisibleSongs, librarySortMode\)/);
+  assert.match(controller, /const libraryOrderLocked = librarySortMode !== "library" && \(view === "library" \|\| view === "liked"\)/);
   for (const handler of ["handleLibraryDragOver", "handleLibraryDrop", "handleLibraryAreaDragOver", "handleLibraryAreaDrop"]) {
     assert.match(app, new RegExp(`function ${handler}\\([^)]*\\) \\{\\s+if \\(libraryOrderLocked\\) return;`));
   }

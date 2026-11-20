@@ -64,7 +64,9 @@ test("download and Spotify refresh use final result snapshots before bootstrap f
   const app = fs.readFileSync(path.join(root, "src/App.tsx"), "utf8");
   assert.match(app, /if \(!Array\.isArray\(result\.songs\) && \(successCount > 0 \|\| Number\(result\.changedCount \|\| 0\) > 0\) && window\.localitfy\?\.bootstrap\)/);
   assert.match(app, /if \(!Array\.isArray\(result\.songs\) && \(successCount > 0 \|\| Number\(result\.changedCount \|\| 0\) > 0\) && bridge\?\.bootstrap\)/);
-  assert.match(app, /reconcileLibraryIndex\(songs, libraryIndexRef\.current/);
+  assert.match(app, /useLibraryDerivedState\(/);
+  const controller = fs.readFileSync(path.join(root, "src/features/library/useLibraryController.ts"), "utf8");
+  assert.match(controller, /reconcileLibraryIndex\(songs, libraryIndexRef\.current/);
 });
 
 

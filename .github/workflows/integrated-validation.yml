@@ -51,11 +51,12 @@ jobs:
         run: |
           # Electron may install its executable lazily. Resolve the runtime before
           # configuring its sandbox; never disable the sandbox to make CI pass.
-          npx --no-install electron --version
+          node node_modules/electron/install.js
           sandbox="$(node -p 'require("node:path").join(require("node:path").dirname(require("electron")), "chrome-sandbox")')"
           test -f "$sandbox"
           sudo chown root:root "$sandbox"
           sudo chmod 4755 "$sandbox"
+          test "$(stat -c '%u:%a' "$sandbox")" = "0:4755"
           # Hosted Linux runners have no physical sound card. Use a real PulseAudio null sink.
           if ! command -v pulseaudio >/dev/null; then
             sudo apt-get update -o Acquire::Retries=3
@@ -71,7 +72,7 @@ jobs:
             ln -s "$GITHUB_WORKSPACE/node_modules" "$baseline/node_modules"
           else
             npm --prefix "$baseline" ci
-            (cd "$baseline" && npx --no-install electron --version)
+            (cd "$baseline" && node node_modules/electron/install.js)
             sandbox="$(cd "$baseline" && node -p 'require("node:path").join(require("node:path").dirname(require("electron")), "chrome-sandbox")')"
             test -f "$sandbox"
             sudo chown root:root "$sandbox"

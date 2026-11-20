@@ -22,6 +22,8 @@ final class RemoteArtworkCache {
     private final SharedPreferences index;
     private final Set<String> pending = new HashSet<>();
     private final Map<String,Long> retry = new LinkedHashMap<>();
+    private final Map<String,String> verified = new LinkedHashMap<>();
+    private boolean initialized;
 
     RemoteArtworkCache(Context context) {
         root = new File(context.getFilesDir(), DIR);
@@ -51,7 +53,8 @@ final class RemoteArtworkCache {
     private static String hash(byte[] bytes) throws Exception {
         byte[] digest = MessageDigest.getInstance("SHA-256").digest(bytes);
         StringBuilder result = new StringBuilder(64);
-        for (byte b : digest) result.append(String.format(Locale.ROOT,"%02x", b & 255));
+        final char[] hex="0123456789abcdef".toCharArray();
+        for (byte b : digest) { result.append(hex[(b & 255) >>> 4]); result.append(hex[b & 15]); }
         return result.toString();
     }
     private static byte[] read(InputStream in,long deadline) throws IOException {
@@ -63,14 +66,25 @@ final class RemoteArtworkCache {
         }
         return out.toByteArray();
     }
-    private static long ttl(HttpURLConnection c) {
+    private static long ttl(HttpURLConnection c, JSONObject previous) {
         String cc = c.getHeaderField("Cache-Control"), vary=c.getHeaderField("Vary");
-        if (cc==null || (vary!=null&&!vary.trim().isEmpty()) ||
-            Pattern.compile("(?i)(^|,)\\s*(no-store|no-cache|private)(\\s*[=,]|\\s*$)").matcher(cc).find()) return 0;
+        if ((vary!=null&&!vary.trim().isEmpty()) ||
+            Pattern.compile("(?i)(^|,)\\s*(no-store|no-cache|private)(\\s*[=,]|\\s*$)").matcher(cc==null?"":cc).find()) return 0;
+        if(cc==null)return previous==null?0:Math.min(MAX_TTL,previous.optLong("ttl"));
         Matcher m=Pattern.compile("(?i)(^|,)\\s*max-age\\s*=\\s*(\\d+)").matcher(cc);
         if (!m.find()) return 0;
         try { return Math.max(0,Math.min(MAX_TTL,Math.min(604800L,Long.parseLong(m.group(2)))*1000)-Math.min(MAX_TTL,Math.max(0,c.getHeaderFieldLong("Age",0))*1000)); }
         catch(NumberFormatException e) { return 0; }
+    }
+    private static long stale(HttpURLConnection c, JSONObject previous) {
+        String cc=c.getHeaderField("Cache-Control");
+        if(cc==null)return previous==null?0:Math.min(86400000L,previous.optLong("stale"));
+        if(Pattern.compile("(?i)(^|,)\\s*(must-revalidate|proxy-revalidate)\\s*(,|$)").matcher(cc).find())return 0;
+        Matcher m=Pattern.compile("(?i)(^|,)\\s*stale-while-revalidate\\s*=\\s*(\\d+)").matcher(cc);
+        try{return m.find()?Math.min(86400L,Long.parseLong(m.group(2)))*1000:0;}catch(NumberFormatException e){return 0;}
+    }
+    private static String validator(String value) {
+        return value!=null&&value.length()<=512&&!value.contains("\r")&&!value.contains("\n")?value:"";
     }
     private static String extension(byte[] b,String mime) {
         if (b.length<12 || mime==null) return "";
@@ -91,18 +105,27 @@ final class RemoteArtworkCache {
         out.put("cacheTtlMs",Math.max(0,expires-System.currentTimeMillis()));
         return out;
     }
-    private synchronized JSObject hit(String key) throws Exception {
-        JSONObject row=row(key);
-        String name=row.optString("file"); long expires=row.optLong("expires");
-        if (!NAME.matcher(name).matches()||expires<=System.currentTimeMillis()) return null;
+    private boolean validFile(JSONObject row) throws Exception {
+        String name=row.optString("file");
+        if(!NAME.matcher(name).matches())return false;
         File f=new File(root,name);
-        if (!f.isFile()||f.length()!=row.optLong("bytes")||f.length()>MAX_IMAGE) return null;
+        if(!f.isFile()||f.length()!=row.optLong("bytes")||f.length()>MAX_IMAGE)return false;
+        android.system.StructStat stat=android.system.Os.lstat(f.getAbsolutePath());
+        if(!android.system.OsConstants.S_ISREG(stat.st_mode))return false;
+        String stamp=stat.st_ino+":"+stat.st_size+":"+stat.st_mtime+":"+stat.st_ctime+":"+f.lastModified();
+        if(stamp.equals(verified.get(name)))return true;
         try(InputStream in=new FileInputStream(f)) {
-            if(!hash(read(in,SystemClock.elapsedRealtime()+2000)).equals(name.substring(0,64)))return null;
+            if(!hash(read(in,SystemClock.elapsedRealtime()+2000)).equals(name.substring(0,64)))return false;
         }
-        row.put("access",System.currentTimeMillis());
-        index.edit().putString(key,row.toString()).apply();
-        return result(name,expires);
+        verified.put(name,stamp);
+        while(verified.size()>MAX_ENTRIES)verified.remove(verified.keySet().iterator().next());
+        return true;
+    }
+    private long staleUntil(JSONObject r){
+        return Math.min(r.optLong("expires")+86400000L,r.optLong("staleUntil",r.optLong("expires")));
+    }
+    private void touch(String key,JSONObject r,long now) throws Exception {
+        if(now-r.optLong("access")>60000) {r.put("access",now);index.edit().putString(key,r.toString()).apply();}
     }
     private synchronized void prune() {
         Map<String,?> all=index.getAll();
@@ -114,7 +137,7 @@ final class RemoteArtworkCache {
         SharedPreferences.Editor edit=index.edit();
         for(String key:keys) {
             JSONObject r=row(key); String n=r.optString("file"); long size=r.optLong("bytes");
-            if(!NAME.matcher(n).matches()||size<=0||size>MAX_IMAGE||r.optLong("expires")<=now||!new File(root,n).isFile()) {edit.remove(key);continue;}
+            if(!NAME.matcher(n).matches()||size<=0||size>MAX_IMAGE||staleUntil(r)<=now||!new File(root,n).isFile()) {edit.remove(key);continue;}
             if(!refs.containsKey(n))bytes+=size;
             refs.put(n,refs.getOrDefault(n,0)+1);entries++;validKeys.add(key);
         }
@@ -122,7 +145,7 @@ final class RemoteArtworkCache {
             if(entries<=MAX_ENTRIES&&bytes<=MAX_BYTES)break;
             if(!validKeys.contains(key))continue;
             JSONObject r=row(key);String n=r.optString("file");
-            if(r.optLong("expires")<=now||!refs.containsKey(n)||r.optLong("bytes")<=0||r.optLong("bytes")>MAX_IMAGE)continue;
+            if(staleUntil(r)<=now||!refs.containsKey(n)||r.optLong("bytes")<=0||r.optLong("bytes")>MAX_IMAGE)continue;
             edit.remove(key);entries--;
             int count=refs.get(n)-1;
             if(count==0){refs.remove(n);bytes-=r.optLong("bytes");}else refs.put(n,count);
@@ -135,23 +158,61 @@ final class RemoteArtworkCache {
             else if(n.endsWith(".part")&&now-file.lastModified()>3600000L)file.delete();
         }
     }
-    JSObject resolve(String url) throws Exception {
+    JSObject resolve(String url, java.util.concurrent.Executor executor) throws Exception {
         if(!eligible(url))return new JSObject();
         String key=hash(url.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        JSONObject previous;
         synchronized(this) {
-            JSObject cached=hit(key); if(cached!=null)return cached;
-            if(pending.contains(key)||retry.getOrDefault(key,0L)>System.currentTimeMillis())return new JSObject();
+            if(!initialized){prune();initialized=true;}
+            long now=System.currentTimeMillis();
+            previous=row(key);
+            if(validFile(previous)){
+                touch(key,previous,now);
+                if(previous.optLong("expires")>now)return result(previous.optString("file"),previous.optLong("expires"));
+                if(staleUntil(previous)>now){
+                    if(!pending.contains(key)&&retry.getOrDefault(key,0L)<=now){
+                        pending.add(key);
+                        final JSONObject prior=previous;
+                        try{executor.execute(()->{try{refresh(url,key,prior);}catch(Exception ignored){}});}
+                        catch(java.util.concurrent.RejectedExecutionException busy){pending.remove(key);}
+                    }
+                    return result(previous.optString("file"),staleUntil(previous));
+                }
+            }else previous=null;
+            if(pending.contains(key)||retry.getOrDefault(key,0L)>now)return new JSObject();
             pending.add(key);
         }
+        return refresh(url,key,previous);
+    }
+    private JSObject refresh(String url,String key,JSONObject previous) throws Exception {
         HttpURLConnection c=null;
         try {
             c=(HttpURLConnection)new URI(url).toURL().openConnection();
             c.setInstanceFollowRedirects(false);c.setUseCaches(false);
             c.setConnectTimeout(1400);c.setReadTimeout(1400);
             c.setRequestProperty("Accept","image/png,image/jpeg,image/webp,image/gif");
-            long deadline=SystemClock.elapsedRealtime()+2000;
-            if(c.getResponseCode()!=200||c.getContentLengthLong()>MAX_IMAGE)return new JSObject();
-            long duration=ttl(c);if(duration<=0)return new JSObject();
+            if(previous!=null){
+                String etag=validator(previous.optString("etag")), modified=validator(previous.optString("modified"));
+                if(!etag.isEmpty())c.setRequestProperty("If-None-Match",etag);
+                if(!modified.isEmpty())c.setRequestProperty("If-Modified-Since",modified);
+            }
+            long deadline=SystemClock.elapsedRealtime()+2500;
+            int status=c.getResponseCode();
+            long duration=ttl(c,status==304?previous:null);
+            long stale=stale(c,status==304?previous:null);
+            if((status==200||status==304)&&duration<=0){synchronized(this){index.edit().remove(key).apply();prune();}return new JSObject();}
+            if(status==304&&previous!=null){
+                synchronized(this){
+                    if(!validFile(previous))return new JSObject();
+                    long expires=System.currentTimeMillis()+duration;
+                    previous.put("expires",expires);previous.put("staleUntil",expires+stale);
+                    previous.put("ttl",duration);previous.put("stale",stale);
+                    previous.put("access",System.currentTimeMillis());
+                    index.edit().putString(key,previous.toString()).apply();
+                    return result(previous.optString("file"),expires);
+                }
+            }
+            if(status!=200||c.getContentLengthLong()>MAX_IMAGE)return new JSObject();
             byte[] bytes;
             try(InputStream in=c.getInputStream()){bytes=read(in,deadline);}
             String ext=extension(bytes,c.getContentType());if(ext.isEmpty())return new JSObject();
@@ -161,10 +222,16 @@ final class RemoteArtworkCache {
                 File target=new File(root,name);
                 File temp=File.createTempFile("cover-",".part",root);
                 try {
-                    try(FileOutputStream out=new FileOutputStream(temp)){out.write(bytes);out.getFD().sync();}
-                    if(!temp.renameTo(target))throw new IOException("Artwork replacement failed");
+                    JSONObject existing=new JSONObject();existing.put("file",name);existing.put("bytes",bytes.length);
+                    if(!validFile(existing)) {
+                        try(FileOutputStream out=new FileOutputStream(temp)){out.write(bytes);out.getFD().sync();}
+                        if(!temp.renameTo(target))throw new IOException("Artwork replacement failed");
+                        verified.remove(name);
+                    }
                     long expires=System.currentTimeMillis()+duration;
                     JSONObject r=new JSONObject();r.put("file",name);r.put("bytes",bytes.length);r.put("expires",expires);r.put("access",System.currentTimeMillis());
+                    r.put("ttl",duration);r.put("stale",stale);r.put("staleUntil",expires+stale);
+                    r.put("etag",validator(c.getHeaderField("ETag")));r.put("modified",validator(c.getHeaderField("Last-Modified")));
                     index.edit().putString(key,r.toString()).apply();
                     prune();
                     if(target.isFile())return result(name,expires);

@@ -205,6 +205,7 @@ async function syncFiles() {
   const base = phoneLibrary.pairing?.url || "";
   let lastByteReport = -Infinity;
   let lastLibraryNotice = performance.now();
+  let lastTrackReport = -Infinity;
   const totalReceived = () => {
     let partial = 0;
     for (const received of inFlight.values()) partial += received;
@@ -265,7 +266,10 @@ async function syncFiles() {
     phoneLibrary.files[song.id] = local;
     done += 1;
     lastByteReport = performance.now();
-    report({ phase: "downloading", message: `Copied ${song.title || "song"}`, done, total: wanted.length, bytesDone: totalReceived() });
+    if (done === wanted.length || lastByteReport - lastTrackReport >= 200) {
+      lastTrackReport = lastByteReport;
+      report({ phase: "downloading", message: `Copied ${song.title || "song"}`, done, total: wanted.length, bytesDone: totalReceived() });
+    }
     // Save as we go so an interrupted first sync resumes where it stopped.
     if (done % 10 === 0 || done === wanted.length) {
       await phoneLibrary.save(["files"]);

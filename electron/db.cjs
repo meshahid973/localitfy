@@ -157,7 +157,7 @@ function setStoredSchemaVersion(database, version = SCHEMA_VERSION) {
     .prepare(`
       INSERT INTO schema_meta (key, value)
       VALUES ('schemaVersion', ?)
-      ON CONFLICT(key) DO UPDATE SET value = excluded.value
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value WHERE settings.value IS NOT excluded.value
     `)
     .run(String(version));
 
@@ -1048,44 +1048,54 @@ function savePlaylists(playlists) {
     INSERT INTO playlists (id, name, createdAt, sortOrder, rules, coverArtwork)
     VALUES (@id, @name, @createdAt, @sortOrder, @rules, @coverArtwork)
     ON CONFLICT(id) DO UPDATE SET
-      name = excluded.name,
-      createdAt = excluded.createdAt,
-      sortOrder = excluded.sortOrder,
-      rules = excluded.rules,
-      coverArtwork = excluded.coverArtwork
+      name = excluded.name, createdAt = excluded.createdAt, sortOrder = excluded.sortOrder,
+      rules = excluded.rules, coverArtwork = excluded.coverArtwork
+    WHERE playlists.name IS NOT excluded.name OR playlists.createdAt IS NOT excluded.createdAt
+      OR playlists.sortOrder IS NOT excluded.sortOrder OR playlists.rules IS NOT excluded.rules
+      OR playlists.coverArtwork IS NOT excluded.coverArtwork
   `);
-
   const insertPlaylistSong = database.prepare(`
     INSERT INTO playlist_songs (playlistId, songId, position, addedAt)
-    VALUES (@playlistId, @songId, @position, @addedAt)
-    ON CONFLICT(playlistId, songId) DO UPDATE SET
-      position = excluded.position,
-      addedAt = excluded.addedAt
+    VALUES (?, ?, ?, ?)
+    ON CONFLICT(playlistId, songId) DO UPDATE SET position = excluded.position
+    WHERE playlist_songs.position IS NOT excluded.position
   `);
-
-  const tx = database.transaction((items) => {
-    database.prepare("DELETE FROM playlist_songs").run();
-    database.prepare("DELETE FROM playlists").run();
-
-    items.forEach((playlist, playlistIndex) => {
-      insertPlaylist.run({
-        id: playlist.id,
-        name: playlist.name,
-        createdAt: playlist.createdAt,
-        sortOrder: playlistIndex,
-        rules: playlist.rules,
-        coverArtwork: playlist.coverArtwork
-      });
-
-      playlist.songIds.forEach((songId, songIndex) => {
-        insertPlaylistSong.run({
-          playlistId: playlist.id,
-          songId,
-          position: songIndex,
-          addedAt: Date.now()
-        });
-      });
+  const deletePlaylist = database.prepare("DELETE FROM playlists WHERE id = ?");
+  const deleteMembers = database.prepare("DELETE FROM playlist_songs WHERE playlistId = ?");
+  const deleteMember = database.prepare("DELETE FROM playlist_songs WHERE playlistId = ? AND songId = ?");
+  const tx = database.transaction(items => {
+    // Preserve last-write-wins playlist metadata and union membership for duplicate
+    // IDs, matching the previous full-snapshot upsert semantics.
+    const targets = new Map();
+    items.forEach((playlist, sortOrder) => {
+      const songPositions = targets.get(playlist.id)?.songPositions || new Map();
+      playlist.songIds.forEach((id, position) => songPositions.set(id, position));
+      targets.set(playlist.id, {playlist, sortOrder, songPositions});
     });
+    const existing = new Map(database.prepare("SELECT * FROM playlists").all().map(row => [row.id,row]));
+    const memberRows = database.prepare("SELECT playlistId,songId,position FROM playlist_songs").all();
+    const members = new Map();
+    for (const row of memberRows) {
+      let group = members.get(row.playlistId);
+      if (!group) { group = new Map(); members.set(row.playlistId, group); }
+      group.set(row.songId, row.position);
+    }
+    for (const id of new Set([...existing.keys(), ...members.keys()])) {
+      if (!targets.has(id)) { deleteMembers.run(id); deletePlaylist.run(id); }
+    }
+    const addedAt = Date.now();
+    for (const [id, {playlist, sortOrder, songPositions}] of targets) {
+      const previous = existing.get(id);
+      if (!previous || previous.name !== playlist.name || previous.createdAt !== playlist.createdAt ||
+          previous.sortOrder !== sortOrder || previous.rules !== playlist.rules || previous.coverArtwork !== playlist.coverArtwork) {
+        insertPlaylist.run({id,name:playlist.name,createdAt:playlist.createdAt,sortOrder,rules:playlist.rules,coverArtwork:playlist.coverArtwork});
+      }
+      const old = members.get(id);
+      if (old) for (const songId of old.keys()) if (!songPositions.has(songId)) deleteMember.run(id,songId);
+      for (const [songId, position] of songPositions) {
+        if (old?.get(songId) !== position) insertPlaylistSong.run(id,songId,position,addedAt);
+      }
+    }
   });
 
   try {

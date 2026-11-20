@@ -41,6 +41,13 @@ function createThumbnailRuntime({
   let thumbnailWrites = 0;
   let preparedDirectory = "";
   let warmTimer = null;
+  let stopped = false;
+  let runningWarm = null;
+  const encoders = new Set();
+  function cancelEncoders() {
+    for (const encoder of encoders) encoder.abort();
+    encoders.clear();
+  }
 
   function getCoverThumbnailDirectory() {
     try {
@@ -99,6 +106,7 @@ function createThumbnailRuntime({
 
   // Decode and resize outside Electron's main process using the bundled FFmpeg.
   function createCoverThumbnail(filePath, requestedSize = COVER_THUMBNAIL_SIZE) {
+    if (stopped) return Promise.resolve({ok:false,error:"Thumbnail runtime stopped."});
     const size = thumbnailSize(requestedSize);
     const thumbnailPath = getCoverThumbnailPath(filePath, size);
     if (!thumbnailPath) return Promise.resolve({ ok: false, error: "Cover unavailable." });
@@ -118,6 +126,8 @@ function createThumbnailRuntime({
         const ffmpegPath = getFfmpegPath();
         if (!ffmpegPath || !fileExists(ffmpegPath)) return { ok: false, error: "Thumbnail encoder unavailable." };
         const temporary = thumbnailPath + "." + crypto.randomUUID() + ".part.png";
+        const encoder = new AbortController();
+        encoders.add(encoder);
         try {
           await fs.promises.mkdir(path.dirname(thumbnailPath), { recursive: true });
           await new Promise((resolve, reject) => execFile(ffmpegPath, [
@@ -125,12 +135,12 @@ function createThumbnailRuntime({
             "-map", "0:v:0", "-frames:v", "1", "-filter_threads", "1", "-vf",
             `scale=${size}:${size}:force_original_aspect_ratio=decrease,pad=${size}:${size}:(ow-iw)/2:(oh-ih)/2`,
             "-threads", "1", "-f", "image2", "-y", temporary
-          ], { windowsHide: true, timeout: 12000, maxBuffer: 256 * 1024 }, error => error ? reject(error) : resolve()));
+          ], { windowsHide: true, timeout: 12000, maxBuffer: 256 * 1024, signal: encoder.signal }, error => error ? reject(error) : resolve()));
           invalidateFileInfo(filePath);
           if (generation !== thumbnailGeneration || getCoverThumbnailPath(filePath, size) !== thumbnailPath) return { ok: false, error: "Thumbnail invalidated." };
           // Cleanup cannot interleave this small atomic publication operation.
           fs.renameSync(temporary, thumbnailPath);
-        } finally { await fs.promises.rm(temporary, { force: true }).catch(() => {}); }
+        } finally { encoders.delete(encoder); await fs.promises.rm(temporary, { force: true }).catch(() => {}); }
         if (generation !== thumbnailGeneration) return { ok: false, error: "Thumbnail invalidated." };
         invalidateFileInfo(thumbnailPath);
         const url = safeMediaUrl(thumbnailPath);
@@ -138,7 +148,7 @@ function createThumbnailRuntime({
         if (++thumbnailWrites % 32 === 0) void scheduleThumbnailPrune();
         return { ok: true, sourcePath: filePath, thumbnailPath, cached: false, url, size };
       } catch (error) {
-        console.log("[localtify thumbnail create error]", error?.message || error);
+        if (generation === thumbnailGeneration) console.log("[localtify thumbnail create error]", error?.message || error);
         return { ok: false, error: "Thumbnail unavailable; original artwork remains available." };
       }
     })().finally(() => thumbnailJobs.delete(thumbnailPath));
@@ -203,6 +213,9 @@ function createThumbnailRuntime({
     let sizeBytes = 0;
     try {
       thumbnailGeneration++;
+      cancelEncoders();
+      if (warmTimer !== null) clearTimeout(warmTimer);
+      warmTimer = null;
       coverThumbnailQueue.clear();
       coverThumbnailUrlCache.clear();
       if (dir && fs.existsSync(dir)) {
@@ -225,7 +238,13 @@ function createThumbnailRuntime({
     }
   }
 
-  async function warmCoverThumbnails({ limit = 80, force = false } = {}) {
+  function warmCoverThumbnails(options = {}) {
+    if (!runningWarm) runningWarm = warmCoverThumbnailsOnce(options).finally(() => { runningWarm = null; });
+    return runningWarm;
+  }
+
+  async function warmCoverThumbnailsOnce({ limit = 80, force = false } = {}) {
+    const generation = thumbnailGeneration;
     const songs = getSongs();
     const uniqueCoverPaths = new Set();
     for (const song of songs) {
@@ -239,6 +258,7 @@ function createThumbnailRuntime({
     let cached = 0;
     const warnings = [];
     for (const coverPath of uniqueCoverPaths) {
+      if (stopped || generation !== thumbnailGeneration) break;
       const thumbnailPath = getCoverThumbnailPath(coverPath);
       if (thumbnailPath && fileExists(thumbnailPath) && !force) { cached += 1; continue; }
       const result = await createCoverThumbnail(coverPath);
@@ -272,7 +292,7 @@ function createThumbnailRuntime({
 
     // Accept a library song ID, never a renderer-provided filesystem path.
     async function requestThumbnail(payload) {
-      if (!payload || typeof payload.id !== "string" || typeof payload.source !== "string") return null;
+      if (stopped || !payload || typeof payload.id !== "string" || typeof payload.source !== "string") return null;
       const song = getSong(payload.id);
       if (!song) return null;
       const file = getRuntimeCoverPath(song);
@@ -300,7 +320,9 @@ function createThumbnailRuntime({
     queue: coverThumbnailQueue,
     clearUrlCache: () => coverThumbnailUrlCache.clear(),
     stop: () => {
+      stopped = true;
       thumbnailGeneration++;
+      cancelEncoders();
       if (warmTimer !== null) clearTimeout(warmTimer);
       warmTimer = null;
       coverThumbnailQueue.clear();
