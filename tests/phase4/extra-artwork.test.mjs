@@ -27,7 +27,7 @@ test("catalog requests coalesce and fail without caching a provider outage",asyn
  const lookup=createDeezerArtwork({fetchImpl,now:()=>now});
  assert.deepEqual(await lookup("recording","Bang Bang","B.A. Robertson"),{});
  assert.deepEqual(await lookup("recording","Bang Bang","B.A. Robertson"),{});
- assert.equal(calls,1);now+=16000;
+ assert.equal(calls,1);now+=60000;
  const values=await Promise.all([lookup("recording","Bang Bang","B.A. Robertson"),lookup("recording","Bang Bang","B.A. Robertson")]);
  assert.equal(values[0].coverUrl,cover);assert.deepEqual(values[0],values[1]);assert.equal(calls,2);
  await lookup("recording","Bang Bang","B.A. Robertson");assert.equal(calls,2);
@@ -65,4 +65,19 @@ test("fallback artwork still consults verified MusicBrainz after a catalog image
  assert.equal((await lookup("Bang Bang","B.A. Robertson")).coverUrl,cover);
  const fallback=await lookup("Bang Bang","B.A. Robertson",{fallback:true});
  assert.equal(fallback.coverUrl,mbCover);assert.ok(fallback.coverAlternatives.includes(cover));
+});
+
+test("an upstream 403 has a five-minute cooldown without caching an empty cover", async () => {
+ let time=1000,requests=0;
+ const lookup=createDeezerArtwork({now:()=>time,fetchImpl:async()=>{
+   requests++;
+   return requests===1?{ok:false,status:403}:{ok:true,text:async()=>JSON.stringify({data:[track]})};
+ }});
+ assert.deepEqual(await lookup("recording","Bang Bang","B.A. Robertson"),{});
+ time+=16000;
+ assert.deepEqual(await lookup("recording","Bang Bang","B.A. Robertson"),{});
+ assert.equal(requests,1,"do not retry a blocked provider every 15 seconds");
+ time+=284001;
+ assert.equal((await lookup("recording","Bang Bang","B.A. Robertson")).coverUrl,cover);
+ assert.equal(requests,2,"retry after cooldown, never permanently cache the error");
 });

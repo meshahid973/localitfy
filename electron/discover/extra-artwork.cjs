@@ -37,7 +37,12 @@ function matchDeezerArtwork(body,kind,title,artist="") {
 }
 async function boundedJson(fetchImpl,url,headers={}) {
   const response=await fetchImpl(url,{method:"GET",credentials:"omit",redirect:"error",headers:{Accept:"application/json",...headers},signal:AbortSignal.timeout(5500)});
-  if(!response.ok||response.status===429){await response.body?.cancel?.().catch(()=>undefined);throw Error("Artwork provider unavailable");}
+  if(!response.ok||response.status===429){
+    await response.body?.cancel?.().catch(()=>undefined);
+    const error=new Error("Artwork provider unavailable");
+    error.status=response.status;
+    throw error;
+  }
   const max=512*1024;
   if(Number(response.headers?.get("content-length"))>max){await response.body?.cancel?.().catch(()=>undefined);throw Error("Oversized artwork response");}
   const reader=response.body?.getReader?.();
@@ -62,7 +67,13 @@ function cachedLookup(work,now=Date.now) {
     if(pending.size>=4||now()<blockedUntil)return {};
     const promise=Promise.resolve().then(()=>work(...args)).then(value=>{
       cached.set(id,{at:now(),value});while(cached.size>256)cached.delete(cached.keys().next().value);return value;
-    }).catch(()=>{blockedUntil=now()+15000;return {};}).finally(()=>pending.delete(id));
+    }).catch(error=>{
+      // A forbidden or rate-limited source should not be polled on every
+      // navigation. Other artwork providers remain independently available.
+      const cooldown=error?.status===403?300000:error?.status===429?60000:15000;
+      blockedUntil=now()+cooldown;
+      return {};
+    }).finally(()=>pending.delete(id));
     pending.set(id,promise);return promise;
   };
 }
