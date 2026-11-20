@@ -304,17 +304,28 @@ test("playback: a player that drops off keeps its place for a while, then the se
 });
 
 test("presence: a phone that stops answering heartbeats is dropped; one that answers stays", async () => {
-  const fixture = await syncFixture({ liveOptions: { heartbeatMs: 40 } });
+  // Advance the hub's clock explicitly. A loaded CI runner must not turn a
+  // scheduled 30 ms sleep into more than the 100 ms peer expiry window.
+  let clock = Date.now();
+  const fixture = await syncFixture({ liveOptions: { heartbeatMs: 40, now: () => clock } });
   try {
     const stream = await openLiveStream(fixture.url, fixture.phone.pairing.token);
     await stream.next("hello");
     for (let i = 0; i < 5; i += 1) {
-      await new Promise((resolve) => setTimeout(resolve, 30));
-      await post(fixture, { type: "pong" });
+      clock += 40;
+      assert.equal((await post(fixture, { type: "pong" })).ok, true);
+      assert.equal(fixture.server.live.presence().peers.length, 2);
     }
+    // Let the actual heartbeat sweep run while time remains below expiry.
+    clock += 90;
+    await new Promise(resolve => setTimeout(resolve, 80));
     assert.equal(fixture.server.live.presence().peers.length, 2);
-    await new Promise((resolve) => setTimeout(resolve, 250));
-    assert.equal(fixture.server.live.presence().peers.length, 1, "silent for 2.5 heartbeats");
+    clock += 20;
+    const deadline = performance.now() + 2000;
+    while (fixture.server.live.presence().peers.length === 2 && performance.now() < deadline) {
+      await new Promise(resolve => setTimeout(resolve, 20));
+    }
+    assert.equal(fixture.server.live.presence().peers.length, 1, "silent for more than 2.5 heartbeats");
     stream.close();
   } finally {
     await fixture.close();
