@@ -63,7 +63,8 @@ test("playback updates reuse normalized text while ranking the latest song state
   const first = exports.buildSongSearchEntryCached(song);
   const updated = { ...song, playCount: 60, playbackPosition: 45, genre: "Jazz" };
   const next = exports.buildSongSearchEntryCached(updated, first);
-  assert.equal(next.tokens, first.tokens);
+  assert.equal(next.haystack, first.haystack);
+  assert.equal("tokens" in next, false, "search entries do not allocate unused token sets");
   assert.equal(next.song, updated);
   assert.equal(first.song, song);
   assert.equal(exports.buildSongSearchEntryCached(updated), next);
@@ -77,7 +78,7 @@ test("every searchable metadata field invalidates reused normalized text", () =>
   for (const patch of [{ title: "Day" }, { artist: "Other" }, { album: "New" }, { filePath: "/new.flac" }, { url: "/other.flac" }, { liked: true }]) {
     const updated = { ...song, ...patch };
     const next = exports.buildSongSearchEntryCached(updated, first);
-    assert.notEqual(next.tokens, first.tokens);
+    assert.notEqual(next.haystack, first.haystack);
     assert.deepEqual(next, exports.buildSongSearchEntry(updated));
   }
   assert.equal(first.song, song);

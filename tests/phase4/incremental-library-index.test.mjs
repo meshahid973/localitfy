@@ -130,7 +130,7 @@ test("same-order playback updates share positions and preserve old snapshots", (
   assert.equal(first.songsById.get("b"),b);
   assert.equal(next.songsById.get("b"),edited);
   assert.equal(next.searchEntries[0],first.searchEntries[0]);
-  assert.equal(next.searchEntries[1].tokens,first.searchEntries[1].tokens);
+  assert.equal(next.searchEntries[1].haystack,first.searchEntries[1].haystack);
   const shuffled=reconcileLibraryIndex([edited,a],next);
   assert.notEqual(shuffled.songIndexById,next.songIndexById);
   assert.equal(shuffled.songIndexById.get("b"),0);
