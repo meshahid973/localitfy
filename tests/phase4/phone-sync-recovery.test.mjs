@@ -279,3 +279,24 @@ test("phone transfer progress coalesces native bursts and still reports the exac
     assert.equal(f.persisted.get("files").a.audioExt,"flac");
   } finally { await f.close(); }
 });
+
+test("pairing excludes automatic sync and concurrent unpairing until persisted", async () => {
+  const f = await syncFixture();
+  try {
+    let release, entered;
+    const waiting = new Promise(resolve => { entered = resolve; });
+    const gate = new Promise(resolve => { release = resolve; });
+    f.hooks.beforeRequest = async request => {
+      if (request.url.endsWith("/v1/hello")) { entered(); await gate; }
+    };
+    const pairing = f.sync.pairWithMac(f.url, f.server.newPairingCode().code);
+    await waiting;
+    try {
+      await assert.rejects(f.sync.forgetMac(), /pairing/);
+      await assert.rejects(f.sync.pairWithMac(f.url, "000000"), /pairing/);
+      await f.sync.syncNow();
+      assert.equal(f.sync.isSyncing(), false);
+    } finally { release(); await pairing; }
+    assert.equal(f.persisted.get("pairing").token, f.phone.pairing.token);
+  } finally { await f.close(); }
+});

@@ -76,6 +76,16 @@ try {
     if (db.saveSongAnalysis({ ...analysis, vector: new Float32Array(4) })) throw new Error("invalid embedding persisted");
     const Database = require("better-sqlite3");
     const inspect = new Database(process.argv[1]);
+    inspect.exec("CREATE TABLE patch_audit (n INTEGER); CREATE TRIGGER audit_song_patch AFTER UPDATE ON songs BEGIN INSERT INTO patch_audit VALUES (1); END;");
+    db.patchSong("legacy-song", { genre: "Synthpop" });
+    if (inspect.prepare("SELECT COUNT(*) AS n FROM patch_audit").get().n !== 0) throw new Error("Unchanged song patch wrote SQLite");
+    db.patchSong("legacy-song", { playbackPosition: 12 });
+    db.patchSong("legacy-song", { playbackPosition: 12 });
+    if (inspect.prepare("SELECT COUNT(*) AS n FROM patch_audit").get().n !== 1) throw new Error("Song patch did not suppress duplicate writes");
+    db.patchSong("legacy-song", { playbackPosition: 0 });
+    inspect.exec("DROP TRIGGER audit_song_patch; DROP TABLE patch_audit;");
+    const datePlan = inspect.prepare("EXPLAIN QUERY PLAN SELECT * FROM songs ORDER BY dateAdded DESC").all().map(row => row.detail).join(" ");
+    if (!datePlan.includes("idx_songs_dateAdded") || datePlan.includes("TEMP B-TREE")) throw new Error("Song listing uses an avoidable sort: " + datePlan);
     const membershipPlan = inspect.prepare("EXPLAIN QUERY PLAN SELECT playlistId, songId FROM playlist_songs ORDER BY playlistId ASC, position ASC, addedAt ASC").all().map(row => row.detail).join(" ");
     if (!membershipPlan.includes("COVERING INDEX idx_playlist_songs_order_cover") || membershipPlan.includes("TEMP B-TREE")) throw new Error("Playlist membership read requires an unnecessary sort: " + membershipPlan);
     if (inspect.prepare("SELECT name FROM sqlite_master WHERE type='index' AND name='idx_playlist_songs_playlistId'").get()) throw new Error("Obsolete playlist index retained");

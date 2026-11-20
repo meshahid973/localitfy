@@ -2933,9 +2933,10 @@ function MainModeApp() {
     }
   }
 
-  async function takeOverMainAudioFromCrossfade(target: ReturnType<typeof getAutoTransitionTarget>, nextAudio: HTMLAudioElement, safeVolume: number) {
+  async function takeOverMainAudioFromCrossfade(target: ReturnType<typeof getAutoTransitionTarget>, nextAudio: HTMLAudioElement, safeVolume: number, version: number) {
     const audio = audioRef.current;
-    if (!audio || !target?.song) return;
+    if (!audio || !target?.song || !playbackTransitionRef.current.isCurrentCrossfade(target.song.id, version)) return;
+    const ownsHandoff = () => playbackTransitionRef.current.isCurrentCrossfade(target.song.id, version);
 
     const handoffTime = Number.isFinite(nextAudio.currentTime) ? nextAudio.currentTime : 0;
     const handoffUrl = nextAudio.src;
@@ -2961,6 +2962,7 @@ function MainModeApp() {
       syncAudioEffectGraph(audio);
 
       await audio.play();
+      if (!ownsHandoff()) return;
 
       commitAutoTransitionTarget(target);
 
@@ -2980,9 +2982,14 @@ function MainModeApp() {
 
       const blendMs = 420;
       const blendStart = performance.now();
+      const blendGeneration = playbackTransitionRef.current.snapshot().generation;
 
-      window.setTimeout(() => {
-        const blendTimer = window.setInterval(() => {
+      const blendTimer = window.setInterval(() => {
+          if (!playbackTransitionRef.current.isCurrent(blendGeneration, target.song.id)) {
+            window.clearInterval(blendTimer);
+            if (crossfadeIntervalRef.current === blendTimer) crossfadeIntervalRef.current = null;
+            return;
+          }
           const progressValue = clamp((performance.now() - blendStart) / blendMs, 0, 1);
           const eased = 1 - Math.pow(1 - progressValue, 2.6);
 
@@ -2991,6 +2998,7 @@ function MainModeApp() {
 
           if (progressValue >= 1) {
             window.clearInterval(blendTimer);
+            if (crossfadeIntervalRef.current === blendTimer) crossfadeIntervalRef.current = null;
             setAudioElementVolume(audio, safeVolume);
 
             try {
@@ -3005,8 +3013,9 @@ function MainModeApp() {
             clearCrossfadeHandoffSoon(target.song.id, 450);
           }
         }, 16);
-      }, 0);
+      crossfadeIntervalRef.current = blendTimer;
     } catch {
+      if (!ownsHandoff()) return;
       // Keep the already-playing hidden audio alive briefly so users do not hear a hard stop,
       // then let the normal playback state-sync recover.
       commitAutoTransitionTarget(target);
@@ -3017,7 +3026,10 @@ function MainModeApp() {
       crossfadeMainPauseGuardRef.current = false;
       playbackTransitionRef.current.crossfadeFinished(target.song.id);
 
-      window.setTimeout(() => {
+      const recoveryGeneration = playbackTransitionRef.current.snapshot().generation;
+      crossfadeHandoffClearTimerRef.current = window.setTimeout(() => {
+        crossfadeHandoffClearTimerRef.current = null;
+        if (!playbackTransitionRef.current.isCurrent(recoveryGeneration, target.song.id)) return;
         try {
           nextAudio.pause();
           nextAudio.currentTime = 0;
@@ -3025,6 +3037,7 @@ function MainModeApp() {
         } catch {
           // ignore cleanup errors
         }
+        clearCrossfadeHandoffSoon(target.song.id);
       }, 950);
     }
   }
@@ -3095,6 +3108,7 @@ function MainModeApp() {
       applyPlaybackRateSettings(nextAudio);
 
       await nextAudio.play();
+      if (!crossfadeAutoStartedRef.current || !playbackTransitionRef.current.isCurrentCrossfade(target.song.id, version)) return;
 
       setCrossfadePreviewSongId(target.song.id);
       stopFade();
@@ -3135,10 +3149,11 @@ function MainModeApp() {
           crossfadeAutoStartedRef.current = false;
           crossfadeAutoTargetRef.current = "";
 
-          void takeOverMainAudioFromCrossfade(target, nextAudio, safeVolume);
+          void takeOverMainAudioFromCrossfade(target, nextAudio, safeVolume, version);
         }
       }, 16);
     } catch {
+      if (!playbackTransitionRef.current.isCurrentCrossfade(target.song.id, version)) return;
       playbackTransitionRef.current.crossfadeCancelled();
       crossfadeAutoStartedRef.current = false;
       crossfadeAutoTargetRef.current = "";

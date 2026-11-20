@@ -892,6 +892,23 @@ function relinkSongPaths(items) {
   })(updates);
 }
 
+// Patch statements are cached by canonical field order, bounded per connection.
+const songPatchStatements = new WeakMap();
+function songPatchStatement(database, keys) {
+  let cache = songPatchStatements.get(database);
+  if (!cache) { cache = new Map(); songPatchStatements.set(database, cache); }
+  const signature = keys.join(",");
+  let statement = cache.get(signature);
+  if (!statement) {
+    const sets = keys.map(key => key + " = ?").join(", ");
+    const differs = keys.map(key => key + " IS NOT ?").join(" OR ");
+    statement = database.prepare("UPDATE songs SET " + sets + " WHERE id = ? AND (" + differs + ")");
+    if (cache.size >= 64) cache.delete(cache.keys().next().value);
+    cache.set(signature, statement);
+  }
+  return statement;
+}
+
 function patchSong(id, patch) {
   const database = ensureDb();
 
@@ -923,14 +940,12 @@ function patchSong(id, patch) {
     "sourceMatchScore"
   ];
 
-  const entries = Object.entries(patch).filter(([key]) => allowed.includes(key));
+  const entries = allowed.filter(key => Object.prototype.propertyIsEnumerable.call(patch, key)).map(key => [key, patch[key]]);
   if (!entries.length) return getSong(id);
 
-  const sets = [];
   const values = [];
 
   for (const [key, value] of entries) {
-    sets.push(`${key} = ?`);
 
     if (key === "liked") values.push(asBoolInt(value));
     else if (key === "playCount") values.push(Math.max(0, Math.floor(asNumber(value, 0))));
@@ -940,10 +955,8 @@ function patchSong(id, patch) {
     else values.push(value ?? null);
   }
 
-  values.push(id);
-
   try {
-    database.prepare(`UPDATE songs SET ${sets.join(", ")} WHERE id = ?`).run(...values);
+    songPatchStatement(database, entries.map(([key]) => key)).run(...values, id, ...values);
   } catch (error) {
     lastMigrationReport.errors.push(`patch failed: ${error?.message || error}`);
     throw error;
@@ -966,8 +979,10 @@ function deleteSong(id) {
 
 function clearLibrary() {
   const database = ensureDb();
-  database.prepare("DELETE FROM songs").run();
-  database.prepare("DELETE FROM daily_mixes").run();
+  database.transaction(() => {
+    database.prepare("DELETE FROM songs").run();
+    database.prepare("DELETE FROM daily_mixes").run();
+  })();
 }
 
 function getSettings() {

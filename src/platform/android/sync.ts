@@ -23,6 +23,7 @@ type Snapshot = { protocol: number; platform?: string; serverTime: number; featu
 const listeners = new Set<(progress: SyncProgress) => void>();
 let progress: SyncProgress = { phase: "idle", message: "", done: 0, total: 0, bytesDone: 0, bytesTotal: 0 };
 let running: Promise<void> | null = null;
+let changingPairing = false;
 let onLibraryChanged: () => void = () => {};
 let onFeaturesChanged: () => void = () => {};
 
@@ -83,28 +84,34 @@ async function call<T>(path: string, options: { method?: string; body?: unknown;
   }
   let parsed: unknown = {};
   try { parsed = response.body ? JSON.parse(response.body) : {}; } catch { /* non-JSON error page */ }
-  if (response.status >= 400) throw new Error((parsed as { error?: string })?.error || `Your ${computerName()} answered with error ${response.status}`);
+  if (response.status < 200 || response.status >= 300) throw new Error((parsed as { error?: string })?.error || `Your ${computerName()} answered with error ${response.status}`);
   return parsed as T;
 }
 
 export async function pairWithMac(address: string, code: string) {
-  if (running) throw new Error("Wait for the current sync before changing pairing");
+  if (running || changingPairing) throw new Error("Wait for the current sync or pairing before changing pairing");
   if (phoneLibrary.pendingSync) throw new Error(`Finish the pending sync with your paired ${computerName()} before changing pairing`);
   const base = normalizeMacAddress(address);
   if (!base) throw new Error(`Enter the ${computerName()}'s address, for example 192.168.1.20`);
-  const hello = await call<{ app?: string; name?: string; platform?: string }>("/v1/hello", { base, token: "" });
+  changingPairing = true;
+  try {
+    const hello = await call<{ app?: string; name?: string; platform?: string }>("/v1/hello", { base, token: "" });
   if (hello.app !== "localtify") throw new Error("That address is not running localtify");
   const result = await call<{ token: string; name: string }>("/v1/pair", { base, token: "", method: "POST", body: { code: code.trim(), deviceName: phoneLibrary.paths.deviceName } });
   phoneLibrary.pairing = { url: base, token: result.token, name: result.name || hello.name || "computer", platform: hello.platform };
   setPairedComputerPlatform(hello.platform);
-  await phoneLibrary.save(["pairing"]);
+    await phoneLibrary.save(["pairing"]);
+  } finally { changingPairing = false; }
 }
 
 export async function forgetMac() {
-  if (running) throw new Error("Wait for the current sync before unpairing");
+  if (running || changingPairing) throw new Error("Wait for the current sync or pairing before unpairing");
   if (phoneLibrary.pendingSync) throw new Error("Finish the pending sync before unpairing so acknowledged edits are not sent twice");
-  phoneLibrary.pairing = null;
-  await phoneLibrary.save(["pairing"]);
+  changingPairing = true;
+  try {
+    phoneLibrary.pairing = null;
+    await phoneLibrary.save(["pairing"]);
+  } finally { changingPairing = false; }
 }
 
 const baseFields = (song: SyncSongFields): SyncSongFields => {
@@ -328,6 +335,8 @@ async function removeDeletedSongs() {
 }
 
 export function syncNow() {
+  // Automatic foreground/reconnect sync must not use a pairing being replaced.
+  if (changingPairing) return Promise.resolve();
   running ??= (async () => {
     await LocaltifyNative.setSyncActive({ active: true }).catch(() => undefined);
     try {

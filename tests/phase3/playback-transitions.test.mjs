@@ -80,3 +80,14 @@ test("cancel crossfade before pausing so the hidden next track cannot keep playi
   assert.equal(m.isCurrent(current, "a"), false);
   assert.equal(m.snapshot().targetId, "");
 });
+
+test("a retried crossfade cannot inherit the cancelled attempt's generation", () => {
+  const m = new PlaybackTransitionCoordinator();
+  m.requestPlay("a"); m.playing();
+  m.crossfadeStarted("b");
+  const first = m.snapshot().generation;
+  m.crossfadeCancelled();
+  m.crossfadeStarted("b");
+  assert.equal(m.isCurrentCrossfade("b", first), false);
+  assert.equal(m.isCurrentCrossfade("b", m.snapshot().generation), true);
+});
