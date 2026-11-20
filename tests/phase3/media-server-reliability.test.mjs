@@ -155,12 +155,14 @@ test("HTTP server serves correct GET and HEAD byte ranges", async (t) => {
 
 test("thumbnail cache refreshes media URLs and downloads shape the library once", () => {
   const main = fs.readFileSync(path.join(root, "electron", "main.cjs"), "utf8");
+  const thumbnails = fs.readFileSync(path.join(root, "electron/runtime/thumbnail-runtime.cjs"), "utf8");
   const protocols = fs.readFileSync(path.join(root, "electron", "runtime", "protocols.cjs"), "utf8");
-  assert.match(main, /const freshUrl = safeMediaUrl\(cached\)/);
-  assert.match(main, /rememberCoverThumbnail\(key, cached\)/);
-  assert.match(main, /coverThumbnailUrlCache\.size > COVER_THUMBNAIL_URL_CACHE_LIMIT/);
-  assert.match(main, /fileInfoCache\.delete\(thumbnailPath\);\s*(?:const url = safeMediaUrl\(thumbnailPath\)|return \{ ok: true)/);
-  assert.match(main, /webContents\.send\("covers:thumbnail-ready", \{ source: safeMediaUrl\(filePath\), url \}\)/);
+  assert.match(thumbnails, /const freshUrl = safeMediaUrl\(cached\)/);
+  assert.match(thumbnails, /rememberCoverThumbnail\(key, cached\)/);
+  assert.match(thumbnails, /coverThumbnailUrlCache\.size > COVER_THUMBNAIL_URL_CACHE_LIMIT/);
+  assert.match(thumbnails, /invalidateFileInfo\(thumbnailPath\);\s*(?:const url = safeMediaUrl\(thumbnailPath\)|return \{ ok: true)/);
+  assert.match(thumbnails, /publish\(\{ source: safeMediaUrl\(filePath\), url \}\)/);
+  assert.match(main, /webContents\.send\("covers:thumbnail-ready", payload\)/);
   assert.doesNotMatch(protocols, /bypassCSP\s*:\s*true/);
 
   const download = main.slice(main.indexOf('const runAudioDownload ='), main.indexOf('ipcRouter.handle("download:cancel"'));
