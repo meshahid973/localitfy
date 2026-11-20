@@ -59,6 +59,7 @@
 .collectionHeroActions { grid-area: actions; display: flex; flex-wrap: wrap; align-items: center; gap: var(--lt-space-2); }
 .collectionHeroSearch { flex: 1 1 160px; min-width: 0; max-width: 280px; margin-inline-start: auto; }
 .collectionHeroSearch .pageHeaderSearch { width: 100%; min-width: 0; }
+.collectionHeroActions .collectionSort { flex: 0 1 132px; min-width: 0; max-width: 100%; }
 .collectionPlayButton {
   min-height: var(--lt-control-height);
   display: inline-flex;

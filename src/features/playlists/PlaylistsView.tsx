@@ -15,6 +15,7 @@ import { preparePlaylistArtwork } from "./playlistArtwork";
 import { formatTime } from "../../shared/utils/format";
 import type { Playlist } from "./playlist.types";
 import type { Song } from "../library/song.types";
+import { filterCollectionSongs, sortLibrarySongs, type LibrarySortMode } from "../library/librarySort";
 import { describeSmartRules, type ListeningCounts, type SmartRules } from "./smartPlaylist";
 import { MediaCard } from "../../shared/ui/MediaCard";
 import { playlistTarget, playableIds, useAppActions } from "../shell/appActions";
@@ -112,6 +113,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
   const [prompting, setPrompting] = useState(false);
   const [playlistQuery, setPlaylistQuery] = useState("");
   const [trackQuery, setTrackQuery] = useState("");
+  const [trackSort,setTrackSort]=useState<LibrarySortMode>("library");
   const [coverBusy, setCoverBusy] = useState(false);
   const [coverError, setCoverError] = useState("");
   const coverInput = useRef<HTMLInputElement>(null);
@@ -127,8 +129,9 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
   useEffect(() => { if (detailId && selectedPlaylist?.id !== detailId) setSelectedPlaylistId(detailId); }, [detailId, selectedPlaylist?.id, setSelectedPlaylistId]);
   const detailPlaylist: Playlist | null = detailId ? playlistSummaries.find((summary: { playlist: Playlist }) => summary.playlist.id === detailId)?.playlist ?? null : null;
   const detailSongs = useMemo(() => detailPlaylist?.songIds.flatMap((id) => songsById.get(id) ?? []) ?? [], [detailPlaylist, songsById]);
-  useEffect(() => { setTrackQuery(""); setCoverError(""); }, [detailId]);
-  const filteredDetailSongs = useMemo(() => { const q = trackQuery.trim().toLocaleLowerCase(); return q ? detailSongs.filter(song => [song.title,song.artist,song.album].some(value => (value || "").toLocaleLowerCase().includes(q))) : detailSongs; }, [detailSongs, trackQuery]);
+  useEffect(() => { setTrackQuery(""); setTrackSort("library"); setCoverError(""); }, [detailId]);
+  const sortedDetailSongs = useMemo(()=>sortLibrarySongs(detailSongs,trackSort),[detailSongs,trackSort]);
+  const filteredDetailSongs = useMemo(()=>filterCollectionSongs(sortedDetailSongs,trackQuery),[sortedDetailSongs,trackQuery]);
   const smartDialog = smartEditing !== undefined ? (
     <Suspense fallback={null}>
       <SmartPlaylistDialog playlist={smartEditing} songs={songs} listeningCounts={props.listeningCounts}
@@ -158,6 +161,9 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
       );
     }
     const target = playlistTarget(detailPlaylist, detailSongs);
+    // Give the existing playlist playback owner the sorted snapshot. Never modify saved songIds.
+    const playbackPlaylist = trackSort === "library" ? detailPlaylist : {...detailPlaylist,songIds:sortedDetailSongs.map(song=>song.id)};
+    const playbackTarget = trackSort === "library" ? target : playlistTarget(playbackPlaylist,sortedDetailSongs);
     return (
       <section data-page-section="playlists" className="playlistsPage playlistPageV029 playlistDetailPage">
       <PageAtmosphere songs={detailSongs} custom={detailPlaylist.coverArtwork} />
@@ -169,10 +175,11 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
           byline={detailPlaylist.rules ? <span className="smartPlaylistSummary">{describeSmartRules(detailPlaylist.rules)}</span> : undefined}
           stats={`${detailSongs.length} song${detailSongs.length === 1 ? "" : "s"} · ${formatTime(detailSongs.reduce((total, song) => total + (Number(song.duration) || 0), 0))}`}
           playable={playableIds(detailSongs).length}
-          onPlay={() => void playPlaylist(detailPlaylist, false)}
+          onPlay={() => void playPlaylist(playbackPlaylist, false)}
           onShuffle={() => void playPlaylist(detailPlaylist, true)}
-          onQueue={() => actions.queueCollection(target)}
+          onQueue={() => actions.queueCollection(playbackTarget)}
           onMore={(event) => actions.openCollectionMenu(event, target)}
+          sort={{value:trackSort,onChange:setTrackSort,defaultLabel:"Playlist order"}}
           search={<input type="search" className="pageHeaderSearch" aria-label="Search playlist tracks" placeholder="Search tracks" value={trackQuery} onChange={event => setTrackQuery(event.currentTarget.value)} />}
         >
           <button className="collectionIconButton" type="button" onClick={() => props.openSimilarSongs({ kind: "playlist", playlistId: detailPlaylist.id })}
@@ -238,11 +245,11 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
             selectedPlaylistId={detailPlaylist.id}
             list={filteredDetailSongs}
             editable={!detailPlaylist.rules}
-            reorderable={!detailPlaylist.rules && !trackQuery.trim()}
+            reorderable={!detailPlaylist.rules && !trackQuery.trim() && trackSort==="library"}
             currentId={currentId}
             isPlaying={isPlaying}
             draggedSongId={draggedSongId}
-            onSelectSong={(id) => selectPlaylistSongAction(id, detailPlaylist.id)}
+            onSelectSong={(id) => trackSort==="library" ? selectPlaylistSongAction(id, detailPlaylist.id) : actions.playCollection({...playbackTarget,playlist:undefined,songs:filteredDetailSongs},{startId:id})}
             onStartSongDrag={startPlaylistSongDragAction}
             onDropSong={dropPlaylistSongAction}
             onAppendSong={appendPlaylistSongAction}

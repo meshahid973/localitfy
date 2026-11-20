@@ -10,6 +10,7 @@ import { splitGenreCredits } from "../genres/genreCredits";
 import { useGenreTaggedSongs } from "../genres/useGenreTaggedSongs";
 import { artistTarget, genreTarget, playableIds, useAppActions } from "../shell/appActions";
 import type { Song } from "../library/song.types";
+import { filterCollectionSongs, sortLibrarySongs, type LibrarySortMode } from "../library/librarySort";
 import type { ArtistBio } from "../discover/discover.types";
 import { PageAtmosphere } from "../covers/pageAtmosphere";
 import CollectionHero from "./CollectionHero";
@@ -53,14 +54,13 @@ function SongGroupBody({ kind, name, members, loading, currentId, isPlaying, tog
   const actions = useAppActions();
   const [showAll, setShowAll] = useState(false);
   const [query, setQuery] = useState("");
+  const [sort,setSort] = useState<LibrarySortMode>("library");
   // Most played first once there is history; otherwise library order.
   const popular = useMemo(() => (members.some((song) => song.playCount > 0)
     ? [...members].sort((a, b) => (b.playCount || 0) - (a.playCount || 0)) : members), [members]);
 
-  const filtered = useMemo(() => {
-    const needle = query.trim().toLocaleLowerCase();
-    return needle ? popular.filter(song => [song.title, song.artist, song.album].some(value => (value || "").toLocaleLowerCase().includes(needle))) : popular;
-  }, [popular, query]);
+  const sorted = useMemo(()=>sortLibrarySongs(popular,sort),[popular,sort]);
+  const filtered = useMemo(()=>filterCollectionSongs(sorted,query),[sorted,query]);
   if (!name) {
     return (
       <section data-page-section={kind} className="collectionPage">
@@ -72,9 +72,10 @@ function SongGroupBody({ kind, name, members, loading, currentId, isPlaying, tog
   }
 
   const target = kind === "artist" ? artistTarget(name, members) : genreTarget(name, members);
+  const playbackTarget = sort === "library" ? target : {...target,songs:sorted};
   const playable = playableIds(members);
   const duration = members.reduce((total, song) => total + Math.max(0, Number(song.duration) || 0), 0);
-  const shown = showAll || query.trim() ? filtered : filtered.slice(0, TOP_SONGS);
+  const shown = showAll || query.trim() || sort!=="library" ? filtered : filtered.slice(0, TOP_SONGS);
 
   return (
     <section data-page-section={kind} className="collectionPage songGroupPage" aria-label={`${name} ${kind}`}>
@@ -87,10 +88,11 @@ function SongGroupBody({ kind, name, members, loading, currentId, isPlaying, tog
         coverSong={target.coverSong}
         stats={[`${members.length} track${members.length === 1 ? "" : "s"}`, formatTime(duration)].join(" · ")}
         playable={playable.length}
-        onPlay={() => actions.playCollection(target)}
+        onPlay={() => actions.playCollection(playbackTarget)}
         onShuffle={() => actions.playCollection(target, { shuffle: true })}
-        onQueue={() => actions.queueCollection(target)}
+        onQueue={() => actions.queueCollection(playbackTarget)}
         onMore={(event) => actions.openCollectionMenu(event, target)}
+        sort={{value:sort,onChange:setSort,defaultLabel:"Popular / default"}}
         search={<input className="pageHeaderSearch" type="search" aria-label="Search collection tracks" placeholder="Search tracks"
           value={query} onChange={event => setQuery(event.currentTarget.value)} />}
       >
@@ -108,7 +110,7 @@ function SongGroupBody({ kind, name, members, loading, currentId, isPlaying, tog
         <TrackList songs={shown} currentId={currentId} isPlaying={isPlaying} hideArtist={kind === "artist" ? name : undefined}
           playFrom={(songId) => actions.playCollection({ ...target, songs: filtered }, { startId: songId })}
           toggleLike={toggleLike} openPlaylistPicker={openPlaylistPicker} />
-        {!query.trim() && popular.length > TOP_SONGS ? (
+        {!query.trim() && sort==="library" && popular.length > TOP_SONGS ? (
           <button className="collectionTextButton collectionShowAll" type="button" onClick={() => setShowAll((value) => !value)}>
             {showAll ? "show less" : `show all ${popular.length} songs`}
           </button>

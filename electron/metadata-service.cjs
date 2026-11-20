@@ -9,6 +9,7 @@ let serviceFfmpegPath = "";
 let musicMetadataModulePromise = null;
 let metadataCache = createResourceCache({maxEntries: 4096, maxBytes: 8 * 1024 * 1024, validate: validMetadataSnapshot});
 const metadataPending = new Map();
+const incompleteCoverSnapshots = new WeakSet();
 let activeParses = 0;
 const waiters = [];
 const MAX_ACTIVE_PARSES = 4;
@@ -295,7 +296,7 @@ async function readLocalAudioMetadataUncached(filePath, options = {}) {
             output.embeddedCoverPath = coverPath;
             output.hasEmbeddedCover = true;
             output.coverSource = "embedded";
-          }
+          } else incompleteCoverSnapshots.add(output);
         }
       }
 
@@ -352,7 +353,7 @@ async function readLocalAudioMetadata(filePath, options = {}) {
     if (metadataPending.size >= 64) return withParseSlot(() => readLocalAudioMetadataUncached(target, options));
     pending = withParseSlot(() => readLocalAudioMetadataUncached(target, options)).then(async result => {
       const current = await fs.promises.stat(target).catch(() => null);
-      if (result.ok && result.source === "music-metadata" && !result.error &&
+      if (result.ok && result.source === "music-metadata" && !result.error && !incompleteCoverSnapshots.has(result) &&
           (options.readDuration === false || result.durationMs > 0) &&
           current?.size === stat.size && current.mtimeMs === stat.mtimeMs && current.ctimeMs === stat.ctimeMs) {
         cache.set(key, { ...result }, METADATA_TTL);

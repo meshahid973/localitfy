@@ -93,7 +93,7 @@ export async function cachedArtworkFromMac(artwork: ArtworkQuery): Promise<Disco
   if (key.length>2048) return {status:"error",error:"Artwork query too long"};
   await hydrateArtwork();
   const row=artworkRows.get(key);
-  if (row && Date.now()-row.at<86400000) return row.result;
+  if (row && Date.now()-row.at<86400000) { artworkRows.delete(key); artworkRows.set(key,row); return row.result; }
   const pending=artworkPending.get(key);
   if(pending) return pending;
   if(artworkPending.size>=8) return row?.result ?? {status:"artwork"};
@@ -108,7 +108,7 @@ export async function cachedArtworkFromMac(artwork: ArtworkQuery): Promise<Disco
       }
       return result;
     }
-    if(row && Date.now()-row.at<7*86400000) return row.result;
+    if(!answer.ok && row && Date.now()-row.at<7*86400000) return row.result;
     return result ?? {status:"artwork"} as const;
   }).finally(()=>artworkPending.delete(key));
   artworkPending.set(key,job);

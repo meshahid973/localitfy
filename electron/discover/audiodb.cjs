@@ -6,7 +6,9 @@ function createAudioDbArtwork({apiKey, fetchImpl=globalThis.fetch, now=Date.now}
   let nextSlot=0, blockedUntil=0;
   const request=async(endpoint,params)=>{
     if(now()<blockedUntil)return null;
-    const slot=Math.max(now(),nextSlot);nextSlot=slot+2100;
+    const slot=Math.max(now(),nextSlot);
+    if(slot-now()>7000)return null; // avoid accumulating unbounded delayed work
+    nextSlot=slot+2100;
     if(slot>now())await new Promise(resolve=>setTimeout(resolve,slot-now()));
     if(now()<blockedUntil)return null;
     const url=new URL("https://www.theaudiodb.com/api/v1/json/"+apiKey+"/"+endpoint);

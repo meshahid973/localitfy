@@ -5,4 +5,4 @@ export * from "./librarySort";
 export * from "./importState";
 export * from "./components/SongRows";
 
-export { useLibraryController } from "./useLibraryController";
+export { useLibraryController, useLibraryDerivedState } from "./useLibraryController";

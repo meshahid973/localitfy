@@ -52,6 +52,7 @@ public class LocaltifyNativePlugin extends Plugin {
     public void load() {
         active = this;
         artworkCache = new RemoteArtworkCache(getContext());
+        artworkRequests.allowCoreThreadTimeOut(true);
     }
 
     /** Media controls from the notification, lock screen or headset, forwarded to the renderer. */

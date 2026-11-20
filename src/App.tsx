@@ -7,7 +7,7 @@ import type { ListeningOutcome } from "./features/player/listeningHistory";
 import { usePlayerRuntime } from "./features/player";
 import { useSongRadio } from "./features/player/useSongRadio";
 import { useNotForMe } from "./features/analysis/notForMe";
-import { devPerfStart, devPerfEnd, measureDevTime } from "./shared/perf/devPerf";
+import { devPerfStart, devPerfEnd } from "./shared/perf/devPerf";
 import type { PlayerEngineSource } from "./features/player/engine/PlayerEngine";
 import { useAnalyticsRuntime } from "./features/analytics/useAnalyticsRuntime";
 import {
@@ -33,9 +33,9 @@ import { updateStatusLabel, useUpdatesController } from "./features/updates";
 import { useSettingsController } from "./features/settings";
 import { useCoversController } from "./features/covers";
 import type { VirtualSongRowsProps } from "./features/library/components/SongRows";
-import { useLibraryController } from "./features/library";
+import { useLibraryController, useLibraryDerivedState } from "./features/library";
 import { subscribeWatchedFoldersChange } from "./features/library/watchedFolderBridge";
-import { reconcileLibraryIndex, patchLibrarySong, replaceLibrarySong } from "./features/search/incrementalLibraryIndex";
+import { patchLibrarySong, replaceLibrarySong } from "./features/search/incrementalLibraryIndex";
 import { pickRecentlyAdded, pickListenNow } from "./features/home/homeShelfPicks";
 import { createMetadataCleanPreview } from "./features/library/metadataCleanPreview";
 import {
@@ -104,15 +104,12 @@ import {
   maybeApplyCoderpixelArtist,
   reorderSongList,
   saveLibraryOrder,
-  sortLibrarySongs,
-  topPlayedSongs,
   stableSongSourceKey
 } from "./features/library";
 import {
   heroTitleDensityClass,
   prettyMeta,
   prettyTitle,
-  rankSongsForSearch,
   sanitizeSongList
 } from "./features/search";
 import {
@@ -1034,61 +1031,9 @@ function MainModeApp() {
   }
 
 
-  const libraryIndexRef = useRef<ReturnType<typeof reconcileLibraryIndex> | null>(null);
-  const libraryIndex = useMemo(() => {
-    const next = measureDevTime("library:index", () => reconcileLibraryIndex(songs, libraryIndexRef.current ?? undefined));
-    libraryIndexRef.current = next;
-    return next;
-  }, [songs]);
-  const librarySearchIndex = libraryIndex.searchEntries;
-
-  const filteredSongs = useMemo(() => {
-    if (!deferredQuery.trim()) return songs;
-    return rankSongsForSearch(librarySearchIndex, deferredQuery);
-  }, [librarySearchIndex, deferredQuery, songs]);
-
-  const likedSongs = useMemo(() => {
-    const seen = new Set<string>();
-
-    return songs.filter((song) => {
-      if (!song.liked) return false;
-
-      const key = String(song.id || stableSongSourceKey(song) || `${song.title}|${song.artist}|${song.duration}`).trim();
-      if (!key) return true;
-      if (seen.has(key)) return false;
-
-      seen.add(key);
-      return true;
-    });
-  }, [songs]);
-
-  const topSongs = useMemo(() => topPlayedSongs(songs, 6), [songs]);
-
-  const mostPlayed = topSongs[0] ?? null;
-  const missingSongsForLibrary = useMemo(() => songs.filter((song) => song.fileExists === false), [songs]);
-  const likedSongIds = useMemo(() => new Set(likedSongs.map(song => song.id)), [likedSongs]);
-  const unsortedVisibleSongs = useMemo(() => {
-    if (view === "liked") return deferredQuery.trim() ? filteredSongs.filter(song => likedSongIds.has(song.id)) : likedSongs;
-    if (view === "library" && libraryFilterMode === "missing") return deferredQuery.trim() ? filteredSongs.filter(song => song.fileExists === false) : missingSongsForLibrary;
-    return filteredSongs;
-  }, [view, libraryFilterMode, deferredQuery, filteredSongs, likedSongIds, likedSongs, missingSongsForLibrary]);
-  const visibleSongs = useMemo(
-    () => sortLibrarySongs(unsortedVisibleSongs, librarySortMode),
-    [unsortedVisibleSongs, librarySortMode]
-  );
-  const libraryOrderLocked = librarySortMode !== "library" && (view === "library" || view === "liked");
-
-  useEffect(() => {
-    libraryListLengthRef.current = visibleSongs.length;
-  }, [visibleSongs.length]);
-
-  useEffect(() => {
-    libraryRenderLimitRef.current = libraryRenderLimit;
-  }, [libraryRenderLimit]);
-
-  const songsById = libraryIndex.songsById;
-  const songIndexById = libraryIndex.songIndexById;
-  const playableSongs = useMemo(() => songs.filter(isPlayableSong), [songs]);
+  const { libraryIndex, filteredSongs, likedSongs, mostPlayed, missingSongsForLibrary, visibleSongs, libraryOrderLocked, songsById, songIndexById, playableSongs } = useLibraryDerivedState({
+    songs, deferredQuery, view, libraryFilterMode, librarySortMode, libraryRenderLimit, libraryListLengthRef, libraryRenderLimitRef
+  });
   const similarSeed = useMemo(() => resolveSimilarSeed(similarRequest, songsById, songs, playlists), [similarRequest, songsById, songs, playlists]);
   const activePlaylist = useMemo(
     () => playlists.find((playlist) => playlist.id === activePlaylistId) ?? null,
