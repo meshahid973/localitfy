@@ -138,10 +138,11 @@ final class RemoteArtworkCache {
         String cc = c.getHeaderField("Cache-Control"), vary=c.getHeaderField("Vary");
         if ((vary!=null&&!vary.trim().isEmpty()) ||
             Pattern.compile("(?i)(^|,)\\s*(no-store|no-cache|private)(\\s*[=,]|\\s*$)").matcher(cc==null?"":cc).find()) return 0;
-        if(cc==null)return previous==null?0:Math.min(MAX_TTL,previous.optLong("ttl"));
+        long age=Math.min(MAX_TTL/1000,Math.max(0,c.getHeaderFieldLong("Age",0)))*1000;
+        if(cc==null)return previous==null?0:Math.max(0,Math.min(MAX_TTL,previous.optLong("ttl"))-age);
         Matcher m=Pattern.compile("(?i)(^|,)\\s*max-age\\s*=\\s*(\\d+)").matcher(cc);
         if (!m.find()) return 0;
-        try { return Math.max(0,Math.min(MAX_TTL,Math.min(604800L,Long.parseLong(m.group(2)))*1000)-Math.min(MAX_TTL,Math.max(0,c.getHeaderFieldLong("Age",0))*1000)); }
+        try { return Math.max(0,Math.min(MAX_TTL,Math.min(604800L,Long.parseLong(m.group(2)))*1000)-age); }
         catch(NumberFormatException e) { return 0; }
     }
     private static long stale(HttpURLConnection c, JSONObject previous) {

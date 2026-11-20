@@ -89,3 +89,14 @@ test("transient tag failures retry without marking the migration complete", asyn
   await runtime.run();assert.equal(settings.genreMetadataBackfillVersion,undefined);
   await runtime.run();assert.deepEqual(patched,{genre:"Ambient"});assert.equal(settings.genreMetadataBackfillVersion,1);
 });
+
+test("bulk metadata repair preserves newer edits, relinks and grouped artwork updates", () => {
+  const { guardMetadataRepairPatch } = require("../../electron/metadata-service.cjs");
+  const original = { id: "song", filePath: "/music/a.mp3", title: "old", genre: "", duration: 0, durationMs: 0, coverPath: "old.jpg", coverSource: "fallback", coverUpdatedAt: "old" };
+  const patch = { title: "new", genre: "Ambient", duration: 120, durationMs: 120000, coverPath: "new.jpg", coverSource: "embedded", coverUpdatedAt: "new" };
+  assert.deepEqual(guardMetadataRepairPatch(original, original, patch), patch);
+  assert.deepEqual(guardMetadataRepairPatch(original, { ...original, title: "manual", coverUpdatedAt: "manual", durationMs: 1000 }, patch), { genre: "Ambient" });
+  assert.deepEqual(guardMetadataRepairPatch(original, { ...original, filePath: "/music/b.mp3" }, patch), {});
+  assert.deepEqual(guardMetadataRepairPatch(original, null, patch), {});
+  assert.deepEqual(guardMetadataRepairPatch(original, original, { title: "old" }), {});
+});

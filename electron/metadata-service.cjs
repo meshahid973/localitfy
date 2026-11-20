@@ -365,7 +365,22 @@ async function readLocalAudioMetadata(filePath, options = {}) {
   return { ...await pending };
 }
 
+// Async repair must never overwrite a relink or a newer user edit. Related
+// cover and duration fields are guarded as units to avoid inconsistent pairs.
+function guardMetadataRepairPatch(original, current, patch) {
+  if (!current || current.id !== original.id || current.filePath !== original.filePath) return {};
+  const guarded = {};
+  const groups = [["title"], ["artist"], ["album"], ["genre"], ["duration", "durationMs"], ["coverPath", "coverSource", "coverUpdatedAt"]];
+  for (const fields of groups) {
+    if (fields.some(field => current[field] !== original[field])) continue;
+    if (!fields.some(field => Object.hasOwn(patch, field) && patch[field] !== current[field])) continue;
+    for (const field of fields) if (Object.hasOwn(patch, field)) guarded[field] = patch[field];
+  }
+  return guarded;
+}
+
 module.exports = {
+  guardMetadataRepairPatch,
   initMetadataService,
   flushMetadataCache: () => metadataCache.flush(),
   readLocalAudioMetadata

@@ -66,7 +66,7 @@ const savePlaylists = databaseRepositories.playlists.save;
 const { setDiscordActivity, clearDiscordActivity, getDiscordStatus, resetDiscordActivityCache } = require("./rpc.cjs");
 const { isDownloadFileInProgress } = require("./downloader.cjs");
 
-const { readLocalAudioMetadata } = require("./metadata-service.cjs");
+const { readLocalAudioMetadata, guardMetadataRepairPatch } = require("./metadata-service.cjs");
 const { findFolderCover, resolveSongCover, createLeastUsedCoverAllocator } = require("./cover-service.cjs");
 
 const ipcRouter = createIpcRouter(ipcMain, {
@@ -1661,24 +1661,28 @@ async function repairMissingSongMetadata(payload = {}) {
   const durationOnly = Boolean(payload?.durationOnly);
   const allSongs = getSongs();
   const pixelArtFiles = getPixelArtFiles();
-  const targets = allSongs.filter((song) => {
-    if (!song?.filePath || !fileExists(song.filePath) || !isAudioFile(song.filePath)) return false;
+  const targets = [];
+  for (const song of allSongs) {
+    if (!song?.filePath || !isAudioFile(song.filePath)) continue;
     const durationMissing = Number(song.duration || 0) <= 0 || Number(song.durationMs || 0) <= 0;
-    const coverMissing = !song.coverPath || !fileExists(song.coverPath) || !song.coverSource || song.coverSource === "fallback" || song.coverSource === "none" || song.coverSource === "unknown";
-    if (force) return true;
-    if (coverOnly) return coverMissing;
-    if (durationOnly) return durationMissing;
-    return durationMissing || coverMissing;
-  }).slice(0, limit);
+    const coverMissing = !durationOnly && (!song.coverPath || !song.coverSource || ["fallback", "none", "unknown"].includes(song.coverSource) || !fileExists(song.coverPath));
+    if (!(force || (coverOnly ? coverMissing : durationOnly ? durationMissing : durationMissing || coverMissing))) continue;
+    if (!fileExists(song.filePath)) continue;
+    targets.push(song);
+    if (targets.length >= limit) break;
+  }
 
   let changedCount = 0;
   let durationFixedCount = 0;
   let coverFixedCount = 0;
   const changedIds = [];
   for (const song of targets) {
-    const metadata = await readLocalAudioMetadata(song.filePath);
-    const fallbackCover = pickStablePixelCoverForSong(song, pixelArtFiles);
-    const coverResult = await resolveSongCover({ song, metadata, filePath: song.filePath, folderCoverPath: findFolderCover(song.filePath), fallbackCoverPath: fallbackCover });
+    const before = await fs.promises.stat(song.filePath).catch(() => null);
+    if (!before?.isFile() || getSong(song.id)?.filePath !== song.filePath) continue;
+    const metadata = await readLocalAudioMetadata(song.filePath, { readCover: !durationOnly, readDuration: !coverOnly });
+    const coverResult = durationOnly ? {} : await resolveSongCover({
+      song, metadata, filePath: song.filePath, fallbackCoverPath: pickStablePixelCoverForSong(song, pixelArtFiles)
+    });
     const patch = {};
     const title = String(metadata?.title || "").trim();
     const artist = String(metadata?.artist || "").trim();
@@ -1701,10 +1705,13 @@ async function repairMissingSongMetadata(payload = {}) {
       patch.coverUpdatedAt = coverResult.coverUpdatedAt;
     }
     if (Object.keys(patch).length) {
-      patchSong(song.id, patch);
+      const after = await fs.promises.stat(song.filePath).catch(() => null);
+      if (!after?.isFile() || before.size !== after.size || before.mtimeMs !== after.mtimeMs || before.ctimeMs !== after.ctimeMs) continue;
+      const guarded = guardMetadataRepairPatch(song, getSong(song.id), patch);
+      if (!Object.keys(guarded).length || !patchSong(song.id, guarded)) continue;
       changedCount += 1;
-      if (Object.prototype.hasOwnProperty.call(patch, "duration") || Object.prototype.hasOwnProperty.call(patch, "durationMs")) durationFixedCount += 1;
-      if (Object.prototype.hasOwnProperty.call(patch, "coverPath")) coverFixedCount += 1;
+      if (Object.prototype.hasOwnProperty.call(guarded, "duration") || Object.prototype.hasOwnProperty.call(guarded, "durationMs")) durationFixedCount += 1;
+      if (Object.prototype.hasOwnProperty.call(guarded, "coverPath")) coverFixedCount += 1;
       changedIds.push(song.id);
     }
   }
