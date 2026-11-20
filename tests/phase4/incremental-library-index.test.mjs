@@ -136,3 +136,27 @@ test("same-order playback updates share positions and preserve old snapshots", (
   assert.equal(shuffled.songIndexById.get("b"),0);
   assert.equal(next.songIndexById.get("b"),1);
 });
+
+test("one-song updates preserve snapshots and avoid rescanning the unchanged library", () => {
+  const firstSongs = Array.from({ length: 5000 }, (_, i) => song("track-" + i));
+  const first = reconcileLibraryIndex(firstSongs);
+  const changed = patchLibrarySong(firstSongs, "track-4999", {playCount:4}, 4999);
+  const optimized = reconcileLibraryIndex(changed,first);
+  assert.equal(optimized.songsById.get("track-4999"),changed[4999]);
+  assert.equal(optimized.searchEntries[0],first.searchEntries[0]);
+  assert.equal(optimized.albumOccurrences,first.albumOccurrences);
+  assert.equal(optimized.artistOccurrences,first.artistOccurrences);
+  assert.equal(optimized.sourceSongs, changed);
+  assert.equal(first.songsById.get("track-4999").playCount,0);
+});
+
+test("single-track hint never survives a reorder or an intervening patch", () => {
+  const songs = [song("a"),song("b"),song("c")];
+  const first = reconcileLibraryIndex(songs);
+  const next = patchLibrarySong(songs,"b",{playCount:3},1);
+  const reorder = [next[2],next[0],next[1]];
+  const nextIndex = reconcileLibraryIndex(reorder,first);
+  assert.deepEqual([...nextIndex.songIndexById.keys()],["c","a","b"]);
+  assert.equal(nextIndex.searchEntries[2].song.playCount,3);
+  assert.equal(first.searchEntries[1].song.playCount,0);
+});
