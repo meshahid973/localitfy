@@ -35,3 +35,14 @@ test("feature controllers do not depend on the renderer monolith", () => {
     assert.equal(source.includes("@ts-nocheck"), false, file);
   }
 });
+
+
+test("playback checkpoint loop re-arms on visibility and reads the latest position preference", () => {
+  const app = read("src/App.tsx");
+  const loop = app.slice(app.indexOf("let lastPaintedDuration"), app.indexOf("const discordSettingsRef"));
+  assert.match(loop, /if \(document.hidden \|\| isAppBackgroundedRef.current\) tick\(performance.now\(\)\)/);
+  assert.match(loop, /const handleProgressVisibility = \(\) => \{\s*stopProgressLoop\(\)/);
+  assert.match(loop, /scheduleProgressTick\(document.hidden \? 1800 : 0\)/);
+  assert.match(loop, /document.removeEventListener\("visibilitychange", handleProgressVisibility\)/);
+  assert.match(loop, /settingsRef.current.rememberPlaybackPosition/);
+});

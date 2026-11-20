@@ -111,3 +111,22 @@ test("no-op patches and identical IPC snapshots preserve library identity", () =
   assert.notEqual(replaceLibrarySong(list, { ...a, url: undefined }), list);
   assert.notEqual(patchLibrarySong(list, "a", { playCount: 1 }), list);
 });
+
+
+test("same-order playback updates share positions and preserve old snapshots", () => {
+  const a=song("a"), b=song("b","Artist B","Album B");
+  const first=reconcileLibraryIndex([a,b]);
+  assert.equal(reconcileLibraryIndex([a,b],first),first);
+  const edited={...b,playCount:4};
+  const next=reconcileLibraryIndex([a,edited],first);
+  assert.equal(next.songIndexById,first.songIndexById);
+  assert.notEqual(next.songsById,first.songsById);
+  assert.equal(first.songsById.get("b"),b);
+  assert.equal(next.songsById.get("b"),edited);
+  assert.equal(next.searchEntries[0],first.searchEntries[0]);
+  assert.equal(next.searchEntries[1].tokens,first.searchEntries[1].tokens);
+  const shuffled=reconcileLibraryIndex([edited,a],next);
+  assert.notEqual(shuffled.songIndexById,next.songIndexById);
+  assert.equal(shuffled.songIndexById.get("b"),0);
+  assert.equal(next.songIndexById.get("b"),1);
+});

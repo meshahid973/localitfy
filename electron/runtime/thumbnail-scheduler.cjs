@@ -16,11 +16,13 @@ function createThumbnailScheduler({
   const background = new Set();
   const size = () => visible.size + background.size;
   let timer = null;
+  let paused = false;
 
   function schedule(delay = delayMs) {
-    if (timer !== null || size() === 0) return;
+    if (paused || timer !== null || size() === 0) return;
     timer = setTimer(() => {
       timer = null;
+      if (paused) return;
       const filePath = visible.values().next().value ?? background.values().next().value;
       if (filePath === undefined) return;
       visible.delete(filePath);
@@ -38,10 +40,21 @@ function createThumbnailScheduler({
       visible.add(filePath);
       return true;
     }
-    if (size() >= 500) return false;
+    if (size() >= 500) {
+      if (lowPriority || !background.size) return false;
+      background.delete(background.values().next().value);
+    }
     (lowPriority ? background : visible).add(filePath);
     schedule();
     return true;
+  }
+
+  function setPaused(next) {
+    paused = Boolean(next);
+    if (paused) {
+      if (timer !== null) clearTimer(timer);
+      timer = null;
+    } else schedule();
   }
 
   function clear() {
@@ -52,7 +65,7 @@ function createThumbnailScheduler({
   }
 
   return {
-    enqueue, clear,
+    enqueue, clear, setPaused,
     has: (filePath) => visible.has(filePath) || background.has(filePath),
     get size() { return size(); }
   };

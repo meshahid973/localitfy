@@ -51,6 +51,7 @@ const backupDatabase = databaseRepositories.database.backup;
 const repairDatabaseNow = databaseRepositories.database.repair;
 const getDatabaseStatus = databaseRepositories.database.status;
 const getSongs = databaseRepositories.songs.list;
+const getSong = databaseRepositories.songs.get;
 const insertSongs = databaseRepositories.songs.insertMany;
 const patchSong = databaseRepositories.songs.patch;
 const deleteSong = databaseRepositories.songs.remove;
@@ -91,6 +92,14 @@ app.on("second-instance", () => {
 const COVER_THUMBNAIL_SIZE = 256;
 const COVER_THUMBNAIL_DIR_NAME = "thumbnails";
 const coverThumbnailUrlCache = new Map();
+const COVER_THUMBNAIL_URL_CACHE_LIMIT = 2048;
+function rememberCoverThumbnail(key, thumbnailPath) {
+  coverThumbnailUrlCache.delete(key);
+  coverThumbnailUrlCache.set(key, thumbnailPath);
+  if (coverThumbnailUrlCache.size > COVER_THUMBNAIL_URL_CACHE_LIMIT) {
+    coverThumbnailUrlCache.delete(coverThumbnailUrlCache.keys().next().value);
+  }
+}
 const coverThumbnailQueue = createThumbnailScheduler({
   processFile: createCoverThumbnailSync,
   onError: (error) => console.log("[localtify thumbnail queue error]", error?.message || error)
@@ -532,6 +541,9 @@ function createCoverThumbnailSync(filePath) {
     if (!resized || resized.isEmpty()) return { ok: false, sourcePath: filePath, thumbnailPath: "", error: "Localtify could not resize this cover image. The original cover will still be used." };
     fs.mkdirSync(path.dirname(thumbnailPath), { recursive: true });
     fs.writeFileSync(thumbnailPath, resized.toPNG());
+    // The existence probe before creation cached a missing file. Invalidate it
+    // before registering the media token for the newly written thumbnail.
+    fileInfoCache.delete(thumbnailPath);
     return { ok: true, sourcePath: filePath, thumbnailPath, cached: false, url: safeMediaUrl(thumbnailPath), sourceWidth: sourceSize.width, sourceHeight: sourceSize.height, size: COVER_THUMBNAIL_SIZE };
   } catch (error) {
     console.log("[localtify thumbnail create error]", error?.message || error);
@@ -551,10 +563,10 @@ function getCoverThumbnailUrl(filePath, options = {}) {
   if (!filePath || !path.isAbsolute(filePath) || !isImageFile(filePath) || !fileExists(filePath)) return "";
   const key = getCoverThumbnailCacheKey(filePath);
   const cached = coverThumbnailUrlCache.get(key);
-  if (cached && fileExists(cached.thumbnailPath)) {
-    const freshUrl = safeMediaUrl(cached.thumbnailPath);
+  if (cached) {
+    const freshUrl = safeMediaUrl(cached);
     if (freshUrl) {
-      cached.url = freshUrl;
+      rememberCoverThumbnail(key, cached);
       return freshUrl;
     }
     coverThumbnailUrlCache.delete(key);
@@ -562,13 +574,13 @@ function getCoverThumbnailUrl(filePath, options = {}) {
   const thumbnailPath = getCoverThumbnailPath(filePath);
   if (thumbnailPath && fileExists(thumbnailPath)) {
     const url = safeMediaUrl(thumbnailPath);
-    coverThumbnailUrlCache.set(key, { thumbnailPath, url, cachedAt: Date.now() });
+    rememberCoverThumbnail(key, thumbnailPath);
     return url;
   }
   if (forceCreate) {
     const created = createCoverThumbnailSync(filePath);
     if (created.ok && created.url) {
-      coverThumbnailUrlCache.set(key, { thumbnailPath: created.thumbnailPath, url: created.url, cachedAt: Date.now() });
+      rememberCoverThumbnail(key, created.thumbnailPath);
       return created.url;
     }
     return "";
@@ -2100,6 +2112,12 @@ function createWindow() {
       backgroundThrottling: false
     }
   });
+  const thumbnailWindow = mainWindow;
+  const syncThumbnailQueue = () => coverThumbnailQueue.setPaused(
+    thumbnailWindow.isDestroyed() || !thumbnailWindow.isVisible() || thumbnailWindow.isMinimized()
+  );
+  for (const event of ["show", "hide", "minimize", "restore"]) thumbnailWindow.on(event, syncThumbnailQueue);
+  syncThumbnailQueue();
   attachLocaltifyDevToolsShortcuts(mainWindow);
   applyWindowTranslucencyToWindow(mainWindow, windowTranslucency);
   const rendererIndexPath = isDev ? "" : getRendererIndexPath();
@@ -2146,7 +2164,7 @@ function createWindow() {
       } catch (error) { console.log("[localtify linux delayed show error]", error?.message || error); }
     }, 1600);
   }
-  mainWindow.on("closed", () => { clearRendererLoadWatchdog(); mainWindow = null; });
+  mainWindow.on("closed", () => { coverThumbnailQueue.setPaused(true); clearRendererLoadWatchdog(); mainWindow = null; });
   attachCloseToTray(mainWindow);
   appMenu.attachNavigationGestures(mainWindow);
 }
@@ -2401,7 +2419,7 @@ app.whenReady().then(async () => {
   ipcRouter.handle("covers:cleanup-cache", async () => { try { return cleanupCoverThumbnailCache(); } catch (error) { return { ok: false, error: error?.message || "cover cache cleanup failed" }; } });
   ipcRouter.handle("song:set-cover", async (_event, id, coverPath) => { const updated = patchSong(id, { coverPath }); return updated ? shapeSong(updated) : null; });
   ipcRouter.handle("song:pick-cover", async (event, id) => {
-    const song = getSongs().find((item) => item.id === id);
+    const song = (typeof id === "string" ? getSong(id) : null);
     if (!song) return null;
     try {
       const senderWindow = BrowserWindow.fromWebContents(event.sender) || mainWindow;
@@ -2418,7 +2436,7 @@ app.whenReady().then(async () => {
     }
   });
   ipcRouter.handle("song:analyze-volume", async (_event, id) => {
-    const target = getSongs().find((item) => item.id === id);
+    const target = (typeof id === "string" ? getSong(id) : null);
     if (!target) return { ok: false, volumeGain: 1, error: "song not in library database" };
     const analysis = await analyzeVolumeGain(target.filePath);
     if (!analysis?.ok) return analysis;
@@ -2525,7 +2543,7 @@ app.whenReady().then(async () => {
   });
   ipcRouter.handle("song:random-cover", async (_event, id) => {
     const covers = getPixelArtFiles();
-    const song = getSongs().find((item) => item.id === id);
+    const song = (typeof id === "string" ? getSong(id) : null);
     const chosen = pickLeastUsedCover(covers, song ? [song] : [], { avoidSelectedCurrent: true });
     const updated = patchSong(id, { coverPath: chosen });
     return updated ? shapeSong(updated) : null;
@@ -2724,6 +2742,7 @@ app.whenReady().then(async () => {
 
 app.on("before-quit", async () => {
   allowQuit = true;
+  coverThumbnailQueue.clear();
   libraryWatcher?.dispose();
   scrobbler?.dispose();
   if (serviceRuntime) await serviceRuntime.stop("app-before-quit");

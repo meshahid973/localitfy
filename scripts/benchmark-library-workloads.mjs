@@ -29,7 +29,7 @@ const hash=x=>createHash("sha256").update(JSON.stringify(x)).digest("hex");
 const mib=x=>Math.round(x/1048576*100)/100;
 const trials=[];
 const count=Number(process.argv[3]||10000);
-if(![1000,10000,50000].includes(count))throw Error("Unsupported workload size");
+if(![1000,10000,50000,100000].includes(count))throw Error("Unsupported workload size");
 function measure(label,fn,summarize){
   global.gc?.();
   const before=process.memoryUsage(),cpu=process.cpuUsage(),start=performance.now();

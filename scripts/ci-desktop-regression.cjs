@@ -54,10 +54,23 @@ const server=http.createServer((req,res)=>{
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function until(fn,label,timeout=35000){const end=Date.now()+timeout;while(Date.now()<end){const v=await fn();if(v)return v;await sleep(200);}throw Error("Timeout: "+label);}
 async function screenshot(win,name){await win.webContents.executeJavaScript("new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve(true))))");const image=await win.webContents.capturePage();assert.ok(!image.isEmpty());fs.writeFileSync(path.join(output,name+".png"),image.toPNG());}
-async function metrics(label){
+async function metrics(label,sampleCount=5){
   // Prime Electron's interval-based CPU counters before sampling.
   app.getAppMetrics();
-  const readings=[];for(let i=0;i<5;i++){await sleep(1000);const m=app.getAppMetrics();readings.push({workingSetMiB:m.reduce((s,p)=>s+(p.memory?.workingSetSize||0),0)/1024,cpuPercent:m.reduce((s,p)=>s+(p.cpu?.percentCPUUsage||0),0),processes:m.length});}
+  const readings=[];
+  for(let i=0;i<sampleCount;i++){
+    await sleep(1000);
+    const m=app.getAppMetrics();
+    const totals={workingSetMiB:0,cpuPercent:0,processes:m.length};
+    const byType={};
+    for(const p of m){
+      const memory=(p.memory?.workingSetSize||0)/1024, cpu=p.cpu?.percentCPUUsage||0;
+      totals.workingSetMiB+=memory;totals.cpuPercent+=cpu;
+      const bucket=byType[p.type]??={workingSetMiB:0,cpuPercent:0,processes:0};
+      bucket.workingSetMiB+=memory;bucket.cpuPercent+=cpu;bucket.processes++;
+    }
+    readings.push({...totals,byType});
+  }
   const median=key=>readings.map(r=>r[key]).sort((a,b)=>a-b)[Math.floor(readings.length/2)];
   return{label,readings,medianWorkingSetMiB:median("workingSetMiB"),peakWorkingSetMiB:Math.max(...readings.map(r=>r.workingSetMiB)),medianCpuPercent:median("cpuPercent")};
 }
@@ -154,12 +167,16 @@ server.listen(5173,async()=>{
     await screenshot(win,"desktop-home");
     const idle=await metrics("desktop idle");
     // Exercise actual rendered library navigation and playback.
+    const libraryNavigationStart=performance.now();
     const clicked=await win.webContents.executeJavaScript("(()=>{const b=document.querySelector('.sidebar [data-nav-id=library]');if(!b)return false;b.click();return true})()");
     assert.ok(clicked,"library navigation missing");
     await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.sidebar [data-nav-id=library].active') && !!document.querySelector('.songButton')").catch(()=>false),"library tracks");
+    const libraryNavigationMs=performance.now()-libraryNavigationStart;
     await screenshot(win,"desktop-library");
+    const playbackStart=performance.now();
     await win.webContents.executeJavaScript("document.querySelector('.songButton').click()");
     await until(()=>win.webContents.executeJavaScript("[...document.querySelectorAll('audio')].some(a=>!a.paused&&a.currentTime>0)").catch(()=>false),"audio playing");
+    const playbackStartMs=performance.now()-playbackStart;
     // Focus changes must not reload, seek or pause a healthy audio element.
     await win.webContents.executeJavaScript(`(()=>{const audio=document.querySelector('audio');const q={start:audio.currentTime,src:audio.src,events:[]};window.qaFocusAudio=q;for(const type of ['pause','seeking','loadstart']) audio.addEventListener(type,()=>q.events.push(type),{once:true});window.dispatchEvent(new Event('blur'));})()`);
     win.blur();
@@ -172,7 +189,15 @@ server.listen(5173,async()=>{
     await screenshot(win,"desktop-playing");
     assert.equal(await win.webContents.executeJavaScript("typeof window.localitfy.onWatchedFoldersChange"), "function", "current preload exposes watched-folder events");
     assert.equal(await win.webContents.executeJavaScript("document.querySelector(\".app\")?.dataset.appVersion"), version, "renderer version matches package");
-    const playing=await metrics("desktop playback");
+    const playing=await metrics("desktop playback",3);
+    const beforeHidden=await win.webContents.executeJavaScript("(()=>{const a=document.querySelector('audio');return {src:a.src,time:a.currentTime}})()");
+    let hiddenPlayback, hiddenAudio;
+    try {
+      win.hide();
+      hiddenPlayback=await metrics("desktop hidden playback",3);
+      hiddenAudio=await win.webContents.executeJavaScript("(()=>{const a=document.querySelector('audio');return {src:a.src,time:a.currentTime,paused:a.paused,documentHidden:document.hidden}})()");
+    } finally { win.show(); win.focus(); }
+    const hiddenPlaybackObservation={documentHidden:hiddenAudio.documentHidden,sameSource:hiddenAudio.src===beforeHidden.src,advancedSeconds:hiddenAudio.time-beforeHidden.time,paused:hiddenAudio.paused};
     await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=home]').click()");
     await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.homeFeatureCover') && document.querySelector('.app').dataset.workspaceArtwork==='on'").catch(()=>false),"artwork-led Home");
     async function homeGeometry(width,height) {
@@ -395,7 +420,7 @@ server.listen(5173,async()=>{
     assert.ok(collection.hero&&collection.row&&collection.play,"compact collections retain keyboard playback: "+JSON.stringify(collection));
     await screenshot(win,"collection-narrow");
     win.setSize(1280,800);
-    const result={startupMs,reloadMs,startupDefinition:"desktop entry to first rendered screen (onboarding or shell); excludes fixture creation and Electron process spawn",metrics:[idle,playing],memoryDefinition:"sum of Electron process working sets; may double count shared pages",platform:process.platform,fixtureSongs:songs.length,layouts,artworkTransitionLayers:samples};
+    const result={startupMs,reloadMs,libraryNavigationMs,playbackStartMs,interactionDefinition:"click to observed DOM/audio readiness, polling resolution 200ms",startupDefinition:"desktop entry to first rendered screen (onboarding or shell); excludes fixture creation and Electron process spawn",metrics:[idle,playing,hiddenPlayback],hiddenPlaybackObservation,gpuNote:"GPU process CPU and working set are reported by process type; these are not hardware GPU utilization",memoryDefinition:"sum of Electron process working sets; may double count shared pages",platform:process.platform,fixtureSongs:songs.length,layouts,artworkTransitionLayers:samples};
     fs.writeFileSync(path.join(output,"desktop-runtime.json"),JSON.stringify(result,null,2));console.log("[desktop-qa]",JSON.stringify(result));
     clearTimeout(watchdog);server.close();app.exit(0);
   }catch(error){
