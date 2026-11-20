@@ -55,7 +55,9 @@ test("media token capacity supports large local libraries", () => {
 test("database repair clears thumbnail URLs backed by discarded media tokens", () => {
   assert.match(
     mainSource,
-    /mediaServerRuntime\.clearTokens\(\);\s*coverThumbnailUrlCache\.clear\(\);/,
+    /mediaServerRuntime\.clearTokens\(\);\s*thumbnailRuntime\.clearUrlCache\(\);/,
     "cached thumbnail URLs must be invalidated whenever their media tokens are cleared"
   );
+  const thumbnailSource = fs.readFileSync(path.join(root, "electron", "runtime", "thumbnail-runtime.cjs"), "utf8");
+  assert.match(thumbnailSource, /clearUrlCache:\s*\(\)\s*=>\s*coverThumbnailUrlCache\.clear\(\)/);
 });
