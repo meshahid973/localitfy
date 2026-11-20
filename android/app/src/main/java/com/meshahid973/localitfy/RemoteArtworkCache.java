@@ -201,14 +201,16 @@ final class RemoteArtworkCache {
     }
     private synchronized void prune() {
         Map<String,?> all=index.getAll();
-        List<String> keys=new ArrayList<>(all.keySet());
-        keys.sort(Comparator.comparingLong(k->row(k).optLong("access")));
+        Map<String,JSONObject> rows=new HashMap<>();
+        for(String key:all.keySet())rows.put(key,row(key));
+        List<String> keys=new ArrayList<>(rows.keySet());
+        keys.sort(Comparator.comparingLong(k->rows.get(k).optLong("access")));
         Map<String,Integer> refs=new HashMap<>();
         Set<String> validKeys=new HashSet<>();
         long bytes=0; int entries=0; long now=System.currentTimeMillis();
         SharedPreferences.Editor edit=index.edit();
         for(String key:keys) {
-            JSONObject r=row(key); String n=r.optString("file"); long size=r.optLong("bytes");
+            JSONObject r=rows.get(key); String n=r.optString("file"); long size=r.optLong("bytes");
             if(!NAME.matcher(n).matches()||size<=0||size>MAX_IMAGE||retainUntil(r)<=now||!new File(root,n).isFile()) {edit.remove(key);continue;}
             if(!refs.containsKey(n))bytes+=size;
             refs.put(n,refs.getOrDefault(n,0)+1);entries++;validKeys.add(key);
@@ -216,7 +218,7 @@ final class RemoteArtworkCache {
         for(String key:keys) {
             if(entries<=MAX_ENTRIES&&bytes<=MAX_BYTES)break;
             if(!validKeys.contains(key))continue;
-            JSONObject r=row(key);String n=r.optString("file");
+            JSONObject r=rows.get(key);String n=r.optString("file");
             if(retainUntil(r)<=now||!refs.containsKey(n)||r.optLong("bytes")<=0||r.optLong("bytes")>MAX_IMAGE)continue;
             edit.remove(key);entries--;
             int count=refs.get(n)-1;

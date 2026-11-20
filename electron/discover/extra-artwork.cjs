@@ -107,4 +107,4 @@ function createFanartArtwork({apiKey,fetchImpl=globalThis.fetch,now=Date.now}={}
     return matchFanartArtwork(await boundedJson(fetchImpl,url,{"api-key":apiKey}),kind,id);
   },now);
 }
-module.exports={createDeezerArtwork,createFanartArtwork,matchDeezerArtwork,matchFanartArtwork,deezerImage,fanartImage};
+module.exports={createDeezerArtwork,createFanartArtwork,matchDeezerArtwork,matchFanartArtwork,deezerImage,fanartImage,boundedJson};
