@@ -41,11 +41,18 @@ jobs:
           BASELINE_SHA="$(git rev-parse --verify "$BASELINE_REF^{commit}")"
           test "$BASELINE_SHA" != "$(git rev-parse HEAD)" || { echo "Select a different baseline commit"; exit 1; }
           git worktree add --detach "$RUNNER_TEMP/localtify-baseline" "$BASELINE_SHA"
+          # Fresh Node processes and alternating order reduce warm-cache/order bias.
           for n in 1000 10000 50000 100000; do
-            node --expose-gc scripts/benchmark-library-workloads.mjs "$RUNNER_TEMP/localtify-baseline" "$n" | tee "qa-artifacts/baseline-$n.json"
-            node --expose-gc scripts/benchmark-library-workloads.mjs . "$n" | tee "qa-artifacts/current-$n.json"
+            for round in 1 2 3; do
+              if [ "$round" -eq 2 ]; then order="current baseline"; else order="baseline current"; fi
+              for kind in $order; do
+                target=.
+                if [ "$kind" = baseline ]; then target="$RUNNER_TEMP/localtify-baseline"; fi
+                node --expose-gc scripts/benchmark-library-workloads.mjs "$target" "$n" | tee "qa-artifacts/$kind-$n-$round.json"
+              done
+            done
           done
-          node -e 'const fs=require("fs");for(const n of [1000,10000,50000,100000]){const a=JSON.parse(fs.readFileSync("qa-artifacts/baseline-"+n+".json"));const b=JSON.parse(fs.readFileSync("qa-artifacts/current-"+n+".json"));for(let i=0;i<a.trials.length;i++)if(a.trials[i].digest!==b.trials[i].digest)throw Error("Output divergence: "+n+" "+a.trials[i].label);}'
+          node -e 'const fs=require("fs"),read=(k,n,r)=>JSON.parse(fs.readFileSync("qa-artifacts/"+k+"-"+n+"-"+r+".json")),median=v=>v.slice().sort((a,b)=>a-b)[1];for(const n of [1000,10000,50000,100000]){const a=[1,2,3].map(r=>read("baseline",n,r)),b=[1,2,3].map(r=>read("current",n,r));for(const v of [...a,...b])for(let i=0;i<a[0].trials.length;i++)if(v.trials[i].digest!==a[0].trials[i].digest)throw Error("Output divergence: "+n+" "+a[0].trials[i].label);for(const [kind,rows] of [["baseline",a],["current",b]]){const result={...rows[0],peakRssMiB:median(rows.map(x=>x.peakRssMiB)),rounds:3,trials:rows[0].trials.map((t,i)=>({...t,...Object.fromEntries(["wallMs","cpuMs","heapDeltaMiB","rssMiB","rssDeltaMiB"].map(key=>[key,median(rows.map(x=>x.trials[i][key]))]))}))};fs.writeFileSync("qa-artifacts/"+kind+"-"+n+".json",JSON.stringify(result,null,2));console.log(JSON.stringify(result));}}'
       - name: Actual Electron desktop renderer and audio smoke
         shell: bash
         run: |

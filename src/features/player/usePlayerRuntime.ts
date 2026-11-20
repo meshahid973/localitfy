@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { MutableRefObject } from "react";
+import { useStableCallback } from "../../shared/hooks/useStableCallback";
 import { ListeningHistory } from "./listeningHistory";
 import { AudioEffectRuntime } from "./audio/audioEffectRuntime";
 import { PlaybackTransitionCoordinator } from "./engine/playbackTransitionCoordinator";
@@ -194,4 +196,61 @@ export function usePlayerRuntime({ defaultVolume }: UsePlayerRuntimeOptions) {
     playQueue, setPlayQueue, queueHistory, setQueueHistory, repeatPlaylist, setRepeatPlaylist,
     queueDropHot, setQueueDropHot, queueDropHotRef
   };
+}
+
+type ProgressLoopOptions = {
+  enabled: boolean;
+  songId: string;
+  animationFrameRef: MutableRefObject<number | null>;
+  progressLoopTimeoutRef: MutableRefObject<number | null>;
+  isBackgrounded: () => boolean;
+  stopProgressLoop: () => void;
+  onInactive: () => void;
+  onVisible: () => void;
+  onTick: (clock: number) => number;
+};
+
+/** One timer/frame owner per playback session. Metadata/seek/UI changes update
+ * callbacks, rather than continually tearing down and restarting the loop. */
+export function usePlaybackProgressLoop(options: ProgressLoopOptions) {
+  const { enabled, songId, animationFrameRef, progressLoopTimeoutRef } = options;
+  const isBackgrounded = useStableCallback(options.isBackgrounded);
+  const stopProgressLoop = useStableCallback(options.stopProgressLoop);
+  const onInactive = useStableCallback(options.onInactive);
+  const onVisible = useStableCallback(options.onVisible);
+  const onTick = useStableCallback(options.onTick);
+  useEffect(() => {
+    if (!enabled || !songId) {
+      stopProgressLoop();
+      onInactive();
+      return;
+    }
+    let active = true;
+    const scheduleProgressTick = (delay: number) => {
+      if (!active) return;
+      if (progressLoopTimeoutRef.current !== null) window.clearTimeout(progressLoopTimeoutRef.current);
+      progressLoopTimeoutRef.current = window.setTimeout(() => {
+        progressLoopTimeoutRef.current = null;
+        if (!active) return;
+        if (document.hidden || isBackgrounded()) tick(performance.now());
+        else animationFrameRef.current = window.requestAnimationFrame(tick);
+      }, delay);
+    };
+    const tick = (clock: number) => {
+      animationFrameRef.current = null;
+      if (active) scheduleProgressTick(onTick(clock));
+    };
+    const handleProgressVisibility = () => {
+      stopProgressLoop();
+      if (!document.hidden) onVisible();
+      scheduleProgressTick(document.hidden ? 1800 : 0);
+    };
+    document.addEventListener("visibilitychange", handleProgressVisibility);
+    scheduleProgressTick(140);
+    return () => {
+      active = false;
+      document.removeEventListener("visibilitychange", handleProgressVisibility);
+      stopProgressLoop();
+    };
+  }, [enabled, songId, animationFrameRef, progressLoopTimeoutRef, isBackgrounded, stopProgressLoop, onInactive, onVisible, onTick]);
 }

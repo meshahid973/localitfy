@@ -5,6 +5,7 @@ import { createPlayerController } from "./features/player/engine/playerControlle
 import { useNativeMediaSession } from "./features/player/useNativeMediaSession";
 import type { ListeningOutcome } from "./features/player/listeningHistory";
 import { usePlayerRuntime } from "./features/player";
+import { usePlaybackProgressLoop } from "./features/player/usePlayerRuntime";
 import { resolveCachedPlaybackUrl } from "./features/player/playbackUrlCache";
 import { useSongRadio } from "./features/player/useSongRadio";
 import { useNotForMe } from "./features/analysis/notForMe";
@@ -2311,37 +2312,24 @@ function MainModeApp() {
     }
   }, [isVolumeDragging, settings.volume]);
 
-  useEffect(() => {
-    if (!isPlaying || !currentSong) {
-      stopProgressLoop();
-      syncProgressDom(timeRef.current || 0, durationRef.current || currentDuration, true);
-      return;
-    }
-
-    let lastPaintedDuration = currentDuration || 0;
-
-    const scheduleProgressTick = (delayMs: number) => {
-      if (progressLoopTimeoutRef.current !== null) {
-        window.clearTimeout(progressLoopTimeoutRef.current);
-      }
-
-      progressLoopTimeoutRef.current = window.setTimeout(() => {
-        progressLoopTimeoutRef.current = null;
-        // Hidden windows may suspend animation frames. Continue position
-        // checkpoints without painting progress UI.
-        if (document.hidden || isAppBackgroundedRef.current) tick(performance.now());
-        else animationFrameRef.current = window.requestAnimationFrame(tick);
-      }, delayMs);
-    };
-
-    const tick = (clock: number) => {
-      animationFrameRef.current = null;
+  usePlaybackProgressLoop({
+    enabled: isPlaying && Boolean(currentSong),
+    songId: currentSong?.id || "",
+    animationFrameRef,
+    progressLoopTimeoutRef,
+    isBackgrounded: () => isAppBackgroundedRef.current,
+    stopProgressLoop,
+    onInactive: () => syncProgressDom(timeRef.current || 0, durationRef.current || currentDuration, true),
+    onVisible: () => {
+      if (!isSeekingRef.current) syncProgressDom(timeRef.current, durationRef.current || currentDuration, true);
+    },
+    onTick: (clock) => {
       const audio = audioRef.current;
       const backgroundMode = document.hidden || isAppBackgroundedRef.current;
       const busyUi = scrollBusyRef.current || performance.now() < rendererQuietUntilRef.current || Boolean(draggedSongIdRef.current) || themeSettlingRef.current;
 
       const transition = playbackTransitionRef.current.snapshot();
-      if (audio && !audio.paused && transition.sourceId === currentSong.id &&
+      if (audio && !audio.paused && transition.sourceId === currentSong?.id &&
           (transition.phase === "playing" || transition.phase === "crossfading")) {
         const nextTime = audio.currentTime || 0;
         const nextDuration = Number.isFinite(audio.duration) ? audio.duration : currentDuration;
@@ -2355,8 +2343,7 @@ function MainModeApp() {
           syncProgressDom(nextTime, nextDuration);
         }
 
-        if (!backgroundMode && Number.isFinite(nextDuration) && nextDuration > 0 && Math.abs(nextDuration - lastPaintedDuration) > 0.5) {
-          lastPaintedDuration = nextDuration;
+        if (!backgroundMode && Number.isFinite(nextDuration) && nextDuration > 0 && Math.abs(nextDuration - currentDuration) > 0.5) {
           setCurrentDuration(nextDuration);
           syncProgressDom(nextTime, nextDuration, true);
         }
@@ -2372,26 +2359,9 @@ function MainModeApp() {
         }
 
       }
-
-      scheduleProgressTick(backgroundMode ? 1800 : busyUi ? 520 : 180);
-    };
-
-    // Cancel a pending frame that may never run when the window is hidden.
-    const handleProgressVisibility = () => {
-      stopProgressLoop();
-      if (!document.hidden && !isSeekingRef.current) {
-        syncProgressDom(timeRef.current, durationRef.current || currentDuration, true);
-      }
-      scheduleProgressTick(document.hidden ? 1800 : 0);
-    };
-    document.addEventListener("visibilitychange", handleProgressVisibility);
-    scheduleProgressTick(140);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleProgressVisibility);
-      stopProgressLoop();
-    };
-  }, [isPlaying, currentSong?.id, currentDuration, syncProgressDom]);
+      return backgroundMode ? 1800 : busyUi ? 520 : 180;
+    }
+  });
 
   const discordSettingsRef = useRef(settings);
 
