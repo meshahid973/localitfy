@@ -1052,10 +1052,15 @@ function getPlaylists() {
 
 function savePlaylists(playlists) {
   const database = ensureDb();
-  const list = Array.isArray(playlists) ? playlists : [];
-  const normalized = list
-    .map((playlist, index) => normalizePlaylist(playlist, index))
-    .filter(Boolean);
+  // A malformed IPC payload must never be interpreted as a request to
+  // clear every playlist. Only an explicit empty array may clear the library.
+  if (!Array.isArray(playlists) ||
+      playlists.some(playlist => !playlist || Array.isArray(playlist) ||
+        typeof playlist !== "object" || !Array.isArray(playlist.songIds))) {
+    throw new TypeError("Invalid playlists snapshot");
+  }
+  const normalized = playlists.map((playlist, index) => normalizePlaylist(playlist, index));
+  if (normalized.some(playlist => !playlist)) throw new TypeError("Invalid playlist");
 
   const insertPlaylist = database.prepare(`
     INSERT INTO playlists (id, name, createdAt, sortOrder, rules, coverArtwork)

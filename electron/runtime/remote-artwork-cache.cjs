@@ -207,6 +207,14 @@ function createRemoteArtworkCache({ dir, maxBytes = 128 * 1024 * 1024, maxEntrie
       return await refresh(url,hit?.row);
     } catch { return ""; }
   }
-  return {resolve, remainingTtl(url){return Math.max(0,(rows.get(url)?.staleUntil || 0)-now());}, close(){closed=true;shutdown.abort();},get pendingCount(){return pending.size;}};
+  return {resolve, remainingTtl(url){
+    const row = rows.get(url);
+    if (!row || closed) return 0;
+    const timestamp = now();
+    if (row.expiresAt > timestamp) return row.expiresAt - timestamp;
+    // Stale-while-revalidate grants a brief *display* grace period, not a
+    // fresh renderer cache lease. Recheck promptly for the refreshed image.
+    return row.staleUntil > timestamp ? Math.min(1000, row.staleUntil - timestamp) : 0;
+  }, close(){closed=true;shutdown.abort();},get pendingCount(){return pending.size;}};
 }
 module.exports = {createRemoteArtworkCache,lifetime,eligible};

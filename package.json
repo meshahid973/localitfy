@@ -11,7 +11,7 @@
   "main": "electron/main.cjs",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/meshahid973/localitfy.git"
+    "url": "git+https://github.com/meshahid973/localtify.git"
   },
   "scripts": {
     "dev": "concurrently -k \"vite --host 127.0.0.1\" \"wait-on tcp:5173 && electron .\"",
@@ -214,7 +214,7 @@
       {
         "provider": "github",
         "owner": "meshahid973",
-        "repo": "localitfy"
+        "repo": "localtify"
       }
     ],
     "compression": "maximum",

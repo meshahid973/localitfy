@@ -1,7 +1,7 @@
 "use strict";
 
-const LOCALTIFY_LINUX_RELEASES_URL = "https://github.com/meshahid973/localitfy/releases/latest";
-const LOCALTIFY_GITHUB_LATEST_RELEASE_API = "https://api.github.com/repos/meshahid973/localitfy/releases/latest";
+const LOCALTIFY_LINUX_RELEASES_URL = "https://github.com/meshahid973/localtify/releases/latest";
+const LOCALTIFY_GITHUB_LATEST_RELEASE_API = "https://api.github.com/repos/meshahid973/localtify/releases/latest";
 
 function normalizeUpdateVersion(value = "") {
   return String(value || "").trim().replace(/^v/i, "");
@@ -94,10 +94,15 @@ function createUpdaterRuntime(options = {}) {
           (response) => {
             let body = "";
             response.setEncoding("utf8");
-            response.on("data", (chunk) => { body += chunk; });
+            response.on("data", (chunk) => {
+              // GitHub release metadata should be small. Never let a bad or
+              // unexpectedly huge response exhaust the Electron main process.
+              body += chunk;
+              if (body.length > 1024 * 1024) { request.destroy(); resolve(null); }
+            });
             response.on("end", () => {
               try {
-                if (response.statusCode && response.statusCode >= 400) {
+                if (response.statusCode !== 200) {
                   resolve(null);
                   return;
                 }

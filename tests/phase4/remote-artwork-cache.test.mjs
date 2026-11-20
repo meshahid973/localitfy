@@ -54,6 +54,11 @@ test("stale artwork is served only during an explicit revalidation window and va
   try {
     const cache=createRemoteArtworkCache({dir,fetchImpl,now:()=>clock});
     const original=await cache.resolve(a);
+    assert.equal(cache.remainingTtl(a),1000,"renderer freshness excludes the stale window");
+    clock=2100;
+    assert.equal(cache.remainingTtl(a),1000,"stale image gets only a short recheck lease");
+    clock=5900;
+    assert.equal(cache.remainingTtl(a),100,"renderer must not cache past the provider stale deadline");
     clock=2100;
     assert.equal(await cache.resolve(a),original);
     assert.equal(observed,'"cover"');

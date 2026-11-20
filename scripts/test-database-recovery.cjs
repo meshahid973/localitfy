@@ -68,6 +68,11 @@ try {
     db.savePlaylists([{ id: "smart", name: "Smart", songIds: ["legacy-song"], createdAt: now, rules },
       { id: "plain", name: "Plain", songIds: [], createdAt: now, rules: "not json" }]);
     const saved = db.getPlaylists();
+    for (const invalid of [null, {}, [null], [{ id: "smart", name: "Broken", songIds: null }]]) {
+      let rejected = false;
+      try { db.savePlaylists(invalid); } catch (error) { rejected = error instanceof TypeError; }
+      if (!rejected || JSON.stringify(db.getPlaylists()) !== JSON.stringify(saved)) throw new Error("Malformed playlist snapshot modified the library");
+    }
     if (JSON.stringify(saved.find((item) => item.id === "smart")?.rules) !== JSON.stringify(rules)) throw new Error("smart playlist rules were not persisted");
     if ("rules" in saved.find((item) => item.id === "plain")) throw new Error("malformed playlist rules were persisted");
     const vector = new Float32Array(512); vector[0] = 1;
