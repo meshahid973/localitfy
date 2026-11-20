@@ -114,6 +114,7 @@ contextBridge.exposeInMainWorld("localitfy", {
   listBrokenCovers: () => ipcRenderer.invoke("covers:broken"),
   getLeastUsedCover: () => ipcRenderer.invoke("covers:least-used"),
   requestCoverThumbnail: (payload) => ipcRenderer.invoke("covers:request-thumbnail", payload),
+  cancelCoverThumbnail: (payload) => ipcRenderer.invoke("covers:cancel-thumbnail", payload),
   onCoverThumbnailReady: (callback) => {
     const handler = (_event, payload) => callback(payload);
     ipcRenderer.on("covers:thumbnail-ready", handler);

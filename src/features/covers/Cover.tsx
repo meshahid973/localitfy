@@ -6,7 +6,7 @@ import { nextPixelArtForSong, pixelArtForSong } from "./cover.runtime";
 import { runtimePixelArtImageUrl } from "./pixelArt";
 import { prettyTitle } from "../search/search.utils";
 import { toCssUrl } from "../../shared/utils/format";
-import { observeArtwork, requestThumbnail, useCompletedThumbnail, type ThumbnailSize } from "./thumbnailResource";
+import { observeArtwork, retainThumbnail, useCompletedThumbnail, type ThumbnailSize } from "./thumbnailResource";
 
 export type CoverImagePriority = "auto" | "high" | "low";
 export function getCardCoverUrl(song?: Song | null) {
@@ -54,7 +54,7 @@ export const Cover = memo(function Cover({ song, className, priority = "auto", p
   }, [useFullCover]);
   useEffect(() => {
     if (useFullCover || !viewport.near || !songId || !fullSource || (thumbnailSource && !thumbnailFailed)) return;
-    void requestThumbnail(songId, fullSource, viewport.size, thumbnailFailed ? thumbnailSource : undefined);
+    return retainThumbnail(songId, fullSource, viewport.size, thumbnailFailed ? thumbnailSource : undefined);
   }, [useFullCover, viewport, songId, fullSource, thumbnailSource, thumbnailFailed]);
   if (completedThumbnail) sourceCandidates.unshift(completedThumbnail);
   let coverSrc = sourceCandidates.find(source => source && !failedSources[source]) || "";

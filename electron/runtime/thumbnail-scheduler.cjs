@@ -56,6 +56,13 @@ function createThumbnailScheduler({
     return true;
   }
 
+  function cancel(filePath) {
+    // Active jobs finish; only abandoned visible work is removed. Background warmup is independent.
+    const removed = visible.delete(filePath);
+    if (size() === 0 && timer !== null) { clearTimer(timer); timer = null; }
+    return removed;
+  }
+
   function setPaused(next) {
     paused = Boolean(next);
     if (paused) {
@@ -72,7 +79,7 @@ function createThumbnailScheduler({
   }
 
   return {
-    enqueue, clear, setPaused,
+    enqueue, cancel, clear, setPaused,
     has: (filePath) => active === filePath || visible.has(filePath) || background.has(filePath),
     get size() { return size(); }
   };

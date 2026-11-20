@@ -2239,6 +2239,7 @@ app.whenReady().then(async () => {
     }
   });
   ipcRouter.handle("covers:request-thumbnail", async (_event, payload) => thumbnailRuntime.requestThumbnail(payload));
+  ipcRouter.handle("covers:cancel-thumbnail", async (_event, payload) => thumbnailRuntime.cancelThumbnail(payload));
   ipcRouter.handle("covers:cleanup-cache", async () => { try { return cleanupCoverThumbnailCache(); } catch (error) { return { ok: false, error: error?.message || "cover cache cleanup failed" }; } });
   ipcRouter.handle("song:set-cover", async (_event, id, coverPath) => { const updated = patchSong(id, { coverPath }); return updated ? shapeSong(updated) : null; });
   ipcRouter.handle("song:pick-cover", async (event, id) => {

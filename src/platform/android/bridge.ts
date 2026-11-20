@@ -139,6 +139,7 @@ export function createAndroidBridge(): Bridge {
       const result = await LocaltifyNative.resolveRemoteArtwork({ url }).catch(() => null);
       return result?.url && phoneLibrary.effectiveSettings().discoverEnabled === true ? { url: result.url, cacheTtlMs: result.cacheTtlMs } : null;
     },
+    cancelCoverThumbnail: async () => false,
     requestCoverThumbnail: async ({id,source,size=256,failed}) => {
       const record=phoneLibrary.files[id];
       if(!record?.cover||!record.coverExt)return null;

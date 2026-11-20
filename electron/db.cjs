@@ -157,7 +157,7 @@ function setStoredSchemaVersion(database, version = SCHEMA_VERSION) {
     .prepare(`
       INSERT INTO schema_meta (key, value)
       VALUES ('schemaVersion', ?)
-      ON CONFLICT(key) DO UPDATE SET value = excluded.value WHERE settings.value IS NOT excluded.value
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value WHERE schema_meta.value IS NOT excluded.value
     `)
     .run(String(version));
 
@@ -994,7 +994,7 @@ function saveSettings(settings) {
   const stmt = database.prepare(`
     INSERT INTO settings (key, value)
     VALUES (?, ?)
-    ON CONFLICT(key) DO UPDATE SET value = excluded.value
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value WHERE settings.value IS NOT excluded.value
   `);
 
   const tx = database.transaction((items) => {

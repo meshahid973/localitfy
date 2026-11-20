@@ -292,6 +292,15 @@ function createThumbnailRuntime({
   }
 
     // Accept a library song ID, never a renderer-provided filesystem path.
+    function cancelThumbnail(payload) {
+      if (stopped || !payload || typeof payload.id !== "string" || typeof payload.source !== "string") return false;
+      const song = getSong(payload.id);
+      if (!song) return false;
+      const file = getRuntimeCoverPath(song);
+      if (!file || safeMediaUrl(file) !== payload.source) return false;
+      return coverThumbnailQueue.cancel(jobKey(file,thumbnailSize(payload.size)));
+    }
+
     async function requestThumbnail(payload) {
       if (stopped || !payload || typeof payload.id !== "string" || typeof payload.source !== "string") return null;
       const song = getSong(payload.id);
@@ -320,7 +329,7 @@ function createThumbnailRuntime({
 
   return {
     getCoverThumbnailUrl, getCoverThumbnailStatus, warmCoverThumbnails,
-    cleanupCoverThumbnailCache, scheduleCoverThumbnailWarmup, requestThumbnail,
+    cleanupCoverThumbnailCache, scheduleCoverThumbnailWarmup, requestThumbnail, cancelThumbnail,
     queue: coverThumbnailQueue,
     clearUrlCache: () => coverThumbnailUrlCache.clear(),
     stop: () => {

@@ -61,6 +61,25 @@ export function requestThumbnail(id: string, source: string, size: ThumbnailSize
   return job;
 }
 
+// Visible consumers own queued work. A card leaving the viewport cannot cancel another card's request.
+const thumbnailDemand = new Map<string, number>();
+export function retainThumbnail(id: string, source: string, size: ThumbnailSize, failed?: string) {
+  const key = keyOf(source,size);
+  thumbnailDemand.set(key,(thumbnailDemand.get(key)||0)+1);
+  const pending = requestThumbnail(id,source,size,failed);
+  let released=false;
+  return () => {
+    if(released)return;
+    released=true;
+    const count=(thumbnailDemand.get(key)||1)-1;
+    if(count>0){thumbnailDemand.set(key,count);return;}
+    thumbnailDemand.delete(key);
+    void pending.then(result=>{
+      if(!result&&!thumbnailDemand.has(key))void window.localitfy?.cancelCoverThumbnail?.({id,source,size}).catch(()=>undefined);
+    });
+  };
+}
+
 // One observer for artwork across all mounted lists, not one observer per row.
 const viewportListeners = new Map<Element, (near: boolean, size: ThumbnailSize) => void>();
 let viewportObserver: IntersectionObserver | null = null;
