@@ -92,3 +92,30 @@ test("visible artwork is processed before background warmup and existing jobs ca
   flush();
   assert.deepEqual(completed, ["visible-now", "warm-b", "warm-a"]);
 });
+
+
+test("hidden window pauses thumbnail work and resumes once without losing queued jobs", () => {
+  const processed=[];
+  const {scheduler,timers,flush}=makeScheduler(file=>processed.push(file));
+  scheduler.enqueue("a",{lowPriority:true});
+  scheduler.setPaused(true);
+  scheduler.enqueue("b");
+  assert.equal(timers.size,0);
+  assert.equal(flush(),false);
+  assert.equal(scheduler.size,2);
+  scheduler.setPaused(false);
+  scheduler.setPaused(false);
+  assert.equal(timers.size,1);
+  while(flush()) {}
+  assert.deepEqual(processed,["b","a"]);
+});
+test("visible thumbnails can displace queued warmup at the fixed capacity", () => {
+  const {scheduler,timers}=makeScheduler(()=>{});
+  for(let i=0;i<500;i++) assert.equal(scheduler.enqueue("warm-"+i,{lowPriority:true}),true);
+  assert.equal(scheduler.enqueue("extra",{lowPriority:true}),false);
+  assert.equal(scheduler.enqueue("visible"),true);
+  assert.equal(scheduler.has("visible"),true);
+  assert.equal(scheduler.has("warm-0"),false);
+  assert.equal(scheduler.size,500);
+  assert.equal(timers.size,1);
+});

@@ -1537,7 +1537,7 @@ function MainModeApp() {
 
     clearBeatTimers();
 
-    if (!ready || !isPlaying || !currentSong || !settings.animatedGlow || settings.reducedMotion || document.hidden) {
+    if (!ready || !isPlaying || !currentSong || !settings.animatedGlow || settings.reducedMotion || isAppBackgrounded || document.hidden) {
       resetBeatVariables();
       return;
     }
@@ -1620,8 +1620,6 @@ function MainModeApp() {
     const tick = (now: number) => {
       if (document.hidden) {
         resetBeatVariables();
-        lastPaint = now;
-        scheduleBeatTick(900);
         return;
       }
 
@@ -1704,7 +1702,7 @@ function MainModeApp() {
     return () => {
       clearBeatTimers();
     };
-  }, [ready, isPlaying, currentSong?.id, settings.animatedGlow, settings.reducedMotion, settings.volume, settings.playbackSpeed, settings.audioEffectMode, settings.audioEffectAmount, settings.audioReverbAmount, view, settingsCategory, isViewSwitching, isSeeking, isVolumeDragging]);
+  }, [ready, isPlaying, currentSong?.id, isAppBackgrounded, settings.animatedGlow, settings.reducedMotion, settings.volume, settings.playbackSpeed, settings.audioEffectMode, settings.audioEffectAmount, settings.audioReverbAmount, view, settingsCategory, isViewSwitching, isSeeking, isVolumeDragging]);
 
 
   function resetPlayCountTracker(outcome: Exclude<ListeningOutcome, "active"> = "interrupted") {
