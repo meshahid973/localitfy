@@ -47,10 +47,10 @@ export function reconcileLibraryIndex(songs: readonly Song[], previous?: Library
     previous.songIndexById.size === songs.length &&
     previous.searchEntries[edit.index]?.song.id === songs[edit.index]?.id
     ? edit.index : -1;
-  const stableOrder = editedIndex >= 0 || Boolean(previous &&
-    previous.searchEntries.length === songs.length &&
-    previous.songIndexById.size === songs.length &&
-    songs.every((song, i) => previous.searchEntries[i].song.id === song.id));
+  const stableOrder = previous && (editedIndex >= 0 ||
+    (previous.searchEntries.length === songs.length &&
+     previous.songIndexById.size === songs.length &&
+     songs.every((song, i) => previous.searchEntries[i].song.id === song.id)));
   let songsById = stableOrder ? previous.songsById : new Map<string, Song>();
   const songIndexById = stableOrder ? previous.songIndexById : new Map<string, number>();
   let searchEntries = stableOrder ? previous.searchEntries : new Array<SongSearchEntry>(songs.length);
