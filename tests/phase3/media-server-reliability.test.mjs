@@ -159,7 +159,8 @@ test("thumbnail cache refreshes media URLs and downloads shape the library once"
   assert.match(main, /const freshUrl = safeMediaUrl\(cached\)/);
   assert.match(main, /rememberCoverThumbnail\(key, cached\)/);
   assert.match(main, /coverThumbnailUrlCache\.size > COVER_THUMBNAIL_URL_CACHE_LIMIT/);
-  assert.match(main, /fileInfoCache\.delete\(thumbnailPath\);\s*return \{ ok: true/);
+  assert.match(main, /fileInfoCache\.delete\(thumbnailPath\);\s*(?:const url = safeMediaUrl\(thumbnailPath\)|return \{ ok: true)/);
+  assert.match(main, /webContents\.send\("covers:thumbnail-ready", \{ source: safeMediaUrl\(filePath\), url \}\)/);
   assert.doesNotMatch(protocols, /bypassCSP\s*:\s*true/);
 
   const download = main.slice(main.indexOf('const runAudioDownload ='), main.indexOf('ipcRouter.handle("download:cancel"'));

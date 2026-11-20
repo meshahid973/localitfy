@@ -649,6 +649,7 @@ declare global {
       rescanPixelArt?: () => Promise<Song[]>;
       listBrokenCovers?: () => Promise<LocalitfyCoverBrokenItem[]>;
       getLeastUsedCover?: () => Promise<string | null>;
+      onCoverThumbnailReady?: (callback: (result: { source: string; url: string }) => void) => () => void;
       getCoverThumbnailStatus?: () => Promise<LocalitfyCoverThumbnailStatus>;
       warmCoverThumbnails?: (payload?: { limit?: number; force?: boolean }) => Promise<LocalitfyCoverThumbnailWarmResult>;
       cleanupCoverCache: () => Promise<LocalitfyCoverThumbnailCleanupResult>;

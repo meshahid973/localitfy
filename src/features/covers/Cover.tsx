@@ -6,6 +6,7 @@ import { nextPixelArtForSong, pixelArtForSong } from "./cover.runtime";
 import { runtimePixelArtImageUrl } from "./pixelArt";
 import { prettyTitle } from "../search/search.utils";
 import { toCssUrl } from "../../shared/utils/format";
+import { useCompletedThumbnail } from "./thumbnailResource";
 
 export type CoverImagePriority = "auto" | "high" | "low";
 export function getCardCoverUrl(song?: Song | null) {
@@ -38,6 +39,8 @@ export function Cover({ song, className, priority = "auto", preferThumbnail = fa
   const savedCoverSrc = getRendererSafeImageUrl(savedCover);
   // A broken thumbnail must fall back to the actual original, not a placeholder.
   const sourceCandidates = [directCover, getFullCoverUrl(song), savedCoverSrc];
+  const completedThumbnail = useCompletedThumbnail(useFullCover ? "" : getFullCoverUrl(song));
+  if (completedThumbnail) sourceCandidates.unshift(completedThumbnail);
   let coverSrc = sourceCandidates.find(source => source && !failedSources[source]) || "";
   // Most tracks have real art; avoid hashing metadata and resolving fallback
   // assets unless the real cover is unavailable.

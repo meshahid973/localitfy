@@ -91,5 +91,6 @@ test('decorative artwork uses low-resolution source without changing eager loadi
  assert.match(backdrop,/const source = getSongAmbientSource\(song\)/);
  assert.match(backdrop,/prepareBackdropArtwork\(candidate, controller.signal\)/);
  assert.match(ambient,/return getRendererSafeImageUrl\(song.coverThumbUrl\)\|\|getRendererSafeImageUrl\(song.coverThumbnailUrl\)/);
- assert.match(source,/preferThumbnail \? getFullCoverUrl\(song\) : ""/);
+ assert.match(source,/const sourceCandidates = \[directCover, getFullCoverUrl\(song\), savedCoverSrc\]/);
+ assert.match(source,/sourceCandidates\.find\(source => source && !failedSources\[source\]\)/);
 });

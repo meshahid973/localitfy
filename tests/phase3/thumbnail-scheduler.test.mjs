@@ -119,3 +119,30 @@ test("visible thumbnails can displace queued warmup at the fixed capacity", () =
   assert.equal(scheduler.size,500);
   assert.equal(timers.size,1);
 });
+
+
+test("asynchronous thumbnail jobs remain serialized and deduplicated during visibility changes", async () => {
+  const processed = [];
+  let complete;
+  const { scheduler, timers, flush } = makeScheduler(file => {
+    processed.push(file);
+    return new Promise(resolve => { complete = resolve; });
+  });
+  scheduler.enqueue("a");
+  scheduler.enqueue("b");
+  flush();
+  assert.deepEqual(processed, ["a"]);
+  assert.equal(timers.size, 0);
+  assert.equal(scheduler.enqueue("a"), false);
+  scheduler.setPaused(true);
+  complete();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(timers.size, 0);
+  scheduler.setPaused(false);
+  assert.equal(timers.size, 1);
+  flush();
+  assert.deepEqual(processed, ["a", "b"]);
+  complete();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(timers.size, 0);
+});

@@ -295,6 +295,7 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
       return stored ? bioAnswer(stored) : { status: "error", error: error?.message || "Couldn't load the biography." };
     }
   });
+  return { flush: artworkResults.flush };
 }
 
 module.exports = { registerDiscoverIpc };

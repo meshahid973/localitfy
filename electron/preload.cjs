@@ -112,6 +112,11 @@ contextBridge.exposeInMainWorld("localitfy", {
   rescanPixelArt: () => ipcRenderer.invoke("covers:rescan"),
   listBrokenCovers: () => ipcRenderer.invoke("covers:broken"),
   getLeastUsedCover: () => ipcRenderer.invoke("covers:least-used"),
+  onCoverThumbnailReady: (callback) => {
+    const handler = (_event, payload) => callback(payload);
+    ipcRenderer.on("covers:thumbnail-ready", handler);
+    return () => ipcRenderer.removeListener("covers:thumbnail-ready", handler);
+  },
   getCoverThumbnailStatus: () => ipcRenderer.invoke("covers:thumbnail-status"),
   warmCoverThumbnails: (payload) => ipcRenderer.invoke("covers:warm-thumbnails", payload),
   cleanupCoverCache: () => ipcRenderer.invoke("covers:cleanup-cache"),

@@ -101,10 +101,13 @@ function rememberCoverThumbnail(key, thumbnailPath) {
   }
 }
 const coverThumbnailQueue = createThumbnailScheduler({
-  processFile: createCoverThumbnailSync,
+  processFile: createCoverThumbnail,
   onError: (error) => console.log("[localtify thumbnail queue error]", error?.message || error)
 });
 let coverThumbnailWarmStarted = false;
+let thumbnailGeneration = 0;
+let discoverCacheLifecycle = null;
+const thumbnailJobs = new Map();
 
 const APP_NAME = "localtify";
 const APP_USER_MODEL_ID = "com.meshahid973.localitfy";
@@ -528,33 +531,51 @@ function getCoverThumbnailPath(filePath) {
   return path.join(dir, `${getCoverThumbnailCacheKey(filePath)}.png`);
 }
 
-function createCoverThumbnailSync(filePath) {
+// Decode and resize outside Electron's main process using the bundled FFmpeg.
+function createCoverThumbnail(filePath) {
   const thumbnailPath = getCoverThumbnailPath(filePath);
-  if (!thumbnailPath) return { ok: false, sourcePath: filePath, thumbnailPath: "", error: "That cover image is missing or unsupported." };
-  if (fileExists(thumbnailPath)) return { ok: true, sourcePath: filePath, thumbnailPath, cached: true, url: safeMediaUrl(thumbnailPath) };
-
-  try {
-    const image = nativeImage.createFromPath(filePath);
-    if (!image || image.isEmpty()) return { ok: false, sourcePath: filePath, thumbnailPath: "", error: "Localtify could not read this cover image. The original cover will still be used." };
-    const sourceSize = image.getSize();
-    const resized = image.resize({ width: COVER_THUMBNAIL_SIZE, height: COVER_THUMBNAIL_SIZE, quality: "good" });
-    if (!resized || resized.isEmpty()) return { ok: false, sourcePath: filePath, thumbnailPath: "", error: "Localtify could not resize this cover image. The original cover will still be used." };
-    fs.mkdirSync(path.dirname(thumbnailPath), { recursive: true });
-    const temporary = thumbnailPath + "." + crypto.randomUUID() + ".part";
+  if (!thumbnailPath) return Promise.resolve({ ok: false, error: "Cover unavailable." });
+  const existing = thumbnailJobs.get(thumbnailPath);
+  if (existing) return existing;
+  if (thumbnailJobs.size >= 2) return Promise.resolve({ ok: false, error: "Thumbnail queue busy." });
+  const generation = thumbnailGeneration;
+  const task = (async () => {
     try {
-      fs.writeFileSync(temporary, resized.toPNG(), { flag: "wx" });
-      fs.renameSync(temporary, thumbnailPath);
-    } finally {
-      fs.rmSync(temporary, { force: true });
+      const stat = await fs.promises.stat(thumbnailPath).catch(() => null);
+      if (stat?.isFile() && stat.size > 0) {
+        fileInfoCache.delete(thumbnailPath);
+        return { ok: true, sourcePath: filePath, thumbnailPath, cached: true, url: safeMediaUrl(thumbnailPath) };
+      }
+      const ffmpegPath = getFfmpegPath();
+      if (!ffmpegPath || !fileExists(ffmpegPath)) return { ok: false, error: "Thumbnail encoder unavailable." };
+      const temporary = thumbnailPath + "." + crypto.randomUUID() + ".part.png";
+      try {
+        await fs.promises.mkdir(path.dirname(thumbnailPath), { recursive: true });
+        await new Promise((resolve, reject) => execFile(ffmpegPath, [
+          "-hide_banner", "-loglevel", "error", "-nostdin", "-threads", "1", "-i", filePath,
+          "-map", "0:v:0", "-frames:v", "1", "-filter_threads", "1", "-vf",
+          "scale=256:256:force_original_aspect_ratio=decrease,pad=256:256:(ow-iw)/2:(oh-ih)/2",
+          "-threads", "1", "-f", "image2", "-y", temporary
+        ], { windowsHide: true, timeout: 12000, maxBuffer: 256 * 1024 }, error => error ? reject(error) : resolve()));
+        fileInfoCache.delete(filePath);
+        if (generation !== thumbnailGeneration || getCoverThumbnailPath(filePath) !== thumbnailPath) return { ok: false, error: "Thumbnail invalidated." };
+        // Cleanup cannot interleave this small atomic publication operation.
+        fs.renameSync(temporary, thumbnailPath);
+      } finally { await fs.promises.rm(temporary, { force: true }).catch(() => {}); }
+      if (generation !== thumbnailGeneration) return { ok: false, error: "Thumbnail invalidated." };
+      fileInfoCache.delete(thumbnailPath);
+      const url = safeMediaUrl(thumbnailPath);
+      if (url && mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send("covers:thumbnail-ready", { source: safeMediaUrl(filePath), url });
+      }
+      return { ok: true, sourcePath: filePath, thumbnailPath, cached: false, url, size: COVER_THUMBNAIL_SIZE };
+    } catch (error) {
+      console.log("[localtify thumbnail create error]", error?.message || error);
+      return { ok: false, error: "Thumbnail unavailable; original artwork remains available." };
     }
-    // The existence probe before creation cached a missing file. Invalidate it
-    // before registering the media token for the newly written thumbnail.
-    fileInfoCache.delete(thumbnailPath);
-    return { ok: true, sourcePath: filePath, thumbnailPath, cached: false, url: safeMediaUrl(thumbnailPath), sourceWidth: sourceSize.width, sourceHeight: sourceSize.height, size: COVER_THUMBNAIL_SIZE };
-  } catch (error) {
-    console.log("[localtify thumbnail create error]", error?.message || error);
-    return { ok: false, sourcePath: filePath, thumbnailPath: "", error: "Localtify could not create a small cover thumbnail yet. The full cover will still work." };
-  }
+  })().finally(() => thumbnailJobs.delete(thumbnailPath));
+  thumbnailJobs.set(thumbnailPath, task);
+  return task;
 }
 
 function queueCoverThumbnail(filePath, lowPriority = false) {
@@ -564,8 +585,7 @@ function queueCoverThumbnail(filePath, lowPriority = false) {
   coverThumbnailQueue.enqueue(filePath, { lowPriority });
 }
 
-function getCoverThumbnailUrl(filePath, options = {}) {
-  const forceCreate = Boolean(options.forceCreate);
+function getCoverThumbnailUrl(filePath) {
   if (!filePath || !path.isAbsolute(filePath) || !isImageFile(filePath) || !fileExists(filePath)) return "";
   const key = getCoverThumbnailCacheKey(filePath);
   const cached = coverThumbnailUrlCache.get(key);
@@ -582,14 +602,6 @@ function getCoverThumbnailUrl(filePath, options = {}) {
     const url = safeMediaUrl(thumbnailPath);
     rememberCoverThumbnail(key, thumbnailPath);
     return url;
-  }
-  if (forceCreate) {
-    const created = createCoverThumbnailSync(filePath);
-    if (created.ok && created.url) {
-      rememberCoverThumbnail(key, created.thumbnailPath);
-      return created.url;
-    }
-    return "";
   }
   queueCoverThumbnail(filePath);
   return "";
@@ -621,6 +633,7 @@ function cleanupCoverThumbnailCache() {
   let removed = 0;
   let sizeBytes = 0;
   try {
+    thumbnailGeneration++;
     coverThumbnailQueue.clear();
     coverThumbnailUrlCache.clear();
     if (dir && fs.existsSync(dir)) {
@@ -642,7 +655,7 @@ function cleanupCoverThumbnailCache() {
   }
 }
 
-function warmCoverThumbnails({ limit = 80, force = false } = {}) {
+async function warmCoverThumbnails({ limit = 80, force = false } = {}) {
   const songs = getSongs();
   const uniqueCoverPaths = [];
   for (const song of songs) {
@@ -659,7 +672,7 @@ function warmCoverThumbnails({ limit = 80, force = false } = {}) {
   for (const coverPath of uniqueCoverPaths) {
     const thumbnailPath = getCoverThumbnailPath(coverPath);
     if (thumbnailPath && fileExists(thumbnailPath) && !force) { cached += 1; continue; }
-    const result = createCoverThumbnailSync(coverPath);
+    const result = await createCoverThumbnail(coverPath);
     if (result.ok) {
       created += result.cached ? 0 : 1;
       if (result.cached) cached += 1;
@@ -2471,7 +2484,7 @@ app.whenReady().then(async () => {
     importFiles: (files) => importNewAudioFiles(files), getWindow: () => (mainWindow && !mainWindow.isDestroyed() ? mainWindow : null) });
   scrobbler = startScrobbling(ipcRouter, { file: path.join(app.getPath("userData"), "scrobbles.json"), getSong: databaseRepositories.songs.get, listPlays: databaseRepositories.listening.list, safeStorage, shell });
   const musicBrainzClient = require("./musicbrainz/client.cjs").createMusicBrainzClient({ userAgent: `localtify/${app.getVersion()} ( https://github.com/meshahid973/localitfy )` });
-  registerDiscoverIpc(ipcRouter, { musicBrainzClient, searchYouTubeMusic: require("./discover/youtube-music.cjs").createYouTubeMusicSearch(), searchYouTubeMusicRadio: require("./discover/youtube-music.cjs").createYouTubeMusicRadio(), searchYouTubeArtwork: require("./discover/youtube-music.cjs").createYouTubeMusicSearch(globalThis.fetch, Date.now, 4), searchStore: require("./discover/catalog.cjs").createStoreSearch(),
+  discoverCacheLifecycle = registerDiscoverIpc(ipcRouter, { musicBrainzClient, searchYouTubeMusic: require("./discover/youtube-music.cjs").createYouTubeMusicSearch(), searchYouTubeMusicRadio: require("./discover/youtube-music.cjs").createYouTubeMusicRadio(), searchYouTubeArtwork: require("./discover/youtube-music.cjs").createYouTubeMusicSearch(globalThis.fetch, Date.now, 4), searchStore: require("./discover/catalog.cjs").createStoreSearch(),
     lookupDeezer: require("./discover/extra-artwork.cjs").createDeezerArtwork(), lookupFanart: require("./discover/extra-artwork.cjs").createFanartArtwork({apiKey:process.env.LOCALTIFY_FANART_API_KEY}),
     lookupAudioDb: require("./discover/audiodb.cjs").createAudioDbArtwork({ apiKey: process.env.LOCALTIFY_AUDIODB_API_KEY || (!app.isPackaged ? "123" : "") }), getSongs, getSettings, cacheFile: path.join(app.getPath("userData"), "discover-cache.json"), bioFile: path.join(app.getPath("userData"), "artist-bios.json") });
   registerMovedSongRepairIpc(ipcRouter, {
@@ -2748,6 +2761,8 @@ app.whenReady().then(async () => {
 
 app.on("before-quit", async () => {
   allowQuit = true;
+  thumbnailGeneration++;
+  discoverCacheLifecycle?.flush();
   coverThumbnailQueue.clear();
   libraryWatcher?.dispose();
   scrobbler?.dispose();

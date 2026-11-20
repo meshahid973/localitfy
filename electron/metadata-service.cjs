@@ -6,6 +6,9 @@ const { execFile } = require("node:child_process");
 let serviceUserDataPath = "";
 let serviceFfmpegPath = "";
 let musicMetadataModulePromise = null;
+const metadataCache = new Map();
+const metadataPending = new Map();
+const METADATA_CACHE_LIMIT = 1024;
 
 const AUDIO_EXTENSIONS = new Set([".mp3", ".flac", ".m4a", ".aac", ".ogg", ".opus", ".wav", ".aiff", ".aif"]);
 const COVER_CACHE_DIR = "metadata-covers-v040";
@@ -182,7 +185,7 @@ function getPrimaryPicture(common) {
   );
 }
 
-async function readLocalAudioMetadata(filePath, options = {}) {
+async function readLocalAudioMetadataUncached(filePath, options = {}) {
   const target = String(filePath || "").trim();
   const readCover = options.readCover !== false;
   const readDuration = options.readDuration !== false;
@@ -294,6 +297,38 @@ async function readLocalAudioMetadata(filePath, options = {}) {
   }
 
   return output;
+}
+
+// Cache successful source tags only, keyed by file revision and parsing options.
+async function readLocalAudioMetadata(filePath, options = {}) {
+  const target = String(filePath || "").trim();
+  let stat;
+  try { stat = await fs.promises.stat(target); } catch {}
+  if (!stat?.isFile() || !isAudioFile(target)) return readLocalAudioMetadataUncached(target, options);
+  const key = JSON.stringify([target, stat.size, stat.mtimeMs, stat.ctimeMs, options.readCover !== false, options.readDuration !== false]);
+  const cached = metadataCache.get(key);
+  if (cached && (!cached.embeddedCoverPath || fileExists(cached.embeddedCoverPath))) {
+    metadataCache.delete(key);
+    metadataCache.set(key, cached);
+    return { ...cached };
+  }
+  metadataCache.delete(key);
+  let pending = metadataPending.get(key);
+  if (!pending) {
+    if (metadataPending.size >= 64) return readLocalAudioMetadataUncached(target, options);
+    pending = readLocalAudioMetadataUncached(target, options).then(async result => {
+      const current = await fs.promises.stat(target).catch(() => null);
+      if (result.ok && result.source === "music-metadata" && !result.error &&
+          (options.readDuration === false || result.durationMs > 0) &&
+          current?.size === stat.size && current.mtimeMs === stat.mtimeMs && current.ctimeMs === stat.ctimeMs) {
+        metadataCache.set(key, { ...result });
+        while (metadataCache.size > METADATA_CACHE_LIMIT) metadataCache.delete(metadataCache.keys().next().value);
+      }
+      return result;
+    }).finally(() => metadataPending.delete(key));
+    metadataPending.set(key, pending);
+  }
+  return { ...await pending };
 }
 
 module.exports = {
