@@ -41,3 +41,27 @@ test("remote cache respects cache headers, provider exclusions and entry budget"
     assert.equal(await noStore.resolve(a),"");
   } finally { await fs.rm(dir,{recursive:true,force:true}); }
 });
+
+test("stale artwork is served only during an explicit revalidation window and validators avoid downloading bytes again", async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(),"localtify-art-"));
+  let clock=1000, calls=0, finish, observed;
+  const fetchImpl = async (_url,options) => {
+    calls++;
+    if (calls === 1) return new Response(bytes,{headers:{"content-type":"image/png","cache-control":"public,max-age=1,stale-while-revalidate=4","etag":'"cover"'}});
+    observed=options.headers["If-None-Match"];
+    return new Promise(resolve=>{finish=resolve});
+  };
+  try {
+    const cache=createRemoteArtworkCache({dir,fetchImpl,now:()=>clock});
+    const original=await cache.resolve(a);
+    clock=2100;
+    assert.equal(await cache.resolve(a),original);
+    assert.equal(observed,'"cover"');
+    finish(new Response(null,{status:304,headers:{"cache-control":"public,max-age=10,stale-while-revalidate=4"}}));
+    while(cache.pendingCount) await new Promise(resolve=>setImmediate(resolve));
+    clock=7000;
+    assert.equal(await cache.resolve(a),original);
+    assert.equal(calls,2);
+    cache.close();
+  } finally {await fs.rm(dir,{recursive:true,force:true});}
+});

@@ -146,6 +146,7 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
         const normalizeKey = value => value.normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase();
         const identity = { providerId, album: normalizeKey(album), durationMs };
         const key = JSON.stringify([kind, normalizeKey(title), normalizeKey(artist), providerId, identity.album, durationMs, fallback === true]);
+        await artworkResults.hydrate();
         let artwork = artworkResults.get(key);
         if (!artwork) {
           let pending = artworkRequests.get(key);

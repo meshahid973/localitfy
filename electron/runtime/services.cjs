@@ -32,7 +32,7 @@ function createElectronServiceRuntime(options = {}) {
     stopped = true;
 
     try { cancelActiveDownloads({ interrupted: true }); } catch { }
-      flushMetadataCache();
+    try { flushMetadataCache(); } catch { }
     try { await shutdownDiscordActivity(reason); } catch { }
     try { cleanupNativeWindowsMedia?.(); } catch { }
     try { stopMediaServer?.(); } catch { }

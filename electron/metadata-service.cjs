@@ -95,7 +95,7 @@ function extensionFromMime(mime = "") {
   return ".jpg";
 }
 
-async function saveEmbeddedCover(filePath, picture) {
+async function saveEmbeddedCover(picture) {
   try {
     const rawData = picture?.data || picture;
     if (!rawData?.length) return "";
@@ -290,7 +290,7 @@ async function readLocalAudioMetadataUncached(filePath, options = {}) {
       if (readCover) {
         const picture = getPrimaryPicture(common);
         if (picture) {
-          const coverPath = await saveEmbeddedCover(target, picture);
+          const coverPath = await saveEmbeddedCover(picture);
           if (coverPath) {
             output.embeddedCoverPath = coverPath;
             output.hasEmbeddedCover = true;
@@ -342,6 +342,7 @@ async function readLocalAudioMetadata(filePath, options = {}) {
   if (!stat?.isFile() || !isAudioFile(target)) return readLocalAudioMetadataUncached(target, options);
   const key = crypto.createHash("sha256").update(JSON.stringify([target, stat.size, stat.mtimeMs, stat.ctimeMs, options.readCover !== false, options.readDuration !== false])).digest("hex");
   const cache = metadataCache;
+  await cache.hydrate();
   const cached = cache.get(key);
   if (cached?.filePath === target && (!cached.embeddedCoverPath || fileExists(cached.embeddedCoverPath))) {
     return { ...cached };

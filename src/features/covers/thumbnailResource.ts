@@ -84,3 +84,30 @@ export function observeArtwork(element: Element, callback: (near: boolean, size:
     if (!viewportListeners.size) { viewportObserver?.disconnect(); viewportObserver = null; }
   };
 }
+
+// Remote resolution returns a local display URL, never the provider/download identity.
+// A short-lived renderer registry avoids IPC storms on remount; disk policy stays
+// authoritative in the platform backend.
+const remoteResults = new Map<string, {url:string; until:number}>();
+const remotePending = new Map<string, Promise<string>>();
+export function getResolvedRemoteArtwork(source: string) {
+  const hit = remoteResults.get(source);
+  if (!hit || hit.until <= Date.now()) { remoteResults.delete(source); return undefined; }
+  remoteResults.delete(source); remoteResults.set(source,hit);
+  return hit.url;
+}
+export function invalidateResolvedRemoteArtwork(source: string) { remoteResults.delete(source); }
+export function resolveRemoteArtwork(source: string) {
+  const cached = getResolvedRemoteArtwork(source);
+  if (cached !== undefined) return Promise.resolve(cached);
+  const pending = remotePending.get(source);
+  if (pending) return pending;
+  if (!window.localitfy?.resolveRemoteArtwork || remotePending.size >= 16) return Promise.resolve("");
+  const task = window.localitfy.resolveRemoteArtwork(source).then(result=>result?.url || "",()=> "").then(url=>{
+    remoteResults.set(source,{url,until:Date.now()+(url?30_000:5000)});
+    while(remoteResults.size>512) remoteResults.delete(remoteResults.keys().next().value!);
+    return url;
+  }).finally(()=>remotePending.delete(source));
+  remotePending.set(source,task);
+  return task;
+}
