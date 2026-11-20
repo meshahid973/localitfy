@@ -79,8 +79,7 @@ function createArtworkLookup(client,now=Date.now,trackInfo,lookupAudioDb,lookupM
       }
       const deezerJob = () => lookupDeezer ? lookupDeezer("recording",title,artist).catch(()=>({})) : Promise.resolve({});
       const trackJob = () => trackInfo ? trackInfo(title,artist).catch(()=>null) : Promise.resolve(null);
-      const alternateJob = () => lookupAudioDb ? awaitableAudioDb() : Promise.resolve({});
-      function awaitableAudioDb() { return lookupAudioDb(title,artist).catch(()=>({})); }
+      const alternateJob = () => lookupAudioDb ? lookupAudioDb(title,artist).catch(()=>({})) : Promise.resolve({});
       const alternatives = fallback ? await Promise.all([deezerJob(),trackJob(),alternateJob()]) : null;
       const deezer = alternatives ? alternatives[0] : await deezerJob();
       if(deezer.coverUrl && !fallback)return deezer;

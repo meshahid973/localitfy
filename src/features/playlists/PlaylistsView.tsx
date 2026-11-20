@@ -162,8 +162,9 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
     }
     const target = playlistTarget(detailPlaylist, detailSongs);
     // Give the existing playlist playback owner the sorted snapshot. Never modify saved songIds.
-    const playbackPlaylist = trackSort === "library" ? detailPlaylist : {...detailPlaylist,songIds:sortedDetailSongs.map(song=>song.id)};
-    const playbackTarget = trackSort === "library" ? target : playlistTarget(playbackPlaylist,sortedDetailSongs);
+    // Sorting changes the view and explicit add-to-queue order, not the saved playlist
+    // or its repeat/playback context.
+    const playbackTarget = trackSort === "library" ? target : playlistTarget(detailPlaylist,sortedDetailSongs);
     return (
       <section data-page-section="playlists" className="playlistsPage playlistPageV029 playlistDetailPage">
       <PageAtmosphere songs={detailSongs} custom={detailPlaylist.coverArtwork} />
@@ -175,7 +176,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
           byline={detailPlaylist.rules ? <span className="smartPlaylistSummary">{describeSmartRules(detailPlaylist.rules)}</span> : undefined}
           stats={`${detailSongs.length} song${detailSongs.length === 1 ? "" : "s"} · ${formatTime(detailSongs.reduce((total, song) => total + (Number(song.duration) || 0), 0))}`}
           playable={playableIds(detailSongs).length}
-          onPlay={() => void playPlaylist(playbackPlaylist, false)}
+          onPlay={() => void playPlaylist(detailPlaylist, false)}
           onShuffle={() => void playPlaylist(detailPlaylist, true)}
           onQueue={() => actions.queueCollection(playbackTarget)}
           onMore={(event) => actions.openCollectionMenu(event, target)}
@@ -249,7 +250,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
             currentId={currentId}
             isPlaying={isPlaying}
             draggedSongId={draggedSongId}
-            onSelectSong={(id) => trackSort==="library" ? selectPlaylistSongAction(id, detailPlaylist.id) : actions.playCollection({...playbackTarget,playlist:undefined,songs:filteredDetailSongs},{startId:id})}
+            onSelectSong={(id) => selectPlaylistSongAction(id, detailPlaylist.id)}
             onStartSongDrag={startPlaylistSongDragAction}
             onDropSong={dropPlaylistSongAction}
             onAppendSong={appendPlaylistSongAction}

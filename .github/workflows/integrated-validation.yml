@@ -49,8 +49,13 @@ jobs:
       - name: Actual Electron desktop renderer and audio smoke
         shell: bash
         run: |
-          sudo chown root:root node_modules/electron/dist/chrome-sandbox
-          sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
+          # Electron may install its executable lazily. Resolve the runtime before
+          # configuring its sandbox; never disable the sandbox to make CI pass.
+          npx --no-install electron --version
+          sandbox="$(node -p 'require("node:path").join(require("node:path").dirname(require("electron")), "chrome-sandbox")')"
+          test -f "$sandbox"
+          sudo chown root:root "$sandbox"
+          sudo chmod 4755 "$sandbox"
           # Hosted Linux runners have no physical sound card. Use a real PulseAudio null sink.
           if ! command -v pulseaudio >/dev/null; then
             sudo apt-get update -o Acquire::Retries=3
@@ -66,8 +71,11 @@ jobs:
             ln -s "$GITHUB_WORKSPACE/node_modules" "$baseline/node_modules"
           else
             npm --prefix "$baseline" ci
-            sudo chown root:root "$baseline/node_modules/electron/dist/chrome-sandbox"
-            sudo chmod 4755 "$baseline/node_modules/electron/dist/chrome-sandbox"
+            (cd "$baseline" && npx --no-install electron --version)
+            sandbox="$(cd "$baseline" && node -p 'require("node:path").join(require("node:path").dirname(require("electron")), "chrome-sandbox")')"
+            test -f "$sandbox"
+            sudo chown root:root "$sandbox"
+            sudo chmod 4755 "$sandbox"
           fi
           npm --prefix "$baseline" run build
           cp scripts/ci-desktop-regression.cjs "$baseline/scripts/ci-desktop-regression.cjs"
