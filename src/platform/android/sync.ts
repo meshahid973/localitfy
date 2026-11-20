@@ -27,6 +27,7 @@ let onLibraryChanged: () => void = () => {};
 let onFeaturesChanged: () => void = () => {};
 
 function report(next: Partial<SyncProgress>) {
+  if ((Object.keys(next) as Array<keyof SyncProgress>).every(key => Object.is(progress[key], next[key]))) return;
   progress = { ...progress, ...next };
   for (const listener of listeners) listener(progress);
 }
@@ -191,6 +192,7 @@ async function syncFiles() {
   // Covers follow the Mac's: a new or changed cover is copied, one the Mac no longer has is removed.
   const wanted = songs.filter((song) => phoneLibrary.files[song.id]?.audio !== fileKey(song.file) ||
     (song.cover ? phoneLibrary.files[song.id]?.cover !== fileKey(song.cover) : Boolean(phoneLibrary.files[song.id]?.cover)));
+  if (!wanted.length) return 0;
   const bytesTotal = wanted.reduce((sum, song) => sum + (phoneLibrary.files[song.id]?.audio === fileKey(song.file) ? 0 : song.file.size) + (song.cover && phoneLibrary.files[song.id]?.cover !== fileKey(song.cover) ? song.cover.size : 0), 0);
   let bytesDone = 0;
   let done = 0;
@@ -198,16 +200,22 @@ async function syncFiles() {
   const expectedBytes = new Map<string, number>();
   const headers = { Authorization: `Bearer ${phoneLibrary.pairing?.token || ""}` };
   const base = phoneLibrary.pairing?.url || "";
-  const reportBytes = () => {
+  let lastByteReport = -Infinity;
+  let lastLibraryNotice = performance.now();
+  const totalReceived = () => {
     let partial = 0;
     for (const received of inFlight.values()) partial += received;
-    report({ bytesDone: Math.min(bytesTotal, bytesDone + partial) });
+    return Math.min(bytesTotal, bytesDone + partial);
   };
   const progressListener = await LocaltifyNative.addListener("downloadProgress", ({ id, received }) => {
     if (!inFlight.has(id)) return;
     if (!Number.isFinite(received)) return;
     inFlight.set(id, Math.max(inFlight.get(id) || 0, Math.min(expectedBytes.get(id) ?? 0, received)));
-    reportBytes();
+    const now = performance.now();
+    if (now - lastByteReport >= 200) {
+      lastByteReport = now;
+      report({ bytesDone: totalReceived() });
+    }
   });
 
   const copySong = async (song: RemoteSong) => {
@@ -253,12 +261,18 @@ async function syncFiles() {
     }
     phoneLibrary.files[song.id] = local;
     done += 1;
-    report({ phase: "downloading", message: `Copied ${song.title || "song"}`, done, total: wanted.length });
-    reportBytes();
+    lastByteReport = performance.now();
+    report({ phase: "downloading", message: `Copied ${song.title || "song"}`, done, total: wanted.length, bytesDone: totalReceived() });
     // Save as we go so an interrupted first sync resumes where it stopped.
     if (done % 10 === 0 || done === wanted.length) {
       await phoneLibrary.save(["files"]);
-      onLibraryChanged();
+      const now = performance.now();
+      // Durability remains every 10 tracks, but a large library is reshaped
+      // at most once per second during copying, plus the final checkpoint.
+      if (done === wanted.length || now - lastLibraryNotice >= 1000) {
+        lastLibraryNotice = now;
+        onLibraryChanged();
+      }
     }
   };
 

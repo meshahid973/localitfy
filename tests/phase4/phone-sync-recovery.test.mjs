@@ -253,3 +253,29 @@ test("a failed audio transfer keeps the previously persisted file reference", as
     assert.equal(f.phone.files.a.audioExt, "flac");
   } finally { await f.close(); }
 });
+
+
+test("phone transfer progress coalesces native bursts and still reports the exact final bytes", async () => {
+  const f = await syncFixture();
+  try {
+    const old=f.repositories.songs.get("a").filePath;
+    const replacement=old.replace(/\.mp3$/, ".flac");
+    fs.writeFileSync(replacement, Buffer.alloc(1000));
+    f.repositories.songs.patch("a",{filePath:replacement});
+    f.hooks.monotonicNow=()=>1000;
+    const updates=[];
+    const unsubscribe=f.sync.onSyncProgress(p => { if(p.phase==="downloading") updates.push({ ...p }); });
+    f.hooks.beforeDownload=(request, emit)=>{
+      for(let received=1; received<=1000; received++) emit({id:request.id,received});
+      emit({id:request.id,received:2000});
+    };
+    await f.sync.syncNow();
+    unsubscribe();
+    assert.equal(f.sync.getSyncProgress().phase,"done");
+    assert.equal(updates.length,3,"initial, first partial, and completed progress");
+    assert.equal(updates.at(-1).bytesDone,1000);
+    assert.equal(updates.at(-1).bytesTotal,1000);
+    assert.equal(updates.at(-1).done,1);
+    assert.equal(f.persisted.get("files").a.audioExt,"flac");
+  } finally { await f.close(); }
+});

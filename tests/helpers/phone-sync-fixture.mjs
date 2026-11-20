@@ -89,12 +89,12 @@ export function openLiveStream(url, token) {
   });
 }
 
-function compile(file, dependencies = {}) {
+function compile(file, dependencies = {}, globals = {}) {
   const exports = {};
   const output = ts.transpileModule(fs.readFileSync(file, "utf8"), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 }
   }).outputText;
-  runInNewContext(output, { exports, structuredClone, URL, console, require: (name) => {
+  runInNewContext(output, { exports, structuredClone, URL, console, performance, ...globals, require: (name) => {
     if (!(name in dependencies)) throw new Error(`Unmocked dependency: ${name}`);
     return dependencies[name];
   } });
@@ -157,10 +157,15 @@ export async function syncFixture({ liveOptions } = {}) {
       return write;
     }
   };
+  let downloadProgress;
   const native = {
     getPaths: async () => ({ files: "/phone", mediaPrefix: "https://localhost/_localtify_media_/", deviceName: "Test phone" }),
-    setSyncActive: async () => {}, addListener: async () => ({ remove: async () => {} }),
-    downloadFile: async (request) => { await hooks.beforeDownload?.(request); return {}; },
+    setSyncActive: async () => {},
+    addListener: async (name, listener) => {
+      if (name === "downloadProgress") downloadProgress = listener;
+      return { remove: async () => { if (downloadProgress === listener) downloadProgress = undefined; } };
+    },
+    downloadFile: async (request) => { await hooks.beforeDownload?.(request, event => downloadProgress?.(event)); return {}; },
     deleteFile: async (request) => { await hooks.beforeDelete?.(request); return {}; },
     request: async (request) => {
       await hooks.beforeRequest?.(request);
@@ -186,7 +191,7 @@ export async function syncFixture({ liveOptions } = {}) {
       "./native": { LocaltifyNative: native }, "./library": library, "./syncMerge": merge, "./syncExchange": exchange,
       "./macFeatures": { markMacReachable: () => {}, fromMacOrKept: async () => null },
       "../../app/platform": { computerName: () => "Mac", setPairedComputerPlatform: () => {} }
-    });
+    }, { performance: { now: () => hooks.monotonicNow?.() ?? performance.now() } });
   }
   await restartPhone();
   await sync.pairWithMac(`127.0.0.1:${port}`, server.newPairingCode().code);
