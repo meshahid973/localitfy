@@ -21,7 +21,9 @@ test("Deezer only returns matching song versions and exact artist identities",()
 });
 test("catalog requests coalesce and fail without caching a provider outage",async()=>{
  let now=1000,calls=0;
- const fetchImpl=async(url,options)=>{calls++;assert.equal(new URL(url).origin,"https://api.deezer.com");assert.equal(options.credentials,"omit");assert.equal(options.redirect,"error");return calls===1?{ok:false,status:429}:response({data:[track]});};
+ const fetchImpl=async(url,options)=>{calls++;assert.equal(new URL(url).origin,"https://api.deezer.com");
+  assert.equal(new URL(url).searchParams.get("q"),"B.A. Robertson Bang Bang","Deezer recording queries use plain text; advanced artist/track filters can return no rows");
+  assert.equal(options.credentials,"omit");assert.equal(options.redirect,"error");return calls===1?{ok:false,status:429}:response({data:[track]});};
  const lookup=createDeezerArtwork({fetchImpl,now:()=>now});
  assert.deepEqual(await lookup("recording","Bang Bang","B.A. Robertson"),{});
  assert.deepEqual(await lookup("recording","Bang Bang","B.A. Robertson"),{});

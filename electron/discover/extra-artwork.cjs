@@ -70,7 +70,7 @@ function createDeezerArtwork({fetchImpl=globalThis.fetch,now=Date.now}={}) {
   return cachedLookup(async(kind,title,artist="")=>{
     if(!["artist","recording"].includes(kind)||typeof title!=="string"||title.length>300||!title.trim()||(kind==="recording"&&(!artistKey(artist)||typeof artist!=="string"||artist.length>300)))return {};
     const clean=value=>String(value).replace(/["\\]/g," ").trim();
-    const query=kind==="artist"?clean(title.replace(/\s+[-–—]\s+Topic$/i,"")):`artist:"${clean(artist.replace(/\s+[-–—]\s+Topic$/i,""))}" track:"${clean(title)}"`;
+    const query=kind==="artist"?clean(title.replace(/\s+[-–—]\s+Topic$/i,"")):`${clean(artist.replace(/\s+[-–—]\s+Topic$/i,""))} ${clean(title)}`;
     const url=new URL(kind==="artist"?"https://api.deezer.com/search/artist":"https://api.deezer.com/search");
     url.search=new URLSearchParams({q:query,limit:"25"}).toString();
     return matchDeezerArtwork(await boundedJson(fetchImpl,url.href),kind,title,artist);
