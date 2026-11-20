@@ -51,9 +51,16 @@ async function check(provider,work) {
 async function main() {
   const jobs=[];
   jobs.push(check("Deezer",async()=>{
-    const lookup=createDeezerArtwork();
+    let httpStatus=0, responseType="";
+    const lookup=createDeezerArtwork({fetchImpl:async(url,options)=>{
+      const response=await fetch(url,options);
+      httpStatus=response.status;
+      responseType=String(response.headers.get("content-type")||"").slice(0,50);
+      return response;
+    }});
     const result=await lookup("recording",expectedTitle,expectedArtist);
-    if(!result?.coverUrl) return {status:"no-exact-match",detail:"No artist/title-identical recording with usable art"};
+    if(!result?.coverUrl) return {status:httpStatus && httpStatus!==200?"http-"+httpStatus:"no-exact-match",
+      detail:httpStatus?"HTTP "+httpStatus+"; "+responseType:"No response or network error"};
     const image=await imageAvailable(result.coverUrl).catch(()=>false);
     return {status:image?"ok":"image-unavailable",metadata:true,image};
   }));
