@@ -1,0 +1,43 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
+const { createRemoteArtworkCache } = require("../../electron/runtime/remote-artwork-cache.cjs");
+const bytes = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/zGQAAAAASUVORK5CYII=", "base64");
+const a = "https://lh3.googleusercontent.com/exampleA=w256-h256-l90-rj";
+const b = "https://lh3.googleusercontent.com/exampleB=w256-h256-l90-rj";
+test("remote image bytes persist across restart, coalesce, deduplicate and repair corruption", async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "localtify-art-"));
+  let calls = 0;
+  const fetchImpl = async () => { calls++; return new Response(bytes, { headers: {"content-type":"image/png","cache-control":"public,max-age=3600"} }); };
+  try {
+    const cache = createRemoteArtworkCache({ dir, fetchImpl });
+    const [one,two] = await Promise.all([cache.resolve(a), cache.resolve(a)]);
+    assert.ok(one); assert.equal(one,two); assert.equal(calls,1);
+    assert.equal(await cache.resolve(b),one); assert.equal(calls,2);
+    assert.equal((await fs.readdir(dir)).filter(name => name.endsWith(".png")).length,1);
+    const restarted = createRemoteArtworkCache({ dir, fetchImpl });
+    assert.equal(await restarted.resolve(a),one); assert.equal(calls,2);
+    await fs.writeFile(one, Buffer.alloc(bytes.length));
+    assert.equal(await restarted.resolve(a),one); assert.equal(calls,3);
+    assert.deepEqual(await fs.readFile(one),bytes);
+  } finally { await fs.rm(dir,{recursive:true,force:true}); }
+});
+test("remote cache respects cache headers, provider exclusions and entry budget", async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "localtify-art-"));
+  let calls = 0;
+  try {
+    const cache = createRemoteArtworkCache({dir,maxEntries:1,fetchImpl:async () => {
+      calls++; return new Response(bytes,{headers:{"content-type":"image/png","cache-control":"public,max-age=3600"}});
+    }});
+    assert.equal(await cache.resolve("https://evil.test/image.png"),""); assert.equal(calls,0);
+    assert.equal(await cache.resolve("https://e-cdns-images.dzcdn.net/images/cover/123456789abcdef0123456789abcdef0/250x250-000000-80-0-0.jpg"),"");
+    assert.ok(await cache.resolve(a)); assert.ok(await cache.resolve(b));
+    assert.ok(await cache.resolve(a)); assert.equal(calls,3);
+    const noStore = createRemoteArtworkCache({dir:path.join(dir,"no-store"),fetchImpl:async () => new Response(bytes,{headers:{"content-type":"image/png","cache-control":"no-store,max-age=3600"}})});
+    assert.equal(await noStore.resolve(a),"");
+  } finally { await fs.rm(dir,{recursive:true,force:true}); }
+});

@@ -5,7 +5,6 @@ on:
     paths:
       - "electron/analysis/**"
       - "electron/db.cjs"
-      - "package.json"
       - "package-lock.json"
       - ".github/workflows/analysis-native.yml"
 

@@ -20,10 +20,11 @@ export type CollectionHeroProps = {
   onMore: (event: ReactMouseEvent<HTMLElement>) => unknown;
   /** Page-specific buttons after the shared ones (edit, more like this…). */
   children?: ReactNode;
+  search?: ReactNode;
 };
 
 /** Top of every album, artist, genre, playlist and mix page: artwork, title, then play · shuffle · queue · more. */
-export default function CollectionHero({ typeLabel, title, cover, round = false, byline, stats, playable, onPlay, onShuffle, onQueue, onMore, children }: CollectionHeroProps) {
+export default function CollectionHero({ typeLabel, title, cover, round = false, byline, stats, playable, onPlay, onShuffle, onQueue, onMore, children, search }: CollectionHeroProps) {
   return (
     <Surface as="header" variant="transparent" className={`collectionHero ${round ? "isRound" : ""}`}>
       <div className="collectionHeroArt">{cover}</div>
@@ -43,6 +44,7 @@ export default function CollectionHero({ typeLabel, title, cover, round = false,
         <IconButton className="collectionIconButton" type="button" onClick={() => void onQueue()} disabled={!playable} aria-label={`add ${title} to queue`} title="Add to queue">
           <ListEnd size={17} strokeWidth={2.2} aria-hidden="true" />
         </IconButton>
+        {search ? <div className="collectionHeroSearch">{search}</div> : null}
         {children}
         <IconButton className="collectionIconButton" type="button" onClick={(event) => void onMore(event)} aria-label={`more options for ${title}`} title="More options">
           <MoreHorizontal size={18} strokeWidth={2.2} aria-hidden="true" />

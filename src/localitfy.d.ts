@@ -531,7 +531,7 @@ declare global {
       /** New files in watched folders were imported, or a library file went missing or came back. */
       onWatchedFoldersChange: (callback: (payload: { importedCount: number; libraryChanged: boolean; songs: Song[] }) => void) => () => void;
       /** Public catalog and optional personalized suggestions. Off until turned on in Discover. */
-      getDiscoveries: (payload?: { refresh?: boolean; catalog?: { kind: CatalogKind; term: string; radioSeed?: string }; artwork?: { title: string; artist: string; kind?: CatalogKind; fallback?: boolean } }) => Promise<DiscoverResult>;
+      getDiscoveries: (payload?: { refresh?: boolean; catalog?: { kind: CatalogKind; term: string; radioSeed?: string }; artwork?: { title: string; artist: string; kind?: CatalogKind; fallback?: boolean; providerId?: string; album?: string; durationMs?: number } }) => Promise<DiscoverResult>;
       /** The artist page biography, under the same opt-in as Discover. Saved on this device. */
       getArtistBio?: (artist: string) => Promise<ArtistBio>;
       /** Scrobbling credentials never leave Electron’s main process. */
@@ -649,6 +649,9 @@ declare global {
       rescanPixelArt?: () => Promise<Song[]>;
       listBrokenCovers?: () => Promise<LocalitfyCoverBrokenItem[]>;
       getLeastUsedCover?: () => Promise<string | null>;
+      resolveRemoteArtwork?: (url: string) => Promise<{ url: string } | null>;
+      requestCoverThumbnail?: (payload: { id: string; source: string; failed?: string }) => Promise<{ source: string; url: string } | null>;
+      onCoverThumbnailReady?: (callback: (result: { source: string; url: string }) => void) => () => void;
       getCoverThumbnailStatus?: () => Promise<LocalitfyCoverThumbnailStatus>;
       warmCoverThumbnails?: (payload?: { limit?: number; force?: boolean }) => Promise<LocalitfyCoverThumbnailWarmResult>;
       cleanupCoverCache: () => Promise<LocalitfyCoverThumbnailCleanupResult>;

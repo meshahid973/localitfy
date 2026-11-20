@@ -133,6 +133,9 @@ export function createAndroidBridge(): Bridge {
       if (kept) await writeValues({ [key]: { ...kept, offsetMs: saved.offsetMs } }).catch(() => undefined);
       return saved;
     },
+    // Desktop cache tokens are not transferable to the phone. Keep ordinary remote image loading here.
+    resolveRemoteArtwork: async () => null,
+    requestCoverThumbnail: async () => null,
     getDiscoveries: (payload) => (payload?.catalog || payload?.artwork) ? fromMac<DiscoverResult>("discover:get", payload, 60000) : fromMacOrKept<DiscoverResult>("discover:get", payload ?? {}, "mac:discover", { status: "off" }),
     getArtistBio: async (artist: string) => {
       if (phoneLibrary.effectiveSettings().discoverEnabled !== true) return { status: "off" };

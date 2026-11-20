@@ -54,6 +54,7 @@ contextBridge.exposeInMainWorld("localitfy", {
   findDuplicates: () => ipcRenderer.invoke("library:find-duplicates"),
   mergeDuplicates: (payload) => ipcRenderer.invoke("library:merge-duplicates", payload),
   getDiscoveries: (payload) => ipcRenderer.invoke("discover:get", payload),
+  resolveRemoteArtwork: (url) => ipcRenderer.invoke("covers:resolve-remote", url),
   getArtistBio: (artist) => ipcRenderer.invoke("discover:artist-bio", { artist }),
   getScrobbleStatus: () => ipcRenderer.invoke("scrobble:status"),
   connectLastfmScrobbling: (payload) => ipcRenderer.invoke("scrobble:connect-lastfm", payload),
@@ -112,6 +113,12 @@ contextBridge.exposeInMainWorld("localitfy", {
   rescanPixelArt: () => ipcRenderer.invoke("covers:rescan"),
   listBrokenCovers: () => ipcRenderer.invoke("covers:broken"),
   getLeastUsedCover: () => ipcRenderer.invoke("covers:least-used"),
+  requestCoverThumbnail: (payload) => ipcRenderer.invoke("covers:request-thumbnail", payload),
+  onCoverThumbnailReady: (callback) => {
+    const handler = (_event, payload) => callback(payload);
+    ipcRenderer.on("covers:thumbnail-ready", handler);
+    return () => ipcRenderer.removeListener("covers:thumbnail-ready", handler);
+  },
   getCoverThumbnailStatus: () => ipcRenderer.invoke("covers:thumbnail-status"),
   warmCoverThumbnails: (payload) => ipcRenderer.invoke("covers:warm-thumbnails", payload),
   cleanupCoverCache: () => ipcRenderer.invoke("covers:cleanup-cache"),

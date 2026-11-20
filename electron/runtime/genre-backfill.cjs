@@ -2,6 +2,7 @@ function createGenreMetadataBackfill({
   getSettings,
   saveSettings,
   getSongs,
+  getSong,
   patchSong,
   fileExists,
   isAudioFile,
@@ -33,8 +34,12 @@ function createGenreMetadataBackfill({
           const metadata = await readLocalAudioMetadata(song.filePath, { readCover: false, readDuration: false });
           const genre = String(metadata?.genre || "").trim();
           if (genre) {
-            patchSong(song.id, { genre });
-            changedCount += 1;
+            // Tag edits or file replacement may have occurred during parsing.
+            const current = getSong ? getSong(song.id) : song;
+            if (current && current.filePath === song.filePath && !String(current.genre || "").trim()) {
+              patchSong(song.id, { genre });
+              changedCount += 1;
+            }
           }
         } catch (error) {
           logger.log("[localtify genre backfill item error]", song.filePath, error?.message || error);

@@ -173,6 +173,7 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
           onShuffle={() => void playPlaylist(detailPlaylist, true)}
           onQueue={() => actions.queueCollection(target)}
           onMore={(event) => actions.openCollectionMenu(event, target)}
+          search={<input type="search" className="pageHeaderSearch" aria-label="Search playlist tracks" placeholder="Search tracks" value={trackQuery} onChange={event => setTrackQuery(event.currentTarget.value)} />}
         >
           <button className="collectionIconButton" type="button" onClick={() => props.openSimilarSongs({ kind: "playlist", playlistId: detailPlaylist.id })}
             disabled={detailSongs.length === 0} aria-label="more like this playlist" title="Find songs in your library that sound like this playlist">
@@ -227,7 +228,6 @@ export default function PlaylistsView(props: PlaylistsViewProps) {
             </div>
 
             <div className="playlistManageActions">
-              <input type="search" className="pageHeaderSearch" aria-label="Search playlist tracks" placeholder="Search tracks" value={trackQuery} onChange={event => setTrackQuery(event.currentTarget.value)} />
               <button className="settingsTinyButton" type="button" onClick={() => startRenamePlaylist(detailPlaylist)}><ActionLabel icon={Pencil}>rename</ActionLabel></button>
               <button className="settingsTinyButton" type="button" onClick={() => duplicatePlaylist(detailPlaylist.id)}><ActionLabel icon={Copy}>duplicate</ActionLabel></button>
               <button className="settingsTinyButton danger" type="button" onClick={() => { removePlaylist(detailPlaylist.id); actions.nav.go("playlists"); }}><ActionLabel icon={Trash2}>remove</ActionLabel></button>

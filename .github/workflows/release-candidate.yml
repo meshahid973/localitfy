@@ -1,8 +1,7 @@
 name: release-candidate
 
+# Installers are built only on demand; regular PR validation is in quality.yml.
 on:
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
 env:

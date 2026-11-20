@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import type { Song } from "../library/song.types";
 import { getRendererSafeImageUrl } from "./cover.ambient";
@@ -6,6 +6,7 @@ import { nextPixelArtForSong, pixelArtForSong } from "./cover.runtime";
 import { runtimePixelArtImageUrl } from "./pixelArt";
 import { prettyTitle } from "../search/search.utils";
 import { toCssUrl } from "../../shared/utils/format";
+import { rememberCompletedThumbnail, useCompletedThumbnail } from "./thumbnailResource";
 
 export type CoverImagePriority = "auto" | "high" | "low";
 export function getCardCoverUrl(song?: Song | null) {
@@ -36,7 +37,35 @@ export function Cover({ song, className, priority = "auto", preferThumbnail = fa
   const directCover = useFullCover ? getFullCoverUrl(song) : getCardCoverUrl(song);
   const savedCover = String(song?.coverPath || "").trim();
   const savedCoverSrc = getRendererSafeImageUrl(savedCover);
-  const sourceCandidates = [directCover, preferThumbnail ? getFullCoverUrl(song) : "", savedCoverSrc];
+  // A broken thumbnail must fall back to the actual original, not a placeholder.
+  const sourceCandidates = [directCover, getFullCoverUrl(song), savedCoverSrc];
+  const fullSource = getFullCoverUrl(song);
+  const completedThumbnail = useCompletedThumbnail(useFullCover ? "" : fullSource);
+  const anchor = useRef<HTMLDivElement>(null);
+  const thumbnailSource = completedThumbnail || (directCover !== fullSource ? directCover : "");
+  const thumbnailFailed = Boolean(thumbnailSource && failedSources[thumbnailSource]);
+  const songId = song?.id;
+  useEffect(() => {
+    if (useFullCover || !songId || !fullSource || (thumbnailSource && !thumbnailFailed) || !window.localitfy?.requestCoverThumbnail) return;
+    let live = true;
+    let requested = false;
+    const request = () => {
+      if (!live || requested) return;
+      requested = true;
+      void window.localitfy.requestCoverThumbnail?.({id: songId, source: fullSource, failed: thumbnailFailed ? thumbnailSource : undefined})
+        .then(result => { if (result && live) rememberCompletedThumbnail(result); }).catch(() => {});
+    };
+    if (!anchor.current || typeof IntersectionObserver === "undefined") request();
+    else {
+      const observer = new IntersectionObserver(entries => {
+        if (entries.some(entry => entry.isIntersecting)) { request(); observer.disconnect(); }
+      }, { rootMargin: "160px" });
+      observer.observe(anchor.current);
+      return () => { live = false; observer.disconnect(); };
+    }
+    return () => { live = false; };
+  }, [useFullCover, songId, fullSource, thumbnailSource, thumbnailFailed]);
+  if (completedThumbnail) sourceCandidates.unshift(completedThumbnail);
   let coverSrc = sourceCandidates.find(source => source && !failedSources[source]) || "";
   // Most tracks have real art; avoid hashing metadata and resolving fallback
   // assets unless the real cover is unavailable.
@@ -59,6 +88,7 @@ export function Cover({ song, className, priority = "auto", preferThumbnail = fa
 
   return (
     <div
+      ref={anchor}
       className={`coverAura ${className} ${hasCover ? "hasCover" : "noCover"} ${imageReady ? "coverReady" : "coverLoading"}`}
       style={style}
       data-cover-title={song?.title ?? "localtify"}

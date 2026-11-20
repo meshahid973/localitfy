@@ -1,10 +1,8 @@
 name: integrated-validation
+# Extended cross-platform benchmarks are intentionally opt-in. Normal PRs run
+# quality.yml. Invoke this before merging changes to media, sync, native runtimes,
+# caching, Android integration or large-library performance.
 on:
-  pull_request:
-    paths:
-      - "scripts/benchmark-library-workloads.mjs"
-      - "scripts/ci-desktop-regression.cjs"
-      - ".github/workflows/integrated-validation.yml"
   workflow_dispatch:
 permissions:
   contents: read
@@ -25,11 +23,13 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run release:check
-      - name: Compare production library modules with the Performance 3.0 baseline
+      - name: Compare production library modules with the PR baseline
+        env:
+          BASELINE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
         shell: bash
         run: |
           mkdir -p qa-artifacts
-          git worktree add --detach "$RUNNER_TEMP/localtify-baseline" 4abd73b45b4ff1165a7e5b63098749179e2f0d7d
+          git worktree add --detach "$RUNNER_TEMP/localtify-baseline" "$BASELINE_SHA"
           for n in 1000 10000 50000 100000; do
             node --expose-gc scripts/benchmark-library-workloads.mjs "$RUNNER_TEMP/localtify-baseline" "$n" | tee "qa-artifacts/baseline-$n.json"
             node --expose-gc scripts/benchmark-library-workloads.mjs . "$n" | tee "qa-artifacts/current-$n.json"

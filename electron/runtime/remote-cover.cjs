@@ -1,5 +1,6 @@
 "use strict";
 const { safeThumbnail } = require("../discover/youtube-music.cjs");
+const { deezerImage, fanartImage } = require("../discover/extra-artwork.cjs");
 function safeProviderCover(value) {
   if (typeof value !== "string" || value.length > 2000) return "";
   const yt = safeThumbnail(value);
@@ -22,4 +23,26 @@ function imageExtension(buffer, contentType) {
   if (type === "image/gif" && ["GIF87a","GIF89a"].includes(buffer.toString("ascii",0,6))) return ".gif";
   return "";
 }
-module.exports = { safeProviderCover, imageExtension };
+// Display-only providers remain excluded from the download allowlist above.
+function safeDisplayCover(value) {
+  if (typeof value !== "string" || value.length > 2000) return false;
+  if (safeProviderCover(value) === value) return true;
+  if (deezerImage(value, "artist") === value || deezerImage(value, "recording") === value) return true;
+  if (value.endsWith("/preview")) {
+    const original = value.slice(0, -8);
+    if (fanartImage(original, "albumcover") === value || fanartImage(original, "artistthumb") === value) return true;
+  }
+  return /^https:\/\/coverartarchive\.org\/(release|release-group)\/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\/front-250$/i.test(value);
+}
+function validArtworkResult(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  if (Object.keys(value).some(key => !["coverUrl", "fallbackCoverUrl", "coverAlternatives", "durationMs"].includes(key))) return false;
+  const urls = [value.coverUrl, value.fallbackCoverUrl].filter(url => url !== undefined);
+  if (value.coverAlternatives !== undefined) {
+    if (!Array.isArray(value.coverAlternatives) || value.coverAlternatives.length > 6) return false;
+    urls.push(...value.coverAlternatives);
+  }
+  return urls.length > 0 && urls.every(safeDisplayCover) &&
+    (value.durationMs === undefined || (Number.isFinite(value.durationMs) && value.durationMs > 0));
+}
+module.exports = { safeProviderCover, imageExtension, safeDisplayCover, validArtworkResult };

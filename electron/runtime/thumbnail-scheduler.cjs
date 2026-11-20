@@ -17,9 +17,10 @@ function createThumbnailScheduler({
   const size = () => visible.size + background.size;
   let timer = null;
   let paused = false;
+  let active = null;
 
   function schedule(delay = delayMs) {
-    if (paused || timer !== null || size() === 0) return;
+    if (paused || active !== null || timer !== null || size() === 0) return;
     timer = setTimer(() => {
       timer = null;
       if (paused) return;
@@ -27,13 +28,19 @@ function createThumbnailScheduler({
       if (filePath === undefined) return;
       visible.delete(filePath);
       background.delete(filePath);
-      try { processFile(filePath); } catch (error) { onError(error); }
-      schedule();
+      active = filePath;
+      const finish = () => { active = null; schedule(); };
+      try {
+        const result = processFile(filePath);
+        if (result && typeof result.then === "function") {
+          Promise.resolve(result).catch(onError).finally(finish);
+        } else finish();
+      } catch (error) { onError(error); finish(); }
     }, delay);
   }
 
   function enqueue(filePath, { lowPriority = false } = {}) {
-    if (!filePath || visible.has(filePath)) return false;
+    if (!filePath || active === filePath || visible.has(filePath)) return false;
     if (background.has(filePath)) {
       if (lowPriority) return false;
       background.delete(filePath);
@@ -66,7 +73,7 @@ function createThumbnailScheduler({
 
   return {
     enqueue, clear, setPaused,
-    has: (filePath) => visible.has(filePath) || background.has(filePath),
+    has: (filePath) => active === filePath || visible.has(filePath) || background.has(filePath),
     get size() { return size(); }
   };
 }
