@@ -54,6 +54,7 @@ contextBridge.exposeInMainWorld("localitfy", {
   findDuplicates: () => ipcRenderer.invoke("library:find-duplicates"),
   mergeDuplicates: (payload) => ipcRenderer.invoke("library:merge-duplicates", payload),
   getDiscoveries: (payload) => ipcRenderer.invoke("discover:get", payload),
+  resolveRemoteArtwork: (url) => ipcRenderer.invoke("covers:resolve-remote", url),
   getArtistBio: (artist) => ipcRenderer.invoke("discover:artist-bio", { artist }),
   getScrobbleStatus: () => ipcRenderer.invoke("scrobble:status"),
   connectLastfmScrobbling: (payload) => ipcRenderer.invoke("scrobble:connect-lastfm", payload),

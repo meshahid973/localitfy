@@ -61,6 +61,8 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
   const key = artworkKey(title, artist, person);
   const [resolved, setResolved] = useState<{ key: string; value: DiscoverArtwork; fallback: boolean }>();
   const [loaded, setLoaded] = useState<{key:string; url:string}>();
+  const [local, setLocal] = useState<{source:string; url:string}>();
+  const [badLocal, setBadLocal] = useState("");
   const [failure, setFailure] = useState<{key:string; urls:string[]}>({key:"",urls:[]});
   const cover = resolved?.key === key ? resolved.value : cachedArtwork(key + ":fallback") || cachedArtwork(key);
   const failed = failure.key === key ? failure.urls : [];
@@ -69,14 +71,29 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
   const candidates = failed.length ? [...resolvedUrls, ...directUrls] : [...directUrls, ...resolvedUrls];
   const src = candidates.find(url => url && !failed.includes(url));
   const needsLookup = lookup && (!directUrls.length || failed.length > 0);
-  const imageReady = Boolean(src && loaded?.key === key && loaded.url === src);
+  // The cache returns a display URL only; the provider URL remains the lookup/download identity.
+  const pendingLocal = Boolean(src && !near ? false : src && !isDisplayOnlyCover(src) && window.localitfy?.resolveRemoteArtwork && local?.source !== src);
+  useEffect(() => {
+    if (!near || !src || isDisplayOnlyCover(src) || !window.localitfy?.resolveRemoteArtwork) return;
+    let active = true;
+    void window.localitfy.resolveRemoteArtwork(src).then(result => {
+      if (active) setLocal({source: src, url: result?.url || ""});
+    }).catch(() => { if (active) setLocal({source: src, url: ""}); });
+    return () => { active = false; };
+  }, [src, near]);
+  const localSrc = local && local.source === src && local.url !== badLocal ? local.url : "";
+  const displaySrc = pendingLocal ? "" : localSrc || src;
+  const imageReady = Boolean(displaySrc && loaded?.key === key && loaded.url === displaySrc);
   const exhausted = Boolean(resolved?.key === key && (resolved.fallback || (!src && failed.length > 0)));
   const requestKey = exhausted ? key + ":fallback" : key;
   useEffect(() => {
-    if (!near || !src || imageReady) return;
-    const timer = window.setTimeout(() => setFailure(current => ({key,urls:[...new Set([...(current.key === key ? current.urls : []),src])]})), 6500);
+    if (!near || !src || !displaySrc || imageReady) return;
+    const timer = window.setTimeout(() => {
+      if (localSrc) setBadLocal(localSrc);
+      else setFailure(current => ({key,urls:[...new Set([...(current.key === key ? current.urls : []),src])]}));
+    }, 6500);
     return () => window.clearTimeout(timer);
-  }, [src, key, imageReady, near]);
+  }, [src, displaySrc, localSrc, key, imageReady, near]);
   useEffect(() => {
     if (!needsLookup || (!person && !artist) || !title || !near) return;
     let live = true;
@@ -112,8 +129,8 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
   }, [key, title, artist, needsLookup, near, person, exhausted, requestKey]);
   return <span ref={ref} className="discoverCover" aria-hidden="true">
     {!imageReady ? (person ? <UserRound size={24} /> : <Disc3 size={24} />) : null}
-    {near && src ? <img key={src} src={src} alt="" loading="eager" decoding="async" fetchPriority="auto" referrerPolicy="no-referrer" data-ready={imageReady}
-      onLoad={() => setLoaded({key,url:src})}
-      onError={() => setFailure(current => ({key,urls:[...new Set([...(current.key === key ? current.urls : []),src])]}))} /> : null}
+    {near && src && displaySrc ? <img key={displaySrc} src={displaySrc} alt="" loading="eager" decoding="async" fetchPriority="auto" referrerPolicy="no-referrer" data-ready={imageReady}
+      onLoad={() => setLoaded({key,url:displaySrc})}
+      onError={() => { if (localSrc) setBadLocal(localSrc); else setFailure(current => ({key,urls:[...new Set([...(current.key === key ? current.urls : []),src])]})); }} /> : null}
   </span>;
 }

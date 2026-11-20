@@ -10,6 +10,8 @@ const { startLibraryWatch } = require("./library-watch.cjs");
 let libraryWatcher = null;
 const { registerDuplicateIpc } = require("./ipc/library-duplicates.cjs");
 const { registerDiscoverIpc } = require("./ipc/discover.cjs");
+const { createRemoteArtworkCache } = require("./runtime/remote-artwork-cache.cjs");
+let remoteArtworkCache = null;
 const { startScrobbling } = require("./ipc/scrobble.cjs");
 let scrobbler = null;
 const { LOCALTIFY_RENDERER_PROTOCOL, MEDIA_PROTOCOL, registerPrivilegedSchemes, getLocaltifyRendererMimeType } = require("./runtime/protocols.cjs");
@@ -2484,6 +2486,17 @@ app.whenReady().then(async () => {
     importFiles: (files) => importNewAudioFiles(files), getWindow: () => (mainWindow && !mainWindow.isDestroyed() ? mainWindow : null) });
   scrobbler = startScrobbling(ipcRouter, { file: path.join(app.getPath("userData"), "scrobbles.json"), getSong: databaseRepositories.songs.get, listPlays: databaseRepositories.listening.list, safeStorage, shell });
   const musicBrainzClient = require("./musicbrainz/client.cjs").createMusicBrainzClient({ userAgent: `localtify/${app.getVersion()} ( https://github.com/meshahid973/localitfy )` });
+  remoteArtworkCache = createRemoteArtworkCache({
+    dir: path.join(app.getPath("userData"), "disposable-remote-artwork-v1"),
+    maxBytes: Math.max(16, Math.min(512, Number(process.env.LOCALTIFY_ARTWORK_CACHE_MB) || 128)) * 1024 * 1024
+  });
+  ipcRouter.handle("covers:resolve-remote", async (_event, url) => {
+    if (getSettings().discoverEnabled !== true) return null;
+    const file = await remoteArtworkCache.resolve(url);
+    if (!file || getSettings().discoverEnabled !== true) return null;
+    const local = safeMediaUrl(file);
+    return local ? { url: local } : null;
+  });
   discoverCacheLifecycle = registerDiscoverIpc(ipcRouter, { musicBrainzClient, searchYouTubeMusic: require("./discover/youtube-music.cjs").createYouTubeMusicSearch(), searchYouTubeMusicRadio: require("./discover/youtube-music.cjs").createYouTubeMusicRadio(), searchYouTubeArtwork: require("./discover/youtube-music.cjs").createYouTubeMusicSearch(globalThis.fetch, Date.now, 4), searchStore: require("./discover/catalog.cjs").createStoreSearch(),
     lookupDeezer: require("./discover/extra-artwork.cjs").createDeezerArtwork(), lookupFanart: require("./discover/extra-artwork.cjs").createFanartArtwork({apiKey:process.env.LOCALTIFY_FANART_API_KEY}),
     lookupAudioDb: require("./discover/audiodb.cjs").createAudioDbArtwork({ apiKey: process.env.LOCALTIFY_AUDIODB_API_KEY || (!app.isPackaged ? "123" : "") }), getSongs, getSettings, cacheFile: path.join(app.getPath("userData"), "discover-cache.json"), bioFile: path.join(app.getPath("userData"), "artist-bios.json") });
@@ -2763,6 +2776,7 @@ app.on("before-quit", async () => {
   allowQuit = true;
   thumbnailGeneration++;
   discoverCacheLifecycle?.flush();
+  remoteArtworkCache?.close();
   coverThumbnailQueue.clear();
   libraryWatcher?.dispose();
   scrobbler?.dispose();
