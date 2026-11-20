@@ -25,16 +25,16 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run release:check
-      - name: Compare current production library modules with pre-optimization 0.5.0
+      - name: Compare production library modules with the Performance 3.0 baseline
         shell: bash
         run: |
           mkdir -p qa-artifacts
-          git worktree add --detach "$RUNNER_TEMP/localtify-baseline" 8f5c3a7af7f23d95fc5e2494aa9d95413498cf13
-          for n in 1000 10000 50000; do
+          git worktree add --detach "$RUNNER_TEMP/localtify-baseline" 4abd73b45b4ff1165a7e5b63098749179e2f0d7d
+          for n in 1000 10000 50000 100000; do
             node --expose-gc scripts/benchmark-library-workloads.mjs "$RUNNER_TEMP/localtify-baseline" "$n" | tee "qa-artifacts/baseline-$n.json"
             node --expose-gc scripts/benchmark-library-workloads.mjs . "$n" | tee "qa-artifacts/current-$n.json"
           done
-          node -e 'const fs=require("fs");for(const n of [1000,10000,50000]){const a=JSON.parse(fs.readFileSync("qa-artifacts/baseline-"+n+".json"));const b=JSON.parse(fs.readFileSync("qa-artifacts/current-"+n+".json"));for(let i=0;i<a.trials.length;i++)if(a.trials[i].digest!==b.trials[i].digest)throw Error("Output divergence: "+n+" "+a.trials[i].label);}'
+          node -e 'const fs=require("fs");for(const n of [1000,10000,50000,100000]){const a=JSON.parse(fs.readFileSync("qa-artifacts/baseline-"+n+".json"));const b=JSON.parse(fs.readFileSync("qa-artifacts/current-"+n+".json"));for(let i=0;i<a.trials.length;i++)if(a.trials[i].digest!==b.trials[i].digest)throw Error("Output divergence: "+n+" "+a.trials[i].label);}'
       - name: Actual Electron desktop renderer and audio smoke
         shell: bash
         run: |

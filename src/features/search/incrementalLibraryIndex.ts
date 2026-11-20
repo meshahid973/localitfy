@@ -34,9 +34,14 @@ function count(map: Map<string, number>, key: string, delta: number) {
  * normalization and facet updates run only on changed/added/removed songs.
  */
 export function reconcileLibraryIndex(songs: readonly Song[], previous?: LibraryIndex): LibraryIndex {
-  const songsById = new Map<string, Song>();
-  const songIndexById = new Map<string, number>();
-  const searchEntries: SongSearchEntry[] = [];
+  // The frequent playback/like edit keeps order and IDs stable. Reuse the
+  // previous position map and avoid per-song hash lookups and map insertion.
+  const stableOrder = previous && previous.searchEntries.length === songs.length &&
+    previous.songIndexById.size === songs.length &&
+    songs.every((song, i) => previous.searchEntries[i].song.id === song.id);
+  let songsById = stableOrder ? previous.songsById : new Map<string, Song>();
+  const songIndexById = stableOrder ? previous.songIndexById : new Map<string, number>();
+  let searchEntries = stableOrder ? previous.searchEntries : new Array<SongSearchEntry>(songs.length);
   // Preserve immutable facet snapshots when only playback/likes/title change.
   // Copy on the first actual artist/album change, not on every library update.
   let artistOccurrences = previous?.artistOccurrences || new Map<string, number>();
@@ -50,14 +55,22 @@ export function reconcileLibraryIndex(songs: readonly Song[], previous?: Library
     return albumOccurrences;
   };
 
-  for (const [index, song] of songs.entries()) {
-    songsById.set(song.id, song);
-    songIndexById.set(song.id, index);
-    const oldSong = previous?.songsById.get(song.id);
-    const oldIndex = previous?.songIndexById.get(song.id);
+  for (let index = 0; index < songs.length; index++) {
+    const song = songs[index];
+    const oldIndex = stableOrder ? index : previous?.songIndexById.get(song.id);
     const oldEntry = oldIndex === undefined ? undefined : previous?.searchEntries[oldIndex];
+    const oldSong = stableOrder ? oldEntry?.song : previous?.songsById.get(song.id);
     const unchanged = oldSong === song && oldEntry?.song === song;
-    searchEntries.push(unchanged ? oldEntry : buildSongSearchEntryCached(song, oldEntry));
+    if (stableOrder) {
+      if (unchanged) continue;
+      if (songsById === previous.songsById) songsById = new Map(songsById);
+      if (searchEntries === previous.searchEntries) searchEntries = searchEntries.slice();
+      songsById.set(song.id, song);
+    } else {
+      songsById.set(song.id, song);
+      songIndexById.set(song.id, index);
+    }
+    searchEntries[index] = unchanged ? oldEntry : buildSongSearchEntryCached(song, oldEntry);
     if (!oldSong || oldSong.artist !== song.artist) {
       if (oldSong) for (const key of artistKeys(oldSong)) count(artistWrite(), key, -1);
       for (const key of artistKeys(song)) count(artistWrite(), key, 1);
@@ -68,7 +81,7 @@ export function reconcileLibraryIndex(songs: readonly Song[], previous?: Library
     }
   }
 
-  if (previous) {
+  if (previous && !stableOrder) {
     for (const [id, oldSong] of previous.songsById) {
       if (songsById.has(id)) continue;
       for (const key of artistKeys(oldSong)) count(artistWrite(), key, -1);
@@ -76,6 +89,7 @@ export function reconcileLibraryIndex(songs: readonly Song[], previous?: Library
     }
   }
 
+  if (stableOrder && searchEntries === previous.searchEntries) return previous;
   return {
     songsById, songIndexById, searchEntries,
     artistOccurrences, albumOccurrences,

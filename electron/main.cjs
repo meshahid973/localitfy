@@ -51,6 +51,7 @@ const backupDatabase = databaseRepositories.database.backup;
 const repairDatabaseNow = databaseRepositories.database.repair;
 const getDatabaseStatus = databaseRepositories.database.status;
 const getSongs = databaseRepositories.songs.list;
+const getSong = databaseRepositories.songs.get;
 const insertSongs = databaseRepositories.songs.insertMany;
 const patchSong = databaseRepositories.songs.patch;
 const deleteSong = databaseRepositories.songs.remove;
@@ -2401,7 +2402,7 @@ app.whenReady().then(async () => {
   ipcRouter.handle("covers:cleanup-cache", async () => { try { return cleanupCoverThumbnailCache(); } catch (error) { return { ok: false, error: error?.message || "cover cache cleanup failed" }; } });
   ipcRouter.handle("song:set-cover", async (_event, id, coverPath) => { const updated = patchSong(id, { coverPath }); return updated ? shapeSong(updated) : null; });
   ipcRouter.handle("song:pick-cover", async (event, id) => {
-    const song = getSongs().find((item) => item.id === id);
+    const song = (typeof id === "string" ? getSong(id) : null);
     if (!song) return null;
     try {
       const senderWindow = BrowserWindow.fromWebContents(event.sender) || mainWindow;
@@ -2418,7 +2419,7 @@ app.whenReady().then(async () => {
     }
   });
   ipcRouter.handle("song:analyze-volume", async (_event, id) => {
-    const target = getSongs().find((item) => item.id === id);
+    const target = (typeof id === "string" ? getSong(id) : null);
     if (!target) return { ok: false, volumeGain: 1, error: "song not in library database" };
     const analysis = await analyzeVolumeGain(target.filePath);
     if (!analysis?.ok) return analysis;
@@ -2525,7 +2526,7 @@ app.whenReady().then(async () => {
   });
   ipcRouter.handle("song:random-cover", async (_event, id) => {
     const covers = getPixelArtFiles();
-    const song = getSongs().find((item) => item.id === id);
+    const song = (typeof id === "string" ? getSong(id) : null);
     const chosen = pickLeastUsedCover(covers, song ? [song] : [], { avoidSelectedCurrent: true });
     const updated = patchSong(id, { coverPath: chosen });
     return updated ? shapeSong(updated) : null;
