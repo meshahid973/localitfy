@@ -2492,7 +2492,7 @@ function MainModeApp() {
         progressLoopTimeoutRef.current = null;
         // Hidden windows may suspend animation frames. Continue position
         // checkpoints without painting progress UI.
-        if (document.hidden) tick(performance.now());
+        if (document.hidden || isAppBackgroundedRef.current) tick(performance.now());
         else animationFrameRef.current = window.requestAnimationFrame(tick);
       }, delayMs);
     };
@@ -2500,7 +2500,7 @@ function MainModeApp() {
     const tick = (clock: number) => {
       animationFrameRef.current = null;
       const audio = audioRef.current;
-      const backgroundMode = isAppBackgroundedRef.current;
+      const backgroundMode = document.hidden || isAppBackgroundedRef.current;
       const busyUi = scrollBusyRef.current || performance.now() < rendererQuietUntilRef.current || Boolean(draggedSongIdRef.current) || themeSettlingRef.current;
 
       if (audio && !audio.paused) {
@@ -2525,7 +2525,7 @@ function MainModeApp() {
         // Store progress without React updates. Only the remembered startup song
         // resumes; regular song selections still begin at 0:00.
         const wallClock = Date.now();
-        if (settings.rememberPlaybackPosition && currentSong.id &&
+        if (settingsRef.current.rememberPlaybackPosition && currentSong.id &&
             nextTime > 1 && wallClock - positionSaveRef.current >= 5000) {
           positionSaveRef.current = wallClock;
           void window.localitfy.patchSong(currentSong.id, { playbackPosition: Math.floor(nextTime) })
@@ -2537,10 +2537,22 @@ function MainModeApp() {
       scheduleProgressTick(backgroundMode ? 1800 : busyUi ? 520 : 180);
     };
 
+    // Cancel a pending frame that may never run when the window is hidden.
+    const handleProgressVisibility = () => {
+      stopProgressLoop();
+      if (!document.hidden && !isSeekingRef.current) {
+        syncProgressDom(timeRef.current, durationRef.current || currentDuration, true);
+      }
+      scheduleProgressTick(document.hidden ? 1800 : 0);
+    };
+    document.addEventListener("visibilitychange", handleProgressVisibility);
     scheduleProgressTick(140);
 
-    return () => stopProgressLoop();
-  }, [isPlaying, currentSong?.id, currentDuration, settings.gaplessPlayback, syncProgressDom]);
+    return () => {
+      document.removeEventListener("visibilitychange", handleProgressVisibility);
+      stopProgressLoop();
+    };
+  }, [isPlaying, currentSong?.id, currentDuration, syncProgressDom]);
 
   const discordSettingsRef = useRef(settings);
 
