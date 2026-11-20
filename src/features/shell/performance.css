@@ -66,6 +66,18 @@ body.localtifyBackgroundMode .app .playerBar::before {
   -webkit-backdrop-filter: none !important;
 }
 
+/* Window blur/hidden mode must suspend animation timelines on every screen,
+ * including onboarding, immersive player, loading skeletons and screensaver.
+ * This intentionally leaves audio playback and foreground styling untouched. */
+body.localtifyWindowBackgrounded .app *,
+body.localtifyWindowBackgrounded .app *::before,
+body.localtifyWindowBackgrounded .app *::after,
+body.localtifyBackgroundMode .app *,
+body.localtifyBackgroundMode .app *::before,
+body.localtifyBackgroundMode .app *::after {
+  animation-play-state: paused !important;
+}
+
 /* The renderer performance policy is the sole owner of reduced motion. */
 /* Reduced motion has one selector contract matching AppShell's data-motion-level. */
 .app.reducedMotion *,
