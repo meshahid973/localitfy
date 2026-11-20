@@ -83,7 +83,7 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
     });
     return () => { active = false; };
   }, [src, near]);
-  const localCandidate = eligibleLocal ? (remembered ?? (local?.source === src ? local.url : "")) : "";
+  const localCandidate = eligibleLocal ? (remembered ?? (local && local.source === src ? local.url : "")) : "";
   const localSrc = localCandidate !== badLocal ? localCandidate : "";
   const displaySrc = pendingLocal ? "" : localSrc || src;
   const imageReady = Boolean(displaySrc && loaded?.key === key && loaded.url === displaySrc);

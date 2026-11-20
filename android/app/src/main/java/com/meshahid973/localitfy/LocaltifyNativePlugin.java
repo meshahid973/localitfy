@@ -32,6 +32,8 @@ public class LocaltifyNativePlugin extends Plugin {
     // A few files at once: one stream at a time leaves most of a Wi-Fi link idle.
     private final ExecutorService downloads = Executors.newFixedThreadPool(4);
     private WifiManager.WifiLock wifiLock;
+    private RemoteArtworkCache artworkCache;
+    private final java.util.concurrent.ThreadPoolExecutor artworkRequests = new java.util.concurrent.ThreadPoolExecutor(1, 2, 30, java.util.concurrent.TimeUnit.SECONDS, new java.util.concurrent.ArrayBlockingQueue<>(6));
 
     // The live connection: one server-sent-events stream from the computer, read on its own thread so it keeps
     // going while the page is in the background. It reconnects with a growing pause, and at once on a new network.
@@ -49,6 +51,7 @@ public class LocaltifyNativePlugin extends Plugin {
     @Override
     public void load() {
         active = this;
+        artworkCache = new RemoteArtworkCache(getContext());
     }
 
     /** Media controls from the notification, lock screen or headset, forwarded to the renderer. */
@@ -68,6 +71,16 @@ public class LocaltifyNativePlugin extends Plugin {
         result.put("mediaPrefix", "https://localhost" + LocalMediaHandler.PREFIX);
         result.put("deviceName", Build.MANUFACTURER + " " + Build.MODEL);
         call.resolve(result);
+    }
+
+    @PluginMethod
+    public void resolveRemoteArtwork(PluginCall call) {
+        try {
+            artworkRequests.execute(() -> {
+                try { call.resolve(artworkCache.resolve(call.getString("url"))); }
+                catch (Exception error) { call.resolve(new JSObject()); }
+            });
+        } catch (java.util.concurrent.RejectedExecutionException busy) { call.resolve(new JSObject()); }
     }
 
     private File resolve(String relative) throws IOException {

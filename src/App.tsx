@@ -7037,7 +7037,7 @@ function MainModeApp() {
     getTime: () => timeRef.current, getDuration: () => durationRef.current, togglePlay, next: playNext, previous: playPrevious, playQueueItem,
     seek: (seconds) => handleSeek((seconds / (durationRef.current || 1)) * 100), setQueue: setPlayQueue, setShuffle: setIsShuffle, setRepeat: setRepeatMode,
     start: (songId, time, play) => { startupResumePositionRef.current = { songId, time }; void selectSong(songId, play, { source: null }); },
-    onLike: (id, liked) => setSongs((all) => all.map((song) => (song.id === id ? { ...song, liked } : song))), toast: showAppToast
+    onLike: (id, liked) => setSongs((all) => patchLibrarySong(all, id, { liked }, songIndexById.get(id))), toast: showAppToast
   });
 
   const downloadPageState = getDownloadPageState({

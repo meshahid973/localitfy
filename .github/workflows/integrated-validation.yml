@@ -4,6 +4,15 @@ name: integrated-validation
 # caching, Android integration or large-library performance.
 on:
   workflow_dispatch:
+    inputs:
+      baseline_ref:
+        description: Baseline branch or commit (must differ from candidate)
+        default: origin/main
+        required: true
+        type: string
+  pull_request:
+    paths:
+      - '.github/workflows/integrated-validation.yml'
 permissions:
   contents: read
 env:
@@ -22,13 +31,15 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run release:check
+      - run: npm run build
       - name: Compare production library modules with the PR baseline
         env:
-          BASELINE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
+          BASELINE_REF: ${{ github.event.pull_request.base.sha || inputs.baseline_ref }}
         shell: bash
         run: |
           mkdir -p qa-artifacts
+          BASELINE_SHA="$(git rev-parse --verify "$BASELINE_REF^{commit}")"
+          test "$BASELINE_SHA" != "$(git rev-parse HEAD)" || { echo "Select a different baseline commit"; exit 1; }
           git worktree add --detach "$RUNNER_TEMP/localtify-baseline" "$BASELINE_SHA"
           for n in 1000 10000 50000 100000; do
             node --expose-gc scripts/benchmark-library-workloads.mjs "$RUNNER_TEMP/localtify-baseline" "$n" | tee "qa-artifacts/baseline-$n.json"

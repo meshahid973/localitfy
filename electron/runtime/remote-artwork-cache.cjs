@@ -204,6 +204,6 @@ function createRemoteArtworkCache({ dir, maxBytes = 128 * 1024 * 1024, maxEntrie
       return await refresh(url,hit?.row);
     } catch { return ""; }
   }
-  return {resolve, close(){closed=true;shutdown.abort();},get pendingCount(){return pending.size;}};
+  return {resolve, remainingTtl(url){return Math.max(0,(rows.get(url)?.staleUntil || 0)-now());}, close(){closed=true;shutdown.abort();},get pendingCount(){return pending.size;}};
 }
 module.exports = {createRemoteArtworkCache,lifetime,eligible};

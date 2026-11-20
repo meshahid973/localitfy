@@ -120,3 +120,20 @@ test("metadata preview keeps original repair semantics without allocating unchan
     for(const field of ["title","artist","album"])assert.equal(result[field+"FixCount"],expected.filter(x=>Object.hasOwn(x.patch,field)).length);
   }
 });
+
+
+test("library normalization retains Japanese tags and backend artwork identities", () => {
+  const raw={id:"jp",title:"夜に駆ける",artist:"ヨアソビ",album:"群青",filePath:"/music/夜に駆ける.flac",coverThumbUrl:"localtify-media://thumb",coverFullUrl:"localtify-media://full",sourceTrackId:"original",duration:200};
+  const song=exports.sanitizeSongRecord(raw,0);
+  assert.equal(song.title,raw.title);
+  assert.equal(song.artist,raw.artist);
+  assert.equal(song.album,raw.album);
+  assert.equal(song.coverThumbUrl,raw.coverThumbUrl);
+  assert.equal(song.coverFullUrl,raw.coverFullUrl);
+  assert.equal(song.sourceTrackId,raw.sourceTrackId);
+  assert.equal(exports.normalizeSearchText("ガ"),"ガ");
+  assert.equal(exports.normalizeSearchText("Café"),"cafe");
+  const other={...song,id:"other",title:"別の曲",artist:"別の歌手",album:"別のアルバム",filePath:"/other.flac"};
+  const result=exports.rankSongsForSearch([song,other].map(exports.buildSongSearchEntry),"夜に");
+  assert.deepEqual(Array.from(result,s=>s.id),["jp"]);
+});

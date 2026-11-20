@@ -2297,7 +2297,7 @@ app.whenReady().then(async () => {
     const file = await remoteArtworkCache.resolve(url);
     if (!file || getSettings().discoverEnabled !== true) return null;
     const local = safeMediaUrl(file);
-    return local ? { url: local } : null;
+    return local ? { url: local, cacheTtlMs: remoteArtworkCache.remainingTtl(url) } : null;
   });
   discoverCacheLifecycle = registerDiscoverIpc(ipcRouter, { musicBrainzClient, searchYouTubeMusic: require("./discover/youtube-music.cjs").createYouTubeMusicSearch(), searchYouTubeMusicRadio: require("./discover/youtube-music.cjs").createYouTubeMusicRadio(), searchYouTubeArtwork: require("./discover/youtube-music.cjs").createYouTubeMusicSearch(globalThis.fetch, Date.now, 4), searchStore: require("./discover/catalog.cjs").createStoreSearch(),
     lookupDeezer: require("./discover/extra-artwork.cjs").createDeezerArtwork(), lookupFanart: require("./discover/extra-artwork.cjs").createFanartArtwork({apiKey:process.env.LOCALTIFY_FANART_API_KEY}),

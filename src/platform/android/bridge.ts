@@ -6,7 +6,7 @@ import type { PlayEvent } from "../../features/player/listeningHistory";
 import type { ScrobbleStatus } from "../../features/scrobbling/scrobble.types";
 import { computerName } from "../../app/platform";
 import { phoneLibrary } from "./library";
-import { fromMac, fromMacOrKept } from "./macFeatures";
+import { fromMac, fromMacOrKept, cachedArtworkFromMac } from "./macFeatures";
 import { LocaltifyNative } from "./native";
 import { readValue, writeValues } from "./store";
 import { setLibraryChangedHandler } from "./sync";
@@ -133,10 +133,14 @@ export function createAndroidBridge(): Bridge {
       if (kept) await writeValues({ [key]: { ...kept, offsetMs: saved.offsetMs } }).catch(() => undefined);
       return saved;
     },
-    // Desktop cache tokens are not transferable to the phone. Keep ordinary remote image loading here.
-    resolveRemoteArtwork: async () => null,
-    requestCoverThumbnail: async () => null,
-    getDiscoveries: (payload) => (payload?.catalog || payload?.artwork) ? fromMac<DiscoverResult>("discover:get", payload, 60000) : fromMacOrKept<DiscoverResult>("discover:get", payload ?? {}, "mac:discover", { status: "off" }),
+    // Desktop cache tokens are not transferable; the phone owns its artwork files.
+    resolveRemoteArtwork: async (url: string) => {
+      if (phoneLibrary.effectiveSettings().discoverEnabled !== true) return null;
+      const result = await LocaltifyNative.resolveRemoteArtwork({ url }).catch(() => null);
+      return result?.url && phoneLibrary.effectiveSettings().discoverEnabled === true ? { url: result.url, cacheTtlMs: result.cacheTtlMs } : null;
+    },
+    requestCoverThumbnail: undefined,
+    getDiscoveries: (payload) => payload?.artwork ? cachedArtworkFromMac(payload.artwork) : payload?.catalog ? fromMac<DiscoverResult>("discover:get", payload, 60000) : fromMacOrKept<DiscoverResult>("discover:get", payload ?? {}, "mac:discover", { status: "off" }),
     getArtistBio: async (artist: string) => {
       if (phoneLibrary.effectiveSettings().discoverEnabled !== true) return { status: "off" };
       return fromMacOrKept<ArtistBio>("discover:artist-bio", { artist }, `mac:bio:${artist.trim().toLocaleLowerCase()}`, { status: "none" },

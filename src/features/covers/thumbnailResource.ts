@@ -103,8 +103,10 @@ export function resolveRemoteArtwork(source: string) {
   const pending = remotePending.get(source);
   if (pending) return pending;
   if (!window.localitfy?.resolveRemoteArtwork || remotePending.size >= 16) return Promise.resolve("");
-  const task = window.localitfy.resolveRemoteArtwork(source).then(result=>result?.url || "",()=> "").then(url=>{
-    remoteResults.set(source,{url,until:Date.now()+(url?30_000:5000)});
+  const task = window.localitfy.resolveRemoteArtwork(source).catch(()=>null).then(result=>{
+    const url = result?.url || "";
+    const ttl = url ? Math.max(0,Math.min(30_000,result?.cacheTtlMs || 0)) : 5000;
+    if (ttl) remoteResults.set(source,{url,until:Date.now()+ttl});
     while(remoteResults.size>512) remoteResults.delete(remoteResults.keys().next().value!);
     return url;
   }).finally(()=>remotePending.delete(source));
