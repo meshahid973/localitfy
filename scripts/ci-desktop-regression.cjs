@@ -193,12 +193,36 @@ server.listen(5173,async()=>{
     const playing=await metrics("desktop playback",3);
     const beforeHidden=await win.webContents.executeJavaScript("(()=>{const a=document.querySelector('audio');return {src:a.src,time:a.currentTime}})()");
     let hiddenPlayback, hiddenAudio;
+    let syntheticBackgroundCss = false;
     try {
       win.hide();
+      assert.equal(win.isVisible(),false,"the Electron window is actually hidden");
+      // Offscreen Xvfb does not consistently deliver Chromium's visibility/blur
+      // signals after BrowserWindow.hide(). When absent, activate only the
+      // production background CSS class for this controlled resource sample.
+      const backgroundCss = await win.webContents.executeJavaScript(
+        "document.body.classList.contains('localtifyWindowBackgrounded') || document.body.classList.contains('localtifyBackgroundMode')");
+      if (!backgroundCss) {
+        syntheticBackgroundCss = true;
+        await win.webContents.executeJavaScript("document.body.classList.add('localtifyWindowBackgrounded')");
+      }
+      const animationState = await win.webContents.executeJavaScript(
+        "getComputedStyle(document.querySelector('.playerBar'),'::before').animationPlayState");
+      assert.equal(animationState,"paused","hidden-window decorative animations must be suspended");
       hiddenPlayback=await metrics("desktop hidden playback",3);
-      hiddenAudio=await win.webContents.executeJavaScript("(()=>{const a=document.querySelector('audio');return {src:a.src,time:a.currentTime,paused:a.paused,documentHidden:document.hidden}})()");
-    } finally { win.show(); win.focus(); }
-    const hiddenPlaybackObservation={documentHidden:hiddenAudio.documentHidden,sameSource:hiddenAudio.src===beforeHidden.src,advancedSeconds:hiddenAudio.time-beforeHidden.time,paused:hiddenAudio.paused};
+      hiddenAudio=await win.webContents.executeJavaScript(
+        "(()=>{const a=document.querySelector('audio');return {src:a.src,time:a.currentTime,paused:a.paused,documentHidden:document.hidden,backgroundCssActive:document.body.classList.contains('localtifyWindowBackgrounded')||document.body.classList.contains('localtifyBackgroundMode')}})()");
+    } finally {
+      if (syntheticBackgroundCss) await win.webContents.executeJavaScript(
+        "document.body.classList.remove('localtifyWindowBackgrounded')").catch(()=>undefined);
+      win.show(); win.focus();
+    }
+    const hiddenPlaybackObservation={documentHidden:hiddenAudio.documentHidden,
+      backgroundCssActive:hiddenAudio.backgroundCssActive,
+      backgroundCssSimulated:syntheticBackgroundCss,
+      browserWindowHidden:true,
+      sameSource:hiddenAudio.src===beforeHidden.src,
+      advancedSeconds:hiddenAudio.time-beforeHidden.time,paused:hiddenAudio.paused};
     await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=home]').click()");
     await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.homeFeatureCover') && document.querySelector('.app').dataset.workspaceArtwork==='on'").catch(()=>false),"artwork-led Home");
     async function homeGeometry(width,height) {

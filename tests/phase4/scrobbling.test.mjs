@@ -212,3 +212,11 @@ test("scrobble queue writes are atomic and plaintext credentials are never allow
   assert.match(ipc, /if \(!secure\) throw new Error/);
   assert.match(view, /if \(ok\) setToken\(""\)/);
 });
+
+test("scrobble settings coalesce status polling and reject stale results after an action", () => {
+  const view = fs.readFileSync("src/features/scrobbling/ScrobbleSettings.tsx", "utf8");
+  assert.match(view, /pendingStatusRef\.current/);
+  assert.match(view, /generation === statusGenerationRef\.current/);
+  assert.match(view, /setInterval\(refresh, 15_000\)/);
+  assert.match(view, /document\.hidden/);
+});

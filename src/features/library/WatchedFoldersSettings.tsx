@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FolderPlus, RefreshCw, X } from "lucide-react";
 import type { Settings } from "../settings/settings.types";
 import { supportsWatchedFolders, subscribeWatchedFoldersChange } from "./watchedFolderBridge";
@@ -25,17 +25,29 @@ export default function WatchedFoldersSettings({ settings, updateSetting }: Watc
   const [message, setMessage] = useState("");
 
   const supported = supportsWatchedFolders(window.localitfy);
+  const pendingStatusRef = useRef(false);
   const refresh = useCallback(() => {
-    if (!supportsWatchedFolders(window.localitfy)) return;
-    void window.localitfy.getWatchedFolderStatus().then(setStatus).catch(() => undefined);
+    if (!supportsWatchedFolders(window.localitfy) || pendingStatusRef.current) return;
+    pendingStatusRef.current = true;
+    void window.localitfy.getWatchedFolderStatus()
+      .then(setStatus).catch(() => undefined)
+      .finally(() => { pendingStatusRef.current = false; });
   }, []);
   useEffect(() => {
     if (!supported) return;
     refresh();
     const stop = subscribeWatchedFoldersChange(window.localitfy, refresh);
-    // A newly added folder gets its first check in the background; keep the status line current meanwhile.
-    const timer = window.setInterval(refresh, 3000);
-    return () => { stop?.(); window.clearInterval(timer); };
+    // The main process already emits watched-folder changes. Keep a modest
+    // fallback refresh while the settings screen is visible, not an IPC poll
+    // every three seconds even while the window is hidden.
+    const refreshIfVisible = () => { if (!document.hidden) refresh(); };
+    const timer = window.setInterval(refreshIfVisible, 20_000);
+    document.addEventListener("visibilitychange", refreshIfVisible);
+    return () => {
+      stop?.();
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", refreshIfVisible);
+    };
   }, [refresh, supported]);
 
   async function addFolder() {
