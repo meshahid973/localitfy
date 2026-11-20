@@ -49,6 +49,8 @@ const initial=measure("cold index",()=>index.reconcileLibraryIndex(songs),x=>[x.
 trials[0].rawDigest=hash(initial.searchEntries.map(e=>e.haystack));
 const edited=songs.slice();edited[count>>1]={...edited[count>>1],playCount:60};
 const changed=measure("single playback update",()=>index.reconcileLibraryIndex(edited,initial),x=>[x.artistCount,x.albumCount,x.searchEntries[count>>1].song.playCount]);
+const patched=index.patchLibrarySong(songs,songs[count>>1].id,{playCount:60},count>>1);
+measure("single playback update via helper",()=>index.reconcileLibraryIndex(patched,initial),x=>[x.artistCount,x.albumCount,x.searchEntries[count>>1].song.playCount]);
 measure("selective searches",()=>["midnight artist 4","track 209","liked","not-present-xyz"].map(q=>search.rankSongsForSearch(changed.searchEntries,q)),x=>x.map(a=>a.map(s=>s.id)));
 measure("metadata preview",()=>preview.createMetadataCleanPreview(songs,[],"all"),x=>[x.totalCount,x.changedCount,x.titleFixCount,x.artistFixCount,x.albumFixCount,x.items.map(i=>[i.id,i.patch])]);
 const report={platform:process.platform,arch:process.arch,node:process.version,cores:os.cpus().length,count,peakRssMiB:mib(process.resourceUsage().maxRSS*1024),trials};
