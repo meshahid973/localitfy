@@ -41,8 +41,8 @@ test("tries yt-dlp's default clients before the format-limited mobile clients", 
 });
 
 test("URL downloads forward audio options and the setting defaults off", () => {
-  const main = fs.readFileSync(path.join(root, "electron", "main.cjs"), "utf8");
-  assert.match(main, /quality, format, cleanTitle, keepOriginal: keepOriginal === true/);
+  const downloads = fs.readFileSync(path.join(root, "electron", "ipc", "downloads.cjs"), "utf8");
+  assert.match(downloads, /quality, format, cleanTitle, keepOriginal: keepOriginal === true/);
   const selectors = fs.readFileSync(path.join(root, "src", "features", "downloads", "download.selectors.ts"), "utf8");
   assert.match(selectors, /keepOriginal: settings\.downloadKeepOriginal/);
   const constants = fs.readFileSync(path.join(root, "src", "features", "settings", "settings.constants.ts"), "utf8");
@@ -56,8 +56,9 @@ test("keep-original Opus downloads import and play; nested download settings rea
   const isAudioFile = new Function("filePath", match[1]);
   for (const file of ["song.opus", "song.m4a", "song.aiff", "song.MP3"]) assert.equal(isAudioFile(file), true, file);
   assert.equal(isAudioFile("archive.zip"), false);
-  assert.match(main, /options\.autoAdd !== false/, "auto-add preference is forwarded");
-  assert.match(main, /payload\?\.folder \?\? options\.downloadFolder/, "download folder preference is forwarded");
+  const downloads = fs.readFileSync(path.join(root, "electron", "ipc", "downloads.cjs"), "utf8");
+  assert.match(downloads, /options\.autoAdd !== false/, "auto-add preference is forwarded");
+  assert.match(downloads, /payload\?\.folder \?\? options\.downloadFolder/, "download folder preference is forwarded");
   const downloader = fs.readFileSync(path.join(root, "electron", "downloader.cjs"), "utf8");
   assert.match(downloader, /"\.opus"/, "the converter recognizes Opus imports");
 });

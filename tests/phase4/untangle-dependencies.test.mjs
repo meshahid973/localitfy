@@ -58,7 +58,8 @@ test("download processing stays React-independent while keeping all established 
     assert.ok(!runtime.includes("export function " + symbol), symbol + " is still owned by the hook");
   }
   assert.match(runtime, /from "\.\/downloadProcessing"/);
-  assert.match(app, /from "\.\/features\/downloads\/downloadProcessing"/);
+  assert.match(app, /from "\.\/features\/downloads\/useDownloadsRuntime"/);
+  assert.doesNotMatch(app, /from "\.\/features\/downloads\/downloadProcessing"/);
   assert.match(benchmark, /downloadProcessing\.ts/);
   assert.match(tests, /downloadProcessing\.ts/);
   assert.doesNotMatch(benchmark, /if \(name === "react"\)/);

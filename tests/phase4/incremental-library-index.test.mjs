@@ -62,8 +62,12 @@ test("single-song edits preserve untouched references and handle out-of-date ind
 
 test("download and Spotify refresh use final result snapshots before bootstrap fallback", () => {
   const app = fs.readFileSync(path.join(root, "src/App.tsx"), "utf8");
-  assert.match(app, /if \(!Array\.isArray\(result\.songs\) && \(successCount > 0 \|\| Number\(result\.changedCount \|\| 0\) > 0\) && window\.localitfy\?\.bootstrap\)/);
-  assert.match(app, /if \(!Array\.isArray\(result\.songs\) && \(successCount > 0 \|\| Number\(result\.changedCount \|\| 0\) > 0\) && bridge\?\.bootstrap\)/);
+  const downloads = fs.readFileSync(path.join(root, "src/features/downloads/useDownloadsRuntime.ts"), "utf8");
+  const snapshot = downloads.slice(downloads.indexOf("async function resolveLibrarySnapshot"), downloads.indexOf("async function clearFailedDownloads"));
+  assert.ok(snapshot.indexOf("if (Array.isArray(snapshot)) return") < snapshot.indexOf("await window.localitfy.bootstrap()"));
+  assert.match(snapshot, /if \(changed && window\.localitfy\?\.bootstrap\)/);
+  assert.match(snapshot, /return songsRef\.current;/);
+  assert.equal((downloads.match(/await resolveLibrarySnapshot\(result\.songs,/g)||[]).length,2);
   assert.match(app, /useLibraryDerivedState\(/);
   const controller = fs.readFileSync(path.join(root, "src/features/library/useLibraryController.ts"), "utf8");
   assert.match(controller, /reconcileLibraryIndex\(songs, libraryIndexRef\.current/);
