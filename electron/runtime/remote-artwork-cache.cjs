@@ -214,7 +214,9 @@ function createRemoteArtworkCache({ dir, maxBytes = 128 * 1024 * 1024, maxEntrie
     if (row.expiresAt > timestamp) return row.expiresAt - timestamp;
     // Stale-while-revalidate grants a brief *display* grace period, not a
     // fresh renderer cache lease. Recheck promptly for the refreshed image.
-    return row.staleUntil > timestamp ? Math.min(1000, row.staleUntil - timestamp) : 0;
+    if (row.staleUntil <= timestamp) return 0;
+    const nextRetry = Math.max(timestamp + 1000, retryAt.get(url) || 0);
+    return Math.min(row.staleUntil - timestamp, nextRetry - timestamp);
   }, close(){closed=true;shutdown.abort();},get pendingCount(){return pending.size;}};
 }
 module.exports = {createRemoteArtworkCache,lifetime,eligible};

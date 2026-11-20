@@ -61,3 +61,30 @@ test("Android song lookup reuses the index and invalidates it when sync replaces
   assert.equal(phone.patchSong("1999", { liked: false }).title, "new");
   assert.equal(phone.patchSong("0", { liked: true }), null);
 });
+
+test("offline Android play-event updates use indexed identities and rebuild after sync acknowledgements", () => {
+  const { phone } = library();
+  const make = id => ({ id, sessionId: "s", songId: "song", startedAt: 1, updatedAt: 2, msListened: 1, outcome: "active" });
+  phone.pendingEvents = Array.from({ length: 3000 }, (_, i) => make(String(i)));
+  phone.recordPlayEvent({ ...make("2999"), msListened: 500 });
+  assert.equal(phone.pendingEvents.length, 3000);
+  assert.equal(phone.pendingEvents[2999].msListened, 500);
+  phone.pendingEvents = [make("2999")];
+  phone.recordPlayEvent(make("new"));
+  assert.equal(phone.pendingEvents.length, 2);
+  assert.equal(phone.pendingEvents[1].id, "new");
+  phone.recordPlayEvent({ ...make("2999"), msListened: 700 });
+  assert.equal(phone.pendingEvents[0].msListened, 700);
+});
+
+test("unchanged Android song edits do not rewrite IndexedDB", () => {
+  const { phone, writes } = library();
+  phone.remoteSongs = [{ id: "a", title: "a", file: { size: 1, mtimeMs: 1, ext: "mp3" }, cover: null }];
+  phone.patchSong("a", { playbackPosition: 12 });
+  const revision = phone.revision;
+  phone.patchSong("a", { playbackPosition: 12 });
+  assert.equal(phone.revision, revision);
+  assert.equal(writes.length, 1);
+  phone.patchSong("a", { playbackPosition: 13 });
+  assert.equal(writes.length, 2);
+});

@@ -45,6 +45,19 @@ export class PhoneLibrary {
   private checkpointDirty = false;
   private indexedSongs: RemoteSong[] | null = null;
   private songsById = new Map<string, RemoteSong>();
+  private indexedEvents: PlayEvent[] | null = null;
+  private eventIndexById = new Map<string, number>();
+
+  private pendingEventIndex() {
+    // The sync acknowledgement replaces pendingEvents with a filtered array.
+    // Invalidate on replacement, while checkpoints reuse the existing index.
+    if (this.indexedEvents !== this.pendingEvents ||
+        this.eventIndexById.size !== this.pendingEvents.length) {
+      this.indexedEvents = this.pendingEvents;
+      this.eventIndexById = new Map(this.pendingEvents.map((event, index) => [event.id, index]));
+    }
+    return this.eventIndexById;
+  }
 
   private remoteSong(id: string) {
     // Sync adopts a new snapshot array; property-only like changes keep the
@@ -143,7 +156,11 @@ export class PhoneLibrary {
   patchSong(id: string, patch: Partial<Song>) {
     const remote = this.remoteSong(id);
     if (!remote) return null;
-    this.edits[id] = { ...this.edits[id], ...patch };
+    const previous = this.edits[id] || {};
+    if (Object.keys(patch).length && Object.entries(patch).every(([key, value]) =>
+        Object.prototype.hasOwnProperty.call(previous, key) &&
+        Object.is((previous as Record<string, unknown>)[key], value))) return this.toSong(remote);
+    this.edits[id] = { ...previous, ...patch };
     if (typeof patch.liked === "boolean") this.likeClock[id] = Date.now() + this.clockOffset;
     this.revision += 1;
     void this.save(typeof patch.liked === "boolean" ? ["edits", "likeClock"] : ["edits"]);
@@ -179,9 +196,13 @@ export class PhoneLibrary {
   }
 
   recordPlayEvent(event: PlayEvent) {
-    const index = this.pendingEvents.findIndex((item) => item.id === event.id);
-    if (index >= 0) this.pendingEvents[index] = event;
-    else this.pendingEvents.push(event);
+    const indices = this.pendingEventIndex();
+    const index = indices.get(event.id);
+    if (index !== undefined) this.pendingEvents[index] = event;
+    else {
+      indices.set(event.id, this.pendingEvents.length);
+      this.pendingEvents.push(event);
+    }
     this.revision += 1;
     void this.save(["pendingEvents"]);
     return true;
