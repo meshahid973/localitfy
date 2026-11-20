@@ -41,7 +41,8 @@ async function check(provider,work) {
     const outcome=await work();
     checks.push({provider,status:outcome?.status||"unavailable",metadata:outcome?.metadata||false,
       image:outcome?.image||false,elapsedMs:now()-start,
-      detail:String(outcome?.detail||"").slice(0,120)});
+      detail:String(outcome?.detail||"").slice(0,120),
+      ...(outcome?.candidates?{candidates:outcome.candidates}:{})});
   } catch(error) {
     checks.push({provider,status:"error",metadata:false,image:false,elapsedMs:now()-start,
       detail:String(error?.message||error).slice(0,120)});
@@ -51,16 +52,24 @@ async function check(provider,work) {
 async function main() {
   const jobs=[];
   jobs.push(check("Deezer",async()=>{
-    let httpStatus=0, responseType="";
+    let httpStatus=0, responseType="", candidates=[];
     const lookup=createDeezerArtwork({fetchImpl:async(url,options)=>{
       const response=await fetch(url,options);
       httpStatus=response.status;
       responseType=String(response.headers.get("content-type")||"").slice(0,50);
+      if(response.ok && Number(response.headers.get("content-length")||0)<512*1024) {
+        const json=await response.clone().json().catch(()=>null);
+        candidates=Array.isArray(json?.data)?json.data.slice(0,8).map(row=>({
+          title:String(row.title||"").slice(0,70),artist:String(row.artist?.name||"").slice(0,70),
+          duration:Number(row.duration||0),albumId:row.album?.id||null,
+          coverMedium:Boolean(row.album?.cover_medium)
+        })):[];
+      }
       return response;
     }});
     const result=await lookup("recording",expectedTitle,expectedArtist);
     if(!result?.coverUrl) return {status:httpStatus && httpStatus!==200?"http-"+httpStatus:"no-exact-match",
-      detail:httpStatus?"HTTP "+httpStatus+"; "+responseType:"No response or network error"};
+      detail:httpStatus?"HTTP "+httpStatus+"; "+responseType:"No response or network error",candidates};
     const image=await imageAvailable(result.coverUrl).catch(()=>false);
     return {status:image?"ok":"image-unavailable",metadata:true,image};
   }));
