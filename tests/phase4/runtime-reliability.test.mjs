@@ -22,8 +22,8 @@ test("Discord RPC does not roll new art just for a fresh resume", () => {
 
 test("Discord download and source buttons have distinct canonical URLs", () => {
   const constants = read("src/features/discord/discord.constants.ts");
-  assert.match(constants, /LOCALITFY_DOWNLOAD_URL\s*=\s*"https:\/\/github\.com\/meshahid973\/localitfy\/releases\/latest"/);
-  assert.match(constants, /LOCALITFY_SOURCE_URL\s*=\s*"https:\/\/github\.com\/meshahid973\/localitfy"/);
+  assert.match(constants, /LOCALITFY_DOWNLOAD_URL\s*=\s*"https:\/\/github\.com\/meshahid973\/localtify\/releases\/latest"/);
+  assert.match(constants, /LOCALITFY_SOURCE_URL\s*=\s*"https:\/\/github\.com\/meshahid973\/localtify"/);
 });
 
 test("renderer root is protected by the Localitfy error boundary", () => {
