@@ -1,4 +1,4 @@
-const REPOSITORY_URL = "https://github.com/meshahid973/localitfy";
+const REPOSITORY_URL = "https://github.com/meshahid973/localtify";
 
 // View shortcuts follow the sidebar order; ⌘, already opens Settings.
 const MENU_VIEWS = [

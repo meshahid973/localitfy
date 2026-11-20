@@ -1,6 +1,6 @@
 # Android installation and pairing
 
-The Android companion is experimental. Download the release-signed APK from [GitHub Releases](https://github.com/meshahid973/localitfy/releases), or follow the developer instructions below to build a debug APK.
+The Android companion is experimental. Download the release-signed APK from [GitHub Releases](https://github.com/meshahid973/localtify/releases), or follow the developer instructions below to build a debug APK.
 
 Release and debug APKs use different signing keys. To move from a debug build to an official release, first sync pending phone changes back to the computer and preserve anything you need, then uninstall the debug build before installing the release APK. Uninstalling erases its local data. Official release APKs share a dedicated signing key so later official updates can preserve app data.
 

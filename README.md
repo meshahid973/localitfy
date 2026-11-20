@@ -6,7 +6,7 @@ A local-first desktop music player with albums, playlists, custom artwork, theme
 
 ![localtify desktop player](screenshots/showcase.png)
 
-**[Download the latest release](https://github.com/meshahid973/localitfy/releases)**
+**[Download the latest release](https://github.com/meshahid973/localtify/releases)**
 
 ## Features
 
@@ -27,11 +27,11 @@ Download a release for your operating system:
 | Windows | Installer (`.exe`) |
 | Linux | AppImage, Debian (`.deb`), or RPM (`.rpm`) |
 
-Open the installed app and import your music. macOS native binaries are tested in CI, but check [Releases](https://github.com/meshahid973/localitfy/releases) for currently published installers.
+Open the installed app and import your music. macOS native binaries are tested in CI, but check [Releases](https://github.com/meshahid973/localtify/releases) for currently published installers.
 
 ### Android (experimental)
 
-The experimental Android companion copies your library from the desktop app over home Wi-Fi for offline playback. Download the release-signed APK from [Releases](https://github.com/meshahid973/localitfy/releases).
+The experimental Android companion copies your library from the desktop app over home Wi-Fi for offline playback. Download the release-signed APK from [Releases](https://github.com/meshahid973/localtify/releases).
 
 See the [Android installation and pairing guide](docs/android.md) for building an APK, installing it on a phone, pairing with your computer, updating, and troubleshooting.
 
@@ -40,7 +40,7 @@ See the [Android installation and pairing guide](docs/android.md) for building a
 Use Node.js 22, npm, and Git.
 
 ~~~bash
-git clone https://github.com/meshahid973/localitfy.git
+git clone https://github.com/meshahid973/localtify.git
 cd localitfy
 npm ci
 npm run dev

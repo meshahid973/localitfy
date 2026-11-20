@@ -2255,7 +2255,7 @@ app.whenReady().then(async () => {
   libraryWatcher = startLibraryWatch(ipcRouter, { dialog, isAudioFile, getSongs, getSettings, listSongsShaped,
     importFiles: (files) => importNewAudioFiles(files), getWindow: () => (mainWindow && !mainWindow.isDestroyed() ? mainWindow : null) });
   scrobbler = startScrobbling(ipcRouter, { file: path.join(app.getPath("userData"), "scrobbles.json"), getSong: databaseRepositories.songs.get, listPlays: databaseRepositories.listening.list, safeStorage, shell });
-  const musicBrainzClient = require("./musicbrainz/client.cjs").createMusicBrainzClient({ userAgent: `localtify/${app.getVersion()} ( https://github.com/meshahid973/localitfy )` });
+  const musicBrainzClient = require("./musicbrainz/client.cjs").createMusicBrainzClient({ userAgent: `localtify/${app.getVersion()} ( https://github.com/meshahid973/localtify )` });
   remoteArtworkCache = createRemoteArtworkCache({
     dir: path.join(app.getPath("userData"), "disposable-remote-artwork-v1"),
     maxBytes: Math.max(16, Math.min(512, Number(process.env.LOCALTIFY_ARTWORK_CACHE_MB) || 128)) * 1024 * 1024

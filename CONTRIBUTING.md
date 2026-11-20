@@ -5,7 +5,7 @@ Thanks for helping improve the desktop music player. Keep pull requests focused 
 ## Setup and validation
 
 ~~~bash
-git clone https://github.com/meshahid973/localitfy.git
+git clone https://github.com/meshahid973/localtify.git
 cd localitfy
 npm ci
 npm run dev

@@ -4,7 +4,7 @@ const { createLyricsService, shapeResult } = require("../lyrics/service.cjs");
 function registerLyricsIpc(router, app, repositories) {
   const service = createLyricsService({
     cacheDir: path.join(app.getPath("userData"), "lyrics-cache"),
-    userAgent: `localtify/${app.getVersion()} (https://github.com/meshahid973/localitfy)`
+    userAgent: `localtify/${app.getVersion()} (https://github.com/meshahid973/localtify)`
   });
   function getEnabledSong(payload) {
     const settings = repositories.settings.get() || {};
