@@ -45,6 +45,9 @@ function createRemoteArtworkCache({ dir, maxBytes = 128 * 1024 * 1024, maxEntrie
       await fs.rename(temporary, index);
     } finally { await fs.rm(temporary, { force: true }).catch(() => {}); }
   }
+  // Retain validators briefly after expiry without ever displaying stale bytes
+  // outside the provider-authorized stale-while-revalidate window.
+  const retainUntil = row => Math.max(row.staleUntil, (row.etag || row.lastModified) ? row.expiresAt + MAX_STALE : row.expiresAt);
   async function removeFile(name) {
     if (!imageName.test(name)) return;
     verified.delete(name);
@@ -64,7 +67,7 @@ function createRemoteArtworkCache({ dir, maxBytes = 128 * 1024 * 1024, maxEntrie
       const ref = refs.get(row.file);
       if (ref && --ref.count === 0) { refs.delete(row.file); bytes -= ref.bytes; orphaned.push(row.file); }
     }
-    for (const [url,row] of rows) if (row.staleUntil <= now()) drop(url,row);
+    for (const [url,row] of rows) if (retainUntil(row) <= now()) drop(url,row);
     while (rows.size > maxEntries || bytes > maxBytes) {
       const [url,row] = rows.entries().next().value;
       drop(url,row);
@@ -91,7 +94,7 @@ function createRemoteArtworkCache({ dir, maxBytes = 128 * 1024 * 1024, maxEntrie
           if (!eligible(url) || !imageName.test(row?.file || "") || !Number.isInteger(row.bytes) || row.bytes <= 0 ||
               row.bytes > MAX_IMAGE || !Number.isFinite(row.expiresAt)) continue;
           const staleUntil = Math.min(row.expiresAt + MAX_STALE, Number.isFinite(row.staleUntil) ? row.staleUntil : row.expiresAt);
-          if (staleUntil <= now()) continue;
+          if (retainUntil({...row,staleUntil}) <= now()) continue;
           rows.set(url,{file:row.file,bytes:row.bytes,expiresAt:row.expiresAt,staleUntil,
             ttl:Math.min(MAX_TTL,Math.max(0,Number(row.ttl)||0)),stale:Math.min(MAX_STALE,Math.max(0,Number(row.stale)||0)),
             etag:headerValue(row.etag),lastModified:headerValue(row.lastModified)});
@@ -135,9 +138,9 @@ function createRemoteArtworkCache({ dir, maxBytes = 128 * 1024 * 1024, maxEntrie
         if (closed) return "";
         if (ttl <= 0) { rows.delete(url); await prune([prior.file]); return ""; }
         const file = await validateFile(prior);
-        if (!file) { rows.delete(url); return ""; }
+        if (!file) { rows.delete(url); await prune([prior.file]); return ""; }
         rows.delete(url);
-        rows.set(url,{...prior,ttl,stale,expiresAt:now()+ttl,staleUntil:now()+ttl+stale});
+        rows.set(url,{...prior,ttl,stale,expiresAt:now()+ttl,staleUntil:now()+ttl+stale,etag:headerValue(response.headers.get("etag")) || prior.etag,lastModified:headerValue(response.headers.get("last-modified")) || prior.lastModified});
         await prune(); return file;
       });
     }

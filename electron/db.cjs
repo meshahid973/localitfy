@@ -1168,9 +1168,10 @@ module.exports = {
   getListeningSummary: (options) => require("./db/listening-summary.cjs").getRecordedListeningSummary(ensureDb(), options),
   listPlayEvents: (options) => playEvents.listPlayEvents(ensureDb(), options),
   recordPlayEvent: (payload) => {
-    const settings = getSettings();
+    const database = ensureDb();
+    const settings = Object.fromEntries(database.prepare("SELECT key,value FROM settings WHERE key IN ('listeningHistoryEnabled','listeningHistoryClearedAt')").all().map(row=>[row.key,safeJsonParse(row.value,row.value)]));
     if (settings.listeningHistoryEnabled === false || !(payload?.startedAt > Number(settings.listeningHistoryClearedAt || 0))) return false;
-    return playEvents.recordPlayEvent(ensureDb(), payload);
+    return playEvents.recordPlayEvent(database, payload);
   },
   initDatabase,
   getSongs,

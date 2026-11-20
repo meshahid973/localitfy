@@ -22,7 +22,7 @@ test("genre backfill tags only eligible local songs and records completion", asy
     isAudioFile: (filePath) => filePath.endsWith(".mp3"),
     readLocalAudioMetadata: async (filePath, options) => {
       metadataReads.push({ filePath, options });
-      return { genre: "Synthpop; Dance" };
+      return { ok: true, genre: "Synthpop; Dance" };
     },
     yieldToMainLoop: async () => {},
     logger: { log() {} }
@@ -72,6 +72,20 @@ test("genre backfill never overwrites edits made while metadata is being read", 
   });
   const work = runtime.run();
   song = {...song,genre:"Manual genre"};
-  release({genre:"Automatic genre"});
+  release({ok:true,genre:"Automatic genre"});
   assert.deepEqual(await work,{scannedCount:1,changedCount:0});
+});
+
+
+test("transient tag failures retry without marking the migration complete", async () => {
+  let settings={}, attempts=0, patched;
+  const runtime=createGenreMetadataBackfill({
+    getSettings:()=>settings,saveSettings:patch=>Object.assign(settings,patch),
+    getSongs:()=>[{id:"retry",filePath:"/music/retry.flac",genre:""}],
+    patchSong:(_id,patch)=>{patched=patch;},fileExists:()=>true,isAudioFile:()=>true,
+    readLocalAudioMetadata:async()=>++attempts===1?{ok:false,error:"temporary"}:{ok:true,genre:"Ambient"},
+    yieldToMainLoop:async()=>{},logger:{log(){}}
+  });
+  await runtime.run();assert.equal(settings.genreMetadataBackfillVersion,undefined);
+  await runtime.run();assert.deepEqual(patched,{genre:"Ambient"});assert.equal(settings.genreMetadataBackfillVersion,1);
 });

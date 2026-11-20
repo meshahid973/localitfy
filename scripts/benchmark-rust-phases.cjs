@@ -139,8 +139,9 @@ async function run() {
         const rust=await benchmark(fn);
         const invoked = requiredNames?.some(key => nativeCalls.get(key) > before.get(key));
         if (requiredNames?.length && !invoked) throw new Error("Rust did not execute in benchmark: " + name);
-        const label = requiredNames?.length ? "native opt-in " : "JS fallback (native gate not reached) ";
-        console.log("[rust-phases] "+name+": JS "+js.toFixed(2)+" ms; "+label+rust.toFixed(2)+" ms"+(requiredNames?.length ? " (includes bridge)" : ""));
+        const actualCalls = [...nativeCalls].filter(([key,count])=>count>(before.get(key)||0)).map(([key,count])=>key+":"+String(count-(before.get(key)||0)));
+        const label = actualCalls.length ? "native opt-in " : "JS fallback (native gate not reached) ";
+        console.log("[rust-phases] "+name+": JS "+js.toFixed(2)+" ms; "+label+rust.toFixed(2)+" ms"+(actualCalls.length ? " (includes bridge; calls "+actualCalls.join(", ")+")" : "")+"; ratio "+(js/Math.max(rust,0.001)).toFixed(2)+"x");
       } else console.log("[rust-baseline] "+name+": JavaScript median "+js.toFixed(2)+" ms");
   }
 }

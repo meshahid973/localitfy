@@ -110,7 +110,8 @@ final class RemoteArtworkCache {
         if(!NAME.matcher(name).matches())return false;
         File f=new File(root,name);
         if(!f.isFile()||f.length()!=row.optLong("bytes")||f.length()>MAX_IMAGE)return false;
-        android.system.StructStat stat=android.system.Os.lstat(f.getAbsolutePath());
+        android.system.StructStat stat;
+        try{stat=android.system.Os.lstat(f.getAbsolutePath());}catch(android.system.ErrnoException e){return false;}
         if(!android.system.OsConstants.S_ISREG(stat.st_mode))return false;
         String stamp=stat.st_ino+":"+stat.st_size+":"+stat.st_mtime+":"+stat.st_ctime+":"+f.lastModified();
         if(stamp.equals(verified.get(name)))return true;
@@ -123,6 +124,9 @@ final class RemoteArtworkCache {
     }
     private long staleUntil(JSONObject r){
         return Math.min(r.optLong("expires")+86400000L,r.optLong("staleUntil",r.optLong("expires")));
+    }
+    private long retainUntil(JSONObject r){
+        return Math.max(staleUntil(r),(!r.optString("etag").isEmpty()||!r.optString("modified").isEmpty())?r.optLong("expires")+86400000L:r.optLong("expires"));
     }
     private void touch(String key,JSONObject r,long now) throws Exception {
         if(now-r.optLong("access")>60000) {r.put("access",now);index.edit().putString(key,r.toString()).apply();}
@@ -137,7 +141,7 @@ final class RemoteArtworkCache {
         SharedPreferences.Editor edit=index.edit();
         for(String key:keys) {
             JSONObject r=row(key); String n=r.optString("file"); long size=r.optLong("bytes");
-            if(!NAME.matcher(n).matches()||size<=0||size>MAX_IMAGE||staleUntil(r)<=now||!new File(root,n).isFile()) {edit.remove(key);continue;}
+            if(!NAME.matcher(n).matches()||size<=0||size>MAX_IMAGE||retainUntil(r)<=now||!new File(root,n).isFile()) {edit.remove(key);continue;}
             if(!refs.containsKey(n))bytes+=size;
             refs.put(n,refs.getOrDefault(n,0)+1);entries++;validKeys.add(key);
         }
@@ -145,7 +149,7 @@ final class RemoteArtworkCache {
             if(entries<=MAX_ENTRIES&&bytes<=MAX_BYTES)break;
             if(!validKeys.contains(key))continue;
             JSONObject r=row(key);String n=r.optString("file");
-            if(staleUntil(r)<=now||!refs.containsKey(n)||r.optLong("bytes")<=0||r.optLong("bytes")>MAX_IMAGE)continue;
+            if(retainUntil(r)<=now||!refs.containsKey(n)||r.optLong("bytes")<=0||r.optLong("bytes")>MAX_IMAGE)continue;
             edit.remove(key);entries--;
             int count=refs.get(n)-1;
             if(count==0){refs.remove(n);bytes-=r.optLong("bytes");}else refs.put(n,count);
@@ -208,6 +212,9 @@ final class RemoteArtworkCache {
                     previous.put("expires",expires);previous.put("staleUntil",expires+stale);
                     previous.put("ttl",duration);previous.put("stale",stale);
                     previous.put("access",System.currentTimeMillis());
+                    String etag=validator(c.getHeaderField("ETag")), modified=validator(c.getHeaderField("Last-Modified"));
+                    if(!etag.isEmpty())previous.put("etag",etag);
+                    if(!modified.isEmpty())previous.put("modified",modified);
                     index.edit().putString(key,previous.toString()).apply();
                     return result(previous.optString("file"),expires);
                 }

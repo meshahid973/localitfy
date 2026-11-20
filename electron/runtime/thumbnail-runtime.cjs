@@ -123,6 +123,7 @@ function createThumbnailRuntime({
           if (url) publish({ source: safeMediaUrl(filePath), url, size });
           return { ok: true, sourcePath: filePath, thumbnailPath, cached: true, url, size };
         }
+        if (stopped || generation !== thumbnailGeneration) return {ok:false,error:"Thumbnail invalidated."};
         const ffmpegPath = getFfmpegPath();
         if (!ffmpegPath || !fileExists(ffmpegPath)) return { ok: false, error: "Thumbnail encoder unavailable." };
         const temporary = thumbnailPath + "." + crypto.randomUUID() + ".part.png";
@@ -300,7 +301,10 @@ function createThumbnailRuntime({
       const size = thumbnailSize(payload.size);
       const thumbnail = getCoverThumbnailPath(file, size);
       if (!thumbnail) return null;
-      if (await readableThumbnail(thumbnail)) {
+      const generation = thumbnailGeneration;
+      const readable = await readableThumbnail(thumbnail);
+      if (stopped || generation !== thumbnailGeneration) return null;
+      if (readable) {
         const url = safeMediaUrl(thumbnail);
         if (url && payload.failed !== url) return { source: payload.source, url, size };
       }

@@ -1,10 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { observeArtwork, getResolvedRemoteArtwork, invalidateResolvedRemoteArtwork, resolveRemoteArtwork } from "../covers/thumbnailResource";
 import { Disc3, UserRound } from "lucide-react";
-import type { DiscoverArtwork } from "./discover.types";
+import type { DiscoverArtwork, DiscoverResult } from "./discover.types";
 const cache = new Map<string, {at:number; value:DiscoverArtwork}>();
 type ArtworkJob = () => Promise<void>;
 const waiting: ArtworkJob[] = [];
+const sharedLookups = new Map<string, Promise<DiscoverResult | null>>();
 let running = 0;
 function pumpArtwork() {
   while (running < 4 && waiting.length) {
@@ -117,7 +118,13 @@ export function DiscoverCover({ title, artist, artwork, lookup = false, person =
         let value = cachedArtwork(requestKey);
         if (!value) {
           attempts++;
-          const answer = await window.localitfy.getDiscoveries({ artwork: { title, artist, kind: person ? "artist" : "recording", fallback: exhausted, providerId, album, durationMs } }).catch(() => null);
+          let shared = sharedLookups.get(requestKey);
+          if (!shared) {
+            shared = window.localitfy.getDiscoveries({ artwork: { title, artist, kind: person ? "artist" : "recording", fallback: exhausted, providerId, album, durationMs } })
+              .catch(()=>null).finally(()=>sharedLookups.delete(requestKey));
+            sharedLookups.set(requestKey,shared);
+          }
+          const answer = await shared;
           if (answer?.status !== "artwork") {
             if (live && attempts < 3 && answer?.status !== "off") retryTimer = window.setTimeout(start, attempts * 900);
             return;

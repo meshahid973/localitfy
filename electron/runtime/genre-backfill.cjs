@@ -33,7 +33,7 @@ function createGenreMetadataBackfill({
         const song = targets[index];
         try {
           const metadata = await readLocalAudioMetadata(song.filePath, { readCover: false, readDuration: false });
-          if (!metadata?.ok || metadata.error) { failedCount++; continue; }
+          if (!metadata?.ok || metadata.error) { failedCount++; if (index > 0 && index % 100 === 0) await yieldToMainLoop(); continue; }
           const genre = String(metadata?.genre || "").trim();
           if (genre) {
             // Tag edits or file replacement may have occurred during parsing.

@@ -76,6 +76,11 @@ try {
     if (db.saveSongAnalysis({ ...analysis, vector: new Float32Array(4) })) throw new Error("invalid embedding persisted");
     const Database = require("better-sqlite3");
     const inspect = new Database(process.argv[1]);
+    inspect.prepare("UPDATE playlist_songs SET addedAt = 1234 WHERE playlistId = ? AND songId = ?").run("smart","legacy-song");
+    db.savePlaylists(saved.map(item => item.id === "plain" ? {...item,name:"Renamed"} : item));
+    if(inspect.prepare("SELECT addedAt FROM playlist_songs WHERE playlistId=? AND songId=?").get("smart","legacy-song")?.addedAt!==1234) throw new Error("Unchanged membership was rewritten");
+    db.savePlaylists(db.getPlaylists().filter(item=>item.id!=="plain"));
+    if(inspect.prepare("SELECT COUNT(*) AS n FROM playlists WHERE id=?").get("plain").n!==0) throw new Error("Removed playlist retained");
     inspect.prepare("INSERT INTO daily_mixes (day, edition, fingerprint, result, generatedAt) VALUES (?, ?, ?, ?, ?)").run("2026-10-16", 0, "fixture", "{}", now);
     const backupPath = db.backupDatabase("phase3-restore-test");
     if (inspect.prepare("SELECT COUNT(*) AS n FROM play_events").get().n !== 1) throw new Error("duplicate events persisted");
@@ -113,6 +118,7 @@ try {
     if (status.schemaVersion !== status.expectedSchemaVersion) throw new Error("restored database schema is invalid");
     const Database = require("better-sqlite3");
     const inspect = new Database(process.argv[1]);
+    if(inspect.prepare("SELECT addedAt FROM playlist_songs WHERE playlistId=? AND songId=?").get("smart","legacy-song")?.addedAt!==1234) throw new Error("Playlist membership not restored");
     const event = inspect.prepare("SELECT * FROM play_events WHERE id = ?").get("listen-1");
     if (event?.msListened !== 8000 || event.outcome !== "ended") throw new Error("history backup/restore failed");
     const analysis = inspect.prepare("SELECT * FROM song_analysis WHERE songId = ?").get("legacy-song");
