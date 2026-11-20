@@ -32,10 +32,12 @@ export function prettyTitle(rawTitle:string,maxWords=7){
 }
 export function heroTitleDensityClass(title:string){const letters=collapseSpaces(title||"").replace(/[^a-z0-9]/gi,"");if(letters.length<=5)return"heroTitleTiny";if(letters.length<=11)return"heroTitleShort";if(letters.length>=32)return"heroTitleLong";return"heroTitleNormal";}
 export function previewTitle(rawTitle:string,cleanup:DiscordTitleCleanup,maxWords=7){if(cleanup==="off")return lower(shortenWords(collapseSpaces(rawTitle||"local song"),maxWords));if(cleanup==="light")return lower(shortenWords(cleanupSongTitle(rawTitle||"local song","light"),maxWords));return lower(shortenWords(cleanupSongTitle(rawTitle,"heavy"),maxWords));}
-export function compactSongKey(text:string){return lower(cleanupSongTitle(text||"","heavy")).replace(/\b(official|audio|lyrics|lyric|video|visualizer|remix|remastered|slowed|reverb|sped|nightcore|lofi)\b/g," ").replace(/[^\p{L}\p{N}\p{M}]+/gu," ").replace(/\s+/g," ").trim();}
+const asciiOnly = /^[\x00-\x7f]*$/;
+function foldLatinAccents(text:string) { return asciiOnly.test(text) ? text : text.normalize("NFKD").replace(/(\p{Script=Latin})\p{M}+/gu,"$1").normalize("NFC"); }
+export function compactSongKey(text:string){return foldLatinAccents(lower(cleanupSongTitle(text||"","heavy"))).replace(/\b(official|audio|lyrics|lyric|video|visualizer|remix|remastered|slowed|reverb|sped|nightcore|lofi)\b/g," ").replace(/[^\p{L}\p{N}\p{M}]+/gu," ").replace(/\s+/g," ").trim();}
 export type SongSearchEntry={song:Song;title:string;artist:string;album:string;fileName:string;filePath:string;compactTitle:string;compactArtist:string;compactAlbum:string;haystack:string;tokens:string[]};
 export type SearchQueryInfo={raw:string;clean:string;compact:string;terms:string[]};
-export function normalizeSearchText(value:unknown){return String(value??"").normalize("NFKD").replace(/(\p{Script=Latin})\p{M}+/gu,"$1").normalize("NFC").replace(/[_\-.]+/g," ").replace(/[()[\]{}]+/g," ").replace(/[^\p{L}\p{N}\p{M}\s:/]+/gu," ").toLowerCase().replace(/\s+/g," ").trim();}
+export function normalizeSearchText(value:unknown){const text=foldLatinAccents(String(value??""));return text.replace(/[_\-.]+/g," ").replace(/[()[\]{}]+/g," ").replace(asciiOnly.test(text)?/[^a-zA-Z0-9\s:/]+/g:/[^\p{L}\p{N}\p{M}\s:/]+/gu," ").toLowerCase().replace(/\s+/g," ").trim();}
 export function splitSearchTerms(query:string){return normalizeSearchText(query).split(" ").filter(Boolean).slice(0,14);}
 export function prepareSearchQuery(query:string):SearchQueryInfo{const clean=normalizeSearchText(query);return{raw:query,clean,compact:compactSongKey(clean),terms:clean?splitSearchTerms(clean):[]};}
 export function fileNameFromPath(filePath=""){return String(filePath||"").split(/[\\/]/).pop()||"";}

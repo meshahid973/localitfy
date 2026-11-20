@@ -160,7 +160,10 @@ test("Home 3.1 keeps Listen Now on the workspace atmosphere and real mix covers 
   const artwork = read("src/features/covers/CollectionArtwork.tsx");
   assert.match(css, /\.homeListenGrid \{[^}]*background: transparent/);
   assert.match(artwork, /new PaletteCache<ArtworkPalette>\(96\)/);
-  assert.match(artwork, /IntersectionObserver/);
+  assert.match(artwork, /observeArtwork\(element, setVisible\)/);
+  const viewport = read("src/features/covers/thumbnailResource.ts");
+  assert.match(viewport, /new IntersectionObserver/);
+  assert.match(viewport, /unobserve\(element\)/);
   assert.match(artwork, /controller.abort\(\)/);
   assert.match(read("src/features/covers/MixCoverArtwork.tsx"), /<PlaylistCoverCollage/);
 });
