@@ -231,9 +231,6 @@ function createPlaylistsTables(database) {
       PRIMARY KEY (playlistId, songId)
     );
 
-    CREATE INDEX IF NOT EXISTS idx_playlists_sortOrder ON playlists(sortOrder);
-    CREATE INDEX IF NOT EXISTS idx_playlist_songs_playlistId ON playlist_songs(playlistId, position);
-    CREATE INDEX IF NOT EXISTS idx_playlist_songs_songId ON playlist_songs(songId);
   `);
 }
 
@@ -641,7 +638,8 @@ function migratePlaylistsTables(database) {
 
   database.exec(`
     CREATE INDEX IF NOT EXISTS idx_playlists_sortOrder ON playlists(sortOrder);
-    CREATE INDEX IF NOT EXISTS idx_playlist_songs_playlistId ON playlist_songs(playlistId, position);
+    CREATE INDEX IF NOT EXISTS idx_playlist_songs_order_cover ON playlist_songs(playlistId, position, addedAt, songId);
+    DROP INDEX IF EXISTS idx_playlist_songs_playlistId;
     CREATE INDEX IF NOT EXISTS idx_playlist_songs_songId ON playlist_songs(songId);
   `);
 

@@ -76,6 +76,9 @@ try {
     if (db.saveSongAnalysis({ ...analysis, vector: new Float32Array(4) })) throw new Error("invalid embedding persisted");
     const Database = require("better-sqlite3");
     const inspect = new Database(process.argv[1]);
+    const membershipPlan = inspect.prepare("EXPLAIN QUERY PLAN SELECT playlistId, songId FROM playlist_songs ORDER BY playlistId ASC, position ASC, addedAt ASC").all().map(row => row.detail).join(" ");
+    if (!membershipPlan.includes("COVERING INDEX idx_playlist_songs_order_cover") || membershipPlan.includes("TEMP B-TREE")) throw new Error("Playlist membership read requires an unnecessary sort: " + membershipPlan);
+    if (inspect.prepare("SELECT name FROM sqlite_master WHERE type='index' AND name='idx_playlist_songs_playlistId'").get()) throw new Error("Obsolete playlist index retained");
     inspect.prepare("UPDATE playlist_songs SET addedAt = 1234 WHERE playlistId = ? AND songId = ?").run("smart","legacy-song");
     db.savePlaylists(saved.map(item => item.id === "plain" ? {...item,name:"Renamed"} : item));
     if(inspect.prepare("SELECT addedAt FROM playlist_songs WHERE playlistId=? AND songId=?").get("smart","legacy-song")?.addedAt!==1234) throw new Error("Unchanged membership was rewritten");
