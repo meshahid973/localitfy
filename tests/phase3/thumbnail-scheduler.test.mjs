@@ -158,3 +158,17 @@ test("leaving the viewport cancels only queued visible artwork",()=>{
   while(flush()){}
   assert.deepEqual(processed,["still-visible","warm"]);
 });
+
+test("cancelling a promoted visible job restores independently requested warmup", () => {
+  const processed = [];
+  const { scheduler, flush } = makeScheduler(file => processed.push(file));
+  scheduler.enqueue("warm-first", { lowPriority: true });
+  scheduler.enqueue("warm-first");
+  scheduler.enqueue("visible-first");
+  scheduler.enqueue("visible-first", { lowPriority: true });
+  scheduler.cancel("warm-first");
+  scheduler.cancel("visible-first");
+  scheduler.enqueue("still-visible");
+  while (flush()) {}
+  assert.deepEqual(processed, ["still-visible", "warm-first", "visible-first"]);
+});

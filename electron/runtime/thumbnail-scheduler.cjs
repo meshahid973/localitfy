@@ -14,6 +14,8 @@ function createThumbnailScheduler({
   if (typeof processFile !== "function") throw new TypeError("processFile is required");
   const visible = new Set();
   const background = new Set();
+  // A promoted job still has a background owner until it runs or is cleared.
+  const promoted = new Set();
   const size = () => visible.size + background.size;
   let timer = null;
   let paused = false;
@@ -28,6 +30,7 @@ function createThumbnailScheduler({
       if (filePath === undefined) return;
       visible.delete(filePath);
       background.delete(filePath);
+      promoted.delete(filePath);
       active = filePath;
       const finish = () => { active = null; schedule(); };
       try {
@@ -40,10 +43,15 @@ function createThumbnailScheduler({
   }
 
   function enqueue(filePath, { lowPriority = false } = {}) {
-    if (!filePath || active === filePath || visible.has(filePath)) return false;
+    if (!filePath || active === filePath) return false;
+    if (visible.has(filePath)) {
+      if (lowPriority) promoted.add(filePath);
+      return false;
+    }
     if (background.has(filePath)) {
       if (lowPriority) return false;
       background.delete(filePath);
+      promoted.add(filePath);
       visible.add(filePath);
       return true;
     }
@@ -59,6 +67,7 @@ function createThumbnailScheduler({
   function cancel(filePath) {
     // Active jobs finish; only abandoned visible work is removed. Background warmup is independent.
     const removed = visible.delete(filePath);
+    if (removed && promoted.delete(filePath)) background.add(filePath);
     if (size() === 0 && timer !== null) { clearTimer(timer); timer = null; }
     return removed;
   }
@@ -74,6 +83,7 @@ function createThumbnailScheduler({
   function clear() {
     visible.clear();
     background.clear();
+    promoted.clear();
     if (timer !== null) clearTimer(timer);
     timer = null;
   }

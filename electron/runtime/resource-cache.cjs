@@ -16,8 +16,9 @@ function createResourceCache({ maxEntries = 512, maxBytes = 2 * 1024 * 1024, fil
   }
   function insert(key, entry) {
     const size = Buffer.byteLength(JSON.stringify([key, entry]));
-    if (size + 3 > maxBytes) return;
+    // A replacement that cannot fit must not leave the previous value visible.
     remove(key);
+    if (size + 3 > maxBytes) return;
     entries.set(key, { ...entry, bytes: size });
     bytes += size + 1;
     trim();

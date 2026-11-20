@@ -12,7 +12,6 @@ async function pruneThumbnails(dir, { maxBytes = 256 * 1024 * 1024, maxFiles = 8
   for (const entry of entries) {
     if (!entry.isFile() || (!cachedName.test(entry.name) && !partialName.test(entry.name))) continue;
     const file = path.join(dir, entry.name);
-    if (active(file)) continue;
     const stat = await fs.lstat(file).catch(() => null);
     if (!stat?.isFile()) continue;
     if (partialName.test(entry.name)) {

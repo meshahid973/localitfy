@@ -57,3 +57,17 @@ test("hydrated caches trim to the byte budget before writing and retain the newe
     assert.ok(fs.statSync(file).size<=256);
   } finally {fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+test("oversized replacements invalidate older cached metadata in memory and after restart", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "localtify-resource-replacement-"));
+  try {
+    const opts = { file: path.join(dir, "lookup.json"), maxBytes: 128 };
+    const cache = createResourceCache(opts);
+    cache.set("track", "old", 10000);
+    cache.flush();
+    cache.set("track", "x".repeat(256), 10000);
+    assert.equal(cache.get("track"), undefined);
+    cache.flush();
+    assert.equal(createResourceCache(opts).get("track"), undefined);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
