@@ -509,3 +509,42 @@ test("failed catalog image may request a separate provider fallback",async()=>{
  assert.equal((await lookup("Song","Artist")).coverUrl,yt);
  assert.equal((await lookup("Song","Artist",{fallback:true})).coverUrl,alternate);
 });
+
+
+test("persistent artwork cache separates entity types and preserves display-only restrictions", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "localtify-artwork-cache-"));
+  try {
+    const cacheFile = path.join(dir, "discover.json");
+    const artistCover = "https://lh3.googleusercontent.com/portrait=w256-h256-l90-rj";
+    const trackCover = "https://lh3.googleusercontent.com/track=w256-h256-l90-rj";
+    let calls = 0;
+    const setup = () => {
+      const handlers = new Map();
+      registerDiscoverIpc({ handle: (name, handler) => handlers.set(name, handler) }, {
+        cacheFile, getSongs: () => [], getSettings: () => ({ discoverEnabled: true }),
+        searchYouTubeArtwork: async (kind) => {
+          calls++;
+          return kind === "artist"
+            ? [{ id: "ytmusic:UCabcdefghijklmnopqrstuv", title: "Same", coverUrl: artistCover }]
+            : [{ title: "Same", artist: "Same", coverUrl: trackCover }];
+        }
+      });
+      return (kind, artist) => handlers.get("discover:get")({}, { artwork: { kind, title: "Same", artist } });
+    };
+    const get = setup();
+    assert.equal((await get("artist", "Same")).coverUrl, artistCover);
+    assert.equal((await get("recording", "Same")).coverUrl, trackCover);
+    await new Promise(resolve => setTimeout(resolve, 350));
+    const restart = setup();
+    assert.equal((await restart("artist", "Same")).coverUrl, artistCover);
+    assert.equal((await restart("recording", "Same")).coverUrl, trackCover);
+    assert.equal(calls, 2);
+    const { validArtworkResult, safeProviderCover } = require("../../electron/runtime/remote-cover.cjs");
+    const displayOnly = "https://e-cdns-images.dzcdn.net/images/cover/123456789abcdef0123456789abcdef0/250x250-000000-80-0-0.jpg";
+    assert.equal(validArtworkResult({ coverUrl: displayOnly }), true);
+    assert.equal(safeProviderCover(displayOnly), "");
+    assert.equal(validArtworkResult({ coverUrl: "https://evil.test/cover.jpg" }), false);
+    assert.equal(validArtworkResult({ coverUrl: artistCover, coverAlternatives: ["file:///private"] }), false);
+    assert.equal(validArtworkResult({ coverUrl: artistCover, status: "off" }), false);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});

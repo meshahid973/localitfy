@@ -17,8 +17,8 @@
   grid-template-columns: clamp(144px, 16vw, 208px) minmax(0, 1fr);
   grid-template-areas: "art copy" "art actions";
   align-items: end;
-  column-gap: clamp(18px, 3vw, 40px);
-  row-gap: var(--lt-space-4);
+  column-gap: clamp(16px, 2vw, 28px);
+  row-gap: var(--lt-space-3);
   padding: var(--lt-space-2) 0;
   border: 0;
   background: transparent;
@@ -56,7 +56,9 @@
 .collectionHeroByline { min-width: 0; color: var(--lt-text); font-size: var(--lt-text-label); font-weight: 550; }
 .collectionHeroStats { margin: 0; color: var(--lt-muted); font-size: var(--lt-text-sm); font-variant-numeric: tabular-nums; }
 
-.collectionHeroActions { grid-area: actions; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.collectionHeroActions { grid-area: actions; display: flex; flex-wrap: wrap; align-items: center; gap: var(--lt-space-2); }
+.collectionHeroSearch { flex: 1 1 160px; min-width: 0; max-width: 280px; margin-inline-start: auto; }
+.collectionHeroSearch .pageHeaderSearch { width: 100%; min-width: 0; }
 .collectionPlayButton {
   min-height: var(--lt-control-height);
   display: inline-flex;
@@ -198,6 +200,7 @@
 @media (max-width: 480px) {
   .collectionHero { grid-template-areas: "art copy" "actions actions"; align-items: center; }
   .collectionHeroActions { gap: var(--lt-space-2); }
+  .collectionHeroSearch { order: 1; flex-basis: 100%; max-width: none; margin-inline-start: 0; }
   .collectionHeroActions > .collectionPlayButton { flex-basis: 100%; justify-content: center; }
   .trackRowDuration { display: none; }
   .trackRow { --track-columns: var(--lt-control-height) minmax(0, 1fr) var(--lt-control-height) var(--lt-control-height); }

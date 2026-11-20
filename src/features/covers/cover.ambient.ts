@@ -67,6 +67,47 @@ export function decodeArtwork(source: string, signal: AbortSignal, samplePixels 
   });
 }
 
+// Share expensive palette decoding between visible consumers. Each consumer owns
+// its cancellation; only the last departing consumer cancels the underlying image.
+type PaletteJob = { controller: AbortController; promise: Promise<ArtworkPalette | null>; users: number };
+const paletteJobs = new Map<string, PaletteJob>();
+function acquirePalette(source: string, signal: AbortSignal): Promise<ArtworkPalette | null> {
+  if (signal.aborted) return Promise.resolve(null);
+  let job = paletteJobs.get(source);
+  if (!job) {
+    if (paletteJobs.size >= 16) return Promise.resolve(null);
+    const controller = new AbortController();
+    const entry: PaletteJob = { controller, users: 0, promise: Promise.resolve(null) };
+    entry.promise = decodeArtwork(source, controller.signal, true).then(result => {
+      if (controller.signal.aborted || !result || result === true) return null;
+      cache.set(source, paletteStyle(result));
+      return result;
+    }).finally(() => {
+      if (paletteJobs.get(source) === entry) paletteJobs.delete(source);
+    });
+    paletteJobs.set(source, entry);
+    job = entry;
+  }
+  const entry = job;
+  entry.users++;
+  return new Promise(resolve => {
+    let done = false;
+    const finish = (value: ArtworkPalette | null) => {
+      if (done) return;
+      done = true;
+      signal.removeEventListener("abort", cancel);
+      if (--entry.users === 0 && paletteJobs.get(source) === entry) {
+        paletteJobs.delete(source);
+        entry.controller.abort();
+      }
+      resolve(value);
+    };
+    const cancel = () => finish(null);
+    signal.addEventListener("abort", cancel, { once: true });
+    void entry.promise.then(finish, () => finish(null));
+  });
+}
+
 /** Mix artwork shares the same 512-entry sample cache as the player. */
 export async function readArtworkPalette(source: string, signal: AbortSignal): Promise<ArtworkPalette | null> {
   if (!source || signal.aborted) return null;
@@ -75,10 +116,7 @@ export async function readArtworkPalette(source: string, signal: AbortSignal): P
     const a = rgbFromHex(cached["--cover-palette-a"] ?? ""), b = rgbFromHex(cached["--cover-palette-b"] ?? ""), c = rgbFromHex(cached["--cover-palette-c"] ?? "");
     if (a && b && c) return [a, b, c];
   }
-  const result = await decodeArtwork(source, signal, true);
-  if (signal.aborted || !result || result === true) return null;
-  cache.set(source, paletteStyle(result));
-  return result;
+  return acquirePalette(source, signal);
 }
 
 export function useCoverAverageStyle(source: string, enabled: boolean, visible = true) {
@@ -90,10 +128,9 @@ export function useCoverAverageStyle(source: string, enabled: boolean, visible =
     if (cached) { setSample({ source: coverSource, style: cached }); return; }
     const controller = new AbortController();
     const timer = window.setTimeout(() => {
-      void decodeArtwork(coverSource, controller.signal, true).then(result => {
+      void readArtworkPalette(coverSource, controller.signal).then(result => {
         if (controller.signal.aborted) return;
-        const style = result && result !== true ? paletteStyle(result) : FAILED_COVER_STYLE;
-        if (result && result !== true) cache.set(coverSource, style);
+        const style = result ? paletteStyle(result) : FAILED_COVER_STYLE;
         setSample({ source: coverSource, style });
       });
     }, 60);

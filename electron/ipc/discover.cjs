@@ -8,6 +8,7 @@ const { discover, withoutOwned } = require("../discover/recommend.cjs");
 const { catalogArtwork, createArtworkLookup, matchArtistArtwork, matchMusicArtwork } = require("../discover/artwork.cjs");
 const { rankCatalog, searchTerms } = require("../discover/catalog.cjs");
 const { createResourceCache } = require("../runtime/resource-cache.cjs");
+const { validArtworkResult } = require("../runtime/remote-cover.cjs");
 
 const RESULT_TTL_MS = 12 * 60 * 60 * 1000;
 // Biographies rarely change. Old ones are still shown while offline or when Last.fm fails.
@@ -46,8 +47,7 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
   // Persist only positive provider lookup results, separate from user artwork.
   const artworkResults = createResourceCache({
     file: cacheFile ? cacheFile + ".resolved-artwork-v1" : "", now,
-    validate: value => Boolean(value && typeof value === "object" &&
-      [value.coverUrl, value.fallbackCoverUrl].some(url => typeof url === "string" && url.startsWith("https://") && url.length <= 2000))
+    validate: validArtworkResult
   });
   const artworkRequests = new Map();
   async function lookupMusicArtwork(title,artist) {

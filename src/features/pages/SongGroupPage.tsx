@@ -91,6 +91,8 @@ function SongGroupBody({ kind, name, members, loading, currentId, isPlaying, tog
         onShuffle={() => actions.playCollection(target, { shuffle: true })}
         onQueue={() => actions.queueCollection(target)}
         onMore={(event) => actions.openCollectionMenu(event, target)}
+        search={<input className="pageHeaderSearch" type="search" aria-label="Search collection tracks" placeholder="Search tracks"
+          value={query} onChange={event => setQuery(event.currentTarget.value)} />}
       >
         <button className="collectionIconButton" type="button" disabled={!playable.length} aria-label={`songs like ${name}`} title="Similar songs"
           onClick={() => openSimilar(playable, `${kind}:${target.id}`, name)}>
@@ -101,9 +103,7 @@ function SongGroupBody({ kind, name, members, loading, currentId, isPlaying, tog
       <section className="collectionSection" aria-label="songs">
         <div className="collectionSectionHead">
           <h2>{members.some((song) => song.playCount > 0) ? "Popular" : "Songs"}</h2>
-          <input className="pageHeaderSearch" type="search" aria-label="Search collection tracks" placeholder="Search tracks"
-            value={query} onChange={event => setQuery(event.currentTarget.value)} />
-        </div>
+         </div>
         {!shown.length ? <p role="status">No matching tracks.</p> : null}
         <TrackList songs={shown} currentId={currentId} isPlaying={isPlaying} hideArtist={kind === "artist" ? name : undefined}
           playFrom={(songId) => actions.playCollection({ ...target, songs: filtered }, { startId: songId })}
