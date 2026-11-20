@@ -1,4 +1,9 @@
 name: integrated-validation
+# Cancel outdated automatic PR validation; preserve intentionally separate manual runs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 # Extended cross-platform benchmarks are intentionally opt-in. Normal PRs run
 # quality.yml. Invoke this before merging changes to media, sync, native runtimes,
 # caching, Android integration or large-library performance.
