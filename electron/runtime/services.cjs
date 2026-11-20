@@ -16,11 +16,11 @@ function createElectronServiceRuntime(options = {}) {
   let stopped = false;
 
   async function start() {
-    if (started) return false;
+    if (started || stopped) return false;
     started = true;
-    stopped = false;
 
     if (typeof startMediaServer === "function") await startMediaServer();
+    if (stopped) return false;
     initDownloader({ userDataPath, ffmpegPath });
     initMetadataService({ userDataPath, ffmpegPath });
     initCoverService({ userDataPath });

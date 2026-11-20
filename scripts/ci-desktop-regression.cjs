@@ -320,7 +320,7 @@ server.listen(5173,async()=>{
         await until(()=>win.webContents.executeJavaScript("window.innerWidth").then(actual=>actual===width),"viewport "+width,5000);
         for (const view of ["home","library","artists","genres","playlists","discover","downloads","covers","analytics","settings"]) {
           await win.webContents.executeJavaScript(`document.querySelector('.sidebar [data-nav-id="${view}"]').click()`);
-          await until(()=>win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return !!page?.firstElementChild&&!page.querySelector('.collectionLoading')&&!document.querySelector('.appCrashBoundary')})()`).catch(()=>false),view+" "+mode+" "+width);
+          await until(()=>win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return !!page?.firstElementChild&&!page.querySelector('.collectionLoading')&&!document.querySelector('.appCrashBoundary')&&Number(getComputedStyle(page).opacity)>=0.99})()`).catch(()=>false),view+" "+mode+" "+width);
           if(view==="downloads") {
             const saved=await win.webContents.executeJavaScript("window.localitfy.getDownloadJobs()");
             assert.equal(saved.error, "", "download journal is available through the trusted preload");
@@ -356,7 +356,7 @@ server.listen(5173,async()=>{
           await screenshot(win,view+"-"+mode+"-"+width);
         }
         await win.webContents.executeJavaScript("document.querySelector('.playerLyricsButton').click()");
-        await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.lyricsView')&&!document.querySelector('.appCrashBoundary')").catch(()=>false),"lyrics "+mode+" "+width);
+        await until(()=>win.webContents.executeJavaScript(`(()=>{const panel=document.querySelector(".lyricsView");if(!panel||document.querySelector(".appCrashBoundary"))return false;const rect=panel.getBoundingClientRect();return rect.width>0&&rect.height>0&&Number(getComputedStyle(panel).opacity)>=0.99})()`).catch(()=>false),"visible lyrics "+mode+" "+width);
         await screenshot(win,"lyrics-"+mode+"-"+width);
         await win.webContents.executeJavaScript("document.querySelector('.lyricsView button[aria-label=\"close lyrics\"]').click()");
         await until(()=>win.webContents.executeJavaScript("!document.querySelector('.lyricsView')").catch(()=>false),"close lyrics");

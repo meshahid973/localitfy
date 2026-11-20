@@ -2121,8 +2121,12 @@ async function sendLocaltifyFeedback(payload = {}) {
 }
 
 let serviceRuntime = null;
+let shutdownStarted = false;
+let startupWindowTimer = null;
+let startupUpdateTimer = null;
 
 app.whenReady().then(async () => {
+  if (shutdownStarted) return;
   registerLocaltifyRendererProtocol();
   registerLocaltifyMediaProtocol();
   serviceRuntime = createElectronServiceRuntime({
@@ -2133,6 +2137,7 @@ app.whenReady().then(async () => {
     cleanupNativeWindowsMedia
   });
   await serviceRuntime.start();
+  if (shutdownStarted) return;
   const databaseRecovery = restoreDatabaseFromOldUserDataIfNeeded();
   initDatabase(databaseRecovery.dbPath || path.join(app.getPath("userData"), userDataRuntime.sqliteFileName));
   try {
@@ -2444,13 +2449,24 @@ app.whenReady().then(async () => {
   ipcRouter.handle("window:close", async (event) => { BrowserWindow.fromWebContents(event.sender)?.close(); return true; });
 
   const startupCreateDelayMs = process.platform === "win32" && startupLaunchStatus?.wasOpenedAtLogin ? 1600 : 0;
-  setTimeout(() => { createWindow(); setupNativeWindowsMedia(); }, startupCreateDelayMs);
-  setTimeout(() => { checkForUpdates({ silent: true }).catch((e) => console.log("[localitfy updater startup error]", e?.message)); }, UPDATE_CHECK_STARTUP_DELAY_MS);
-  app.on("activate", () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
+  startupWindowTimer = setTimeout(() => {
+    startupWindowTimer = null;
+    if (!shutdownStarted) { createWindow(); setupNativeWindowsMedia(); }
+  }, startupCreateDelayMs);
+  startupUpdateTimer = setTimeout(() => {
+    startupUpdateTimer = null;
+    if (!shutdownStarted) checkForUpdates({ silent: true }).catch((e) => console.log("[localitfy updater startup error]", e?.message));
+  }, UPDATE_CHECK_STARTUP_DELAY_MS);
+  app.on("activate", () => { if (!shutdownStarted && BrowserWindow.getAllWindows().length === 0) createWindow(); });
 });
 
 app.on("before-quit", async () => {
+  if (shutdownStarted) return;
+  shutdownStarted = true;
   allowQuit = true;
+  clearTimeout(startupWindowTimer);
+  clearTimeout(startupUpdateTimer);
+  startupWindowTimer = startupUpdateTimer = null;
   discoverCacheLifecycle?.flush();
   remoteArtworkCache?.close();
   thumbnailRuntime.stop();

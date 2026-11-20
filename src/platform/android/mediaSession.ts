@@ -26,12 +26,17 @@ export function installMediaSessionBridge(filesDir: string, mediaPrefix: string)
   const artworkPath = (url?: string) => {
     const src = url ?? metadata?.artwork?.[0]?.src ?? "";
     if (!src.startsWith(mediaPrefix)) return "";
-    return `${filesDir}/${decodeURIComponent(src.slice(mediaPrefix.length).split("?")[0])}`;
+    try {
+      const relative = decodeURIComponent(src.slice(mediaPrefix.length).split("?")[0]);
+      if (relative.includes("\\") || relative.includes("\0") || relative.split("/").some((part) => !part || part === "." || part === "..")) return "";
+      return `${filesDir}/${relative}`;
+    } catch { return ""; }
   };
 
   const push = () => {
-    window.clearTimeout(timer);
+    if (timer) return;
     timer = window.setTimeout(() => {
+      timer = 0;
       if (remote) {
         void LocaltifyNative.updateMedia({
           title: remote.title, artist: remote.device ? `${remote.artist} · on ${remote.device}` : remote.artist, album: remote.album,
