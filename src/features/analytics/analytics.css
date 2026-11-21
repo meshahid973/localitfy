@@ -64,3 +64,7 @@
 .analyticsV4GenreList { display:grid; gap:9px; }
 .analyticsV4GenreList > div { display:flex; align-items:center; justify-content:space-between; gap:15px; color:var(--lt-muted); font-size:12px; }
 .analyticsV4GenreList strong { font-weight:650; color:var(--lt-text); font-variant-numeric:tabular-nums; }
+
+.analyticsV4ChartLegend { display:flex; gap:19px; flex-wrap:wrap; align-items:center; margin-top:5px; font-size:11px; color:var(--lt-muted); }
+.analyticsV4ChartLegend span::before { content:""; display:inline-block; width:15px; vertical-align:middle; margin-right:7px; border-top:2px solid var(--lt-accent); }
+.analyticsV4ChartLegend span+span::before { border-top:2px dashed var(--lt-muted); opacity:.85; }

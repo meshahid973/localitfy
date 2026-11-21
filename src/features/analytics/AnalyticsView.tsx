@@ -9,7 +9,7 @@ import { artistTarget, useAppActions } from "../shell/appActions";
 import { formatAnalyticsDuration } from "./formatters";
 import { isListeningCalendarSummary, type ListeningCalendarRange, type ListeningCalendarSummary } from "./listeningSummary";
 import type { Song } from "../library/song.types";
-import { LineChart, LineChartPlot, LineChartTooltip, LineChartLegend, type LineChartSeries } from "../../vendor/charts/line-chart";
+import { LineChart, LineChartPlot, LineChartTooltip, type LineChartSeries } from "../../vendor/charts/line-chart";
 import SegmentedControl from "../../vendor/arc/segmented-control/segmented-control";
 import { DropdownMenu } from "../../vendor/arc/dropdown-menu/dropdown-menu";
 
@@ -191,12 +191,12 @@ export default function AnalyticsView({
                 variant="area"
                 label={"Recorded listening time for " + listeningPeriodName(summary)}
                 formatValue={value => formatAnalyticsDuration(value * 60)}
-                formatTick={value => Math.round(value) + "m"}
+                formatTick={value => formatAnalyticsDuration(value * 60)}
               >
                 <LineChartPlot height={218} />
                 <LineChartTooltip />
-                <LineChartLegend />
               </LineChart>
+              <div className="analyticsV4ChartLegend" aria-label="Chart series"><span>This period</span><span>Previous period</span></div>
             </div>
           ) : <p className="analyticsV4Empty">No recorded listening in this period yet.</p>}
           <details className="analyticsV4DayData"><summary>Inspect exact UTC {summary.range==="year"?"months":"days"}</summary>
