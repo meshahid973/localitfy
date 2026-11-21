@@ -65,7 +65,7 @@ test("fallback artwork still consults verified MusicBrainz after a catalog image
  const lookup=createArtworkLookup(mb,Date.now,undefined,undefined,undefined,async()=>({coverUrl:cover}));
  assert.equal((await lookup("Bang Bang","B.A. Robertson")).coverUrl,cover);
  const fallback=await lookup("Bang Bang","B.A. Robertson",{fallback:true});
- assert.equal(fallback.coverUrl,mbCover);assert.ok(fallback.coverAlternatives.includes(cover));
+ assert.equal(fallback.coverUrl,mbCover);assert.ok(!fallback.coverAlternatives.includes(cover),"do not offer a previously failed Deezer image again");
 });
 
 test("an upstream 403 has a five-minute cooldown without caching an empty cover", async () => {
