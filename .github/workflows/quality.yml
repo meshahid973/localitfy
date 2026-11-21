@@ -23,6 +23,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -30,6 +31,36 @@ jobs:
       - name: Install dependencies
         id: install
         run: npm ci
+      # Only profile the explicitly scoped Performance 4.0 branch. No recurring
+      # 100k-song benchmark cost on unrelated PRs or main pushes.
+      - name: Profile 10k and 100k song workloads against this PR's base
+        if: ${{ startsWith(github.head_ref, 'codex/performance-4-') }}
+        env:
+          BASELINE_SHA: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa-performance
+          git worktree add --detach "$RUNNER_TEMP/localtify-perf-baseline" "$BASELINE_SHA"
+          for count in 10000 100000; do
+            for round in 1 2; do
+              if [[ "$round" == 1 ]]; then order="baseline current"; else order="current baseline"; fi
+              for kind in $order; do
+                src=.
+                if [[ "$kind" == baseline ]]; then src="$RUNNER_TEMP/localtify-perf-baseline"; fi
+                node --expose-gc scripts/benchmark-library-workloads.mjs "$src" "$count" > "qa-performance/$kind-$count-$round.json"
+              done
+            done
+          done
+          node -e 'const fs=require("fs"); const read=(k,n,r)=>JSON.parse(fs.readFileSync("qa-performance/"+k+"-"+n+"-"+r+".json")); for(const n of [10000,100000]){for(let r=1;r<=2;r++){const a=read("baseline",n,r),b=read("current",n,r);for(let i=0;i<a.trials.length;i++){if(a.trials[i].label!==b.trials[i].label||a.trials[i].digest!==b.trials[i].digest)throw Error("Workload correctness diverged: "+n+"/"+r+"/"+i); console.log(JSON.stringify({tracks:n,round:r,workload:a.trials[i].label,baselineMs:a.trials[i].wallMs,candidateMs:b.trials[i].wallMs,baselineHeapMiB:a.trials[i].heapDeltaMiB,candidateHeapMiB:b.trials[i].heapDeltaMiB}));}}}'
+      - name: Preserve optional Performance 4.0 measurements
+        if: ${{ always() && startsWith(github.head_ref, 'codex/performance-4-') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-4-profile
+          path: qa-performance/
+          if-no-files-found: warn
+
       - name: Report production dependency advisories
         shell: bash
         run: |

@@ -84,25 +84,28 @@ async function metrics(label,sampleCount=5){
 function profileMainThreadJournalBlocking() {
   const root=fs.mkdtempSync(path.join(os.tmpdir(),"localtify-journal-profile-"));
   try {
-    const file=path.join(root,"fixture.wav"), data=Buffer.alloc(8*1024*1024,0x53);
-    fs.writeFileSync(file,data);
-    const stat=fs.statSync(file);
-    const digest=require("node:crypto").createHash("sha256").update(data).digest("hex");
-    const store=require("../electron/download-jobs.cjs").createDownloadJobStore(root);
-    const request={source:"youtube",url:"https://www.youtube.com/watch?v=abcdefghijk",folder:root,options:{autoAdd:false}};
-    const job=store.prepare(request);
-    const checkpointStart=performance.now();
-    store.update(job.id,{status:"done",result:{ok:true,filePath:file},sizeBytes:stat.size,mtimeMs:stat.mtimeMs,sha256:digest});
-    const checkpointMs=performance.now()-checkpointStart;
-    const reuseSamplesMs=[];
-    for(let i=0;i<3;i++) {
-      const began=performance.now(), reused=store.prepare(request);
-      reuseSamplesMs.push(performance.now()-began);
-      assert.equal(reused.status,"done","verified existing download must be reused");
+    const cases=[];
+    for(const [mib,videoId] of [[8,"abcdefghijk"],[64,"abcdefghijl"]]){
+      const file=path.join(root,"fixture-"+mib+".wav"), data=Buffer.alloc(mib*1024*1024,0x53);
+      fs.writeFileSync(file,data);
+      const stat=fs.statSync(file);
+      const digest=require("node:crypto").createHash("sha256").update(data).digest("hex");
+      const store=require("../electron/download-jobs.cjs").createDownloadJobStore(root);
+      const request={source:"youtube",url:"https://www.youtube.com/watch?v="+videoId,folder:root,options:{autoAdd:false}};
+      const job=store.prepare(request);
+      const checkpointStart=performance.now();
+      store.update(job.id,{status:"done",result:{ok:true,filePath:file},sizeBytes:stat.size,mtimeMs:stat.mtimeMs,sha256:digest});
+      const checkpointMs=performance.now()-checkpointStart;
+      const reuseSamplesMs=[];
+      for(let i=0;i<3;i++){
+        const began=performance.now(), reused=store.prepare(request);
+        reuseSamplesMs.push(performance.now()-began);
+        assert.equal(reused.status,"done","verified existing download must be reused");
+      }
+      const sorted=[...reuseSamplesMs].sort((a,b)=>a-b);
+      cases.push({mib,bytes:stat.size,checkpointMs,reuseSamplesMs,medianReuseMs:sorted[1]});
     }
-    const sorted=[...reuseSamplesMs].sort((a,b)=>a-b);
-    return {bytes:stat.size,checkpointMs,reuseSamplesMs,medianReuseMs:sorted[1],
-      note:"Blocking elapsed time on Electron main process, including SHA-256 and durable journal write; synthetic file"};
+    return {cases,note:"Elapsed synchronous main-process output SHA-256 verification and durable journal writes against synthetic files only; not event-loop CPU percent"};
   } finally {fs.rmSync(root,{recursive:true,force:true});}
 }
 const watchdog=setTimeout(()=>{console.error("Integrated visual smoke timed out");server.close();app.exit(1);},210000);
