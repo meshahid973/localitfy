@@ -120,7 +120,6 @@ const {
   setAllowQuit: (value) => { allowQuit = Boolean(value); }
 });
 
-const UPDATE_CHECK_STARTUP_DELAY_MS = 2200;
 const PIXEL_ART_CACHE_TTL_MS = 30_000;
 const FILE_INFO_CACHE_TTL_MS = 4_000;
 const MAIN_TASK_YIELD_MS = 0;
@@ -2148,7 +2147,6 @@ async function sendLocaltifyFeedback(payload = {}) {
 let serviceRuntime = null;
 let shutdownStarted = false;
 let startupWindowTimer = null;
-let startupUpdateTimer = null;
 
 app.whenReady().then(async () => {
   if (shutdownStarted) return;
@@ -2428,8 +2426,7 @@ app.on("before-quit", async () => {
   shutdownStarted = true;
   allowQuit = true;
   clearTimeout(startupWindowTimer);
-  clearTimeout(startupUpdateTimer);
-  startupWindowTimer = startupUpdateTimer = null;
+  startupWindowTimer = null;
   discoverCacheLifecycle?.flush();
   remoteArtworkCache?.close();
   thumbnailRuntime.stop();
