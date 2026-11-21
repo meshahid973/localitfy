@@ -2939,18 +2939,6 @@ body.isResizingPlayer .app *{
   z-index: 1 !important;
 }
 
-/* no glyph UI icons + full app modal overlay.
-   Uses inline SVGs so packaged builds do not depend on font glyph rendering. */
-
-/* titlebar hover colors.
-   Maximize gets orange, close stays red{
-
-  align-items: flex-start !important;
-  justify-content: center !important;
-  padding: 0 !important;
-
-}
-
 @keyframes localtifyTopIslandInV454{
   from{ opacity: 0; transform: translate3d(0,-12px,0) scale(.94); filter: blur(5px); }
   to{ opacity: 1; transform: translate3d(0,0,0) scale(1); filter: blur(0); }
@@ -3164,21 +3152,6 @@ body.isResizingPlayer .app *{
   --panel-calm-shadow-hover: none;
 }
 
-.app :is(.panel{
-
-  background: var(--panel-calm-bg) !important;
-  box-shadow: none !important;
-  color: color-mix(in srgb, var(--text) 90%, transparent) !important;
-  isolation: isolate;
-  contain: layout paint style;
-}
-
-.app :is(.panel{
-
-  background: var(--panel-calm-bg) !important;
-  box-shadow: none !important;
-}
-
 .app :is(.active, .selected, .playing, .loggedIn):is(.panel, .ambientSurface){
   border-color: rgba(var(--lt-accent-rgb), .22) !important;
   background:
@@ -3199,22 +3172,6 @@ body.isResizingPlayer .app *{
   contain: layout style;
 }
 
-/* Lighter{
-
-  inset: var(--localtify-titlebar-height, 48px) 0 auto 0 !important;
-
-}
-
-/* Reduce outline noise: only active/important areas should look outlined. */
-
-@media (max-width: 760px){
-  .app .topUpdateRibbonText h3,
-.topUpdateRibbonText h3{
-    font-size: 10.5px !important;
-  }
-
-}
-
 .app{
   --outline-calm-v487: color-mix(in oklab, rgba(255,255,255,.05) 84%, var(--lt-accent) 16%) !important;
   --outline-hover-v487: color-mix(in oklab, rgba(255,255,255,.065) 68%, var(--lt-accent) 32%) !important;
@@ -3225,15 +3182,6 @@ body.isResizingPlayer .app *{
 .app .titleBar,
 .titleBar{
   overflow: visible !important;
-}
-
-/* Fewer outlines globally. Accent outline is mostly active/important only. */
-.app :is(.panel{
-  border-color: var(--outline-calm-v487) !important;
-}
-
-.app :is(.panel{
-  border-color: var(--outline-hover-v487) !important;
 }
 
 .app :is(.active, .playing, .selected):is(.panel, .ambientSurface){
