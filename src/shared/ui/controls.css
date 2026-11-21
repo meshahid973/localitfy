@@ -67,7 +67,7 @@
   box-shadow: none !important;
 }
 
-.app :is(button, a, input, textarea, select, [role="button"]):focus-visible{
+.app :is(button, a, input, textarea, select, [role="button"]):not([data-embedded-field]):focus-visible{
   outline: 2px solid var(--lt-accent) !important;
   outline-offset: 3px !important;
 }
@@ -81,7 +81,7 @@
 .app :is(input, textarea) { caret-color: var(--lt-accent); }
 .app ::selection { background: var(--lt-accent); color: var(--accent-contrast, #06100b); }
 
-.app :is(input:not(:where([type="checkbox"], [type="radio"], [type="range"])), textarea){
+.app :is(input:not(:where([type="checkbox"], [type="radio"], [type="range"])), textarea):not([data-embedded-field]){
   color: var(--lt-text) !important;
   border-color: var(--lt-border) !important;
   background-color: var(--lt-surface-soft) !important;
@@ -112,3 +112,6 @@ input[type="range"]::-webkit-slider-thumb{
   cursor: not-allowed !important;
   filter: none !important;
 }
+
+/* Embedded inputs inherit the parent field, without a second opaque surface. */
+.app [data-embedded-field] { background:transparent !important; border:0 !important; box-shadow:none !important; outline:none !important; }
