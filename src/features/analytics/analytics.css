@@ -70,4 +70,4 @@
 .analyticsV4ChartLegend span+span::before { border-top:2px dashed var(--lt-muted); opacity:.85; }
 
 .analyticsV4EmptyLibrary { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; border-bottom:1px solid var(--lt-border); padding:10px 0 18px; color:var(--lt-muted); font-size:13px; }
-.analyticsV4EmptyLibrary button { padding:8px 14px; border-radius:var(--lt-radius-item); background:var(--lt-accent); border:0; color:#fff; font-size:12px; cursor:pointer; }
+.analyticsV4EmptyLibrary button { padding:8px 14px; border-radius:var(--lt-radius-item); background:var(--lt-accent); border:0; color:var(--button-text-on-accent); font-size:12px; cursor:pointer; }

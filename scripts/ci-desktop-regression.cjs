@@ -435,13 +435,24 @@ server.listen(5173,async()=>{
     // Render the actual title-bar update banner and remote What's New flow without installing a fake package.
     win.webContents.send("localitfy:auto-update-event",{
       type:"available",version:"9.9.9",manualOnly:true,silent:false,
-      message:"QA update preview",releaseNotes:"## QA release details\\n- Verified original release notes"
+      message:"QA update preview",releaseNotes:"## QA release details\n- Verified original release notes"
     });
     await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.localtifyUpdateBanner.available')"),"blue release banner");
     assert.equal(await win.webContents.executeJavaScript("getComputedStyle(document.querySelector('.localtifyUpdateBanner')).backgroundImage.includes('linear-gradient')"),true,"banner has the proper blue treatment");
     await screenshot(win,"updates-blue-banner");
     await win.webContents.executeJavaScript("Array.from(document.querySelectorAll('.localtifyUpdateBanner button')).find(b=>b.textContent.includes('What'))?.click()");
     await until(()=>win.webContents.executeJavaScript("document.querySelector('.releaseNotesDialog .releaseNotesMarkdown')?.textContent.includes('QA release details')"),"versioned release notes");
+    const doneContrast=await win.webContents.executeJavaScript(`(()=>{
+      const element=document.querySelector('.releaseNotesFooter button');
+      const style=getComputedStyle(element);
+      const channel=s=>s.match(/[0-9.]+/g).slice(0,3).map(Number).map(v=>{
+        const n=v/255;return n<=0.04045?n/12.92:((n+0.055)/1.055)**2.4;
+      });
+      const luminance=c=>{const v=channel(c);return v[0]*0.2126+v[1]*0.7152+v[2]*0.0722;};
+      const text=luminance(style.color),fill=luminance(style.backgroundColor);
+      return (Math.max(text,fill)+0.05)/(Math.min(text,fill)+0.05);
+    })()`);
+    assert.ok(doneContrast>=4.5,"Changelog Done button must meet WCAG AA text contrast: "+doneContrast);
     await screenshot(win,"whats-new-release-history");
     await win.webContents.executeJavaScript("document.querySelector('.releaseNotesClose').click()");
     await until(()=>win.webContents.executeJavaScript("!document.querySelector('.releaseNotesDialog')"),"close release notes");
