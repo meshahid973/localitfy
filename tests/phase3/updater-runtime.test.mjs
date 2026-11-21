@@ -128,6 +128,7 @@ test("Linux successful no-update checks are not reported as retryable failures",
   process.env.LOCALTIFY_ENABLE_LINUX_UPDATER = "0";
   try {
     const events = [];
+    let assetName = "localtify-0.5.1-x86_64.AppImage";
     const https = {
       get(_url, _options, onResponse) {
         const request = new EventEmitter();
@@ -140,8 +141,8 @@ test("Linux successful no-update checks are not reported as retryable failures",
           response.emit("data", JSON.stringify({
             tag_name: "v0.5.1",
             assets: [{
-              name: "localtify-0.5.1-x64.AppImage",
-              browser_download_url: "https://github.com/meshahid973/localtify/releases/download/v0.5.1/localtify-0.5.1-x64.AppImage"
+              name: assetName, size: 1024,
+              browser_download_url: "https://github.com/meshahid973/localtify/releases/download/v0.5.1/" + assetName
             }]
           }));
           response.emit("end");
@@ -160,6 +161,10 @@ test("Linux successful no-update checks are not reported as retryable failures",
     assert.equal(runtime.getUpdateState().type, "not-available");
     assert.equal(events.at(-1)?.type, "not-available");
     assert.equal(runtime.getUpdateState().version, "0.5.1");
+    assetName = "unrelated.AppImage";
+    assert.equal(await runtime.checkForUpdates({ silent: true }), false,
+      "an unrelated release asset must not count as an installable Localtify AppImage");
+    assert.equal(runtime.getUpdateState().type, "error");
   } finally {
     if (previousOverride === undefined) delete process.env.LOCALTIFY_ENABLE_LINUX_UPDATER;
     else process.env.LOCALTIFY_ENABLE_LINUX_UPDATER = previousOverride;

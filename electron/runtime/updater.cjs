@@ -127,7 +127,15 @@ function createUpdaterRuntime(options = {}) {
                 const tag = String(data.tag_name || data.name || "").trim();
                 const version = normalizeUpdateVersion(tag);
                 const assets = Array.isArray(data.assets) ? data.assets : [];
-                const appImageAsset = assets.find((asset) => /\.AppImage$/i.test(String(asset?.name || "")) && /^https:\/\/github\.com\/meshahid973\/localtify\/releases\/download\//.test(String(asset?.browser_download_url || "")));
+                // Accept only the nonempty AppImage that belongs to this stable
+                // published version, rather than any similarly named release asset.
+                const assetName = `localtify-${version}-x86_64.AppImage`;
+                const expectedUrl = `https://github.com/meshahid973/localtify/releases/download/${tag}/${assetName}`;
+                const appImageAsset = /^v\d+\.\d+\.\d+$/.test(tag)
+                  ? assets.find(asset => asset?.name === assetName &&
+                      Number.isFinite(Number(asset.size)) && Number(asset.size) > 0 &&
+                      asset.browser_download_url === expectedUrl)
+                  : null;
 
                 resolve({
                   version,
