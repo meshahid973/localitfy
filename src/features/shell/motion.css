@@ -76,8 +76,7 @@ button:disabled:active {
 }
 
 .toast,
-.appToast,
-.updateToast {
+.appToast{
   animation: localtifyToastIn 220ms var(--motion-pop) both;
 }
 
@@ -120,18 +119,6 @@ button:disabled:active {
   min-width: 0;
   width: 100%;
   animation: localtifyPanelIn 220ms var(--motion-ease) both;
-}
-
-.topUpdateRibbonLayer,
-.topUpdateRibbon,
-.topUpdateRibbonMain,
-.topUpdateRibbonRight,
-.topUpdateRibbonActions {
-  transform-origin: top center;
-}
-
-.app[data-motion-level="smooth"] .topUpdateRibbonIcon {
-  animation: localtifyIconSettle 300ms var(--motion-pop) both;
 }
 
 /* Small icon feedback uses simple transforms, not SVG stroke animations. */

@@ -1,5 +1,5 @@
 /* Shared control skin; feature owners retain layout and sizing exceptions. */
-.app :is(.mainAction, .heroMain, .updatePrimaryButton, .settingsActionButton.primary){
+.app :is(.mainAction, .heroMain, .settingsActionButton.primary){
   min-height: var(--lt-control-height) !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -34,7 +34,7 @@
   cursor: pointer;
 }
 
-.app :is(.mainAction, .heroMain, .updatePrimaryButton, .settingsActionButton.primary):hover:not(:disabled){
+.app :is(.mainAction, .heroMain, .settingsActionButton.primary):hover:not(:disabled){
   border-color: transparent !important;
   box-shadow: none !important;
   filter: none !important;
@@ -70,7 +70,7 @@
   filter: none !important;
 }
 
-.app :is(.iconAction, .songMenuButton, .closeModalButton, .updateToastClose),
+.app :is(.iconAction, .songMenuButton, .closeModalButton,
 .app :is(.circleButton):not(.playerBar *){
   width: var(--lt-control-height) !important;
   height: var(--lt-control-height) !important;
@@ -86,7 +86,7 @@
   box-shadow: none !important;
 }
 
-.app :is(.iconAction, .songMenuButton, .closeModalButton, .updateToastClose):hover:not(:disabled),
+.app :is(.iconAction, .songMenuButton, .closeModalButton,
 .app :is(.circleButton):not(.playerBar *):hover:not(:disabled){
   border-color: transparent !important;
   background: var(--lt-fill-hover) !important;

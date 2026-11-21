@@ -582,8 +582,7 @@
 
 .app .windowButtons button svg,
 .inlineGlyphIcon,
-.localtifyStateIconV373 svg,
-.updateToastIcon svg{
+.localtifyStateIconV373 svg{
   display: block !important;
   width: 1em !important;
   height: 1em !important;
@@ -604,14 +603,12 @@
   opacity: .95 !important;
 }
 
-.localtifyStateIconV373,
-.updateToastIcon{
+.localtifyStateIconV373{
   display: grid !important;
   place-items: center !important;
 }
 
-.localtifyStateIconV373 svg,
-.updateToastIcon svg{
+.localtifyStateIconV373 svg{
   width: 18px !important;
   height: 18px !important;
 }
