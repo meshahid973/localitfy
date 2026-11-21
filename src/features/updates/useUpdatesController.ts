@@ -219,20 +219,14 @@ export function useUpdatesController({ ready,autoUpdateEnabled,autoUpdateNotifyO
     setStatusText("Update reminder dismissed.");
   },[updatePrompt.version,setStatusText]);
 
-  // Keep legacy debug hooks callable, but remove automatic one-minute nag timers.
-  const clearUpdateNagTimer=useCallback(()=>{},[]);
-  const showUpdateNag=useCallback((_stage:1|2|3,versionInput?:string)=>{
-    if(updateWasLeftAlone(versionInput||updatePrompt.version))return;
-    setUpdatePrompt(old=>({...old,visible:true,version:versionInput||old.version}));
-  },[updatePrompt.version]);
   const showDebugUpdateAvailable=useCallback(()=>{
     setUpdatePrompt({visible:true,status:"available",version:"test",percent:0,message:"Test update preview",error:"",releaseNotes:"## Preview\nThis is a developer-only update banner preview."});
   },[]);
 
   return {
-    updatePrompt,setUpdatePrompt,whatsNewOpen,setWhatsNewOpen,whatsNewVersion,whatsNewReleaseNotes,
+    updatePrompt,whatsNewOpen,setWhatsNewOpen,whatsNewVersion,whatsNewReleaseNotes,
     openUpdateChangelog,closeWhatsNew,askUpdaterToDownload,askUpdaterToInstall,manualUpdateCheck,
-    handleUpdateLater,skipAvailableUpdate:handleUpdateLater,clearUpdateNagTimer,showUpdateNag,
+    handleUpdateLater,skipAvailableUpdate:handleUpdateLater,
     showDebugUpdateAvailable,lastUpdateCheckedLabel
   };
 }

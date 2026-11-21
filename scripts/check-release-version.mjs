@@ -41,7 +41,7 @@ function checkReleaseVersion() {
     const source = read(file);
     // User-facing copy must not keep an independently hardcoded version.
     if (file === "src/features/updates/update.constants.ts") {
-      const copy = source.slice(source.indexOf("export const whatsNewItems"));
+      const copy = source.replace(/export const APP_VERSION\s*=\s*["'][^"']+["'];?/, "");
       if (/\b\d+\.\d+\.\d+\b/.test(copy)) mismatches.push(file + ": what's-new copy hardcodes a version");
     } else if (/\b\d+\.\d+\.\d+\b/.test(source)) {
       mismatches.push(file + ": UI copy hardcodes a version");

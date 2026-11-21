@@ -272,7 +272,6 @@ function MainModeApp() {
 
   const {
     updatePrompt,
-    setUpdatePrompt,
     whatsNewOpen,
     whatsNewVersion,
     whatsNewReleaseNotes,
@@ -282,8 +281,6 @@ function MainModeApp() {
     askUpdaterToInstall,
     manualUpdateCheck,
     handleUpdateLater,
-    clearUpdateNagTimer,
-    showUpdateNag,
     showDebugUpdateAvailable,
     lastUpdateCheckedLabel
   } = useUpdatesController({
@@ -1832,27 +1829,6 @@ function MainModeApp() {
 
     if (command === "popup1" || command === "/popup1") {
       showDebugUpdateAvailable();
-      setQuery("");
-      return;
-    }
-
-    if (command === "popup2" || command === "/popup2") {
-      clearUpdateNagTimer();
-      showUpdateNag(1, updatePrompt.version || "test");
-      setQuery("");
-      return;
-    }
-
-    if (command === "popup3" || command === "/popup3") {
-      clearUpdateNagTimer();
-      showUpdateNag(2, updatePrompt.version || "test");
-      setQuery("");
-      return;
-    }
-
-    if (command === "popup4" || command === "/popup4") {
-      clearUpdateNagTimer();
-      showUpdateNag(3, updatePrompt.version || "test");
       setQuery("");
       return;
     }
@@ -5956,7 +5932,6 @@ function MainModeApp() {
       manualUpdateCheck,
       onWhatsNew: () => openUpdateChangelog("available"),
       onDismiss: handleUpdateLater,
-      setUpdatePrompt,
       progress
     },
     screensaver: {
