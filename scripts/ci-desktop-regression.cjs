@@ -81,28 +81,40 @@ async function metrics(label,sampleCount=5){
 /** Measure real synchronous journal + output reuse work on this Electron main thread.
  * Synthetic temporary files only: never open or modify a user's library.
  */
-function profileMainThreadJournalBlocking() {
+async function profileMainThreadJournalBlocking() {
   const root=fs.mkdtempSync(path.join(os.tmpdir(),"localtify-journal-profile-"));
   try {
-    const file=path.join(root,"fixture.wav"), data=Buffer.alloc(8*1024*1024,0x53);
-    fs.writeFileSync(file,data);
-    const stat=fs.statSync(file);
-    const digest=require("node:crypto").createHash("sha256").update(data).digest("hex");
-    const store=require("../electron/download-jobs.cjs").createDownloadJobStore(root);
-    const request={source:"youtube",url:"https://www.youtube.com/watch?v=abcdefghijk",folder:root,options:{autoAdd:false}};
-    const job=store.prepare(request);
-    const checkpointStart=performance.now();
-    store.update(job.id,{status:"done",result:{ok:true,filePath:file},sizeBytes:stat.size,mtimeMs:stat.mtimeMs,sha256:digest});
-    const checkpointMs=performance.now()-checkpointStart;
-    const reuseSamplesMs=[];
-    for(let i=0;i<3;i++) {
-      const began=performance.now(), reused=store.prepare(request);
-      reuseSamplesMs.push(performance.now()-began);
-      assert.equal(reused.status,"done","verified existing download must be reused");
+    const cases=[];
+    for(const [mib,videoId] of [[8,"abcdefghijk"],[64,"abcdefghijl"]]){
+      const file=path.join(root,"fixture-"+mib+".wav"), data=Buffer.alloc(mib*1024*1024,0x53);
+      fs.writeFileSync(file,data);
+      const stat=fs.statSync(file);
+      const digest=require("node:crypto").createHash("sha256").update(data).digest("hex");
+      const store=require("../electron/download-jobs.cjs").createDownloadJobStore(root);
+      const request={source:"youtube",url:"https://www.youtube.com/watch?v="+videoId,folder:root,options:{autoAdd:false}};
+      const job=store.prepare(request);
+      const checkpointStart=performance.now();
+      store.update(job.id,{status:"done",result:{ok:true,filePath:file},sizeBytes:stat.size,mtimeMs:stat.mtimeMs,sha256:digest});
+      const checkpointMs=performance.now()-checkpointStart;
+      const syncStart=performance.now(), syncReused=store.prepare(request);
+      const syncReuseMs=performance.now()-syncStart;
+      assert.equal(syncReused.status,"done");
+      const asyncReuseSamplesMs=[], eventLoopTicks=[];
+      for(let i=0;i<3;i++){
+        let ticks=0;
+        const interval=setInterval(()=>{ticks++;},2);
+        const began=performance.now();
+        const reused=await store.prepareAsync(request);
+        const elapsed=performance.now()-began;
+        clearInterval(interval);
+        asyncReuseSamplesMs.push(elapsed);
+        eventLoopTicks.push(ticks);
+        assert.equal(reused.status,"done","asynchronously verified output must be reused");
+      }
+      const sorted=[...asyncReuseSamplesMs].sort((a,b)=>a-b);
+      cases.push({mib,bytes:stat.size,checkpointMs,syncReuseMs,asyncReuseSamplesMs,eventLoopTicks,medianAsyncReuseMs:sorted[1]});
     }
-    const sorted=[...reuseSamplesMs].sort((a,b)=>a-b);
-    return {bytes:stat.size,checkpointMs,reuseSamplesMs,medianReuseMs:sorted[1],
-      note:"Blocking elapsed time on Electron main process, including SHA-256 and durable journal write; synthetic file"};
+    return {cases,note:"Compare sync main-process SHA-256 with production async stream hashing. Timers fired during async verification demonstrate event-loop opportunities; temp files only."};
   } finally {fs.rmSync(root,{recursive:true,force:true});}
 }
 const watchdog=setTimeout(()=>{console.error("Integrated visual smoke timed out");server.close();app.exit(1);},210000);
@@ -600,7 +612,7 @@ server.listen(5173,async()=>{
     assert.ok(collection.hero&&collection.row&&collection.play,"compact collections retain keyboard playback: "+JSON.stringify(collection));
     await screenshot(win,"collection-narrow");
     win.setSize(1280,800);
-    const journalBlocking=profileMainThreadJournalBlocking();
+    const journalBlocking=await profileMainThreadJournalBlocking();
     const result={startupMs,reloadMs,libraryNavigationMs,playbackStartMs,journalBlocking,interactionDefinition:"click to observed DOM/audio readiness, polling interval 16ms plus IPC overhead",startupDefinition:"desktop entry to first rendered screen (onboarding or shell); excludes fixture creation and Electron process spawn",metrics:[idle,playing,hiddenPlayback],hiddenPlaybackObservation,gpuNote:"GPU process CPU and working set are reported by process type; these are not hardware GPU utilization",memoryDefinition:"sum of Electron process working sets; may double count shared pages",platform:process.platform,fixtureSongs:songs.length,layouts,artworkTransitionLayers:samples};
     fs.writeFileSync(path.join(output,"desktop-runtime.json"),JSON.stringify(result,null,2));console.log("[desktop-qa]",JSON.stringify(result));
     clearTimeout(watchdog);server.close();app.exit(0);
