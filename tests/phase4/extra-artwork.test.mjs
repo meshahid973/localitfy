@@ -13,6 +13,7 @@ test("Deezer only returns matching song versions and exact artist identities",()
  assert.deepEqual(matchDeezerArtwork({data:[{...track,title:"Bang Bang (Live)"},track]},"recording","Bang Bang","B.A. Robertson"),{coverUrl:cover,durationMs:200000});
  assert.deepEqual(matchDeezerArtwork({data:[track]},"recording","Bang Bang","Another artist"),{});
  assert.deepEqual(matchDeezerArtwork({data:[track,{...track,id:3,duration:300}]},"recording","Bang Bang","B.A. Robertson"),{});
+ assert.deepEqual(matchDeezerArtwork({data:[track,{...track,id:4,album:{id:99,cover_medium:portrait}}]},"recording","Bang Bang","B.A. Robertson"),{}, "ambiguous release identity must not reuse unrelated album art");
  assert.deepEqual(matchDeezerArtwork({data:[{id:1,name:"Artist",picture_medium:portrait}]},"artist","Artist - Topic"),{coverUrl:portrait});
  assert.deepEqual(matchDeezerArtwork({data:[{id:1,name:"Artist",picture_medium:portrait},{id:2,name:"Artist",picture_medium:portrait}]},"artist","Artist"),{});
  assert.equal(deezerImage(cover.replace("e-cdns-images.dzcdn.net","127.0.0.1"),"recording"),undefined);
@@ -80,4 +81,25 @@ test("an upstream 403 has a five-minute cooldown without caching an empty cover"
  time+=284001;
  assert.equal((await lookup("recording","Bang Bang","B.A. Robertson")).coverUrl,cover);
  assert.equal(requests,2,"retry after cooldown, never permanently cache the error");
+});
+
+test("keyed artwork sources resolve before a blocked Deezer service",async()=>{
+ const {createArtworkLookup}=require("../../electron/discover/artwork.cjs");
+ let deezer=0,mb=0;
+ const lookup=createArtworkLookup({searchRecordings:async()=>{mb++;return [];}},Date.now,
+  async()=>({name:"Bang Bang",artist:{name:"B.A. Robertson"},album:{image:[{"#text":cover}]}}),
+  async()=>({coverUrl:portrait}),undefined,async()=>{deezer++;return {};});
+ const result=await lookup("Bang Bang","B.A. Robertson");
+ assert.equal(result.coverUrl,cover);
+ assert.equal(deezer,0,"never hit optional Deezer while a verified image exists");
+ assert.equal(mb,0);
+});
+test("fallback mode skips the failed Deezer image and reaches catalog releases",async()=>{
+ const {createArtworkLookup}=require("../../electron/discover/artwork.cjs");
+ let deezer=0;
+ const mb={searchRecordings:async()=>[{id,title:"Bang Bang","artist-credit":[{name:"B.A. Robertson"}],releases:[{id,status:"Official","release-group":{id}}]}]};
+ const lookup=createArtworkLookup(mb,Date.now,undefined,undefined,undefined,async()=>{deezer++;return {coverUrl:cover};});
+ assert.equal((await lookup("Bang Bang","B.A. Robertson",{fallback:true})).coverUrl,
+   "https://coverartarchive.org/release/"+id+"/front-250");
+ assert.equal(deezer,0);
 });

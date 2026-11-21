@@ -29,6 +29,9 @@ function matchDeezerArtwork(body,kind,title,artist="") {
   }
   if(kind!=="recording"||!key(title)||!artistKey(artist))return {};
   const exact=items.filter(i=>validId(i?.id)&&key(i.title)===key(title)&&artistKey(i.artist?.name)===artistKey(artist)&&validId(i.album?.id));
+  // Search can return compilations and reissues for the same recording. An
+  // arbitrary first cover would silently attach the wrong album artwork.
+  if(new Set(exact.map(i=>i.album.id)).size!==1)return {};
   const durations=exact.map(i=>i.duration).filter(n=>Number.isFinite(n)&&n>0);
   if(durations.length>1&&Math.max(...durations)-Math.min(...durations)>5)return {};
   const covers=[...new Set(exact.map(i=>deezerImage(i.album.cover_medium||i.album.cover_big,"recording")).filter(Boolean))].slice(0,4);
