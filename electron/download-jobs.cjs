@@ -135,10 +135,11 @@ function createDownloadJobStore(userDataPath, { now = Date.now } = {}) {
       try {
         const stat = fs.statSync(old.result.filePath);
         const trustedAsyncHash = verifiedHash?.job === old && sameFileSnapshot(verifiedHash.stat, stat);
-        const hashMatches = old.sha256
+        const sameSize = stat.isFile() && stat.size === old.sizeBytes;
+        const hashMatches = sameSize && (old.sha256
           ? (trustedAsyncHash ? verifiedHash.digest === old.sha256 : hashFile(old.result.filePath) === old.sha256)
-          : stat.mtimeMs === old.mtimeMs;
-        if (stat.isFile() && stat.size === old.sizeBytes && hashMatches) {
+          : stat.mtimeMs === old.mtimeMs);
+        if (hashMatches) {
           const reused = { ...clone(old), request, status: "done", importPending: request.options.autoAdd, updatedAt: now(), result: { ...old.result, error: undefined } };
           const next = new Map(jobs);
           next.set(old.id, reused);
@@ -170,19 +171,20 @@ function createDownloadJobStore(userDataPath, { now = Date.now } = {}) {
         !previous.result?.ok || !previous.result.filePath || previous.pendingOutput) {
       return prepare(input);
     }
+    let verifiedHash = null;
     try {
       const filename = previous.result.filePath;
       const before = await fs.promises.stat(filename);
-      if (!before.isFile() || before.size !== previous.sizeBytes) return prepare(input);
-      const digest = await hashFileAsync(filename);
-      const after = await fs.promises.stat(filename);
-      if (!sameFileSnapshot(before, after)) return prepare(input);
-      return prepare(input, { job: previous, stat: after, digest });
+      if (before.isFile() && before.size === previous.sizeBytes) {
+        const digest = await hashFileAsync(filename);
+        const after = await fs.promises.stat(filename);
+        if (sameFileSnapshot(before, after)) verifiedHash = { job: previous, stat: after, digest };
+      }
     } catch {
-      // A removed, unreadable or concurrently modified file is handled by the
-      // established journal validation and retry rules.
-      return prepare(input);
+      // A missing or changed file follows the established retry rules.
     }
+    // Never swallow or retry a journal persistence error as a hash failure.
+    return prepare(input, verifiedHash);
   }
   function update(id, patch) {
     const old = jobs.get(id);
