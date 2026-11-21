@@ -21,6 +21,10 @@ test("updater version comparison is deterministic", () => {
   assert.equal(updater.compareUpdateVersions("0.4.2", "0.4.1"), 1);
   assert.equal(updater.compareUpdateVersions("0.4.1", "0.4.1"), 0);
   assert.equal(updater.compareUpdateVersions("0.4.0", "0.4.1"), -1);
+  assert.equal(updater.compareUpdateVersions("0.5.2-beta.1", "0.5.1"), 1);
+  assert.equal(updater.compareUpdateVersions("0.5.2", "0.5.2-rc.1"), 1);
+  assert.equal(updater.compareUpdateVersions("0.5.2-beta.2", "0.5.2-beta.11"), -1);
+  assert.equal(updater.compareUpdateVersions("latest", "0.5.1"), 0, "unknown tags cannot trigger updates");
 });
 
 test("Linux manual update path uses the canonical event helper", () => {

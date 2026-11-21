@@ -387,19 +387,18 @@ server.listen(5173,async()=>{
             assert.equal(history.byDay.length,7,"seven-day history");
             assert.equal(history.byDay.reduce((sum,day)=>sum+day.ms,0),history.totalMs,"daily totals equal recorded total");
             assert.ok(history.comparison.totalMs>0,"historical comparison uses fixture playback events");
-            await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.analyticsChartInspector')"),"recorded listening chart");
-            await win.webContents.executeJavaScript("document.querySelector('button[aria-label=\"Listening history period\"]').click()");
-            await until(()=>win.webContents.executeJavaScript("Array.from(document.querySelectorAll('[role=menuitemradio]')).some(item=>item.textContent.includes('Last 7 days'))"),"history periods");
-            await win.webContents.executeJavaScript("Array.from(document.querySelectorAll('[role=menuitemradio]')).find(item=>item.textContent.includes('Last 7 days')).click()");
-            await until(()=>win.webContents.executeJavaScript("document.querySelector('.analyticsChartInspector')?.max==='6'"),"seven-day chart selection");
-            await until(()=>win.webContents.executeJavaScript("document.querySelector('button[aria-label=\"Listening history period\"] .arcDropdownLabel').textContent==='Last 7 days'"),"selected period label finishes its transition");
-            await win.webContents.executeJavaScript("document.querySelector('.analyticsChartInspector').focus()");
-            win.webContents.sendInputEvent({type:"keyDown",keyCode:"Home"});
-            win.webContents.sendInputEvent({type:"keyUp",keyCode:"Home"});
-            await until(()=>win.webContents.executeJavaScript("document.querySelector('.analyticsChartInspector')?.value==='0'"),"history chart Home key");
-            const readable=await win.webContents.executeJavaScript("document.querySelector('.analyticsChartInspector').getAttribute('aria-valuetext')");
-            assert.ok(readable.includes(history.byDay[0].day),"chart announces the selected UTC day");
-            assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('.analyticsHistoryChartData tbody tr').length"),7,"daily data remains available to assistive technology");
+            const calendar=await win.webContents.executeJavaScript("window.localitfy.getListeningCalendarSummary({range:'month',offset:0})");
+            assert.ok(calendar && Number.isFinite(calendar.totalMs) && calendar.totalMs>=0,"real calendar listening summary");
+            assert.equal(calendar.byBucket.reduce((sum,entry)=>sum+entry.ms,0),calendar.totalMs,"calendar sums match recorded events");
+            await until(()=>win.webContents.executeJavaScript("!!document.querySelector('[aria-label=\"Listening analytics\"]')"),"Analytics 4.0 page");
+            await until(()=>win.webContents.executeJavaScript("!!document.querySelector('section[data-slot=\"line-chart\"]')"),"genuine beUI recorded listening chart");
+            assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('.analyticsV4Overview').length"),1,"single listening overview");
+            assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('.analyticsV4Rankings .analyticsV4Ranking').length"),2,"artwork rankings");
+            assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('section[data-slot=\"line-chart\"] table tbody tr').length"),calendar.byBucket.length,"accessible chart data corresponds to exact UTC period");
+            await win.webContents.executeJavaScript("(()=>{const button=[...document.querySelectorAll('button')].find(b=>b.getAttribute('aria-label')==='Previous period');button?.click();})()");
+            await until(()=>win.webContents.executeJavaScript("document.querySelector('.analyticsV4PeriodNav span')?.textContent.includes('October')"),"historic calendar navigation");
+            const previous=await win.webContents.executeJavaScript("window.localitfy.getListeningCalendarSummary({range:'month',offset:1})");
+            assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('section[data-slot=\"line-chart\"] table tbody tr').length"),previous.byBucket.length,"historical period renders exact buckets");
           }
           const geometry=await win.webContents.executeJavaScript(`(()=>{
             const page=document.querySelector('.pageTransition[data-view="${view}"]');
