@@ -37,7 +37,7 @@
 .downloadsExperience :is(button,input,textarea):focus-visible { outline: 2px solid var(--lt-accent); outline-offset: 3px; }
 .downloadsExperience .pageHeader { margin: 0; }
 .downloadsExperience .pageHeaderTools { gap: 3px; }
-.downloadsExperience .pageHeaderTools > button { color: var(--lt-muted); }
+.downloadsExperience .pageHeaderTools > button { color: var(--lt-muted); border: 0; background: transparent; box-shadow: none; }
 .downloadsExperience .pageHeaderTools > button:hover { color: var(--lt-text); background: var(--lt-fill-hover); }
 .downloadsTools { margin-left: 6px; }
 .downloadsTools button[aria-haspopup="menu"] { border-color: var(--lt-border); background: transparent; }
@@ -50,7 +50,7 @@
 }
 .downloadsTabs { max-width: 100%; }
 .downloadsTabList { border: 1px solid var(--lt-border); background: var(--lt-fill-subtle); padding: 4px; gap: 2px; border-radius: 999px; }
-.downloadsTabList [role="tab"] { min-height: 34px; min-width: 110px; padding: 7px 20px; font-size: 13px; }
+.downloadsTabList [role="tab"] { min-height: 34px; min-width: 110px; padding: 7px 20px; font-size: 13px; border: 0; box-shadow: none; }
 .downloadsTabList [data-tabs-indicator] { background: var(--lt-fill-selected); }
 .downloadsTabList [data-tabs-label] { color: var(--lt-text); }
 .downloadsTabList [role="tab"]:focus-visible { outline-offset: -2px; }
@@ -155,7 +155,6 @@
 .downloadsRowMenu { position: relative; }
 .downloadsRowMenu button[aria-haspopup="menu"] { position: relative; width: 32px; height: 32px; min-height: 32px; padding: 0; justify-content: center; border: 0; color: var(--lt-muted); background: transparent; }
 .downloadsRowMenu button[aria-haspopup="menu"]:hover { color: var(--lt-text); background: var(--lt-fill-hover); }
-.downloadsRowMenu button[aria-haspopup="menu"] > span:not(:first-child) { position: absolute; height: 1px; width: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .downloadsRowMenu button[aria-haspopup="menu"] > svg { display: none; }
 
 .downloadsEmpty { display: grid; justify-items: center; gap: 8px; padding: 55px 15px; color: var(--lt-muted); text-align: center; }

@@ -340,7 +340,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
                 {item.status === "interrupted" ? "Resume" : "Retry"}</button> : null}
               {done && !notImported ? <button type="button" className="downloadsRowAction" onClick={() => void openDownloadedSongInLibrary(item)}>Open</button> : null}
               {done && !notImported ? <Check size={14} className="downloadsCompleteIcon" aria-hidden="true" /> : null}
-              <div className="downloadsRowMenu"><DropdownMenu label="More actions" icon={<MoreHorizontal size={16} />} items={actions} /></div>
+              <div className="downloadsRowMenu"><DropdownMenu label="More actions" icon={<MoreHorizontal size={16} />} items={actions} iconOnly /></div>
             </div>
           </div>;
         })}
