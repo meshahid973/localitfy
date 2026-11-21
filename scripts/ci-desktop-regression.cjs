@@ -78,6 +78,33 @@ async function metrics(label,sampleCount=5){
   const median=key=>readings.map(r=>r[key]).sort((a,b)=>a-b)[Math.floor(readings.length/2)];
   return{label,readings,medianWorkingSetMiB:median("workingSetMiB"),peakWorkingSetMiB:Math.max(...readings.map(r=>r.workingSetMiB)),medianCpuPercent:median("cpuPercent")};
 }
+/** Measure real synchronous journal + output reuse work on this Electron main thread.
+ * Synthetic temporary files only: never open or modify a user's library.
+ */
+function profileMainThreadJournalBlocking() {
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),"localtify-journal-profile-"));
+  try {
+    const file=path.join(root,"fixture.wav"), data=Buffer.alloc(8*1024*1024,0x53);
+    fs.writeFileSync(file,data);
+    const stat=fs.statSync(file);
+    const digest=require("node:crypto").createHash("sha256").update(data).digest("hex");
+    const store=require("../electron/download-jobs.cjs").createDownloadJobStore(root);
+    const request={source:"youtube",url:"https://www.youtube.com/watch?v=abcdefghijk",folder:root,options:{autoAdd:false}};
+    const job=store.prepare(request);
+    const checkpointStart=performance.now();
+    store.update(job.id,{status:"done",result:{ok:true,filePath:file},sizeBytes:stat.size,mtimeMs:stat.mtimeMs,sha256:digest});
+    const checkpointMs=performance.now()-checkpointStart;
+    const reuseSamplesMs=[];
+    for(let i=0;i<3;i++) {
+      const began=performance.now(), reused=store.prepare(request);
+      reuseSamplesMs.push(performance.now()-began);
+      assert.equal(reused.status,"done","verified existing download must be reused");
+    }
+    const sorted=[...reuseSamplesMs].sort((a,b)=>a-b);
+    return {bytes:stat.size,checkpointMs,reuseSamplesMs,medianReuseMs:sorted[1],
+      note:"Blocking elapsed time on Electron main process, including SHA-256 and durable journal write; synthetic file"};
+  } finally {fs.rmSync(root,{recursive:true,force:true});}
+}
 const watchdog=setTimeout(()=>{console.error("Integrated visual smoke timed out");server.close();app.exit(1);},210000);
 server.listen(5173,async()=>{
   try{
@@ -557,7 +584,8 @@ server.listen(5173,async()=>{
     assert.ok(collection.hero&&collection.row&&collection.play,"compact collections retain keyboard playback: "+JSON.stringify(collection));
     await screenshot(win,"collection-narrow");
     win.setSize(1280,800);
-    const result={startupMs,reloadMs,libraryNavigationMs,playbackStartMs,interactionDefinition:"click to observed DOM/audio readiness, polling interval 16ms plus IPC overhead",startupDefinition:"desktop entry to first rendered screen (onboarding or shell); excludes fixture creation and Electron process spawn",metrics:[idle,playing,hiddenPlayback],hiddenPlaybackObservation,gpuNote:"GPU process CPU and working set are reported by process type; these are not hardware GPU utilization",memoryDefinition:"sum of Electron process working sets; may double count shared pages",platform:process.platform,fixtureSongs:songs.length,layouts,artworkTransitionLayers:samples};
+    const journalBlocking=profileMainThreadJournalBlocking();
+    const result={startupMs,reloadMs,libraryNavigationMs,playbackStartMs,journalBlocking,interactionDefinition:"click to observed DOM/audio readiness, polling interval 16ms plus IPC overhead",startupDefinition:"desktop entry to first rendered screen (onboarding or shell); excludes fixture creation and Electron process spawn",metrics:[idle,playing,hiddenPlayback],hiddenPlaybackObservation,gpuNote:"GPU process CPU and working set are reported by process type; these are not hardware GPU utilization",memoryDefinition:"sum of Electron process working sets; may double count shared pages",platform:process.platform,fixtureSongs:songs.length,layouts,artworkTransitionLayers:samples};
     fs.writeFileSync(path.join(output,"desktop-runtime.json"),JSON.stringify(result,null,2));console.log("[desktop-qa]",JSON.stringify(result));
     clearTimeout(watchdog);server.close();app.exit(0);
   }catch(error){

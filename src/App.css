@@ -2444,12 +2444,7 @@ body.localtifyBackgroundMode .ambientSurface,
   }
 }
 
-/* hover sidebar CSS moved to effects.css,
-the last imported CSS layer. */
-
-.app .playerBar > :where(.playerLeft, .playerCenter, .playerRight, .controlRow, .progressRow, .volumeWrap){
-  contain: layout style !important;
-}
+/* Hover sidebar effects are owned by effects.css; player containment is owned by player.css. */
 
 .app .secretLayer:not(.stars):not(.yukari){
   display: none !important;

@@ -32,7 +32,7 @@ export type AnalyticsRecapInputs = {
 export function buildAnalyticsRecapCards(input: AnalyticsRecapInputs) {
   const { songCount, monthImportCount, monthImportSeconds, monthArtistCount,
     yearImportCount, yearImportSeconds, yearAlbumCount } = input;
-    return [
+  return [
       {
         label: "monthly recap",
         value: monthImportCount ? `${monthImportCount.toLocaleString()} imported` : "no imports",
