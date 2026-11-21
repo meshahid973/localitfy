@@ -401,7 +401,22 @@ server.listen(5173,async()=>{
             assert.ok(readable.includes(history.byDay[0].day),"chart announces the selected UTC day");
             assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('.analyticsHistoryChartData tbody tr').length"),7,"daily data remains available to assistive technology");
           }
-          const geometry=await win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return {width:page.clientWidth,scroll:page.scrollWidth}})()`);
+          const geometry=await win.webContents.executeJavaScript(`(()=>{
+            const page=document.querySelector('.pageTransition[data-view="${view}"]');
+            const geometry={width:page.clientWidth,scroll:page.scrollWidth};
+            if(geometry.scroll > geometry.width + 3) {
+              const bound=page.getBoundingClientRect();
+              geometry.offenders=[...page.querySelectorAll("*")].map(node=>{
+                const rect=node.getBoundingClientRect(),style=getComputedStyle(node);
+                return {name:node.tagName.toLowerCase(),className:typeof node.className==="string"?node.className.slice(0,110):"",
+                  right:Math.round(rect.right-bound.right),left:Math.round(rect.left-bound.left),
+                  width:Math.round(rect.width),clientWidth:node.clientWidth,scrollWidth:node.scrollWidth,
+                  overflowX:style.overflowX,position:style.position};
+              }).filter(item=>item.width>0 && item.right>3 && item.position!=="absolute" && item.position!=="fixed")
+                .sort((a,b)=>b.right-a.right).slice(0,16);
+            }
+            return geometry;
+          })()`);
           assert.ok(geometry.width>0&&geometry.scroll<=geometry.width+3,"page overflow "+view+" "+mode+" "+JSON.stringify(geometry));
           if(view==="artists") {
             await until(()=>win.webContents.executeJavaScript(`(()=>{const covers=[...document.querySelectorAll(".artistCard .coverImage")].filter(img=>{const r=img.getBoundingClientRect();return r.width>0&&r.height>0&&r.bottom>0&&r.top<window.innerHeight});return covers.length>0&&covers.every(img=>img.complete&&img.naturalWidth>0&&img.classList.contains("isLoaded"))})()`).catch(()=>false),"visible artist fixture artwork "+mode+" "+width,10000);
