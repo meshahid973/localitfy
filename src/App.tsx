@@ -6129,7 +6129,8 @@ function MainModeApp() {
       neverPlayedCount,
       playedPercent,
       recentImportWeekCount,
-      songs
+      songs,
+      onSelectSong: (id: string) => void selectSong(id, true)
     },
     settingsView: {
       renderSettingsCategoryContent,
