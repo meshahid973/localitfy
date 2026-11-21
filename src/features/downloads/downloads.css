@@ -24,7 +24,7 @@
   align-content: start;
   gap: clamp(16px, 1.6vw, 24px);
   width: 100%;
-  max-width: 1120px;
+  max-width: none; /* Match the full-width workspace on wide desktop windows. */
   min-width: 0;
   padding-bottom: 28px;
   color: var(--lt-text);

@@ -417,12 +417,16 @@ server.listen(5173,async()=>{
               const menu=document.querySelector('.downloadsRowMenu button[aria-label="More actions"]');
               const selected=document.querySelector('.downloadsFilters button[aria-pressed="true"] > span');
               return {fields:fields.map(field=>({embedded:field.hasAttribute("data-embedded-field"),background:getComputedStyle(field).backgroundColor})),
+                workspaceWidth:document.querySelector('.pageTransition[data-view="downloads"]')?.getBoundingClientRect().width,
+                downloadsWidth:document.querySelector('.downloadsExperience')?.getBoundingClientRect().width,
                 verticalGap:Math.round(to.top-from.bottom),menuIcons:menu?.querySelectorAll("svg").length,
                 selectedRadius:parseFloat(getComputedStyle(selected).borderTopLeftRadius)};
             })()`);
             assert.ok(downloadAppearance.fields.length>0,"Downloads has visible embedded URL fields");
             assert.ok(downloadAppearance.fields.every(field=>field.embedded && (field.background==="transparent" || field.background.replaceAll(" ","")==="rgba(0,0,0,0)")),"Downloads input has no double grey fill: "+JSON.stringify(downloadAppearance));
             assert.ok(downloadAppearance.verticalGap>=0 && downloadAppearance.verticalGap<=28,"Downloads importer-to-activity spacing is compact: "+JSON.stringify(downloadAppearance));
+            if(width===1920) assert.ok(downloadAppearance.downloadsWidth>=downloadAppearance.workspaceWidth*.93,
+              "Downloads should not leave a huge unused side strip on wide desktop: "+JSON.stringify(downloadAppearance));
             assert.equal(downloadAppearance.menuIcons,1,"icon-only row menus must not render an extra chevron");
             assert.ok(downloadAppearance.selectedRadius>=12,"Download activity filter uses rounded, theme-safe selection");
           }
