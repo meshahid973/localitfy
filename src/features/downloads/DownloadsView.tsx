@@ -79,7 +79,7 @@ const needsAttention = (status: string) => ATTENTION.has(status);
 const identity = (item: { recoveryId?: string; source?: string; spotifyTrackId?: string; url?: string }) =>
   item.recoveryId ? "job:" + item.recoveryId
     : item.source === "spotify" && item.spotifyTrackId ? "spotify:" + item.spotifyTrackId
-      : "source:" + (item.source || "youtube") + ":" + (item.url || "");
+      : item.url ? "source:" + (item.source || "youtube") + ":" + item.url : "";
 
 function DownloadArtwork({ song, remoteUrl }: { song?: Song; remoteUrl?: string }) {
   const [failed, setFailed] = useState("");
@@ -111,13 +111,12 @@ export default function DownloadsView(props: DownloadsViewProps) {
 
   // Results are historical snapshots, not a second list of the same active jobs.
   const activity = useMemo(() => {
-    const present = new Set(visibleDownloadQueueItems.map(identity));
+    const present = new Set(visibleDownloadQueueItems.map(identity).filter(Boolean));
     const recovered: DownloadQueueItem[] = [];
     for (const [index, result] of visibleDownloadResults.entries()) {
       const key = identity(result);
-      if (present.has(key)) continue;
-      if (key !== "source:youtube:" && present.has(key)) continue;
-      present.add(key);
+      if (key && present.has(key)) continue;
+      if (key) present.add(key);
       recovered.push({
         id: result.recoveryId || "result-" + index,
         recoveryId: result.recoveryId,
