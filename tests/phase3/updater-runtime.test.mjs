@@ -121,3 +121,47 @@ test("Download failures remain visible even when update discovery was silent", a
   assert.equal(runtime.getUpdateState().silent,false,"download errors must not inherit silent background-check mode");
   assert.match(runtime.getUpdateState().error,/connection interrupted/);
 });
+
+test("Linux successful no-update checks are not reported as retryable failures", { skip: process.platform !== "linux" }, async () => {
+  const { EventEmitter } = await import("node:events");
+  const previousOverride = process.env.LOCALTIFY_ENABLE_LINUX_UPDATER;
+  process.env.LOCALTIFY_ENABLE_LINUX_UPDATER = "0";
+  try {
+    const events = [];
+    const https = {
+      get(_url, _options, onResponse) {
+        const request = new EventEmitter();
+        request.destroy = () => {};
+        queueMicrotask(() => {
+          const response = new EventEmitter();
+          response.statusCode = 200;
+          response.setEncoding = () => {};
+          onResponse(response);
+          response.emit("data", JSON.stringify({
+            tag_name: "v0.5.1",
+            assets: [{
+              name: "localtify-0.5.1-x64.AppImage",
+              browser_download_url: "https://github.com/meshahid973/localtify/releases/download/v0.5.1/localtify-0.5.1-x64.AppImage"
+            }]
+          }));
+          response.emit("end");
+        });
+        return request;
+      }
+    };
+    const runtime = updater.createUpdaterRuntime({
+      app: { getVersion: () => "0.5.1", isPackaged: true },
+      autoUpdater: Object.assign(new EventEmitter(), { checkForUpdates: async () => { throw Error("Automatic Linux update should not run"); } }),
+      shell: { openExternal: async () => {} },
+      https,
+      getMainWindow: () => ({ isDestroyed: () => false, webContents: { send: (_channel, payload) => events.push(payload) } })
+    });
+    assert.equal(await runtime.checkForUpdates({ silent: true }), true, "a no-update response is a successful check");
+    assert.equal(runtime.getUpdateState().type, "not-available");
+    assert.equal(events.at(-1)?.type, "not-available");
+    assert.equal(runtime.getUpdateState().version, "0.5.1");
+  } finally {
+    if (previousOverride === undefined) delete process.env.LOCALTIFY_ENABLE_LINUX_UPDATER;
+    else process.env.LOCALTIFY_ENABLE_LINUX_UPDATER = previousOverride;
+  }
+});
