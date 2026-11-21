@@ -5,6 +5,7 @@ import type { AppToastKind } from "../shell/view.types";
 import { APP_VERSION, WHATS_NEW_SEEN_KEY, UPDATE_LEAVE_ALONE_PREFIX, defaultUpdatePrompt } from "./update.constants";
 import type { AutoUpdateEvent, UpdatePromptState } from "./update.types";
 import { friendlyUpdateError, updateWasLeftAlone } from "./update.utils";
+import { fetchOfficialAndroidRelease, compareStableVersions, ANDROID_RELEASE_PREFIX } from "./androidRelease";
 
 type UpdatesControllerOptions = {
   ready: boolean;
@@ -105,16 +106,30 @@ export function useUpdatesController({ ready,autoUpdateEnabled,autoUpdateNotifyO
     return()=>window.clearTimeout(timer);
   },[ready]);
 
+  const checkAndroid=useCallback(async(silent:boolean)=>{
+    try {
+      const release=await fetchOfficialAndroidRelease();
+      const checkedAt=Date.now();
+      if(compareStableVersions(release.version,APP_VERSION)>0)
+        applyEvent({type:"available",silent,checkedAt,version:release.version,manualOnly:true,downloadUrl:release.downloadUrl,releaseNotes:release.releaseNotes});
+      else applyEvent({type:"not-available",silent,checkedAt,version:release.version,manualOnly:true});
+      return true;
+    }catch(error){
+      applyEvent({type:"error",silent,manualOnly:true,message:"Could not verify Android releases.",error:String(error)});
+      return false;
+    }
+  },[applyEvent]);
+
   // One renderer-owned scheduler respects autoUpdateEnabled; the Electron main process does not also poll.
   useEffect(()=>{
-    if(!ready||!autoUpdateEnabled||isAndroidApp()||!window.localitfy.checkForUpdates)return;
+    if(!ready||!autoUpdateEnabled||(!isAndroidApp()&&!window.localitfy.checkForUpdates))return;
     let alive=true;
     const run=async()=>{
       if(!alive||checkingRef.current)return;
       checkingRef.current=true;
       lastAttemptRef.current=Date.now();
       try {
-        const ok=await window.localitfy.checkForUpdates?.({silent:true});
+        const ok=isAndroidApp()?await checkAndroid(true):await window.localitfy.checkForUpdates?.({silent:true});
         if(!alive)return;
         if(ok===false) {
           failureCountRef.current=Math.min(4,failureCountRef.current+1);
@@ -134,9 +149,14 @@ export function useUpdatesController({ ready,autoUpdateEnabled,autoUpdateNotifyO
     return()=>{alive=false;window.clearTimeout(startup);window.clearInterval(interval);
       if(retryRef.current!==null)window.clearTimeout(retryRef.current);retryRef.current=null;
       document.removeEventListener("visibilitychange",resumed);window.removeEventListener("online",online);};
-  },[ready,autoUpdateEnabled]);
+  },[ready,autoUpdateEnabled,checkAndroid]);
 
   const manualUpdateCheck=useCallback(async()=>{
+    if(isAndroidApp()){
+      setUpdatePrompt(old=>old.status==="downloaded"?old:{...defaultUpdatePrompt,status:"checking",message:"Checking Android releases..."});
+      await checkAndroid(false);
+      return;
+    }
     if(!window.localitfy.checkForUpdates) {
       setUpdatePrompt({...defaultUpdatePrompt,status:"error",visible:true,message:"Updater is unavailable.",error:"This platform does not have a supported updater."});
       return;
@@ -146,9 +166,20 @@ export function useUpdatesController({ ready,autoUpdateEnabled,autoUpdateNotifyO
       const message=friendlyUpdateError(error);
       setUpdatePrompt({...defaultUpdatePrompt,status:"error",visible:true,message,error:message});
     });
-  },[]);
+  },[checkAndroid]);
 
   const askUpdaterToDownload=useCallback(async()=>{
+    if(isAndroidApp()) {
+      const url=updatePrompt.downloadUrl||"";
+      if(!updatePrompt.manualOnly || !url.startsWith(ANDROID_RELEASE_PREFIX) || !/^https:\/\/github\.com\/meshahid973\/localtify\/releases\/download\/v\d+\.\d+\.\d+\/localtify-\d+\.\d+\.\d+-android\.apk$/.test(url)){
+        setUpdatePrompt(old=>({...old,status:"error",visible:true,message:"No verified APK for this release.",error:"Try checking for updates again."}));
+        return;
+      }
+      try { await window.localitfy.openExternal(url); } catch {
+        setUpdatePrompt(old=>({...old,status:"error",visible:true,message:"Unable to open the Android installer.",error:"Open official GitHub releases in your browser."}));
+      }
+      return;
+    }
     if(!window.localitfy.downloadUpdate)return;
     const manual=updatePrompt.manualOnly;
     if(!manual)setUpdatePrompt(old=>({...old,visible:true,status:"downloading",message:"Starting update download…",percent:0,error:""}));
@@ -157,7 +188,7 @@ export function useUpdatesController({ ready,autoUpdateEnabled,autoUpdateNotifyO
       // The main process also sends detailed errors; retain them when they have arrived.
       setUpdatePrompt(old=>old.status==="downloading"?{...old,status:"error",message:"Download could not be started.",error:"Try again."}:old);
     }
-  },[updatePrompt.manualOnly]);
+  },[updatePrompt.manualOnly,updatePrompt.downloadUrl]);
 
   const askUpdaterToInstall=useCallback(async()=>{
     if(!window.localitfy.installUpdate)return;

@@ -1,4 +1,5 @@
 import "../features/updates/updates.css";
+import { isAndroidApp } from "./platform";
 import { AnimatePresence, motion } from "motion/react";
 import type { ComponentType } from "react";
 import type { Transition } from "motion/react";
@@ -28,7 +29,7 @@ export default function UpdateIsland({show,updatePrompt,appVersion,reducedMotion
     </div>
     <div className="localtifyUpdateBannerActions">
       {(available||downloaded)?<button type="button" onClick={onWhatsNew}>What's new</button>:null}
-      {available?<button type="button" onClick={onDownload}>{updatePrompt.manualOnly?"Get AppImage":"Download"}</button>:null}
+      {available?<button type="button" onClick={onDownload}>{updatePrompt.manualOnly?(isAndroidApp()?"Get APK":"Get AppImage"):"Download"}</button>:null}
       {downloaded?<button type="button" onClick={onInstall}>Restart to update</button>:null}
       {error?<button type="button" onClick={onCheckAgain}>Retry</button>:null}
       {!downloading?<button type="button" onClick={onDismiss} aria-label="Dismiss update notice"><X size={15}/></button>:null}
