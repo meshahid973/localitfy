@@ -70,3 +70,28 @@ test("Discover track identities survive the download journal without substitutin
     assert.ok(reopened.prepare({ ...selected, url: "https://open.spotify.com/track/lastfm-abc123", track: { id: "lastfm-abc123", title: "Track" } }).id);
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
+
+test("asynchronous completed-output verification preserves SHA-256 safety across restart", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "localtify-async-journal-"));
+  try {
+    const { createHash } = await import("node:crypto");
+    const store = createDownloadJobStore(dir);
+    const job = store.prepare({ ...request(dir), options: { autoAdd: false } });
+    const filePath = path.join(dir, "fixture.mp3");
+    const original = Buffer.alloc(512 * 1024, 0x61);
+    fs.writeFileSync(filePath, original);
+    const stat = fs.statSync(filePath);
+    const sha256 = createHash("sha256").update(original).digest("hex");
+    store.update(job.id, { status: "done", result: { ok: true, filePath }, sizeBytes: stat.size, mtimeMs: stat.mtimeMs, sha256 });
+    const restarted = createDownloadJobStore(dir);
+    const accepted = await restarted.prepareAsync({ ...request(dir), options: { autoAdd: false } });
+    assert.equal(accepted.status, "done");
+    assert.equal(accepted.id, job.id);
+    const altered = Buffer.alloc(original.length, 0x62);
+    fs.writeFileSync(filePath, altered);
+    fs.utimesSync(filePath, stat.atime, stat.mtime);
+    const retry = await restarted.prepareAsync({ ...request(dir), options: { autoAdd: false } });
+    assert.equal(retry.status, "queued", "different audio bytes must not be reused even at identical size");
+    assert.deepEqual(fs.readFileSync(filePath), altered, "retry never overwrites a user's modified file");
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});

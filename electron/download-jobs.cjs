@@ -59,6 +59,19 @@ function hashFile(filename) {
   } finally { fs.closeSync(descriptor); }
 }
 
+// Streaming hash keeps the main thread responsive during large completed-file
+// reuse checks. The legacy synchronous entry point remains for callers that
+// cannot await a journal operation.
+async function hashFileAsync(filename) {
+  const hash = crypto.createHash("sha256");
+  for await (const chunk of fs.createReadStream(filename, { highWaterMark: 256 * 1024 })) hash.update(chunk);
+  return hash.digest("hex");
+}
+function sameFileSnapshot(a, b) {
+  return a && b && a.size === b.size && a.dev === b.dev && a.ino === b.ino &&
+    a.mtimeMs === b.mtimeMs && a.ctimeMs === b.ctimeMs;
+}
+
 /** Main-process-owned journal. Persist state transitions before starting external work. */
 function createDownloadJobStore(userDataPath, { now = Date.now } = {}) {
   const directory = path.join(userDataPath, "download-jobs");
@@ -113,7 +126,7 @@ function createDownloadJobStore(userDataPath, { now = Date.now } = {}) {
 
   function get(id) { const job = jobs.get(id); return job ? clone(job) : null; }
   function list() { return [...jobs.values()].sort((a, b) => b.createdAt - a.createdAt).map(clone); }
-  function prepare(input) {
+  function prepare(input, verifiedHash = null) {
     const request = normalizeRequest(input);
     const key = requestKey(request);
     const old = [...jobs.values()].find(job => job.key === key && job.status !== "cancelled");
@@ -121,7 +134,11 @@ function createDownloadJobStore(userDataPath, { now = Date.now } = {}) {
     if (["done", "interrupted"].includes(old?.status) && old.result?.ok && old.result.filePath) {
       try {
         const stat = fs.statSync(old.result.filePath);
-        if (stat.isFile() && stat.size === old.sizeBytes && (old.sha256 ? hashFile(old.result.filePath) === old.sha256 : stat.mtimeMs === old.mtimeMs)) {
+        const trustedAsyncHash = verifiedHash?.job === old && sameFileSnapshot(verifiedHash.stat, stat);
+        const hashMatches = old.sha256
+          ? (trustedAsyncHash ? verifiedHash.digest === old.sha256 : hashFile(old.result.filePath) === old.sha256)
+          : stat.mtimeMs === old.mtimeMs;
+        if (stat.isFile() && stat.size === old.sizeBytes && hashMatches) {
           const reused = { ...clone(old), request, status: "done", importPending: request.options.autoAdd, updatedAt: now(), result: { ...old.result, error: undefined } };
           const next = new Map(jobs);
           next.set(old.id, reused);
@@ -144,6 +161,28 @@ function createDownloadJobStore(userDataPath, { now = Date.now } = {}) {
     }
     persist(next);
     return clone(job);
+  }
+  async function prepareAsync(input) {
+    const request = normalizeRequest(input);
+    const key = requestKey(request);
+    const previous = [...jobs.values()].find(job => job.key === key && job.status !== "cancelled");
+    if (!previous?.sha256 || !["done", "interrupted"].includes(previous.status) ||
+        !previous.result?.ok || !previous.result.filePath || previous.pendingOutput) {
+      return prepare(input);
+    }
+    try {
+      const filename = previous.result.filePath;
+      const before = await fs.promises.stat(filename);
+      if (!before.isFile() || before.size !== previous.sizeBytes) return prepare(input);
+      const digest = await hashFileAsync(filename);
+      const after = await fs.promises.stat(filename);
+      if (!sameFileSnapshot(before, after)) return prepare(input);
+      return prepare(input, { job: previous, stat: after, digest });
+    } catch {
+      // A removed, unreadable or concurrently modified file is handled by the
+      // established journal validation and retry rules.
+      return prepare(input);
+    }
   }
   function update(id, patch) {
     const old = jobs.get(id);
@@ -184,7 +223,7 @@ function createDownloadJobStore(userDataPath, { now = Date.now } = {}) {
     persist(next);
     return true;
   }
-  return Object.freeze({ get, list, prepare, update, workDirectory, cleanWorkDirectory, remove });
+  return Object.freeze({ get, list, prepare, prepareAsync, update, workDirectory, cleanWorkDirectory, remove });
 }
 
 module.exports = { createDownloadJobStore, normalizeRequest, requestKey };
