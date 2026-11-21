@@ -1,4 +1,5 @@
 import "./downloads.css";
+import { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import type { DownloadQueueItem, DownloadResult, SpotifyTrack } from "./download.types";
 import type { DownloadsTab } from "./useDownloadsRuntime";
@@ -101,6 +102,17 @@ export default function DownloadsView(props: DownloadsViewProps) {
     visibleDownloadResults
   } = props;
 
+  const [queueFilter, setQueueFilter] = useState<"all" | "active" | "attention" | "completed">("all");
+  const attention = (status: string) => ["failed", "cancelled", "interrupted"].includes(status);
+  const active = (status: string) => ["queued", "downloading", "converting", "importing"].includes(status);
+  const activeCount = visibleDownloadQueueItems.filter((item) => active(item.status)).length;
+  const attentionCount = visibleDownloadQueueItems.filter((item) => attention(item.status)).length;
+  const completeCount = visibleDownloadQueueItems.filter((item) => item.status === "done").length;
+  const filteredQueueItems = visibleDownloadQueueItems.filter((item) =>
+    queueFilter === "all" || (queueFilter === "active" && active(item.status)) ||
+    (queueFilter === "attention" && attention(item.status)) || (queueFilter === "completed" && item.status === "done")
+  );
+
   return (
 
               <section data-page-section="downloads" className="downloadsLayout downloadsLayoutV031">
@@ -113,9 +125,19 @@ export default function DownloadsView(props: DownloadsViewProps) {
                   </button>
                 </PageHeader>
 
+                <div className="downloadsOverview">
+                  <p>Bring music into your library from links or local files. Monitor progress, resume interrupted jobs and manage results here.</p>
+                  <div className="downloadsSummary" aria-label="Download queue summary" role="status">
+                    <span><strong>{activeCount}</strong> active</span>
+                    <span><strong>{attentionCount}</strong> need attention</span>
+                    <span><strong>{completeCount}</strong> completed</span>
+                  </div>
+                </div>
+
                 <section className="panel downloadPanel downloadPanelV031">
+                  <div className="downloadWorkspace">
                   <div className="downloadsInputCard" aria-label="Download source and links">
-                    <div className="downloadsInputTitle"><strong>Add music</strong><span>Paste links to download or import.</span></div>
+                    <div className="downloadsInputTitle"><span className="downloadsSectionLabel">01 / Source</span><strong>Add music</strong><span>Choose a source, then paste a link to start.</span></div>
                   {/* -- Source tabs -------------------------------- */}
                   <div className="downloadTabStrip" role="group" aria-label="Download source">
                     <button
@@ -145,8 +167,8 @@ export default function DownloadsView(props: DownloadsViewProps) {
                       />
 
                       <div className="downloadActions downloadActionsV031">
-                        <button className="heroMain" onClick={() => void downloadAudioLinks()} disabled={downloadBusy}>
-                          {downloadBusy ? "downloading..." : "start download"}
+                        <button className="heroMain" onClick={() => void downloadAudioLinks()} disabled={downloadBusy || !downloadText.trim()}>
+                          {downloadBusy ? "Downloading…" : "Start download"}
                         </button>
 
                         {downloadBusy ? (
@@ -341,21 +363,13 @@ export default function DownloadsView(props: DownloadsViewProps) {
 
                   </div>
                   {/* -- Shared: queue, converter, results ----------- */}
-                  {visibleDownloadQueueItems.length ? (
-                    <div className="downloadQueuePanel">
+                  <div className="downloadQueuePanel" aria-label="Download activity">
                       <div className="panelHead smallPanelHead">
                         <div>
-                          <p className="eyebrow">queue</p>
-                          <h3>{visibleDownloadQueueItems.length} item{visibleDownloadQueueItems.length === 1 ? "" : "s"}</h3>
+                          <p className="downloadsSectionLabel">02 / Activity</p>
+                          <h3>Download queue</h3>
                         </div>
                         <div className="downloadQueueHeaderActions downloadQueueHeaderActionsV502">
-                          <span>{downloadBusy ? "working" : failedDownloadQueueItems.length ? "needs attention" : "ready"}</span>
-                          <button
-                            className="softButton tinyDownloadAction"
-                            onClick={() => window.localitfy.openDownloadsFolder(settings.downloadFolder || undefined)}
-                          >
-                            folder
-                          </button>
                           <button
                             className="softButton tinyDownloadAction"
                             onClick={retryFailedDownloads}
@@ -381,8 +395,22 @@ export default function DownloadsView(props: DownloadsViewProps) {
                         </div>
                       </div>
 
+                      <div className="downloadQueueFilters" role="group" aria-label="Filter download queue">
+                        {([
+                          ["all", "All"], ["active", "Active"], ["attention", "Attention"], ["completed", "Completed"]
+                        ] as const).map(([value, label]) => (
+                          <button key={value} type="button" className={queueFilter === value ? "downloadQueueFilter selected" : "downloadQueueFilter"}
+                            aria-pressed={queueFilter === value} onClick={() => setQueueFilter(value)}>{label}</button>
+                        ))}
+                      </div>
                       <div className="downloadQueueList">
-                        {visibleDownloadQueueItems.map((item, index) => {
+                        {!filteredQueueItems.length ? (
+                          <div className="downloadQueueEmpty" role="status">
+                            <strong>{visibleDownloadQueueItems.length ? "Nothing in this view" : "Your queue is clear"}</strong>
+                            <p>{visibleDownloadQueueItems.length ? "Select another filter to see your downloads." : "New downloads and imports will appear here."}</p>
+                          </div>
+                        ) : null}
+                        {filteredQueueItems.map((item, index) => {
                           const done = item.status === "done";
                           const failed = item.status === "failed" || item.status === "cancelled" || item.status === "interrupted";
                           const downloadedNotImported = done && item.importedToLibrary === false;
@@ -394,12 +422,12 @@ export default function DownloadsView(props: DownloadsViewProps) {
                               className={`downloadQueueItem downloadQueueItemV338 ${item.status}${done ? " compactDone" : ""}${downloadedNotImported ? " notImported" : ""}`}
                             >
                               <div className="downloadQueueTop">
-                                <span className="downloadQueueIndex">{String(index + 1).padStart(2, "0")}</span>
+                                <span className="downloadQueueIndex" aria-hidden="true">{sourceLabel === "Spotify" ? "S" : "Y"}</span>
                                 <div>
                                   <strong>{item.filename || item.title}</strong>
                                   <p>{item.message || downloadStatusLabel(item.status)}</p>
                                 </div>
-                                <small>{done ? "100%" : `${item.progress}%`}</small>
+                                <small>{done ? "100%" : failed ? "!" : `${Math.round(clamp(item.progress, 0, 100))}%`}</small>
                               </div>
 
                               {!done || downloadedNotImported ? (
@@ -434,10 +462,11 @@ export default function DownloadsView(props: DownloadsViewProps) {
                         })}
                       </div>
                     </div>
-                  ) : null}
+                  </div>
 
                   <div className="converterBox converterBoxV031">
                     <div>
+                      <span className="downloadsSectionLabel">03 / Utilities</span>
                       <strong>Convert local files</strong>
                       <p>Convert audio and video to music files.</p>
                     </div>
@@ -464,7 +493,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
                   {visibleDownloadResults.length ? (
                     <div className="downloadResults downloadResultsV031 downloadResultsGlowV502">
                       <div className="downloadResultsHeadV502">
-                        <strong>finished downloads</strong>
+                        <div className="downloadsResultHeading"><span className="downloadsSectionLabel">04 / History</span><strong>Recent results</strong></div>
                         <div>
                           <button className="softButton tinyDownloadAction" type="button" onClick={() => window.localitfy.openDownloadsFolder(settings.downloadFolder || undefined)}>
                             open folder
