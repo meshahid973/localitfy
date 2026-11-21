@@ -391,7 +391,7 @@ server.listen(5173,async()=>{
                 selectedRadius:parseFloat(getComputedStyle(selected).borderTopLeftRadius)};
             })()`);
             assert.ok(downloadAppearance.fields.length>0,"Downloads has visible embedded URL fields");
-            assert.ok(downloadAppearance.fields.every(field=>field.embedded && /^(?:transparent|rgba\\(0, 0, 0, 0\\))$/.test(field.background)),"Downloads input has no double grey fill: "+JSON.stringify(downloadAppearance));
+            assert.ok(downloadAppearance.fields.every(field=>field.embedded && (field.background==="transparent" || field.background.replaceAll(" ","")==="rgba(0,0,0,0)")),"Downloads input has no double grey fill: "+JSON.stringify(downloadAppearance));
             assert.ok(downloadAppearance.verticalGap>=0 && downloadAppearance.verticalGap<=28,"Downloads importer-to-activity spacing is compact: "+JSON.stringify(downloadAppearance));
             assert.equal(downloadAppearance.menuIcons,1,"icon-only row menus must not render an extra chevron");
             assert.ok(downloadAppearance.selectedRadius>=12,"Download activity filter uses rounded, theme-safe selection");
