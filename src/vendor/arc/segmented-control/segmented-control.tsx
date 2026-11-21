@@ -16,6 +16,18 @@ export interface SegmentedControlProps {
   className?: string;
 }
 
+/** Measure relative to the scrolling track even when an ancestor is positioned. */
+function revealSelected(node: HTMLDivElement, behavior: ScrollBehavior) {
+  const button = node.querySelector<HTMLElement>('[aria-pressed="true"]');
+  if (!button || node.scrollWidth <= node.clientWidth) return;
+  const leftInTrack = button.getBoundingClientRect().left - node.getBoundingClientRect().left + node.scrollLeft;
+  const room = 20;
+  const start = leftInTrack - room;
+  const end = leftInTrack + button.offsetWidth + room - node.clientWidth;
+  const left = node.scrollLeft > start ? start : node.scrollLeft < end ? end : node.scrollLeft;
+  if (Math.abs(left - node.scrollLeft) > 1) node.scrollTo({ left: Math.max(0, left), behavior });
+}
+
 export default function SegmentedControl({ options, value, onValueChange, label, onOptionIntent, className }: SegmentedControlProps) {
   const id = useId();
   const reduced = useReducedMotion();
@@ -32,7 +44,7 @@ export default function SegmentedControl({ options, value, onValueChange, label,
     };
     edges();
     node.addEventListener("scroll", edges, { passive: true });
-    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(edges);
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => { edges(); revealSelected(node, "auto"); });
     observer?.observe(node);
     return () => { node.removeEventListener("scroll", edges); observer?.disconnect(); };
   }, [options.length]);
@@ -41,11 +53,8 @@ export default function SegmentedControl({ options, value, onValueChange, label,
   const first = useRef(true);
   useEffect(() => {
     const node = track.current;
-    const button = node?.querySelector<HTMLElement>('[aria-pressed="true"]');
-    if (!node || !button || node.scrollWidth <= node.clientWidth) { first.current = false; return; }
-    const room = 20, start = button.offsetLeft - room, end = button.offsetLeft + button.offsetWidth + room - node.clientWidth;
-    const left = node.scrollLeft > start ? start : node.scrollLeft < end ? end : node.scrollLeft;
-    if (left !== node.scrollLeft) node.scrollTo({ left: Math.max(0, left), behavior: first.current || reduced ? "auto" : "smooth" });
+    if (!node) { first.current = false; return; }
+    revealSelected(node, first.current || reduced ? "auto" : "smooth");
     first.current = false;
   }, [value, reduced]);
 

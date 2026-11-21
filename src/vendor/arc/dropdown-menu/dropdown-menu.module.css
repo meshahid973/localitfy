@@ -45,3 +45,7 @@
 .trigger[data-icon-only="true"] { width:34px; height:34px; min-height:34px; padding:0; justify-content:center; border-color:transparent; background:transparent; }
 @media (hover:hover) and (pointer:fine) { .trigger[data-icon-only="true"]:hover { border-color:transparent; background:var(--lt-fill-hover); box-shadow:none; } }
 .trigger[data-icon-only="true"][data-state="open"] { border-color:var(--lt-border); background:var(--lt-fill-selected); }
+
+@media (forced-colors: active) {
+  .item:focus-visible { outline: 2px solid Highlight; outline-offset: -2px; }
+}

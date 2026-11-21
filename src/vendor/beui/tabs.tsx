@@ -155,8 +155,10 @@ export function Tabs({
     tabStop = enabled.some(([tab]) => tab === current) ? current : (enabled[0]?.[0] ?? "");
   }
   const baseId = useId();
-  const tabId = useCallback((tab: string) => `${baseId}-tab-${tab.replace(/[^\w-]/g, "_")}`, [baseId]);
-  const panelId = useCallback((tab: string) => `${baseId}-panel-${tab.replace(/[^\w-]/g, "_")}`, [baseId]);
+  // Unique IDs for every Unicode string; unlike underscore replacement,
+  // "mix one" cannot collide with "mix_one" or another literal suffix.
+  const tabId = useCallback((tab: string) => `${baseId}-tab-${Array.from(tab, c => c.codePointAt(0)!.toString(16)).join("-")}`, [baseId]);
+  const panelId = useCallback((tab: string) => `${baseId}-panel-${Array.from(tab, c => c.codePointAt(0)!.toString(16)).join("-")}`, [baseId]);
   const contextValue = useMemo(
     () => ({
       value: current,
@@ -534,6 +536,7 @@ export function TabsTrigger({
     "aria-controls": panels.has(value) ? panelId(value) : undefined,
     tabIndex: !disabled && (tabStop === null || tabStop === value) ? 0 : -1,
   };
+  const overlayLabel = typeof children === "string" || typeof children === "number" ? children : null;
   const content = icon ? (
     <>
       <TriggerIcon icon={icon} active={active} />
@@ -638,7 +641,8 @@ export function TabsTrigger({
           className="pointer-events-none absolute inset-0 inline-flex items-center justify-center text-primary-foreground [gap:inherit] [padding:inherit]"
           style={{ clipPath: initialClip }}
         >
-          {content}
+          {/* Overlaid color text must not remount arbitrary caller components. */}
+          {overlayLabel}
         </span>
       </button>
     </div>
@@ -658,25 +662,16 @@ export function TabsContent({ value, children, className }: { value: string; chi
     role: "tabpanel",
     "aria-labelledby": tabId(value),
   } as const;
-  // Inactive panels stay mounted but hidden, so their content (e.g. source
-  // code) is present in the server-rendered HTML for crawlers and assistive
-  // tech, instead of being dropped from the DOM.
-  if (!active) {
-    return (
-      <div {...a11y} hidden className={className}>
-        {children}
-      </div>
-    );
-  }
+  // Keep the same React element type when selected state changes. Replacing
+  // div with motion.div remounts the entire panel and loses child state.
   return (
     <motion.div
       {...a11y}
-      // Reachable with Tab so a panel without controls can still be read.
-      tabIndex={0}
-      key={value}
-      initial={{ opacity: 0, y: reduce ? 0 : 4 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.18, ease: EASE_OUT }}
+      hidden={!active}
+      tabIndex={active ? 0 : undefined}
+      initial={false}
+      animate={{ opacity: active ? 1 : 0, y: active || reduce ? 0 : 4 }}
+      transition={{ duration: reduce ? 0 : 0.18, ease: EASE_OUT }}
       className={cn("mt-4 outline-none focus-visible:ring-2 focus-visible:ring-ring/40 rounded-md", className)}
     >
       {children}

@@ -61,6 +61,10 @@ test("filename metadata fallback needs a full title and refuses ambiguous record
   assert.equal(matchSpotifyTrackForFile("/music/KICK BACK.mp3", [kickBack]), kickBack);
   assert.equal(matchSpotifyTrackForFile("/music/Kenshi Yonezu unreleased mix.mp3", [kickBack, lemonade]), null,
     "an artist match alone must not overwrite a local file's metadata");
+  assert.equal(matchSpotifyTrackForFile("/music/Kenshi Yonezu - KICK BACK.mp3", [kickBack, kickBack]), kickBack,
+    "duplicate references to one recording must not become ambiguous");
+  assert.equal(matchSpotifyTrackForFile("/music/Kenshi Yonezu - KICK BACK.mp3", [kickBack, { ...kickBack, id: "another-id" }]), null,
+    "distinct recordings with identical labels remain ambiguous");
   assert.equal(matchSpotifyTrackForFile("/music/Intro.mp3", [intro, other]), null,
     "an ambiguous title cannot select an arbitrary artist");
   assert.equal(matchSpotifyTrackForFile("/music/Kenshi Yonezu - Intro.mp3", [intro, other]), intro);
