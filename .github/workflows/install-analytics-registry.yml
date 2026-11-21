@@ -26,6 +26,32 @@ jobs:
         run: bunx --bun shadcn add @beui/line-chart -y --overwrite
       - name: Install Arc UI original dropdown through pnpm
         run: pnpm dlx shadcn@latest add @uiarc/dropdown-menu -y --overwrite
+      - name: Place original registry source in existing vendor layout
+        run: |
+          mkdir -p src/vendor
+          cp -a -n '@/vendor/.' src/vendor/
+          python3 - <<'PY'
+          import os,re
+          from pathlib import Path
+          root=Path('src/vendor')
+          for base in (root/'charts',root/'motion'):
+            if not base.exists(): continue
+            for file in base.rglob('*'):
+              if file.suffix not in ('.ts','.tsx'): continue
+              original=file.read_text()
+              def fix(match):
+                dest=Path('src/vendor')/match.group(1)
+                relative=os.path.relpath(dest, file.parent).replace(os.sep,'/')
+                return '"' + (relative if relative.startswith('.') else './'+relative) + '"'
+              changed=re.sub(r'"@/(?:components/|vendor/)([^"]+)"',fix,original)
+              def fixlib(match):
+                dest=Path('src/vendor/beui/lib')/match.group(1)
+                relative=os.path.relpath(dest,file.parent).replace(os.sep,'/')
+                return '"' + (relative if relative.startswith('.') else './'+relative) + '"'
+              changed=re.sub(r'"@/lib/([^"]+)"',fixlib,changed)
+              file.write_text(changed)
+          PY
+          rm -rf '@'
       - name: Retain the project's npm lockfile
         run: |
           rm -f pnpm-lock.yaml bun.lock bun.lockb
