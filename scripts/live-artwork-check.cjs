@@ -140,7 +140,17 @@ async function main() {
     return {status:image?"ok":"image-unavailable",metadata:true,image};
   }));
   await Promise.all(jobs);
+  const sorted=checks.sort((a,b)=>a.provider.localeCompare(b.provider));
   console.log(JSON.stringify({checkedAt:new Date().toISOString(),sample:{title:expectedTitle,artist:expectedArtist},
-    checks:checks.sort((a,b)=>a.provider.localeCompare(b.provider)),note:"Advisory network observation, not a guarantee of future provider availability"},null,2));
+    checks:sorted,note:"Advisory network observation, not a guarantee of future provider availability"},null,2));
+  // Manual release acceptance must not silently pass without configured keys
+  // or when either keyed integration is unable to retrieve usable artwork.
+  if(process.argv.includes("--require-keyed")) {
+    const failed=["Last.fm","Fanart.tv"].filter(name=>sorted.find(row=>row.provider===name)?.status!=="ok");
+    if(failed.length) {
+      console.error("Keyed artwork acceptance failed (keys omitted from output): "+failed.join(", "));
+      process.exitCode=1;
+    }
+  }
 }
 main().catch(error=>{console.error("Provider audit failed:",error);process.exitCode=1});
