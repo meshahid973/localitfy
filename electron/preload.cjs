@@ -165,6 +165,7 @@ contextBridge.exposeInMainWorld("localitfy", {
   closeWindow: () => ipcRenderer.invoke("window:close"),
 
   checkForUpdates: (payload) => ipcRenderer.invoke("localitfy:check-for-updates", payload),
+  getUpdateState: () => ipcRenderer.invoke("localitfy:get-update-state"),
   downloadUpdate: () => ipcRenderer.invoke("localitfy:download-update"),
   installUpdate: () => ipcRenderer.invoke("localitfy:install-update"),
   openExternal: (url) => ipcRenderer.invoke("localitfy:open-external", url),

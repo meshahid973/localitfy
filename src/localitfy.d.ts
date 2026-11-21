@@ -678,6 +678,7 @@ declare global {
       repairDatabaseNow: () => Promise<LocalitfyDatabaseRepairResult>;
 
       checkForUpdates?: (payload?: { silent?: boolean }) => Promise<boolean>;
+      getUpdateState?: () => Promise<AutoUpdateEvent>;
       downloadUpdate?: () => Promise<boolean>;
       installUpdate?: () => Promise<boolean>;
       onAutoUpdate?: (callback: (payload: AutoUpdateEvent) => void) => () => void;

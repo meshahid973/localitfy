@@ -204,6 +204,7 @@ const updaterRuntime = createUpdaterRuntime({
   getMainWindow: () => mainWindow
 });
 const checkForUpdates = updaterRuntime.checkForUpdates;
+const getUpdateState = updaterRuntime.getUpdateState;
 const downloadUpdate = updaterRuntime.downloadUpdate;
 const installUpdate = updaterRuntime.installUpdate;
 
@@ -2395,6 +2396,7 @@ app.whenReady().then(async () => {
   ipcRouter.handle("spotdl-check", async () => ({ ok: true, installed: true, engine: "localtify-ytdlp-bridge", message: "Spotify downloads use localtify's bundled yt-dlp bridge after metadata is fetched." }));
 
   ipcRouter.handle("localitfy:check-for-updates", async (_event, payload) => checkForUpdates(payload));
+  ipcRouter.handle("localitfy:get-update-state", async () => getUpdateState());
   ipcRouter.handle("localitfy:download-update", async () => downloadUpdate());
   ipcRouter.handle("localitfy:install-update", async () => installUpdate());
   ipcRouter.handle("localitfy:open-external", async (_event, url) => {
@@ -2417,10 +2419,7 @@ app.whenReady().then(async () => {
     startupWindowTimer = null;
     if (!shutdownStarted) { createWindow(); setupNativeWindowsMedia(); }
   }, startupCreateDelayMs);
-  startupUpdateTimer = setTimeout(() => {
-    startupUpdateTimer = null;
-    if (!shutdownStarted) checkForUpdates({ silent: true }).catch((e) => console.log("[localitfy updater startup error]", e?.message));
-  }, UPDATE_CHECK_STARTUP_DELAY_MS);
+  // Renderer owns the update-check schedule so the user's disabled setting is respected.
   app.on("activate", () => { if (!shutdownStarted && BrowserWindow.getAllWindows().length === 0) createWindow(); });
 });
 
