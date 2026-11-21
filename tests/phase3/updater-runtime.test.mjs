@@ -61,3 +61,41 @@ test("Android official release discovery rejects missing/mismatched APKs and com
   await assert.rejects(()=>fetchOfficialAndroidRelease(response({...valid,draft:true})),/Unverified/);
   await assert.rejects(()=>fetchOfficialAndroidRelease(response({...valid,assets:[{...valid.assets[0],browser_download_url:"https://evil.example/malware.apk"}]})),/APK/);
 });
+
+
+test("Downloaded update remains installable after background or manual recheck", async () => {
+  const { EventEmitter } = await import("node:events");
+  const emitter = new EventEmitter();
+  let checks = 0;
+  let downloaded = 0;
+  let installed = 0;
+  Object.assign(emitter, {
+    checkForUpdates: async () => {
+      checks++;
+      emitter.emit("update-available", { version: "0.5.2", releaseNotes: "## Verified update" });
+    },
+    downloadUpdate: async () => {
+      downloaded++;
+      emitter.emit("update-downloaded", { version: "0.5.2", releaseNotes: "## Verified update" });
+    },
+    quitAndInstall: () => { installed++; },
+  });
+  const runtime = updater.createUpdaterRuntime({
+    app: { getVersion: () => "0.5.1", isPackaged: false },
+    autoUpdater: emitter,
+    shell: { openExternal: async () => {} },
+    https: {},
+    isDev: false,
+  });
+  assert.equal(await runtime.checkForUpdates({ silent: true }), true);
+  assert.equal(await runtime.downloadUpdate(), true);
+  assert.equal(downloaded, 1);
+  assert.equal(runtime.getUpdateState().type, "downloaded");
+  assert.equal(await runtime.checkForUpdates({ silent: true }), true);
+  assert.equal(checks, 1, "do not replace verified pending installer with another check");
+  assert.equal(await runtime.checkForUpdates({ silent: false }), true);
+  assert.equal(runtime.getUpdateState().type, "downloaded");
+  assert.equal(await runtime.installUpdate(), true);
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(installed, 1, "approved restart calls the updater once");
+});
