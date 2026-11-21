@@ -246,7 +246,7 @@ function createUpdaterRuntime(options = {}) {
       }
       const cleanInfo = safeUpdateInfo(info);
       updaterChecking = false;
-      updateDownloaded = false;
+      if (updateDownloaded) return; // Preserve pending install if a check raced a download.
       lastUpdateInfo = cleanInfo;
       sendAutoUpdateEvent({
         type: "available",
@@ -259,7 +259,7 @@ function createUpdaterRuntime(options = {}) {
     autoUpdater.on("update-not-available", (info) => {
       const cleanInfo = safeUpdateInfo(info);
       updaterChecking = false;
-      updateDownloaded = false;
+      if (updateDownloaded) return;
       lastUpdateInfo = cleanInfo;
       sendAutoUpdateEvent({
         type: "not-available",
@@ -317,8 +317,22 @@ function createUpdaterRuntime(options = {}) {
 
   async function checkForUpdates(payload = {}) {
     setupAutoUpdater();
-    if (updaterChecking || updateDownloading) return true;
+    if (updaterChecking) {
+      // A manual check during a background check should receive the eventual result.
+      if (!payload?.silent) updaterSilent = false;
+      return true;
+    }
+    if (updateDownloading) return true;
     updaterSilent = Boolean(payload?.silent);
+    // Checking again must not invalidate a verified, already downloaded installer.
+    if (updateDownloaded) {
+      if (!updaterSilent) sendAutoUpdateEvent({
+        type: "downloaded", version: lastUpdateInfo?.version || "latest",
+        releaseNotes: lastUpdateInfo?.releaseNotes || "", percent: 100,
+        message: "Update already downloaded. Restart to install it."
+      });
+      return true;
+    }
     if (isDev) {
       sendAutoUpdateEvent({ type: "dev", message: "auto update only works in the packaged app" });
       return false;
