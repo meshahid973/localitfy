@@ -51,3 +51,6 @@
 @media(max-width:660px) { .releaseNotesMain { grid-template-columns:1fr; grid-template-rows:auto minmax(0,1fr); } .releaseNotesVersions { flex-direction:row; overflow-x:auto; overflow-y:hidden; border-right:0; border-bottom:1px solid var(--lt-border); padding:8px; } .releaseNotesVersions button { min-width:92px; } .releaseNotesContent { padding:20px; } .releaseNotesHead { padding:18px 20px; } .localtifyUpdateBannerText span { display:none; } }
 @media(max-width:520px) { .localtifyUpdateBanner { padding:3px 6px; } .localtifyUpdateBannerActions button { padding:5px 6px; font-size:10px; } }
 @media(prefers-reduced-motion:reduce) { .releaseNotesOverlay,.localtifyUpdateBanner,.localtifyUpdateBannerProgress { transition:none!important; animation:none!important; } }
+
+.settingsUpdatesActions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding-top:14px; }
+.settingsUpdatesActions button { min-height:34px; }
