@@ -386,10 +386,13 @@ server.listen(5173,async()=>{
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=discover]').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.discoverPage') && !document.querySelector('.appCrashBoundary') && document.querySelector('.app').dataset.workspaceArtwork==='on'").catch(()=>false),"Discover "+mode);
       await screenshot(win,"discover-"+mode);
-      for (const width of [1280,860]) {
-        win.setSize(width,800);
+      // Keep full 860/1280 coverage; exercise original wide-desktop layout
+      // only for the player and the two recently redesigned pages.
+      for (const width of [1280,860,1920]) {
+        win.setSize(width,width===1920?1080:800);
         await until(()=>win.webContents.executeJavaScript("window.innerWidth").then(actual=>actual===width),"viewport "+width,5000);
-        for (const view of ["home","library","artists","genres","playlists","discover","downloads","covers","analytics","settings"]) {
+        const views=width===1920?["home","downloads","analytics"]:["home","library","artists","genres","playlists","discover","downloads","covers","analytics","settings"];
+        for (const view of views) {
           await win.webContents.executeJavaScript(`document.querySelector('.sidebar [data-nav-id="${view}"]').click()`);
           await until(()=>win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return !!page?.firstElementChild&&!page.querySelector('.collectionLoading')&&!document.querySelector('.appCrashBoundary')&&Number(getComputedStyle(page).opacity)>=0.99})()`).catch(()=>false),view+" "+mode+" "+width);
           if(view==="downloads") {
@@ -477,7 +480,7 @@ server.listen(5173,async()=>{
           if(view==="artists") {
             await until(()=>win.webContents.executeJavaScript(`(()=>{const covers=[...document.querySelectorAll(".artistCard .coverImage")].filter(img=>{const r=img.getBoundingClientRect();return r.width>0&&r.height>0&&r.bottom>0&&r.top<window.innerHeight});return covers.length>0&&covers.every(img=>img.complete&&img.naturalWidth>0&&img.classList.contains("isLoaded"))})()`).catch(()=>false),"visible artist fixture artwork "+mode+" "+width,10000);
           }
-          if(width===1280 && view==="home"){
+          if((width===1280 || width===1920) && view==="home"){
             const volumeGeometry=await win.webContents.executeJavaScript(`(()=>{
               const slider=document.querySelector('.playerRight .volumeWrap input[type="range"]');
               const player=document.querySelector('.playerBar');
