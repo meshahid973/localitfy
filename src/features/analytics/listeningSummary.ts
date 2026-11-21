@@ -58,7 +58,7 @@ export type ListeningCalendarPeriod = {
 export type ListeningCalendarSummary = ListeningCalendarPeriod & {
   range:ListeningCalendarRange;offset:number;generatedAt:number;partial:boolean;
   bySong:Array<{id:string;ms:number}>;
-  comparison:ListeningCalendarPeriod & {changePercent:number|null};
+  comparison:ListeningCalendarPeriod & {comparableTotalMs:number;changePercent:number|null};
 };
 export function isListeningCalendarSummary(value:unknown, expected?:{range:ListeningCalendarRange;offset:number}):value is ListeningCalendarSummary {
   if(!object(value)||!["week","month","year"].includes(String(value.range))||
@@ -95,7 +95,9 @@ export function isListeningCalendarSummary(value:unknown, expected?:{range:Liste
   const seen=new Set<string>();let total=0;
   for(const song of value.bySong){if(!object(song)||typeof song.id!=="string"||!song.id||seen.has(song.id)||!nonnegativeInteger(song.ms)||song.ms===0)return false;seen.add(song.id);total+=song.ms;}
   if(total!==value.totalMs)return false;
-  const previous=value.comparison.totalMs as number;
+  const previous=value.comparison.comparableTotalMs;
+  if(!nonnegativeInteger(previous)||previous>(value.comparison.totalMs as number)||
+     !value.partial&&previous!==value.comparison.totalMs)return false;
   const comparison=value.comparison.changePercent;
   const calculated=previous>0?((value.totalMs as number)-previous)/previous*100:null;
   return calculated===null?comparison===null:typeof comparison==="number"&&Number.isFinite(comparison)&&Math.abs(comparison-calculated)<0.000001;

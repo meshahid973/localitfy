@@ -176,7 +176,7 @@ export default function AnalyticsView({
             <div><strong>{summary.activeDays.toLocaleString()}</strong><span>Active days</span></div>
             <div>
               <strong>{summary.comparison.changePercent === null ? "—" : (summary.comparison.changePercent > 0 ? "+" : "") + summary.comparison.changePercent.toFixed(1) + "%"}</strong>
-              <span>{summary.comparison.changePercent === null ? "No previous baseline" : "Vs previous period"}</span>
+              <span>{summary.comparison.changePercent === null ? "No previous baseline" : summary.partial ? "Vs previous period to date" : "Vs previous period"}</span>
             </div>
           </div>
         </div>
@@ -208,7 +208,7 @@ export default function AnalyticsView({
               </tr>)}</tbody>
             </table></div>
           </details>
-          <p className="analyticsV4FinePrint">Comparison curves align by day of period; months may have different lengths. Actual listening events are grouped by their UTC start date. Older unrecorded playback is not estimated.{isAndroidApp() ? " Phone plays not yet synced to your computer are excluded." : ""} Last snapshot: {new Date(summary.generatedAt).toLocaleString()}.</p>
+          <p className="analyticsV4FinePrint">Comparison curves show the full preceding period; {summary.partial?"percentage change compares equivalent elapsed time":"percentage change compares complete periods"}. Months may have different lengths. Events are grouped by UTC start date. Older unrecorded playback is not estimated.{isAndroidApp() ? " Phone plays not yet synced to your computer are excluded." : ""} Last snapshot: {new Date(summary.generatedAt).toLocaleString()}.</p>
         </section>
 
         <div className="analyticsV4Rankings">
