@@ -394,11 +394,11 @@ server.listen(5173,async()=>{
             await until(()=>win.webContents.executeJavaScript("!!document.querySelector('section[data-slot=\"line-chart\"]')"),"genuine beUI recorded listening chart");
             assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('.analyticsV4Overview').length"),1,"single listening overview");
             assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('.analyticsV4Rankings .analyticsV4Ranking').length"),2,"artwork rankings");
-            assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('section[data-slot=\"line-chart\"] table tbody tr').length"),calendar.byBucket.length,"accessible chart data corresponds to exact UTC period");
+            assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('section[data-slot=\"line-chart\"] table tbody tr').length"),Math.max(calendar.byBucket.length,calendar.comparison.byBucket.length),"accessible chart preserves the full current and previous UTC months");
             await win.webContents.executeJavaScript("(()=>{const button=[...document.querySelectorAll('button')].find(b=>b.getAttribute('aria-label')==='Previous period');button?.click();})()");
             await until(()=>win.webContents.executeJavaScript("document.querySelector('.analyticsV4PeriodNav span')?.textContent.includes('October')"),"historic calendar navigation");
             const previous=await win.webContents.executeJavaScript("window.localitfy.getListeningCalendarSummary({range:'month',offset:1})");
-            assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('section[data-slot=\"line-chart\"] table tbody tr').length"),previous.byBucket.length,"historical period renders exact buckets");
+            assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('section[data-slot=\"line-chart\"] table tbody tr').length"),Math.max(previous.byBucket.length,previous.comparison.byBucket.length),"historical comparison retains both UTC calendars");
           }
           const geometry=await win.webContents.executeJavaScript(`(()=>{
             const page=document.querySelector('.pageTransition[data-view="${view}"]');
