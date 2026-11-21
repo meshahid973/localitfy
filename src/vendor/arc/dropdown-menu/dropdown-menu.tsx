@@ -46,6 +46,20 @@ export function DropdownMenu({ label, items, icon, iconOnly = false }: DropdownM
   const [highlight, setHighlight] = useState<Highlight | null>(null);
   const pointer = useRef(false);
   const clearTimer = useRef(0);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const itemsKey = items.map(item => String(item.label) + ":" + String(item.disabled)).join("|");
+  // Re-measure the focused menu action if the queue completes or changes while
+  // the menu remains open. Otherwise the animated highlight points elsewhere.
+  useLayoutEffect(() => {
+    const focused = document.activeElement;
+    const content = contentRef.current;
+    if (!(focused instanceof HTMLElement) || !content?.contains(focused)) return;
+    const item = focused.closest<HTMLElement>('[role="menuitem"]');
+    if (!item) return;
+    const next = { top: item.offsetTop, height: item.offsetHeight, danger: item.dataset.tone === "danger" };
+    setHighlight(current => current?.top === next.top && current.height === next.height && current.danger === next.danger
+      ? current : { ...next, glide: false });
+  }, [itemsKey]);
   useEffect(() => () => window.clearTimeout(clearTimer.current), []);
   // Radix focuses the highlighted item (pointer or keyboard) and the content when the pointer leaves an item.
   function onMenuFocus(event: FocusEvent<HTMLDivElement>) {
@@ -62,7 +76,7 @@ export function DropdownMenu({ label, items, icon, iconOnly = false }: DropdownM
   }
   return <DropdownPrimitive.Root onOpenChange={open => { if (open) { window.clearTimeout(clearTimer.current); setHighlight(null); } }}>
     <DropdownPrimitive.Trigger className={styles.trigger} type="button" aria-label={iconOnly ? label : undefined}>{icon && <span className={styles.triggerIcon} aria-hidden="true">{icon}</span>}{!iconOnly && <TriggerLabel text={label}/>}<ChevronDown className={styles.chevron} size={15} strokeWidth={1.8} aria-hidden="true"/></DropdownPrimitive.Trigger>
-    <DropdownPrimitive.Portal><DropdownPrimitive.Content className={styles.menu} sideOffset={6} align="end" collisionPadding={12} loop onFocus={onMenuFocus} onPointerMoveCapture={() => { pointer.current = true; }} onKeyDownCapture={() => { pointer.current = false; }}>
+    <DropdownPrimitive.Portal><DropdownPrimitive.Content ref={contentRef} className={styles.menu} sideOffset={6} align="end" collisionPadding={12} loop onFocus={onMenuFocus} onPointerMoveCapture={() => { pointer.current = true; }} onKeyDownCapture={() => { pointer.current = false; }}>
       {/* One highlight glides between items for the pointer and jumps instantly for the keyboard. */}
       <motion.span className={styles.highlight} data-tone={highlight?.danger ? "danger" : undefined} aria-hidden="true" initial={false} animate={highlight ? { y: highlight.top, height: highlight.height, opacity: 1 } : { opacity: 0 }} transition={{ default: highlight?.glide && !reduced ? motionTokens.spring.snappy : { duration: 0 }, opacity: { duration: reduced ? 0 : .08 } }}/>
       {items.map((item, index) => <Fragment key={item.label}>{item.separatorBefore && <DropdownPrimitive.Separator className={styles.separator}/>}<DropdownPrimitive.Item className={[styles.item, item.destructive ? styles.destructive : ""].filter(Boolean).join(" ")} data-tone={item.destructive ? "danger" : undefined} style={{ "--i": index } as CSSProperties} disabled={item.disabled} onSelect={item.onSelect}>{item.icon && <span className={styles.icon} aria-hidden="true">{item.icon}</span>}{item.label}</DropdownPrimitive.Item></Fragment>)}

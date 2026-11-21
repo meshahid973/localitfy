@@ -243,6 +243,16 @@ const FadeContent = ({
         stagger > 0 ? { stagger: { each: toSeconds(stagger), from: staggerFrom } } : {};
       const noisy = NOISE_EFFECTS.includes(effect);
       const looks = noisy ? [] : getLooks(effect, blurAmount, startOpacity);
+      const originalStyles = targets.map(target => ({
+        target,
+        transform: target.style.getPropertyValue("transform"),
+        transformPriority: target.style.getPropertyPriority("transform"),
+        filter: target.style.getPropertyValue("filter"),
+        filterPriority: target.style.getPropertyPriority("filter")
+      }));
+      const changedTransform = looks.some(look =>
+        ["x", "y", "scale", "rotate", "rotation", "transform"].some(key => key in look.from || key in look.to));
+      const changedFilter = looks.some(look => "filter" in look.from || "filter" in look.to);
 
       if (noisy) masks = targets.map(target => createNoiseMask(target, effect, startOpacity, blurAmount));
       const proxies = masks.map(mask => mask.state);
@@ -282,7 +292,18 @@ const FadeContent = ({
           masks = [];
           return;
         }
-        gsap.set(targets, { clearProps: 'filter,transform' });
+        for (const saved of originalStyles) {
+          // Removing the whole inline property also removes transforms/filters
+          // supplied by the caller. Restore only values this effect animated.
+          if (changedTransform) {
+            if (saved.transform) saved.target.style.setProperty("transform", saved.transform, saved.transformPriority);
+            else saved.target.style.removeProperty("transform");
+          }
+          if (changedFilter) {
+            if (saved.filter) saved.target.style.setProperty("filter", saved.filter, saved.filterPriority);
+            else saved.target.style.removeProperty("filter");
+          }
+        }
       };
 
       const scrubbing = scrub && trigger !== 'mount';
