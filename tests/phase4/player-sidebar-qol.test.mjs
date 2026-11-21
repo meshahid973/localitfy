@@ -107,7 +107,7 @@ test("repeat-all loops the artist/genre a queue was started from", () => {
   const playNext = app.slice(app.indexOf("function playNext("), app.indexOf("function playPrevious("));
   // Queued songs play first; the loop only restarts once the queue is empty.
   assert.ok(playNext.indexOf("playQueue.findIndex") < playNext.indexOf("sourceLoopRestart()"));
-  assert.match(app, /kind: "source-loop" as const, rest: sourceLoop\.rest/);
+  assert.match(read("src/features/player/resolveAutoTransitionTarget.ts"), /kind: "source-loop" as const, rest: sourceLoop\.rest/);
   assert.match(app, /target\.kind === "source-loop"\) \{\s*setPlayQueue\(target\.rest\);/);
   const shell = read("src/features/shell/useCollectionActions.ts");
   assert.match(shell, /target\.kind === "artist" \|\| target\.kind === "genre" \? playbackSourceRef\(target\.kind, target\.title\)/);

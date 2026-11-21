@@ -91,3 +91,34 @@ test("a retried crossfade cannot inherit the cancelled attempt's generation", ()
   assert.equal(m.isCurrentCrossfade("b", first), false);
   assert.equal(m.isCurrentCrossfade("b", m.snapshot().generation), true);
 });
+
+test("crossfade target selection preserves queue and repeat priority", () => {
+  const file = fs.readFileSync(path.join(root, "src/features/player/resolveAutoTransitionTarget.ts"), "utf8");
+  const output = ts.transpileModule(file, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
+  const loaded = { exports: {} };
+  new Function("module", "exports", "require", output)(loaded, loaded.exports, name => {
+    if (name === "../library/library.utils") return { isPlayableSong: song => !!song?.filePath };
+    throw Error("Unexpected transition dependency: " + name);
+  });
+  const { resolveAutoTransitionTarget } = loaded.exports;
+  const song = id => ({ id, title: id, filePath: "/music/" + id + ".mp3" });
+  const songs = [song("a"), song("b"), song("c")];
+  const byId = new Map(songs.map(item => [item.id, item]));
+  const defaults = {
+    playableSongs: songs, currentSong: songs[0], currentId: "a", repeatMode: "off",
+    playQueue: [], songsById: byId, activePlaylist: null, activePlaylistSongs: [],
+    isShuffle: false, repeatPlaylist: false,
+    sourceLoopRestart: () => null, currentIndex: () => 0,
+    buildShuffleQueue: (list, avoid) => ({ nextSong: list.find(item => item.id !== avoid) || null })
+  };
+  assert.equal(resolveAutoTransitionTarget({ ...defaults, repeatMode: "one" }), null);
+  assert.equal(resolveAutoTransitionTarget({ ...defaults, playQueue: ["c"] }).song.id, "c");
+  assert.equal(resolveAutoTransitionTarget({ ...defaults, playQueue: ["missing"], sourceLoopRestart: () => ({ song: songs[2], rest: [] }) }).kind, "source-loop");
+  const playlist = { id: "playlist", name: "playlist", songIds: ["a","c"], createdAt: 1 };
+  const inPlaylist = { ...defaults, activePlaylist: playlist, activePlaylistSongs: [songs[0], songs[2]] };
+  assert.equal(resolveAutoTransitionTarget(inPlaylist).song.id, "c");
+  assert.equal(resolveAutoTransitionTarget({ ...inPlaylist, isShuffle: true }).kind, "playlist-shuffle");
+  assert.equal(resolveAutoTransitionTarget({ ...defaults, isShuffle: true }).kind, "library-shuffle");
+  assert.equal(resolveAutoTransitionTarget({ ...defaults, currentSong: songs[2], currentId: "c", currentIndex: () => 2 }), null);
+  assert.equal(resolveAutoTransitionTarget({ ...defaults, currentSong: songs[2], currentId: "c", currentIndex: () => 2, repeatMode: "all" }).song.id, "a");
+});
