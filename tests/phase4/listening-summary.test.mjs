@@ -108,6 +108,7 @@ test("Calendar month and year are real UTC ranges, exclude future events and inc
     const feb=getRecordedListeningCalendarSummary(database,{range:"month",offset:1,now});
     assert.equal(feb.totalMs,3000);
     assert.equal(feb.byBucket.length,28);
+    assert.equal(feb.comparison.byBucket.length,31,"previous January must remain complete when February has fewer days");
     assert.equal(feb.comparison.totalMs,0);
     assert.equal(feb.partial,false);
     assert.equal(isListeningCalendarSummary(feb,{range:"month",offset:1}),true);

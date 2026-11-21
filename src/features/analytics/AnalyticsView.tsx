@@ -78,7 +78,7 @@ function breakdown(songs: Song[], summary: ListeningCalendarSummary | null) {
 export default function AnalyticsView({
   songs, importSongs, missingFileCount, neverPlayedCount, recentImportWeekCount,
   averageSongSeconds, libraryLengthLabel, libraryHealthLabel, libraryHealthPercent,
-  longestSong, playedPercent, likedPercent, onSelectSong
+  longestSong, playedPercent, likedPercent, onSelectSong, analyticsRecapCards, analyticsStatCards
 }: AnalyticsViewProps) {
   const actions = useAppActions();
   const [range, setRange] = useState<ListeningCalendarRange>("month");
@@ -105,25 +105,25 @@ export default function AnalyticsView({
   }, [range, offset, revision]);
 
   const insight = useMemo(() => breakdown(songs, summary), [songs, summary]);
+  // Calendar months can differ in length; never discard previous-month dates or invent zero-valued days.
+  const categories = useMemo(() => {
+    if (!summary) return [];
+    const length = Math.max(summary.byBucket.length, summary.comparison.byBucket.length);
+    return Array.from({length}, (_, index) =>
+      summary.range === "year"
+        ? new Intl.DateTimeFormat("en", { month: "short", timeZone: "UTC" }).format(new Date(Date.UTC(2024,index,1)))
+        : summary.range === "week" ? ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"][index]
+          : "Day " + (index + 1));
+  }, [summary]);
   const series = useMemo<LineChartSeries[]>(() => {
     if (!summary) return [];
-    const previous = summary.comparison.byBucket;
     return [
-      {
-        id: "current",
-        name: "This period",
-        color: "var(--lt-accent)",
-        values: summary.byBucket.map(entry => entry.ms / 60000)
-      },
-      {
-        id: "previous",
-        name: "Previous period",
-        color: "var(--lt-muted)",
-        values: summary.byBucket.map((_, index) => previous[index] ? previous[index].ms / 60000 : null)
-      }
+      { id:"current",name:"This period",color:"var(--lt-accent)",
+        values:categories.map((_,index)=>summary.byBucket[index] ? summary.byBucket[index].ms/60000 : null) },
+      { id:"previous",name:"Previous period",color:"var(--lt-muted)",
+        values:categories.map((_,index)=>summary.comparison.byBucket[index] ? summary.comparison.byBucket[index].ms/60000 : null) }
     ];
-  }, [summary]);
-  const categories = useMemo(() => summary?.byBucket.map(entry => entry.id) || [], [summary]);
+  }, [summary,categories]);
 
   function selectRange(value: string) {
     if (value === "week" || value === "month" || value === "year") {
@@ -199,7 +199,16 @@ export default function AnalyticsView({
               </LineChart>
             </div>
           ) : <p className="analyticsV4Empty">No recorded listening in this period yet.</p>}
-          <p className="analyticsV4FinePrint">Actual listening events, grouped by their start date in UTC. Older unrecorded playback is not estimated.{isAndroidApp() ? " Phone plays not yet synced to your computer are excluded." : ""} Last snapshot: {new Date(summary.generatedAt).toLocaleString()}.</p>
+          <details className="analyticsV4DayData"><summary>Inspect exact UTC {summary.range==="year"?"months":"days"}</summary>
+            <div><table><caption>Recorded listening, attributed to the UTC date each event began</caption>
+              <thead><tr><th scope="col">Current UTC period</th><th scope="col">Recorded</th><th scope="col">Previous UTC period</th><th scope="col">Recorded</th></tr></thead>
+              <tbody>{categories.map((_,index)=><tr key={index}>
+                <th scope="row">{summary.byBucket[index]?.id||"—"}</th><td>{summary.byBucket[index]?readableDuration(summary.byBucket[index].ms):"—"}</td>
+                <td>{summary.comparison.byBucket[index]?.id||"—"}</td><td>{summary.comparison.byBucket[index]?readableDuration(summary.comparison.byBucket[index].ms):"—"}</td>
+              </tr>)}</tbody>
+            </table></div>
+          </details>
+          <p className="analyticsV4FinePrint">Comparison curves align by day of period; months may have different lengths. Actual listening events are grouped by their UTC start date. Older unrecorded playback is not estimated.{isAndroidApp() ? " Phone plays not yet synced to your computer are excluded." : ""} Last snapshot: {new Date(summary.generatedAt).toLocaleString()}.</p>
         </section>
 
         <div className="analyticsV4Rankings">
@@ -242,8 +251,21 @@ export default function AnalyticsView({
         <div><strong>{missingFileCount.toLocaleString()}</strong><span>Missing files</span></div>
         <div><strong>{libraryHealthPercent}%</strong><span>{libraryHealthLabel}</span></div>
         <div><strong>{averageSongSeconds ? formatAnalyticsDuration(averageSongSeconds) : "—"}</strong><span>Average track</span></div>
-        <div><strong>{longestSong ? formatAnalyticsDuration(longestSong.duration) : "—"}</strong><span>Longest track</span></div>
+        <div><strong>{longestSong ? formatAnalyticsDuration(longestSong.duration) : "—"}</strong><span>Longest track{longestSong?" · "+longestSong.title:""}</span></div>
       </div>
+      <section className="analyticsV4LibraryRecaps">
+        <h3>Monthly &amp; yearly library imports</h3>
+        <div className="analyticsV4LibraryGrid">{analyticsRecapCards.filter(card=>card.label!=="all-time listening").map(card=><div key={card.label}>
+          <strong>{card.value}</strong><span>{card.label} · {card.note} · {card.meta}</span>
+        </div>)}</div>
+        <h3>Additional library statistics</h3>
+        <div className="analyticsV4LibraryGrid">{analyticsStatCards.filter(card=>card.label!=="listened").map(card=><div key={card.label}>
+          <strong>{card.value}</strong><span>{card.label} · {card.note}</span>
+        </div>)}</div>
+      </section>
+      {insight.topGenres.length?<section className="analyticsV4GenreList"><h3>Top genres by recorded listening</h3>
+        {insight.topGenres.map(([genre,ms])=><div key={genre}><span>{genre}</span><strong>{readableDuration(ms)}</strong></div>)}
+      </section>:null}
       {!songs.length && !isAndroidApp() ? <button type="button" onClick={importSongs} className="analyticsV4Import"><Music2 size={16}/> Import music</button> : null}
       {missingFileCount ? <p className="analyticsV4Warning">{missingFileCount} library file{missingFileCount===1?" is":"s are"} missing on disk. Repair them from Library settings.</p> : null}
     </details>

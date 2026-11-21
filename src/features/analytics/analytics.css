@@ -52,3 +52,15 @@
 @media (max-width:1050px) { .analyticsV4Overview { align-items:start; } .analyticsV4Metrics { width:100%; max-width:500px; } }
 @media (max-width:750px) { .analyticsV4Rankings { grid-template-columns:1fr; } .analyticsV4Controls { justify-content:flex-start; } .analyticsV4Overview { gap:22px; } }
 @media (max-width:480px) { .analyticsV4Metrics { grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; } .analyticsV4Controls { gap:7px; } .analyticsV4PeriodNav span { min-width:85px; max-width:135px; } .analyticsV4Ranking li { gap:9px; } .analyticsV4Artwork { flex-basis:42px; width:42px; height:42px; } }
+
+.analyticsV4DayData { min-width:0; color:var(--lt-muted); font-size:11px; }
+.analyticsV4DayData summary { width:fit-content; cursor:pointer; font-weight:550; }
+.analyticsV4DayData > div { max-width:100%; overflow-x:auto; margin-top:9px; }
+.analyticsV4DayData table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; text-align:left; }
+.analyticsV4DayData th,.analyticsV4DayData td { padding:7px 9px; border-bottom:1px solid var(--lt-border); white-space:nowrap; text-align:left; }
+.analyticsV4LibraryRecaps,.analyticsV4GenreList { border-top:1px solid var(--lt-border); padding-top:19px; margin-top:15px; min-width:0; }
+.analyticsV4LibraryRecaps h3,.analyticsV4GenreList h3 { margin:6px 0 0; font-size:13px; font-weight:630; }
+.analyticsV4LibraryRecaps .analyticsV4LibraryGrid { padding:15px 0 10px; }
+.analyticsV4GenreList { display:grid; gap:9px; }
+.analyticsV4GenreList > div { display:flex; align-items:center; justify-content:space-between; gap:15px; color:var(--lt-muted); font-size:12px; }
+.analyticsV4GenreList strong { font-weight:650; color:var(--lt-text); font-variant-numeric:tabular-nums; }

@@ -432,6 +432,21 @@ server.listen(5173,async()=>{
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=settings]').click()");
       await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.settingsModeButton').length===2").catch(()=>false),"appearance navigation");
     }
+    // Render the actual title-bar update banner and remote What's New flow without installing a fake package.
+    win.webContents.send("localitfy:auto-update-event",{
+      type:"available",version:"9.9.9",manualOnly:true,silent:false,
+      message:"QA update preview",releaseNotes:"## QA release details\\n- Verified original release notes"
+    });
+    await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.localtifyUpdateBanner.available')"),"blue release banner");
+    assert.equal(await win.webContents.executeJavaScript("getComputedStyle(document.querySelector('.localtifyUpdateBanner')).backgroundImage.includes('linear-gradient')"),true,"banner has the proper blue treatment");
+    await screenshot(win,"updates-blue-banner");
+    await win.webContents.executeJavaScript("Array.from(document.querySelectorAll('.localtifyUpdateBanner button')).find(b=>b.textContent.includes('What'))?.click()");
+    await until(()=>win.webContents.executeJavaScript("document.querySelector('.releaseNotesDialog .releaseNotesMarkdown')?.textContent.includes('QA release details')"),"versioned release notes");
+    await screenshot(win,"whats-new-release-history");
+    await win.webContents.executeJavaScript("document.querySelector('.releaseNotesClose').click()");
+    await until(()=>win.webContents.executeJavaScript("!document.querySelector('.releaseNotesDialog')"),"close release notes");
+    await win.webContents.executeJavaScript("document.querySelector('.localtifyUpdateBanner [aria-label=\"Dismiss update notice\"]').click()");
+    await until(()=>win.webContents.executeJavaScript("!document.querySelector('.localtifyUpdateBanner')"),"dismiss update banner");
     // Exercise shared menu navigation, queue editing and both listening layouts.
     await win.webContents.executeJavaScript("document.querySelector('.playerBar [aria-label=pause]')?.click()");
     await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=home]').click()");
