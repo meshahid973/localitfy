@@ -25,6 +25,9 @@ test("publication never replaces existing audio and checkpoints the exact publis
     assert.equal(checkpoint.filePath, output);
     assert.equal(checkpoint.sizeBytes, fs.statSync(output).size);
     assert.equal(checkpoint.mtimeMs, fs.statSync(output).mtimeMs);
+    const { createHash } = await import("node:crypto");
+    assert.equal(checkpoint.sha256, createHash("sha256").update("complete audio").digest("hex"),
+      "hard-link publication checkpoints bytes, not only file size and mtime");
     assert.equal(fs.readdirSync(directory).some(name => name.startsWith(".localtify-publish-")), false);
   } finally { fs.rmSync(directory, { recursive: true, force: true }); }
 });
