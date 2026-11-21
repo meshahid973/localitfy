@@ -1,0 +1,14 @@
+/* beUI ships Tailwind 4 utilities. Install only theme/utilities: no Preflight reset. */
+@import "tailwindcss/theme.css";
+@import "tailwindcss/utilities.css";
+@source "../vendor/beui";
+@theme inline {
+  --color-primary: var(--lt-accent);
+  --color-primary-foreground: var(--lt-bg);
+  --color-card: var(--lt-fill-subtle);
+  --color-foreground: var(--lt-text);
+  --color-muted-foreground: var(--lt-muted);
+  --color-muted: var(--lt-fill-hover);
+  --color-border: var(--lt-border);
+  --color-ring: var(--lt-accent);
+}

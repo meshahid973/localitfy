@@ -104,15 +104,15 @@ test("Legacy appearance selectors are not kept after their controls move", () =>
   }
 });
 
-test("Downloads keeps import and queue controls but omits mascot and redundant empty art", () => {
+test("Downloads Experience keeps import, recovery and conversion controls without the retired cards", () => {
   const downloads = read("src/features/downloads/DownloadsView.tsx");
   const css = read("src/features/downloads/downloads.css");
-  assert.match(downloads, /downloadsInputCard/);
-  assert.match(downloads, /downloadQueuePanel/);
-  assert.match(downloads, /spotifyTrackList/);
-  assert.match(downloads, /converterProgress/);
-  assert.doesNotMatch(downloads, /MascotHelperBubble|MascotStateArt|LocaltifyStateCard/);
-  assert.match(css, /--downloads-surface: var\(--lt-surface-soft\)/);
+  for (const feature of ["downloadsImporter", "downloadsActivity", "downloadsSpotifyPreview", "convertLocalMedia", "retryDownload", "retrySpotifyTrack", "clearFinishedDownloads", "clearFailedDownloads"]) {
+    assert.ok(downloads.includes(feature), "Downloads lost " + feature);
+  }
+  assert.match(downloads, /label="Filter download activity"/);
+  assert.doesNotMatch(downloads, /MascotHelperBubble|MascotStateArt|LocaltifyStateCard|downloadQueuePanel|downloadsInputCard/);
+  assert.match(css, /--surface: var\(--lt-surface-raised\)/);
   assert.doesNotMatch(css, /#82b3ce|#0d1d26|mascotHelper/);
 });
 
@@ -166,7 +166,8 @@ test("Library, Covers and Spotify review fixes remain in place", () => {
   assert.match(library, /\.songRow \{[\s\S]*?color: var\(--lt-text\)/);
   assert.match(covers, /Fix missing \{missingCoverSongs\.length/);
   assert.doesNotMatch(covers, /Fix missing \$\{/);
-  assert.match(downloads, /\.downloadsInputCard > :is\(\.spotifyAuthCard,\.spotifyUrlRow,\.spotifyTrackList\) \{ min-width: 0; width: 100%; \}/);
+  assert.match(downloads, /\.downloadsInputSurface\s*\{[\s\S]*?min-width: 0/);
+  assert.match(downloads, /\.downloadsSpotifyPreview\s*\{[\s\S]*?min-width: 0/);
 });
 
 

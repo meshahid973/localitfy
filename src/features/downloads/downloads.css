@@ -1,182 +1,188 @@
-/* Downloads shares the active app theme. Input and task status are separate surfaces. */
-.downloadsLayoutV031 {
-  --downloads-edge: var(--lt-border);
-  --downloads-surface: var(--lt-surface-soft);
-  --downloads-raised: var(--lt-surface-raised);
-  --downloads-text: var(--lt-text);
-  --downloads-muted: var(--lt-muted);
-  --downloads-accent: var(--lt-accent);
-  min-width: 0; width: 100%;
-  display: grid; grid-template-columns: minmax(0,1fr);
-  gap: var(--lt-page-gap);
-  padding: 0 0 var(--lt-space-5);
-  color: var(--downloads-text);
+/* Downloads Experience 4.0: one continuous music-import workspace. */
+.downloadsExperience {
+  --border: var(--lt-border);
+  --border-strong: var(--lt-border-strong);
+  --radius-control: 12px;
+  --radius-panel: 12px;
+  --surface: var(--lt-surface-raised);
+  --surface-muted: var(--lt-fill);
+  --foreground: var(--lt-text);
+  --text-muted: var(--lt-muted);
+  --text-secondary: var(--lt-muted);
+  --accent: var(--lt-accent);
+  --success: var(--lt-accent);
+  --danger: var(--lt-danger);
+  --shadow-resting: none;
+  --control-height-sm: 36px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --text-sm: 12px;
+  --duration-fast: 120ms;
+  --ease-standard: var(--lt-ease-out);
+  --leading-body: 1.4;
+  display: grid;
+  align-content: start;
+  gap: clamp(24px, 2.8vw, 38px);
+  width: 100%;
+  max-width: 1120px;
+  min-width: 0;
+  padding-bottom: 36px;
+  color: var(--lt-text);
 }
-.downloadsLayoutV031 *, .downloadsLayoutV031 *::before, .downloadsLayoutV031 *::after { box-sizing: border-box; }
-.app .downloadsLayoutV031 .downloadPanelV031 {
-  display: grid; align-content: start; gap: var(--lt-section-gap); min-width: 0; padding: 0;
-  border: 0 !important; background: transparent !important; box-shadow: none !important;
+
+.downloadsExperience *, .downloadsExperience *::before, .downloadsExperience *::after { box-sizing: border-box; }
+.downloadsExperience button, .downloadsExperience input, .downloadsExperience textarea { font-family: inherit; }
+.downloadsExperience button { cursor: pointer; }
+.downloadsExperience button:disabled { opacity: .46; cursor: not-allowed; }
+.downloadsExperience :is(button,input,textarea):focus-visible { outline: 2px solid var(--lt-accent); outline-offset: 3px; }
+.downloadsExperience .pageHeader { margin: 0; }
+.downloadsExperience .pageHeaderTools { gap: 3px; }
+.downloadsExperience .pageHeaderTools > button { color: var(--lt-muted); border: 0; background: transparent; box-shadow: none; }
+.downloadsExperience .pageHeaderTools > button:hover { color: var(--lt-text); background: var(--lt-fill-hover); }
+.downloadsTools { margin-left: 6px; }
+.downloadsTools button[aria-haspopup="menu"] { border-color: var(--lt-border); background: transparent; }
+
+.downloadsImporter {
+  display: block;
+  min-width: 0;
+  padding-bottom: clamp(24px, 2.7vw, 36px);
+  border-bottom: 1px solid var(--lt-border);
 }
-.downloadsLayoutV031 .eyebrow { margin: 0 0 8px; color: var(--downloads-accent); font-size: var(--lt-text-sm); font-weight: 500; }
-.downloadsLayoutV031 .panelHead {
-  min-width: 0; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
-  gap: 20px; padding-bottom: 17px; border-bottom: 1px solid var(--downloads-edge);
+.downloadsTabs { max-width: 100%; }
+.downloadsTabList { border: 1px solid var(--lt-border); background: var(--lt-fill-subtle); padding: 4px; gap: 2px; border-radius: 999px; }
+.downloadsTabList [role="tab"] { min-height: 34px; min-width: 110px; padding: 7px 20px; font-size: 13px; border: 0; box-shadow: none; }
+.downloadsTabList [data-tabs-indicator] { background: var(--lt-fill-selected); }
+.downloadsTabList [data-tabs-label] { color: var(--lt-text); }
+.downloadsTabList [role="tab"]:focus-visible { outline-offset: -2px; }
+.downloadsSourceContent { display: grid; gap: 12px; margin-top: 22px; min-width: 0; }
+.downloadsSourceContent[hidden] { display: none; }
+.downloadsInputLabel { display: block; color: var(--lt-text); font-size: 13px; font-weight: 600; }
+.downloadsInputSurface {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--lt-border);
+  border-radius: 14px;
+  background: var(--lt-fill-subtle);
+  transition: background-color var(--lt-control-motion), border-color var(--lt-control-motion);
 }
-.downloadsLayoutV031 .panelHead h3 { margin: 0; color: var(--downloads-text); font-size: var(--lt-text-heading); font-weight: 700; letter-spacing: -.035em; }
-.downloadsLayoutV031 .panelHead p:last-child { margin: 9px 0 0; color: var(--downloads-muted); font-size: 13px; line-height: 1.5; }
-.downloadsLayoutV031 .downloadActions,
-.downloadsLayoutV031 .downloadQueueHeaderActions, .downloadsLayoutV031 .downloadResultActionsV502 {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 9px;
+.downloadsInputSurface:focus-within { border-color: var(--lt-border-strong); background: var(--lt-fill); }
+.downloadsLinkIcon { flex: none; margin-top: 2px; color: var(--lt-muted); }
+.downloadsLinkInput {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 0;
+  resize: vertical;
+  border: 0;
+  outline: none;
+  color: var(--lt-text);
+  background: none;
+  font-size: 13px;
+  line-height: 1.65;
 }
-.downloadsLayoutV031 .downloadTabStrip {
-  width: fit-content; display: flex; align-items: center; gap: 5px;
-  padding: 4px; border: 1px solid var(--downloads-edge); border-radius: 11px;
-  background: var(--downloads-surface);
+.downloadsExperience .downloadsLinkInput:focus-visible { outline: none; }
+.downloadsLinkInput::placeholder { color: var(--lt-faint); opacity: 1; }
+.downloadsInputSingle { align-items: center; }
+.downloadsInputSingle .downloadsLinkIcon { margin-top: 0; }
+.downloadsInputSingle .downloadsLinkInput { min-height: 20px; height: 24px; resize: none; }
+.downloadsPrimaryRow { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; min-height: 42px; }
+.downloadsPrimaryRow > button { min-width: 150px; gap: 8px; border-radius: 10px; }
+.downloadsInputHint { color: var(--lt-muted); font-size: 11px; line-height: 1.5; }
+.downloadsSpotifyStatus { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; color: var(--lt-muted); font-size: 12px; }
+.downloadsTextAction {
+  border: 0;
+  padding: 3px 0;
+  color: var(--lt-text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  background: transparent;
+  text-decoration: underline;
+  text-decoration-color: var(--lt-border);
+  text-underline-offset: 4px;
 }
-.downloadsLayoutV031 .downloadTab {
-  min-height: 36px; display: inline-flex; align-items: center; gap: 8px;
-  padding: 8px 17px; border: 1px solid transparent; border-radius: 8px;
-  background: transparent; color: var(--downloads-muted); font: inherit; font-size: 13px; font-weight: 650; cursor: pointer;
+.downloadsTextAction:hover { text-decoration-color: currentColor; }
+.downloadsFetchInline { flex: none; margin-left: auto; padding: 4px 3px; font-size: 11px; }
+
+.downloadsInlineError { display: flex; align-items: center; gap: 9px; color: var(--lt-danger); font-size: 12px; overflow-wrap: anywhere; }
+.downloadsInlineError > span { min-width: 0; flex: 1; }
+
+.downloadsSpotifyPreview { display: grid; gap: 8px; min-width: 0; margin-top: 10px; }
+.downloadsPreviewTitle { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 0 0 8px; font-size: 12px; }
+.downloadsPreviewTitle strong { font-weight: 650; }
+.downloadsPreviewTitle > span { color: var(--lt-muted); }
+.downloadsPreviewItems { display: grid; max-height: 350px; overflow: auto; scrollbar-width: thin; }
+.downloadsPreviewItem { display: flex; align-items: center; min-width: 0; gap: 12px; padding: 10px 0; border-top: 1px solid var(--lt-border); }
+.downloadsPreviewSelect { display: flex; align-items: center; flex: 1; min-width: 0; gap: 12px; padding: 0; border: 0; color: inherit; background: none; text-align: left; }
+.downloadsPreviewSelect:hover .downloadsPreviewCopy strong { color: var(--lt-accent); }
+.downloadsPreviewCopy { display: grid; min-width: 0; flex: 1; gap: 4px; }
+.downloadsPreviewCopy strong, .downloadsActivityCopy > strong { display: block; min-width: 0; color: var(--lt-text); font-weight: 600; font-size: 13px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+.downloadsPreviewCopy small { color: var(--lt-muted); font-size: 11px; overflow-wrap: anywhere; }
+.downloadsSelectMark { flex: none; display: grid; place-items: center; width: 20px; height: 20px; border: 1px solid var(--lt-border-strong); border-radius: 5px; color: var(--lt-text); }
+.downloadsSelectMark.selected { border-color: var(--lt-accent); background: var(--lt-fill-selected); }
+.downloadsTrackStatus { max-width: 90px; flex: none; color: var(--lt-muted); font-size: 11px; text-align: right; }
+.downloadsErrorText { color: var(--lt-danger) !important; }
+
+.downloadsConversion { display: grid; grid-template-columns: minmax(0,1fr) minmax(90px,200px) auto; gap: 12px; align-items: center; min-width: 0; font-size: 12px; color: var(--lt-muted); }
+.downloadsActivity { display: grid; min-width: 0; gap: 18px; }
+.downloadsActivityHead { display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: 16px; }
+.downloadsActivityTitle { display: grid; gap: 6px; }
+.downloadsActivityTitle h2 { margin: 0; font-size: 18px; font-weight: 650; letter-spacing: -.02em; }
+.downloadsActivityTitle p { margin: 0; color: var(--lt-muted); font-size: 12px; }
+.downloadsFilters { max-width: 100%; border-color: transparent; background: var(--lt-fill-subtle); }
+.downloadsActivityList { display: grid; min-width: 0; }
+.downloadsActivityRow { display: flex; align-items: center; gap: 14px; padding: 13px 2px; border-bottom: 1px solid var(--lt-border); min-width: 0; }
+.downloadsActivityRow:first-child { border-top: 1px solid var(--lt-border); }
+.downloadsArt { position: relative; display: grid; flex: none; place-items: center; overflow: hidden; width: 52px; height: 52px; border-radius: 8px; background: var(--lt-fill); color: var(--lt-faint); }
+.downloadsArt img, .downloadsArt .coverImage { display: block; width: 100%; height: 100%; object-fit: cover; }
+.downloadsArtFallback { border: 1px solid var(--lt-border); }
+.downloadsActivityCopy { display: grid; align-content: center; min-width: 0; flex: 1; gap: 5px; }
+.downloadsActivityCopy > span { min-width: 0; color: var(--lt-muted); font-size: 12px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+.downloadsActivityMeta { display: flex; flex-wrap: wrap; gap: 5px 12px; min-width: 0; color: var(--lt-muted); font-size: 11px; }
+.downloadsActivityMeta > span { max-width: 100%; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+.downloadsActivityCopy [role="progressbar"] { margin-top: 1px; max-width: 420px; }
+.downloadsActivityCopy [role="progressbar"] > div:last-child { height: 3px; border: 0; }
+.downloadsActivityActions { display: flex; align-items: center; gap: 10px; flex: none; }
+.downloadsActivityActions > small { color: var(--lt-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.downloadsRowAction { border: 0; background: none; color: var(--lt-text); padding: 6px; font-size: 12px; font-weight: 650; }
+.downloadsRowAction:hover { color: var(--lt-accent); text-decoration: underline; text-underline-offset: 3px; }
+.downloadsCompleteIcon { color: var(--lt-muted); }
+.downloadsRowMenu { position: relative; }
+.downloadsRowMenu button[aria-haspopup="menu"] { position: relative; width: 32px; height: 32px; min-height: 32px; padding: 0; justify-content: center; border: 0; color: var(--lt-muted); background: transparent; }
+.downloadsRowMenu button[aria-haspopup="menu"]:hover { color: var(--lt-text); background: var(--lt-fill-hover); }
+.downloadsRowMenu button[aria-haspopup="menu"] > svg { display: none; }
+
+.downloadsEmpty { display: grid; justify-items: center; gap: 8px; padding: 55px 15px; color: var(--lt-muted); text-align: center; }
+.downloadsEmpty strong { font-size: 13px; font-weight: 600; color: var(--lt-text); }
+.downloadsEmpty p { margin: 0; font-size: 12px; }
+.downloadsEmpty svg { opacity: .6; margin-bottom: 4px; }
+
+@media (max-width: 740px) {
+  .downloadsExperience { gap: 22px; padding: 0 2px 28px; }
+  .downloadsActivityHead { align-items: start; flex-direction: column; }
+  .downloadsFilters { width: 100%; }
+  .downloadsPrimaryRow > button { min-width: 128px; }
+  .downloadsInputHint { max-width: 240px; }
+  .downloadsConversion { grid-template-columns: 1fr auto; }
+  .downloadsConversion [role="progressbar"] { grid-column: 1 / -1; grid-row: 2; }
 }
-.downloadsLayoutV031 .spotifyTabDot { width: 8px; height: 8px; border-radius: 50%; background: #72bf9a; }
-.downloadsLayoutV031 .downloadTextarea {
-  width: 100%; min-height: 136px; display: block; resize: vertical; padding: 17px 18px;
-  border: 1px solid var(--downloads-edge); border-radius: var(--lt-control-radius);
-  color: var(--downloads-text); background: var(--lt-bg); font: inherit; font-size: 13px;
-  line-height: 1.6; outline: none;
+@media (max-width: 460px) {
+  .downloadsExperience .pageHeaderTools { gap: 0; }
+  .downloadsTools { margin-left: 0; }
+  .downloadsTabList [role="tab"] { min-width: 96px; }
+  .downloadsInputSurface { padding: 13px; }
+  .downloadsInputHint { display: none; }
+  .downloadsPrimaryRow > button { flex: 1; }
+  .downloadsActivityRow { gap: 10px; }
+  .downloadsArt { width: 44px; height: 44px; }
+  .downloadsActivityActions { gap: 4px; }
+  .downloadsRowAction { font-size: 11px; padding: 3px; }
 }
-.downloadsLayoutV031 .downloadTextarea::placeholder { color: var(--downloads-muted); }
-.downloadsLayoutV031 :is(input,textarea,button):focus-visible { outline: 2px solid var(--downloads-accent); outline-offset: 2px; }
-.downloadsLayoutV031 button:disabled { opacity: .45; cursor: not-allowed; }
-.downloadsLayoutV031 :is(.heroMain,.heroGhost,.softButton,.mainAction) { min-height: 38px; font-size: 12px; font-weight: 700; }
-.downloadsLayoutV031 .spotifyAuthCard { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 15px; padding: 18px; border: 1px solid var(--downloads-edge); border-radius: 12px; background: var(--downloads-surface); }
-.downloadsLayoutV031 .spotifyAuthLeft { display: flex; align-items: center; gap: 11px; }
-.downloadsLayoutV031 .spotifyAuthLeft > div { display: grid; gap: 6px; }
-.downloadsLayoutV031 .spotifyAuthLeft strong { font-size: 14px; }
-.downloadsLayoutV031 .spotifyAuthLeft p { margin: 0; color: var(--downloads-muted); font-size: 12px; }
-.downloadsLayoutV031 .spotifyAuthDot { height: 10px; width: 10px; border-radius: 50%; background: #70bc96; }
-.downloadsLayoutV031 .spotifyAuthActions,.downloadsLayoutV031 .spotifyUrlRow { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
-.downloadsLayoutV031 .spotifyUrlRow .spotifyUrlInput { min-height: 42px; height: 42px; flex: 1 1 300px; min-width: 0; resize: none; }
-.downloadsLayoutV031 .spotifyError { display: flex; justify-content: space-between; gap: 15px; flex-wrap: wrap; padding: 15px; border: 1px solid color-mix(in srgb, var(--lt-danger) 28%, transparent); border-radius: 10px; color: var(--lt-danger); background: color-mix(in srgb, var(--lt-danger) 8%, var(--downloads-surface)); }
-.downloadsLayoutV031 .spotifyError > div { display: grid; gap: 6px; }
-.downloadsLayoutV031 .spotifyError span { font-size: 12px; }
-.downloadsLayoutV031 .spotifyTrackList,.downloadsLayoutV031 .downloadQueuePanel,.downloadsLayoutV031 .downloadResults,.downloadsLayoutV031 .converterBox {
-  min-width: 0; display: grid; gap: 14px;
-  padding: var(--lt-surface-padding); border: 1px solid var(--downloads-edge);
-  border-radius: var(--lt-radius-panel); background: var(--downloads-surface);
-}
-.downloadsLayoutV031 .spotifyTrackListHead,.downloadsLayoutV031 .downloadResultsHeadV502 { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
-.downloadsLayoutV031 .spotifyTrackListHead strong,.downloadsLayoutV031 .downloadResultsHeadV502 strong { font-size: 15px; }
-.downloadsLayoutV031 .spotifySelectActions,.downloadsLayoutV031 .downloadResultsHeadV502 > div { display: flex; gap: 8px; flex-wrap: wrap; }
-.downloadsLayoutV031 .spotifyTrackItems,.downloadsLayoutV031 .downloadQueueList { min-width: 0; display: grid; align-content: start; gap: 8px; }
-.downloadsLayoutV031 .spotifyTrackItem {
-  min-width: 0; width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center; gap: 8px; padding: 10px 12px; text-align: left;
-  border: 1px solid var(--downloads-edge); border-radius: var(--lt-radius-item);
-  color: var(--downloads-text); background: var(--downloads-raised); font: inherit;
-}
-.downloadsLayoutV031 .spotifyTrackSelect {
-  min-width: 0; width: 100%; min-height: 54px; display: grid; grid-template-columns: 54px minmax(0, 1fr) 24px;
-  align-items: center; gap: 12px; padding: 0; border: 0; border-radius: 7px;
-  color: inherit; background: transparent; font: inherit; text-align: left; cursor: pointer;
-}
-.downloadsLayoutV031 .spotifyTrackSelect:disabled { cursor: default; opacity: .65; }
-.app .downloadsLayoutV031 :is(.spotifyTrackSelect, .spotifyRetryButton):focus-visible {
-  outline: 2px solid var(--downloads-accent) !important; outline-offset: 2px !important;
-}
-.downloadsLayoutV031 .spotifyTrackItem:hover { background: color-mix(in oklab,var(--downloads-accent) 9%,var(--downloads-raised)); }
-.downloadsLayoutV031 .spotifyTrackItem.selected { border-color: rgba(var(--lt-accent-rgb,121,167,196),.43); }
-.downloadsLayoutV031 .spotifyTrackArt,.downloadsLayoutV031 .spotifyTrackArt img { width: 54px; height: 54px; display: block; border-radius: 7px; object-fit: cover; }
-.downloadsLayoutV031 .spotifyTrackMeta { min-width: 0; display: grid; gap: 5px; }
-.downloadsLayoutV031 .spotifyTrackTitleLine { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; }
-.downloadsLayoutV031 .spotifyTrackTitleLine strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
-.downloadsLayoutV031 .spotifyTrackMeta p { margin: 0; color: var(--downloads-muted); font-size: 11px; }
-.downloadsLayoutV031 .spotifyTrackMeta small { color: var(--downloads-muted); font-size: 11px; }
-.downloadsLayoutV031 .spotifySourceBadge,.downloadsLayoutV031 .spotifyTrackStatus { color: var(--downloads-muted); font-size: 10px; }
-.downloadsLayoutV031 .spotifyTrackCheck { display: grid; place-items: center; width: 21px; height: 21px; border: 1px solid var(--downloads-edge); border-radius: 6px; color: var(--downloads-accent); }
-.downloadsLayoutV031 .spotifyRetryButton {
-  flex: none; align-self: center; padding: 7px 10px; border: 1px solid var(--downloads-edge); border-radius: 8px;
-  background: transparent; color: var(--lt-danger); font: inherit; font-size: 11px; cursor: pointer;
-}
-.downloadsLayoutV031 .spotifyRetryButton:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--lt-danger) 12%, transparent);
-}
-.downloadsLayoutV031 .spotifyRetryButton:disabled { opacity: .55; cursor: default; }
-.downloadsLayoutV031 .downloadQueuePanel > .panelHead { padding-bottom: 12px; margin: 0; }
-.downloadsLayoutV031 .downloadQueuePanel > .panelHead h3 { font-size: 18px; }
-.downloadsLayoutV031 .downloadQueueHeaderActions > span { font-size: 11px; color: var(--downloads-muted); }
-.downloadsLayoutV031 .downloadQueueItem { min-width: 0; display: grid; gap: 12px; padding: 13px 15px; border: 1px solid var(--downloads-edge); border-radius: var(--lt-radius-item); background: var(--downloads-raised); }
-.downloadsLayoutV031 .downloadQueueTop { min-width: 0; display: grid; grid-template-columns: 26px minmax(0,1fr) 50px; gap: 12px; align-items: center; }
-.downloadsLayoutV031 .downloadQueueTop > div { min-width: 0; }
-.downloadsLayoutV031 .downloadQueueTop strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
-.downloadsLayoutV031 .downloadQueueTop p { margin: 5px 0 0; color: var(--downloads-muted); font-size: 11px; }
-.downloadsLayoutV031 .downloadQueueIndex { color: var(--downloads-muted); font-size: 11px; }
-.downloadsLayoutV031 .downloadQueueTop small { color: var(--downloads-muted); text-align: right; font-size: 12px; }
-.downloadsLayoutV031 .downloadQueueTrack { height: var(--lt-progress-height); width: 100%; overflow: hidden; border-radius: 99px; background: var(--downloads-edge); }
-.downloadsLayoutV031 .downloadQueueTrack i { display: block; height: 100%; border-radius: inherit; background: var(--downloads-accent); transition: width var(--lt-control-motion) ease; }
-.downloadsLayoutV031 .downloadQueueMeta { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; color: var(--downloads-muted); font-size: 11px; }
-.downloadsLayoutV031 .downloadQueueMeta :is(.downloadWarnBadgeV338,.downloadErrorBadgeV338) { color: var(--lt-danger); overflow-wrap: anywhere; }
-.downloadsLayoutV031 .downloadQueueActions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.downloadsLayoutV031 .converterBox { grid-template-columns: minmax(0,1fr) auto; align-items: center; }
-.downloadsLayoutV031 .converterBox > div:first-child { min-width: 0; display: grid; gap: 5px; }
-.downloadsLayoutV031 .converterBox strong { color: var(--downloads-text); font-size: 15px; }
-.downloadsLayoutV031 .converterBox p { margin: 0; color: var(--downloads-muted); font-size: 12px; }
-.downloadsLayoutV031 .converterProgress { min-width: 0; grid-column: 1/-1; }
-.downloadsLayoutV031 .converterProgress > div:first-child { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; }
-.downloadsLayoutV031 .converterTrack { height: var(--lt-progress-height); border-radius: 99px; margin-top: 8px; overflow: hidden; background: var(--downloads-edge); }
-.downloadsLayoutV031 .converterTrack i { height: 100%; display: block; background: var(--downloads-accent); }
-.downloadsLayoutV031 .downloadResult { display: grid; grid-template-columns: 32px minmax(0,1fr) auto; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--downloads-edge); }
-.downloadsLayoutV031 .downloadResult > div { min-width: 0; }
-.downloadsLayoutV031 .downloadResult strong { font-size: 13px; }
-.downloadsLayoutV031 .downloadResult p { margin: 6px 0; color: var(--downloads-muted); font-size: 11px; overflow-wrap: anywhere; }
-.downloadsLayoutV031 .downloadsInputCard {
-  display: grid; align-content: start; justify-items: start; gap: 15px;
-  padding: var(--lt-surface-padding); border: 1px solid var(--downloads-edge);
-  border-radius: var(--lt-radius-panel); background: var(--downloads-surface);
-}
-.downloadsLayoutV031 .downloadsInputCard > :is(.spotifyAuthCard,.spotifyUrlRow,.spotifyTrackList) { min-width: 0; width: 100%; }
-.downloadsLayoutV031 .downloadsInputTitle { display: grid; gap: 3px; }
-.downloadsLayoutV031 .downloadsInputTitle strong { color: var(--downloads-text); font-size: 17px; font-weight: 710; }
-.downloadsLayoutV031 .downloadsInputTitle span { color: var(--downloads-muted); font-size: 12px; }
-.downloadsLayoutV031 .downloadTabStrip { margin: 0; }
-.downloadsLayoutV031 .downloadActions { margin-top: 0; }
-.downloadsLayoutV031 .converterBox {
-  padding: var(--lt-surface-padding); background: var(--downloads-surface); border-color: var(--downloads-edge);
-}
-.downloadsLayoutV031 :is(.heroMain,.mainAction) {
-  border: 1px solid color-mix(in oklab,var(--downloads-accent) 34%,transparent);
-  background: var(--downloads-accent);
-  color: var(--lt-bg);
-  font-size: 12px; font-weight: 700; border-radius: var(--lt-radius-item);
-}
-.downloadsLayoutV031 :is(.heroGhost,.softButton) {
-  border: 1px solid var(--downloads-edge);
-  background: var(--downloads-raised);
-  color: var(--downloads-text);
-  border-radius: var(--lt-radius-item); font-size: 12px; font-weight: 640;
-}
-.downloadsLayoutV031 :is(.heroGhost,.softButton):hover:not(:disabled) {
-  border-color: color-mix(in oklab,var(--downloads-accent) 32%,var(--downloads-edge));
-  background: color-mix(in oklab,var(--downloads-accent) 9%,var(--downloads-raised));
-}
-.downloadsLayoutV031 :is(.downloadTab,.softButton,.heroMain,.heroGhost):focus-visible {
-  outline: 1px solid var(--downloads-accent); outline-offset: 2px;
-}
-.downloadsLayoutV031 .downloadTab.active {
-  background: color-mix(in oklab,var(--downloads-accent) 12%,var(--downloads-raised));
-  border-color: color-mix(in oklab,var(--downloads-accent) 30%,transparent);
-  color: var(--downloads-text);
-}
-.downloadsLayoutV031 .downloadQueuePanel, .downloadsLayoutV031 .downloadResults { max-width: 100%; }
-@media (max-width: 780px) {
-  .downloadsLayoutV031 .downloadsInputCard { padding: 16px; }
-  .downloadsLayoutV031 .downloadTextarea { min-height: 110px; width: 100%; }
-}
-@media (max-width: 780px) {
-  .downloadsLayoutV031 { padding: 0 0 var(--lt-space-5); }
-  .downloadsLayoutV031 .spotifyTrackSelect { grid-template-columns: 42px minmax(0, 1fr) 22px; gap: 8px; min-height: 42px; }
-  .downloadsLayoutV031 .spotifyTrackArt,.downloadsLayoutV031 .spotifyTrackArt img { width: 42px; height: 42px; }
-  .downloadsLayoutV031 .converterBox { grid-template-columns: 1fr; }
-  .downloadsLayoutV031 .downloadResult { grid-template-columns: 25px minmax(0,1fr); }
-  .downloadsLayoutV031 .downloadResult > button,.downloadsLayoutV031 .downloadResultActionsV502 { grid-column: 2; }
+@media (prefers-reduced-motion: reduce) {
+  .downloadsExperience *, .downloadsExperience *::before, .downloadsExperience *::after { animation-duration: .01ms; transition-duration: 0ms; }
 }

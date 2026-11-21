@@ -78,17 +78,21 @@ function createArtworkLookup(client,now=Date.now,trackInfo,lookupAudioDb,lookupM
         if (direct.coverUrl) return direct;
       }
       const deezerJob = () => lookupDeezer ? lookupDeezer("recording",title,artist).catch(()=>({})) : Promise.resolve({});
-      const trackJob = () => trackInfo ? trackInfo(title,artist).catch(()=>null) : Promise.resolve(null);
-      const alternateJob = () => lookupAudioDb ? lookupAudioDb(title,artist).catch(()=>({})) : Promise.resolve({});
-      const alternatives = fallback ? await Promise.all([deezerJob(),trackJob(),alternateJob()]) : null;
-      const deezer = alternatives ? alternatives[0] : await deezerJob();
-      if(deezer.coverUrl && !fallback)return deezer;
-      const track = alternatives ? alternatives[1] : await trackJob();
+      // The independently verified, keyed providers can be fetched together.
+      // Deezer is optional: HTTP 403 at its edge must not delay available art.
+      const trackJob = trackInfo ? trackInfo(title,artist).catch(()=>null) : Promise.resolve(null);
+      const alternateJob = lookupAudioDb ? lookupAudioDb(title,artist).catch(()=>({})) : Promise.resolve({});
+      const track = await trackJob;
       const primary = lastfmArtwork(track,title,artist);
       const verified = norm(track?.name)===norm(title)&&norm(track?.artist?.name)===norm(artist);
       const release = verified && validId(track?.album?.mbid) ? url("release",track.album.mbid) : undefined;
       if (primary.coverUrl && !fallback) return {...primary,...(release?{fallbackCoverUrl:release}:{})};
-      const alternate = alternatives ? alternatives[2] : await alternateJob();
+      const alternate = await alternateJob;
+      if (alternate.coverUrl && !fallback) return {coverUrl:alternate.coverUrl,...(release?{fallbackCoverUrl:release}:{})};
+      // A retry after a broken image prefers catalog releases; don't fall
+      // back into the very same Deezer image that failed in the renderer.
+      const deezer = fallback ? {} : await deezerJob();
+      if (deezer.coverUrl && !fallback) return deezer;
       const known = [...new Set([primary.coverUrl,alternate.coverUrl,release,deezer.coverUrl,...(deezer.coverAlternatives||[])].filter(Boolean))];
       const knownArt=known.length?{coverUrl:known[0],fallbackCoverUrl:known[1],coverAlternatives:known.slice(0,6)}:{};
       if (known.length && !fallback) return knownArt;

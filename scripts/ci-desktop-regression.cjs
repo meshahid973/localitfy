@@ -42,6 +42,10 @@ if(seed.status!==0)throw Error("Synthetic database seed failed: "+seed.stderr);
 const recoveryStore=require("../electron/download-jobs.cjs").createDownloadJobStore(app.getPath("userData"));
 const recoveryJob=recoveryStore.prepare({source:"youtube",url:"https://www.youtube.com/watch?v=abcdefghijk",folder:dir,options:{autoAdd:false}});
 recoveryStore.update(recoveryJob.id,{status:"downloading",progress:37,message:"Recover this interrupted download"});
+const failedJob=recoveryStore.prepare({source:"youtube",url:"https://www.youtube.com/watch?v=abcdefghijl",folder:dir,options:{autoAdd:false}});
+recoveryStore.update(failedJob.id,{status:"failed",progress:12,message:"Provider rejected audio",result:{error:"Provider rejected audio"}});
+const cancelledJob=recoveryStore.prepare({source:"youtube",url:"https://www.youtube.com/watch?v=abcdefghijm",folder:dir,options:{autoAdd:false}});
+recoveryStore.update(cancelledJob.id,{status:"cancelled",progress:9,message:"Cancelled by user"});
 const dist=path.join(root,"dist"),mime={".html":"text/html",".js":"text/javascript",".css":"text/css",".png":"image/png",".jpg":"image/jpeg",".gif":"image/gif",".webp":"image/webp",".svg":"image/svg+xml",".woff2":"font/woff2",".woff":"font/woff"};
 const server=http.createServer((req,res)=>{
   try{
@@ -367,8 +371,14 @@ server.listen(5173,async()=>{
             const recovered=saved.jobs.find(job=>job.id===recoveryJob.id);
             assert.equal(recovered?.status,"interrupted","restart restores interrupted downloads");
             assert.equal(recovered?.progress,37,"restart retains recorded progress");
-            await until(()=>win.webContents.executeJavaScript("Array.from(document.querySelectorAll('.downloadQueueActions button')).some(button=>button.textContent==='resume')"),"resume action is visible");
-            const resumeUsable=await win.webContents.executeJavaScript("(()=>{const button=Array.from(document.querySelectorAll('.downloadQueueActions button')).find(button=>button.textContent==='resume');button.scrollIntoView({block:'center',behavior:'instant'});const box=button.getBoundingClientRect();return document.elementFromPoint(box.x+box.width/2,box.y+box.height/2)===button})()");
+            assert.equal(saved.jobs.find(job=>job.id===failedJob.id)?.status,"failed","failed jobs remain visible after restart");
+            assert.equal(saved.jobs.find(job=>job.id===cancelledJob.id)?.status,"cancelled","cancelled jobs remain available after restart");
+            await until(()=>win.webContents.executeJavaScript("document.querySelector('.downloadsActivityTitle p')?.textContent.includes('need attention')").catch(()=>false),"interrupted count visible");
+            const attentionSelectable=await win.webContents.executeJavaScript("(()=>{const button=[...document.querySelectorAll('.downloadsFilters button')].find(button=>button.textContent.trim()==='Attention');if(!button)return false;button.click();return true})()");
+            assert.equal(attentionSelectable,true,"Attention filter is reachable");
+            await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.downloadsActivityRow').length >= 3"),"failed/cancelled/interrupted rows visible together");
+            await until(()=>win.webContents.executeJavaScript("Array.from(document.querySelectorAll('.downloadsActivityActions button')).some(button=>button.textContent.trim()==='Resume')"),"resume action is visible");
+            const resumeUsable=await win.webContents.executeJavaScript("(()=>{const button=Array.from(document.querySelectorAll('.downloadsActivityActions button')).find(button=>button.textContent.trim()==='Resume');button.scrollIntoView({block:'center',behavior:'instant'});const box=button.getBoundingClientRect();return document.elementFromPoint(box.x+box.width/2,box.y+box.height/2)===button})()");
             assert.equal(resumeUsable,true,"resume remains reachable above the player");
           }
           if(view==="analytics") {
@@ -391,7 +401,22 @@ server.listen(5173,async()=>{
             assert.ok(readable.includes(history.byDay[0].day),"chart announces the selected UTC day");
             assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('.analyticsHistoryChartData tbody tr').length"),7,"daily data remains available to assistive technology");
           }
-          const geometry=await win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return {width:page.clientWidth,scroll:page.scrollWidth}})()`);
+          const geometry=await win.webContents.executeJavaScript(`(()=>{
+            const page=document.querySelector('.pageTransition[data-view="${view}"]');
+            const geometry={width:page.clientWidth,scroll:page.scrollWidth};
+            if(geometry.scroll > geometry.width + 3) {
+              const bound=page.getBoundingClientRect();
+              geometry.offenders=[...page.querySelectorAll("*")].map(node=>{
+                const rect=node.getBoundingClientRect(),style=getComputedStyle(node);
+                return {name:node.tagName.toLowerCase(),className:typeof node.className==="string"?node.className.slice(0,110):"",
+                  right:Math.round(rect.right-bound.right),left:Math.round(rect.left-bound.left),
+                  width:Math.round(rect.width),clientWidth:node.clientWidth,scrollWidth:node.scrollWidth,
+                  overflowX:style.overflowX,position:style.position};
+              }).filter(item=>item.width>0 && item.right>3 && item.position!=="absolute" && item.position!=="fixed")
+                .sort((a,b)=>b.right-a.right).slice(0,16);
+            }
+            return geometry;
+          })()`);
           assert.ok(geometry.width>0&&geometry.scroll<=geometry.width+3,"page overflow "+view+" "+mode+" "+JSON.stringify(geometry));
           if(view==="artists") {
             await until(()=>win.webContents.executeJavaScript(`(()=>{const covers=[...document.querySelectorAll(".artistCard .coverImage")].filter(img=>{const r=img.getBoundingClientRect();return r.width>0&&r.height>0&&r.bottom>0&&r.top<window.innerHeight});return covers.length>0&&covers.every(img=>img.complete&&img.naturalWidth>0&&img.classList.contains("isLoaded"))})()`).catch(()=>false),"visible artist fixture artwork "+mode+" "+width,10000);

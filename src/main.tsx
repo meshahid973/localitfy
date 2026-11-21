@@ -9,6 +9,8 @@ import "@fontsource/space-grotesk/500.css";
 import "@fontsource/space-grotesk/600.css";
 import "@fontsource/space-grotesk/700.css";
 import "./styles/tokens.css";
+/* Vendor utilities only: omit Tailwind Preflight to preserve the existing design. */
+import "./styles/vendor-tailwind.css";
 import "./styles/themes.css";
 
 /* Shared renderer primitives. */

@@ -2,7 +2,9 @@
 
 // Opt-in live-provider verification on integrated CI. No music playback,
 // credentials, private library contents or destructive actions are involved.
-const {createDeezerArtwork} = require("../electron/discover/extra-artwork.cjs");
+const {createDeezerArtwork,createFanartArtwork} = require("../electron/discover/extra-artwork.cjs");
+const {createLastfmClient} = require("../electron/discover/lastfm.cjs");
+const {lastfmArtwork} = require("../electron/discover/artwork.cjs");
 const {createAudioDbArtwork} = require("../electron/discover/audiodb.cjs");
 const {createMusicBrainzClient,coverThumbUrl} = require("../electron/musicbrainz/client.cjs");
 const {createYouTubeMusicSearch} = require("../electron/discover/youtube-music.cjs");
@@ -108,9 +110,35 @@ async function main() {
   if(!process.env.LOCALTIFY_LASTFM_API_KEY)checks.push({
     provider:"Last.fm",status:"skipped-key-required",metadata:false,image:false,detail:"Operator API key not configured"
   });
-  if(!process.env.LOCALTIFY_FANART_TV_API_KEY)checks.push({
+  else jobs.push(check("Last.fm",async()=>{
+    const key=process.env.LOCALTIFY_LASTFM_API_KEY;
+    if(!/^[a-f0-9]{32}$/i.test(key))return {status:"invalid-key-format",detail:"Expected a 32-character API key"};
+    const client=createLastfmClient({apiKey:key});
+    const track=await client.trackInfo(expectedTitle,expectedArtist);
+    if(norm(track?.name)!==norm(expectedTitle)||norm(track?.artist?.name)!==norm(expectedArtist))
+      return {status:"no-exact-match",detail:"Authenticated query did not resolve the expected recording"};
+    const result=lastfmArtwork(track,expectedTitle,expectedArtist);
+    const image=result.coverUrl?await imageAvailable(result.coverUrl).catch(()=>false):false;
+    return {status:!result.coverUrl?"metadata-only":image?"ok":"image-unavailable",metadata:true,image};
+  }));
+  if(!process.env.LOCALTIFY_FANART_API_KEY)checks.push({
     provider:"Fanart.tv",status:"skipped-key-required",metadata:false,image:false,detail:"Operator API key not configured"
   });
+  else jobs.push(check("Fanart.tv",async()=>{
+    let httpStatus=0;
+    const lookup=createFanartArtwork({apiKey:process.env.LOCALTIFY_FANART_API_KEY,fetchImpl:async(url,options)=>{
+      const response=await fetch(url,options);httpStatus=response.status;return response;
+    }});
+    if(!lookup)return {status:"invalid-key-format",detail:"Invalid Fanart.tv key format"};
+    const client=createMusicBrainzClient({userAgent:"Localtify/0.5.1 (https://github.com/meshahid973/localtify)",timeoutMs:9000});
+    const artists=await client.searchCatalog("artist",expectedArtist,{background:true});
+    const exact=artists.filter(item=>norm(item.name)===norm(expectedArtist));
+    if(exact.length!==1)return {status:"catalog-ambiguous",detail:"Cannot identify the artist MBID safely"};
+    const result=await lookup("artist",exact[0].id);
+    if(!result.coverUrl)return {status:httpStatus>=400?"http-"+httpStatus:"no-artwork",metadata:httpStatus===200,detail:httpStatus?"Fanart.tv HTTP "+httpStatus:"No provider response"};
+    const image=await imageAvailable(result.coverUrl).catch(()=>false);
+    return {status:image?"ok":"image-unavailable",metadata:true,image};
+  }));
   await Promise.all(jobs);
   console.log(JSON.stringify({checkedAt:new Date().toISOString(),sample:{title:expectedTitle,artist:expectedArtist},
     checks:checks.sort((a,b)=>a.provider.localeCompare(b.provider)),note:"Advisory network observation, not a guarantee of future provider availability"},null,2));

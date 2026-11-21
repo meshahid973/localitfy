@@ -82,19 +82,21 @@ function registerDiscoverIpc(router, { getSongs, getSettings, cacheFile, bioFile
         const value=matchArtistArtwork(await searchYouTubeArtwork("artist",cleaned.slice(0,160),{artwork:true}).catch(()=>[]),name);
         if(value.coverUrl)return value;
       }
-      const additional=lookupDeezer&&getSettings().discoverEnabled===true?await lookupDeezer("artist",cleaned).catch(()=>({})):{};
-      if(additional.coverUrl&&!fallback)return additional;
-      if(lookupFanart&&musicBrainzClient?.searchCatalog&&getSettings().discoverEnabled===true){
+      // Resolve a validated artist MBID before trying the intermittently
+      // forbidden Deezer search. The result cannot borrow a lookalike artist.
+      if(lookupFanart&&musicBrainzClient?.searchCatalog){
         const items=await musicBrainzClient.searchCatalog("artist",cleaned).catch(()=>[]);
         const exact=(Array.isArray(items)?items:[]).filter(i=>MBID.test(i?.id||"")&&cleanText(i.name).normalize("NFKC").toLowerCase()===cleaned.normalize("NFKC").toLowerCase());
         const ids=[...new Set(exact.map(i=>i.id))];
         if(ids.length===1&&getSettings().discoverEnabled===true){
           const result=await lookupFanart("artist",ids[0]).catch(()=>({}));
-          const covers=[...new Set([result.coverUrl,...(result.coverAlternatives||[]),additional.coverUrl,...(additional.coverAlternatives||[])].filter(Boolean))].slice(0,6);
-          if(covers.length)return {coverUrl:covers[0],...(covers.length>1?{coverAlternatives:covers}:{})};
+          if(result.coverUrl)return result;
         }
       }
-      return additional;
+      // A fallback request follows an image failure; don't offer the same
+      // Deezer image again if it was the originally chosen cover.
+      return !fallback&&lookupDeezer&&getSettings().discoverEnabled===true
+        ? lookupDeezer("artist",cleaned).catch(()=>({})) : {};
     })();
   }
   // Explicit catalog IDs are authoritative. Never borrow another recording's

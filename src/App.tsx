@@ -131,7 +131,7 @@ import type {
   Song
 } from "./features/library/song.types";
 import { getLibraryDropSideInfoForElement, getLibraryDropSideForElement, getLibraryDropSide, getLibraryDropElement } from "./features/library/dragGeometry";
-import type { DownloadQueueItem, DownloadResult, SpotifyTrack } from "./features/downloads/download.types";
+import type { SpotifyTrack } from "./features/downloads/download.types";
 import type { Settings, SettingsCategory } from "./features/settings/settings.types";
 import type { CoverColorSyncMode, SecretMode, SecretTriggerMode, ThemeId } from "./features/settings/theme.types";
 import type { DiscordArtMode } from "./features/discord/discord.types";
@@ -5845,10 +5845,9 @@ function MainModeApp() {
     failedResults: failedDownloadResults,
     firstError: firstDownloadError
   } = downloadPageState;
-  const visibleDownloadQueueItems = downloadQueue.filter(
-    (item: DownloadQueueItem) => !["failed", "cancelled", "error"].includes(String(item.status || "").toLowerCase())
-  );
-  const visibleDownloadResults = downloadResults.filter((item: DownloadResult) => item?.ok !== false);
+  // Downloads owns its view filters. Never discard failed/cancelled jobs upstream.
+  const visibleDownloadQueueItems = downloadQueue;
+  const visibleDownloadResults = downloadResults;
   const copyDownloadError = async (errorText?: string) => {
     const text = String(errorText || firstDownloadError || "No download error found.");
     try {
@@ -6187,7 +6186,8 @@ function MainModeApp() {
       spotifyTracks,
       spotifyUrl,
       visibleDownloadQueueItems,
-      visibleDownloadResults
+      visibleDownloadResults,
+      songs
     },
     playerBar: connect.playerBar({
       ambientStyle,

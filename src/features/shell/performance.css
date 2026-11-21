@@ -13,8 +13,8 @@ body.localtifyPerf .app :is(
   .playlistTrackRow,
   .playlistSongRow,
   .trackRow,
-  .spotifyTrackItem,
-  .downloadQueueItem
+  .downloadsPreviewItem,
+  .downloadsActivityRow
 ) {
   will-change: auto !important;
 }
@@ -25,8 +25,8 @@ body.localtifyPerf .app :is(
   .playlistTrackRow,
   .playlistSongRow,
   .trackRow,
-  .spotifyTrackItem,
-  .downloadQueueItem
+  .downloadsPreviewItem,
+  .downloadsActivityRow
 ):not(:hover):not(.playing):not(.songDragging):not(.songDropTarget):not(.virtualPlaylistTrackRow) {
   /* Virtual playlist rows are positioned by their transform (playlists.css); resetting it stacks them at the top. */
   transform: none !important;
