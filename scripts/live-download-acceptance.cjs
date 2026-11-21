@@ -22,6 +22,9 @@ if ((youtubeIndex < 0) === (spotifyIndex < 0) ||
   process.exit(2);
 }
 
+const source = youtubeIndex >= 0 ? "youtube" : "spotify";
+const input = youtubeIndex >= 0 ? args[youtubeIndex + 1] : JSON.parse(fs.readFileSync(args[spotifyIndex + 1], "utf8"));
+
 const temp = fs.mkdtempSync(path.join(os.tmpdir(), "localtify-live-download-"));
 const downloads = path.join(temp, "downloads");
 const profile = path.join(temp, "profile");
@@ -30,8 +33,6 @@ fs.mkdirSync(profile, { recursive: true });
 const sentinelPath = path.join(downloads, "existing-library-file.mp3");
 const sentinel = crypto.randomBytes(256);
 fs.writeFileSync(sentinelPath, sentinel);
-const source = youtubeIndex >= 0 ? "youtube" : "spotify";
-const input = youtubeIndex >= 0 ? args[youtubeIndex + 1] : JSON.parse(fs.readFileSync(args[spotifyIndex + 1], "utf8"));
 
 async function hashFile(file) {
   const hash = crypto.createHash("sha256");
