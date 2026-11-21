@@ -44,7 +44,7 @@ export type ShellFrameContract = {
 
 export type ShellUpdateContract = {
   updatePrompt: UpdatePromptState; askUpdaterToDownload: () => unknown; askUpdaterToInstall: () => unknown;
-  manualUpdateCheck: () => unknown; setUpdatePrompt: (next: UpdatePromptState) => void; progress: number;
+  manualUpdateCheck: () => unknown; onWhatsNew: () => unknown; onDismiss: () => unknown; progress: number;
 };
 
 export type ShellScreensaverContract = {

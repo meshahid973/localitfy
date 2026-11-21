@@ -628,6 +628,7 @@ declare global {
       /** All-time [songId, finished plays, skips] for songs with listening history. */
       getListeningCounts: () => Promise<Array<[string, number, number]>>;
       getListeningSummary: (payload: { days: 7 | 30 | 90 }) => Promise<import("./features/analytics/listeningSummary").ListeningSummary | null>;
+      getListeningCalendarSummary: (payload: { range: "week" | "month" | "year"; offset: number }) => Promise<import("./features/analytics/listeningSummary").ListeningCalendarSummary | null>;
       recordPlayEvent: (payload: PlayEvent) => Promise<boolean>;
       getLyrics: (payload: { id: string; refresh?: boolean; requestId?: string; cancel?: boolean }) => Promise<import("./features/lyrics/lyrics.types").LyricsResult>;
       searchLyrics: (payload: { id: string; query: string }) => Promise<import("./features/lyrics/lyrics.types").LyricsSearchHit[]>;
@@ -677,6 +678,7 @@ declare global {
       repairDatabaseNow: () => Promise<LocalitfyDatabaseRepairResult>;
 
       checkForUpdates?: (payload?: { silent?: boolean }) => Promise<boolean>;
+      getUpdateState?: () => Promise<AutoUpdateEvent>;
       downloadUpdate?: () => Promise<boolean>;
       installUpdate?: () => Promise<boolean>;
       onAutoUpdate?: (callback: (payload: AutoUpdateEvent) => void) => () => void;

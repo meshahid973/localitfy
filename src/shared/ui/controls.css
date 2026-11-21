@@ -1,21 +1,4 @@
-/* Shared control skin; feature owners retain layout and sizing exceptions. */
-.app :is(.mainAction, .heroMain, .updatePrimaryButton, .settingsActionButton.primary){
-  min-height: var(--lt-control-height) !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: var(--lt-gap-control) !important;
-  padding: 0 16px !important;
-  border-radius: var(--lt-control-radius) !important;
-  border: 1px solid transparent !important;
-  background: var(--lt-accent) !important;
-  color: var(--accent-contrast, var(--lt-bg)) !important;
-  font-weight: 600 !important;
-  letter-spacing: -.01em !important;
-  text-decoration: none !important;
-  box-shadow: none !important;
-  cursor: pointer;
-}
+
 
 .app :is(.softButton, .heroGhost, .settingsActionButton, .settingsTinyButton):not(.primary):not(.danger):not(.main){
   min-height: var(--lt-control-height) !important;
@@ -32,12 +15,6 @@
   text-decoration: none !important;
   box-shadow: none !important;
   cursor: pointer;
-}
-
-.app :is(.mainAction, .heroMain, .updatePrimaryButton, .settingsActionButton.primary):hover:not(:disabled){
-  border-color: transparent !important;
-  box-shadow: none !important;
-  filter: none !important;
 }
 
 .app :is(.softButton, .heroGhost, .settingsActionButton, .settingsTinyButton):not(.primary):not(.danger):not(.main):hover:not(:disabled){
@@ -69,8 +46,6 @@
   color: var(--lt-danger) !important;
   filter: none !important;
 }
-
-.app :is(.iconAction, .songMenuButton, .closeModalButton, .updateToastClose),
 .app :is(.circleButton):not(.playerBar *){
   width: var(--lt-control-height) !important;
   height: var(--lt-control-height) !important;
@@ -85,8 +60,6 @@
   color: var(--lt-text) !important;
   box-shadow: none !important;
 }
-
-.app :is(.iconAction, .songMenuButton, .closeModalButton, .updateToastClose):hover:not(:disabled),
 .app :is(.circleButton):not(.playerBar *):hover:not(:disabled){
   border-color: transparent !important;
   background: var(--lt-fill-hover) !important;
@@ -94,7 +67,7 @@
   box-shadow: none !important;
 }
 
-.app :is(button, a, input, textarea, select, [role="button"]):focus-visible{
+.app :is(button, a, input, textarea, select, [role="button"]):not([data-embedded-field]):focus-visible{
   outline: 2px solid var(--lt-accent) !important;
   outline-offset: 3px !important;
 }
@@ -108,7 +81,7 @@
 .app :is(input, textarea) { caret-color: var(--lt-accent); }
 .app ::selection { background: var(--lt-accent); color: var(--accent-contrast, #06100b); }
 
-.app :is(input:not(:where([type="checkbox"], [type="radio"], [type="range"])), textarea){
+.app :is(input:not(:where([type="checkbox"], [type="radio"], [type="range"])), textarea):not([data-embedded-field]){
   color: var(--lt-text) !important;
   border-color: var(--lt-border) !important;
   background-color: var(--lt-surface-soft) !important;
@@ -139,3 +112,6 @@ input[type="range"]::-webkit-slider-thumb{
   cursor: not-allowed !important;
   filter: none !important;
 }
+
+/* Embedded inputs inherit the parent field, without a second opaque surface. */
+.app [data-embedded-field] { background:transparent !important; border:0 !important; box-shadow:none !important; outline:none !important; }

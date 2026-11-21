@@ -1,6 +1,7 @@
-// Adapted from beUI (MIT). See THIRD_PARTY_NOTICES.txt.
+"use client";
 
 import { type CSSProperties, type PointerEvent, useRef } from "react";
+import { cn } from "../../beui/lib/utils";
 
 export interface XYInspectorProps {
   count: number;
@@ -82,7 +83,7 @@ export function XYInspector({
       value={index}
       aria-valuetext={valueText(index)}
       aria-describedby={open && activeIndex >= 0 ? tooltipId : undefined}
-      className={["analyticsChartInspector", className].filter(Boolean).join(" ")}
+      className={cn("absolute m-0 cursor-crosshair touch-pan-y opacity-0", className)}
       style={style}
       onFocus={() => {
         focused.current = true;

@@ -1,0 +1,56 @@
+/* Scoped release history and blue update banner. Theme-safe, no global reset. */
+.releaseNotesOverlay { position:fixed; inset:0; z-index:1400; display:grid; place-items:center; padding:clamp(10px,3vw,26px); background:rgba(0,0,0,.68); backdrop-filter:blur(10px); }
+.releaseNotesDialog { display:flex; flex-direction:column; background:var(--lt-surface); color:var(--lt-text); border:1px solid var(--lt-border); box-shadow:0 24px 90px rgba(0,0,0,.3); width:min(900px,100%); max-height:min(83dvh,840px); border-radius:16px; overflow:hidden; min-width:0; }
+.releaseNotesHead { display:flex; align-items:flex-start; justify-content:space-between; padding:26px 28px 22px; border-bottom:1px solid var(--lt-border); gap:14px; flex:0 0 auto; }
+.releaseNotesHead h2 { margin:5px 0 8px; font-size:clamp(19px,2.3vw,27px); font-weight:680; letter-spacing:-.035em; }
+.releaseNotesHead p { color:var(--lt-muted); font-size:12px; margin:0; }
+.releaseNotesEyebrow { display:flex; align-items:center; gap:6px; color:var(--lt-accent); font-size:11px; font-weight:650; }
+.releaseNotesClose { border:0; background:transparent; color:var(--lt-muted); border-radius:8px; padding:7px; cursor:pointer; }
+.releaseNotesClose:hover { color:var(--lt-text); background:var(--lt-surface-soft); }
+.releaseNotesMain { flex:1; min-height:0; display:grid; grid-template-columns:170px minmax(0,1fr); }
+.releaseNotesVersions { overflow-y:auto; min-height:0; padding:16px 10px 18px; border-right:1px solid var(--lt-border); display:flex; flex-direction:column; gap:3px; }
+.releaseNotesVersions button { flex:0 0 auto; display:grid; gap:4px; padding:12px 13px; border:0; background:transparent; border-radius:9px; color:var(--lt-text); font-size:13px; font-weight:650; cursor:pointer; text-align:left; }
+.releaseNotesVersions button.selected { background:var(--lt-surface-soft); color:var(--lt-accent); }
+.releaseNotesVersions button span { font-size:10px; font-weight:400; color:var(--lt-muted); }
+.releaseNotesContent { overflow-y:auto; min-width:0; padding:25px 30px 34px; scrollbar-gutter:stable; }
+.releaseNotesVersionTitle { display:flex; justify-content:space-between; gap:12px; align-items:center; border-bottom:1px solid var(--lt-border); padding-bottom:17px; margin-bottom:19px; }
+.releaseNotesVersionTitle h3 { margin:4px 0 0; font-size:21px; font-weight:680; }
+.releaseNotesVersionTitle span { color:var(--lt-muted); font-size:11px; }
+.releaseNotesVersionTitle a { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--lt-muted); text-decoration:none; white-space:nowrap; }
+.releaseNotesMarkdown { font-size:13px; line-height:1.75; color:var(--lt-text); overflow-wrap:anywhere; }
+.releaseNotesMarkdown h1,.releaseNotesMarkdown h2,.releaseNotesMarkdown h3 { margin:25px 0 10px; font-size:16px; line-height:1.4; letter-spacing:-.015em; font-weight:660; }
+.releaseNotesMarkdown h1:first-child,.releaseNotesMarkdown h2:first-child { margin-top:0; }
+.releaseNotesMarkdown h4 { margin:18px 0 8px; font-size:14px; }
+.releaseNotesMarkdown p { margin:9px 0; }
+.releaseNotesMarkdown ul,.releaseNotesMarkdown ol { padding-left:19px; margin:10px 0; }
+.releaseNotesMarkdown li { padding:2px 0; }
+.releaseNotesMarkdown li::marker { color:var(--lt-muted); }
+.releaseNotesMarkdown a { color:var(--lt-accent); }
+.releaseNotesMarkdown code { font-size:12px; overflow-wrap:anywhere; }
+.releaseNotesMarkdown pre { white-space:pre-wrap; overflow-wrap:anywhere; padding:12px; background:var(--lt-surface-soft); border-radius:8px; }
+.releaseNotesMarkdown blockquote { border-left:2px solid var(--lt-accent); margin:14px 0; padding-left:13px; color:var(--lt-muted); }
+.releaseNotesMissing { color:var(--lt-muted); }
+.releaseNotesFooter { flex:0 0 auto; padding:12px 22px; border-top:1px solid var(--lt-border); display:flex; justify-content:space-between; align-items:center; gap:10px; }
+.releaseNotesFooter span { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--lt-muted); }
+.releaseNotesFooter button { padding:9px 17px; background:var(--lt-accent); color:var(--button-text-on-accent); border:0; border-radius:8px; font-weight:600; cursor:pointer; }
+/* The title-bar contains the ribbon, so it never overlays playback or navigation. */
+.localtifyUpdateBanner { position:relative; min-width:0; width:100%; height:34px; padding:4px 8px 4px 13px; border:1px solid rgba(99,170,255,.45); border-radius:9px; background:linear-gradient(105deg,#1351a8,#176cce); color:#fff; display:flex; align-items:center; justify-content:space-between; gap:10px; box-shadow:0 2px 12px rgba(15,97,212,.14); -webkit-app-region:no-drag; pointer-events:auto; }
+.localtifyUpdateBannerMain { min-width:0; display:flex; align-items:center; gap:9px; flex:1; }
+.localtifyUpdateBannerMain > svg { flex:0 0 auto; }
+.localtifyUpdateBannerText { min-width:0; display:grid; gap:1px; }
+.localtifyUpdateBannerText strong { display:block; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-size:12px; font-weight:650; }
+.localtifyUpdateBannerText span { color:rgba(255,255,255,.82); font-size:10px; }
+.localtifyUpdateBannerActions { display:flex; align-items:center; gap:4px; flex:0 0 auto; }
+.localtifyUpdateBannerActions button { padding:5px 9px; background:rgba(255,255,255,.16); border:0; border-radius:6px; color:white; font-size:11px; cursor:pointer; }
+.localtifyUpdateBannerActions button:hover { background:rgba(255,255,255,.28); }
+.localtifyUpdateBannerActions button[aria-label] { padding:5px; display:grid; place-items:center; }
+.localtifyUpdateBannerProgress { position:absolute; height:2px; left:0; bottom:0; background:#a6d5ff; border-radius:2px; max-width:100%; transition:width 100ms linear; }
+.localtifyUpdateBanner.error { background:linear-gradient(105deg,#6e2936,#833f49); border-color:#a55465; }
+.localtifyUpdateBanner.downloaded { background:linear-gradient(105deg,#16658a,#1786a3); }
+.releaseNotesDialog button:focus-visible,.localtifyUpdateBanner button:focus-visible { outline:2px solid var(--lt-accent); outline-offset:2px; }
+@media(max-width:660px) { .releaseNotesMain { grid-template-columns:1fr; grid-template-rows:auto minmax(0,1fr); } .releaseNotesVersions { flex-direction:row; overflow-x:auto; overflow-y:hidden; border-right:0; border-bottom:1px solid var(--lt-border); padding:8px; } .releaseNotesVersions button { min-width:92px; } .releaseNotesContent { padding:20px; } .releaseNotesHead { padding:18px 20px; } .localtifyUpdateBannerText span { display:none; } }
+@media(max-width:520px) { .localtifyUpdateBanner { padding:3px 6px; } .localtifyUpdateBannerActions button { padding:5px 6px; font-size:10px; } }
+@media(prefers-reduced-motion:reduce) { .releaseNotesOverlay,.localtifyUpdateBanner,.localtifyUpdateBannerProgress { transition:none!important; animation:none!important; } }
+
+.settingsUpdatesActions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding-top:14px; }
+.settingsUpdatesActions button { min-height:34px; }

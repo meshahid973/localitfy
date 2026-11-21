@@ -193,7 +193,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
           <label className="downloadsInputLabel" htmlFor="downloads-youtube-links">Paste YouTube links</label>
           <div className="downloadsInputSurface">
             <Link2 size={17} className="downloadsLinkIcon" aria-hidden="true" />
-            <textarea id="downloads-youtube-links" className="downloadsLinkInput"
+            <textarea id="downloads-youtube-links" data-embedded-field="" className="downloadsLinkInput"
               value={downloadText} onChange={event => setDownloadText(event.currentTarget.value)}
               placeholder="One song or playlist link per line" spellCheck={false} rows={2} />
           </div>
@@ -216,7 +216,7 @@ export default function DownloadsView(props: DownloadsViewProps) {
           <label className="downloadsInputLabel" htmlFor="downloads-spotify-link">Spotify link</label>
           <div className="downloadsInputSurface downloadsInputSingle">
             <Link2 size={17} className="downloadsLinkIcon" aria-hidden="true" />
-            <input id="downloads-spotify-link" type="url" className="downloadsLinkInput"
+            <input id="downloads-spotify-link" type="url" data-embedded-field="" className="downloadsLinkInput"
               placeholder="Playlist, album or track URL" value={spotifyUrl}
               disabled={spotifyFetchBusy || spotifyDownloadBusy}
               onChange={event => { setSpotifyUrl(event.currentTarget.value); setSpotifyFetchError(""); }}

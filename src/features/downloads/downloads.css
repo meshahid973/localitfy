@@ -22,11 +22,11 @@
   --leading-body: 1.4;
   display: grid;
   align-content: start;
-  gap: clamp(24px, 2.8vw, 38px);
+  gap: clamp(16px, 1.6vw, 24px);
   width: 100%;
-  max-width: 1120px;
+  max-width: none; /* Match the full-width workspace on wide desktop windows. */
   min-width: 0;
-  padding-bottom: 36px;
+  padding-bottom: 28px;
   color: var(--lt-text);
 }
 
@@ -45,7 +45,7 @@
 .downloadsImporter {
   display: block;
   min-width: 0;
-  padding-bottom: clamp(24px, 2.7vw, 36px);
+  padding-bottom: clamp(14px, 1.8vw, 22px);
   border-bottom: 1px solid var(--lt-border);
 }
 .downloadsTabs { max-width: 100%; }
@@ -54,7 +54,7 @@
 .downloadsTabList [data-tabs-indicator] { background: var(--lt-fill-selected); }
 .downloadsTabList [data-tabs-label] { color: var(--lt-text); }
 .downloadsTabList [role="tab"]:focus-visible { outline-offset: -2px; }
-.downloadsSourceContent { display: grid; gap: 12px; margin-top: 22px; min-width: 0; }
+.downloadsSourceContent { display: grid; gap: 9px; margin-top: 13px; min-width: 0; }
 .downloadsSourceContent[hidden] { display: none; }
 .downloadsInputLabel { display: block; color: var(--lt-text); font-size: 13px; font-weight: 600; }
 .downloadsInputSurface {
@@ -63,13 +63,13 @@
   gap: 12px;
   width: 100%;
   min-width: 0;
-  padding: 16px;
+  padding: 12px 14px;
   border: 1px solid var(--lt-border);
-  border-radius: 14px;
+  border-radius: 11px;
   background: var(--lt-fill-subtle);
   transition: background-color var(--lt-control-motion), border-color var(--lt-control-motion);
 }
-.downloadsInputSurface:focus-within { border-color: var(--lt-border-strong); background: var(--lt-fill); }
+.downloadsInputSurface:focus-within { border-color: var(--lt-border-strong); background: var(--lt-fill-subtle); box-shadow: 0 0 0 1px var(--lt-border); }
 .downloadsLinkIcon { flex: none; margin-top: 2px; color: var(--lt-muted); }
 .downloadsLinkInput {
   display: block;
@@ -81,7 +81,8 @@
   border: 0;
   outline: none;
   color: var(--lt-text);
-  background: none;
+  background: transparent;
+  box-shadow: none;
   font-size: 13px;
   line-height: 1.65;
 }
@@ -90,7 +91,7 @@
 .downloadsInputSingle { align-items: center; }
 .downloadsInputSingle .downloadsLinkIcon { margin-top: 0; }
 .downloadsInputSingle .downloadsLinkInput { min-height: 20px; height: 24px; resize: none; }
-.downloadsPrimaryRow { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; min-height: 42px; }
+.downloadsPrimaryRow { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; min-height: 36px; }
 .downloadsPrimaryRow > button { min-width: 150px; gap: 8px; border-radius: 10px; }
 .downloadsInputHint { color: var(--lt-muted); font-size: 11px; line-height: 1.5; }
 .downloadsSpotifyStatus { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; color: var(--lt-muted); font-size: 12px; }
@@ -129,8 +130,8 @@
 .downloadsErrorText { color: var(--lt-danger) !important; }
 
 .downloadsConversion { display: grid; grid-template-columns: minmax(0,1fr) minmax(90px,200px) auto; gap: 12px; align-items: center; min-width: 0; font-size: 12px; color: var(--lt-muted); }
-.downloadsActivity { display: grid; min-width: 0; gap: 18px; }
-.downloadsActivityHead { display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: 16px; }
+.downloadsActivity { display: grid; min-width: 0; gap: 12px; }
+.downloadsActivityHead { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
 .downloadsActivityTitle { display: grid; gap: 6px; }
 .downloadsActivityTitle h2 { margin: 0; font-size: 18px; font-weight: 650; letter-spacing: -.02em; }
 .downloadsActivityTitle p { margin: 0; color: var(--lt-muted); font-size: 12px; }
@@ -163,7 +164,7 @@
 .downloadsEmpty svg { opacity: .6; margin-bottom: 4px; }
 
 @media (max-width: 740px) {
-  .downloadsExperience { gap: 22px; padding: 0 2px 28px; }
+  .downloadsExperience { gap: 16px; padding: 0 2px 24px; }
   .downloadsActivityHead { align-items: start; flex-direction: column; }
   .downloadsFilters { width: 100%; }
   .downloadsPrimaryRow > button { min-width: 128px; }
@@ -175,7 +176,7 @@
   .downloadsExperience .pageHeaderTools { gap: 0; }
   .downloadsTools { margin-left: 0; }
   .downloadsTabList [role="tab"] { min-width: 96px; }
-  .downloadsInputSurface { padding: 13px; }
+  .downloadsInputSurface { padding: 11px 12px; }
   .downloadsInputHint { display: none; }
   .downloadsPrimaryRow > button { flex: 1; }
   .downloadsActivityRow { gap: 10px; }

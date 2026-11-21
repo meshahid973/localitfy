@@ -1,195 +1,39 @@
-import { AnimatePresence, motion as Motion } from "motion/react";
+import "../features/updates/updates.css";
+import { isAndroidApp } from "./platform";
+import { AnimatePresence, motion } from "motion/react";
 import type { ComponentType } from "react";
-import type { MotionProps, Transition } from "motion/react";
-import { Surface, SurfaceActions, SurfaceBody, SurfaceHeader } from "../shared/ui/Surface";
-import {
-  createVerticalDragConstraints,
-  physicalDragDefaults,
-  updateIslandDragBounds
-} from "../shared/motion/physicalDrag";
+import type { Transition } from "motion/react";
+import { AlertCircle, CheckCircle2, Download, RefreshCcw, X } from "lucide-react";
 import type { UpdatePromptState } from "../features/updates/update.types";
 
-type UpdateIslandTone = "neutral" | "accent" | "success" | "danger";
-
-function clampPercent(value: number) {
-  if (!Number.isFinite(Number(value))) return 0;
-  return Math.min(100, Math.max(0, Number(value)));
-}
-
-function updateTone(status: UpdatePromptState["status"]): UpdateIslandTone {
-  if (status === "downloaded") return "success";
-  if (status === "error") return "danger";
-  if (status === "downloading" || status === "available") return "accent";
-  return "neutral";
-}
-
 export type UpdateIslandProps = {
-  show: boolean;
-  updatePrompt: UpdatePromptState;
-  appVersion: string;
-  reducedMotion: boolean;
-  yukariUpdateImage: string;
-  enterSpring: Transition;
-  childSpring: Transition;
-  titleForPrompt: (prompt: UpdatePromptState) => string;
-  StatusIcon: ComponentType<{ status: string }>;
-  CloseIcon: ComponentType;
-  onDownload: () => void;
-  onInstall: () => void;
-  onCheckAgain: () => void;
-  onDismiss: () => void;
+  show:boolean;updatePrompt:UpdatePromptState;appVersion:string;reducedMotion:boolean;
+  yukariUpdateImage?:string;enterSpring?:Transition;childSpring?:Transition;
+  titleForPrompt?:(prompt:UpdatePromptState)=>string;
+  StatusIcon?:ComponentType<{status:string}>;CloseIcon?:ComponentType;
+  onDownload:()=>void;onInstall:()=>void;onCheckAgain:()=>void;onDismiss:()=>void;onWhatsNew:()=>void;
 };
-
-export default function UpdateIsland({
-  show,
-  updatePrompt,
-  appVersion,
-  reducedMotion,
-  yukariUpdateImage,
-  enterSpring,
-  childSpring,
-  titleForPrompt,
-  StatusIcon,
-  CloseIcon,
-  onDownload,
-  onInstall,
-  onCheckAgain,
-  onDismiss
-}: UpdateIslandProps) {
-  const versionLabel = updatePrompt.version || appVersion;
-  const progress = clampPercent(updatePrompt.percent);
-  const showClose = updatePrompt.status !== "downloading";
-  const surfaceTone = updateTone(updatePrompt.status);
-
-  const dragProps: MotionProps = reducedMotion
-    ? {}
-    : {
-        drag: "y",
-        dragConstraints: createVerticalDragConstraints(updateIslandDragBounds),
-        dragElastic: physicalDragDefaults.dragElastic,
-        dragMomentum: physicalDragDefaults.dragMomentum,
-        dragSnapToOrigin: true,
-        whileDrag: { scale: 0.998 },
-        style: { touchAction: "none", cursor: "grab" }
-      };
-
-  return (
-    <AnimatePresence initial={false}>
-      {show ? (
-        <Motion.div
-          key={`update-ribbon-${updatePrompt.status}-${versionLabel}`}
-          className="updateToastLayer topUpdateRibbonLayer"
-          role="presentation"
-          initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -18 }}
-          animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-          exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -16 }}
-          transition={reducedMotion ? { duration: 0.12 } : enterSpring}
-        >
-          <Motion.img
-            className={`updateYukariPeek updateYukariPeek-${updatePrompt.status}`}
-            src={yukariUpdateImage}
-            alt=""
-            aria-hidden="true"
-            draggable={false}
-            initial={reducedMotion ? { opacity: 0 } : { opacity: 0, x: 118, rotate: 2, scale: 0.985 }}
-            animate={reducedMotion ? { opacity: 1 } : { opacity: 1, x: 0, rotate: 0, scale: 1 }}
-            exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: 96, rotate: 2, scale: 0.985 }}
-            transition={reducedMotion ? { duration: 0.12 } : { type: "spring", stiffness: 260, damping: 24, mass: 0.82, delay: 0.08 }}
-          />
-
-          <Surface
-            as={Motion.section}
-            tone={surfaceTone}
-            density="compact"
-            elevated
-            interactive
-            className={`updateToastCard topUpdateRibbon ${updatePrompt.status} ${updatePrompt.nagStage ? `updateNagStage-${updatePrompt.nagStage}` : ""}`}
-            onClick={(event) => event.stopPropagation()}
-            role="status"
-            aria-live="polite"
-            aria-label="localtify update"
-            initial={reducedMotion ? false : { opacity: 0, y: -8, scale: 0.992 }}
-            animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-            exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.995 }}
-            transition={reducedMotion ? { duration: 0.12 } : enterSpring}
-            {...dragProps}
-          >
-            <SurfaceHeader
-              as={Motion.div}
-              density="compact"
-              className="topUpdateRibbonMain"
-              initial={reducedMotion ? false : { opacity: 0, y: 6 }}
-              animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-              exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
-              transition={reducedMotion ? { duration: 0.1 } : { ...childSpring, delay: 0.04 }}
-            >
-              <div className="updateToastIcon topUpdateRibbonIcon" aria-hidden="true">
-                <StatusIcon status={updatePrompt.status} />
-              </div>
-
-              <SurfaceBody className="updateToastText topUpdateRibbonText" density="compact">
-                <p className="eyebrow">localtify</p>
-                <h3>{titleForPrompt(updatePrompt)}</h3>
-              </SurfaceBody>
-            </SurfaceHeader>
-
-            <Motion.div
-              className="topUpdateRibbonRight"
-              initial={reducedMotion ? false : { opacity: 0, y: 6 }}
-              animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-              exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
-              transition={reducedMotion ? { duration: 0.1 } : { ...childSpring, delay: 0.12 }}
-            >
-              <SurfaceActions
-                as={Motion.div}
-                density="compact"
-                className="updateToastActions topUpdateRibbonActions"
-                initial={reducedMotion ? false : { opacity: 0, x: 8 }}
-                animate={reducedMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
-                exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: 5 }}
-                transition={reducedMotion ? { duration: 0.1 } : { ...childSpring, delay: 0.18 }}
-              >
-                {updatePrompt.status === "available" ? (
-                  <button className="updatePrimaryButton" type="button" onClick={onDownload}>
-                    download update
-                  </button>
-                ) : null}
-
-                {updatePrompt.status === "downloaded" ? (
-                  <button className="updatePrimaryButton" type="button" onClick={onInstall}>
-                    restart
-                  </button>
-                ) : null}
-
-                {updatePrompt.status === "error" || updatePrompt.status === "latest" || updatePrompt.status === "dev" ? (
-                  <button className="updatePrimaryButton" type="button" onClick={onCheckAgain}>
-                    check again
-                  </button>
-                ) : null}
-
-                {showClose ? (
-                  <button className="updateToastClose" type="button" onClick={onDismiss} aria-label="Dismiss update notice">
-                    <CloseIcon />
-                  </button>
-                ) : null}
-              </SurfaceActions>
-            </Motion.div>
-
-            {updatePrompt.status === "downloading" ? (
-              <Motion.div
-                className="updateProgressTrack topUpdateRibbonProgress"
-                aria-label="update progress"
-                initial={reducedMotion ? false : { opacity: 0, scaleX: 0.94 }}
-                animate={reducedMotion ? { opacity: 1 } : { opacity: 1, scaleX: 1 }}
-                exit={reducedMotion ? { opacity: 0 } : { opacity: 0, scaleX: 0.96 }}
-                transition={reducedMotion ? { duration: 0.1 } : { ...childSpring, delay: 0.2 }}
-              >
-                <span style={{ width: `${progress}%` }} />
-              </Motion.div>
-            ) : null}
-          </Surface>
-        </Motion.div>
-      ) : null}
-    </AnimatePresence>
-  );
+const size=(bytes?:number)=>bytes&&bytes>0?(bytes/1048576).toFixed(1)+" MB":"";
+export default function UpdateIsland({show,updatePrompt,appVersion,reducedMotion,onDownload,onInstall,onCheckAgain,onDismiss,onWhatsNew}:UpdateIslandProps){
+  const status=updatePrompt.status,version=updatePrompt.version||appVersion;
+  const pct=Math.max(0,Math.min(100,Number(updatePrompt.percent)||0));
+  const downloading=status==="downloading",available=status==="available",downloaded=status==="downloaded",error=status==="error";
+  const title=available?"Localtify "+version+" is available":downloaded?"Update ready to install":downloading?"Downloading update — "+Math.round(pct)+"%":error?"Update check failed":"Checking for updates…";
+  const detail=available?"A newer version is ready"+(updatePrompt.manualOnly?" · manual install":""):downloaded?"Restart when you're ready":downloading?[size(updatePrompt.downloadedBytes),size(updatePrompt.totalBytes)].filter(Boolean).join(" / "):"";
+  return <AnimatePresence initial={false}>{show?<motion.section
+    key="localtify-update-banner" className={"localtifyUpdateBanner "+status} role="status" aria-live="polite"
+    initial={reducedMotion?false:{opacity:0,y:-6}} animate={{opacity:1,y:0}} exit={reducedMotion?{opacity:0}:{opacity:0,y:-6}} transition={{duration:reducedMotion?0:0.16}}>
+    <div className="localtifyUpdateBannerMain">
+      {downloaded?<CheckCircle2 size={17}/>:error?<AlertCircle size={17}/>:downloading?<Download size={17}/>:<RefreshCcw size={17}/>}
+      <div className="localtifyUpdateBannerText"><strong>{title}</strong>{detail?<span>{detail}</span>:null}</div>
+    </div>
+    <div className="localtifyUpdateBannerActions">
+      {(available||downloaded)?<button type="button" onClick={onWhatsNew}>What's new</button>:null}
+      {available?<button type="button" onClick={onDownload}>{updatePrompt.manualOnly?(isAndroidApp()?"Get APK":"Get AppImage"):"Download"}</button>:null}
+      {downloaded?<button type="button" onClick={onInstall}>Restart to update</button>:null}
+      {error?<button type="button" onClick={onCheckAgain}>Retry</button>:null}
+      {!downloading?<button type="button" onClick={onDismiss} aria-label="Dismiss update notice"><X size={15}/></button>:null}
+    </div>
+    {downloading?<span className="localtifyUpdateBannerProgress" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Update download progress" style={{width:pct+"%"}}/>:null}
+  </motion.section>:null}</AnimatePresence>;
 }

@@ -95,6 +95,7 @@ contextBridge.exposeInMainWorld("localitfy", {
   clearListeningHistory: () => ipcRenderer.invoke("listening:clear"),
   getListeningCounts: () => ipcRenderer.invoke("listening:counts"),
   getListeningSummary: (payload) => ipcRenderer.invoke("listening:summary", payload),
+  getListeningCalendarSummary: (payload) => ipcRenderer.invoke("listening:calendar-summary", payload),
   recordPlayEvent: (payload) => ipcRenderer.invoke("listening:record", payload),
   getLyrics: (payload) => ipcRenderer.invoke("lyrics:get", payload),
   searchLyrics: (payload) => ipcRenderer.invoke("lyrics:search", payload),
@@ -164,6 +165,7 @@ contextBridge.exposeInMainWorld("localitfy", {
   closeWindow: () => ipcRenderer.invoke("window:close"),
 
   checkForUpdates: (payload) => ipcRenderer.invoke("localitfy:check-for-updates", payload),
+  getUpdateState: () => ipcRenderer.invoke("localitfy:get-update-state"),
   downloadUpdate: () => ipcRenderer.invoke("localitfy:download-update"),
   installUpdate: () => ipcRenderer.invoke("localitfy:install-update"),
   openExternal: (url) => ipcRenderer.invoke("localitfy:open-external", url),

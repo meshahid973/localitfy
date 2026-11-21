@@ -30,6 +30,11 @@ function registerAnalysisIpc(router, { app, powerMonitor, repositories, ffmpegPa
     const days = [7, 30, 90].includes(payload?.days) ? payload.days : 30;
     return repositories.listening.summary({ days });
   });
+  router.handle("listening:calendar-summary", (_event, payload) => {
+    const range = ["week","month","year"].includes(payload?.range) ? payload.range : "month";
+    const offset = Number.isSafeInteger(payload?.offset) && payload.offset >= 0 && payload.offset <= 120 ? payload.offset : 0;
+    return repositories.listening.calendarSummary({ range, offset });
+  });
   app.once("before-quit", () => { similarity.dispose(); void service?.dispose(); });
 }
 function preserveExperimentalSettings(settings, saved) {

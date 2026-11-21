@@ -1,4 +1,4 @@
-// Adapted from beUI (MIT). See THIRD_PARTY_NOTICES.txt.
+"use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
 

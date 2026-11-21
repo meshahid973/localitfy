@@ -26,6 +26,7 @@ function checkReleaseVersion() {
   const mismatches = findVersionMismatches(pkg.version, {
     "package-lock.json version": lock.version,
     "package-lock.json root package version": lock.packages?.[""]?.version,
+    "published release notes version": read(".github/release-notes.md").match(/^\s*(?:#{1,3}\s*)?Localtify\s+(\d+\.\d+\.\d+)\b/im)?.[1] || null,
     "renderer version": literalVersion("src/features/updates/update.constants.ts", "APP_VERSION"),
     "Discord Activity version": literalVersion("discord-activity/src/main.ts", "APP_VERSION"),
     "Android package version": read("android/app/build.gradle").match(/\bversionName\s+["']([^"']+)["']/)?.[1] || null
@@ -40,7 +41,7 @@ function checkReleaseVersion() {
     const source = read(file);
     // User-facing copy must not keep an independently hardcoded version.
     if (file === "src/features/updates/update.constants.ts") {
-      const copy = source.slice(source.indexOf("export const whatsNewItems"));
+      const copy = source.replace(/export const APP_VERSION\s*=\s*["'][^"']+["'];?/, "");
       if (/\b\d+\.\d+\.\d+\b/.test(copy)) mismatches.push(file + ": what's-new copy hardcodes a version");
     } else if (/\b\d+\.\d+\.\d+\b/.test(source)) {
       mismatches.push(file + ": UI copy hardcodes a version");

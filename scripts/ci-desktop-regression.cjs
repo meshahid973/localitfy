@@ -78,6 +78,33 @@ async function metrics(label,sampleCount=5){
   const median=key=>readings.map(r=>r[key]).sort((a,b)=>a-b)[Math.floor(readings.length/2)];
   return{label,readings,medianWorkingSetMiB:median("workingSetMiB"),peakWorkingSetMiB:Math.max(...readings.map(r=>r.workingSetMiB)),medianCpuPercent:median("cpuPercent")};
 }
+/** Measure real synchronous journal + output reuse work on this Electron main thread.
+ * Synthetic temporary files only: never open or modify a user's library.
+ */
+function profileMainThreadJournalBlocking() {
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),"localtify-journal-profile-"));
+  try {
+    const file=path.join(root,"fixture.wav"), data=Buffer.alloc(8*1024*1024,0x53);
+    fs.writeFileSync(file,data);
+    const stat=fs.statSync(file);
+    const digest=require("node:crypto").createHash("sha256").update(data).digest("hex");
+    const store=require("../electron/download-jobs.cjs").createDownloadJobStore(root);
+    const request={source:"youtube",url:"https://www.youtube.com/watch?v=abcdefghijk",folder:root,options:{autoAdd:false}};
+    const job=store.prepare(request);
+    const checkpointStart=performance.now();
+    store.update(job.id,{status:"done",result:{ok:true,filePath:file},sizeBytes:stat.size,mtimeMs:stat.mtimeMs,sha256:digest});
+    const checkpointMs=performance.now()-checkpointStart;
+    const reuseSamplesMs=[];
+    for(let i=0;i<3;i++) {
+      const began=performance.now(), reused=store.prepare(request);
+      reuseSamplesMs.push(performance.now()-began);
+      assert.equal(reused.status,"done","verified existing download must be reused");
+    }
+    const sorted=[...reuseSamplesMs].sort((a,b)=>a-b);
+    return {bytes:stat.size,checkpointMs,reuseSamplesMs,medianReuseMs:sorted[1],
+      note:"Blocking elapsed time on Electron main process, including SHA-256 and durable journal write; synthetic file"};
+  } finally {fs.rmSync(root,{recursive:true,force:true});}
+}
 const watchdog=setTimeout(()=>{console.error("Integrated visual smoke timed out");server.close();app.exit(1);},210000);
 server.listen(5173,async()=>{
   try{
@@ -359,10 +386,13 @@ server.listen(5173,async()=>{
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=discover]').click()");
       await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.discoverPage') && !document.querySelector('.appCrashBoundary') && document.querySelector('.app').dataset.workspaceArtwork==='on'").catch(()=>false),"Discover "+mode);
       await screenshot(win,"discover-"+mode);
-      for (const width of [1280,860]) {
-        win.setSize(width,800);
+      // Keep full 860/1280 coverage; exercise original wide-desktop layout
+      // only for the player and the two recently redesigned pages.
+      for (const width of [1280,860,1920]) {
+        win.setSize(width,width===1920?1080:800);
         await until(()=>win.webContents.executeJavaScript("window.innerWidth").then(actual=>actual===width),"viewport "+width,5000);
-        for (const view of ["home","library","artists","genres","playlists","discover","downloads","covers","analytics","settings"]) {
+        const views=width===1920?["home","downloads","analytics"]:["home","library","artists","genres","playlists","discover","downloads","covers","analytics","settings"];
+        for (const view of views) {
           await win.webContents.executeJavaScript(`document.querySelector('.sidebar [data-nav-id="${view}"]').click()`);
           await until(()=>win.webContents.executeJavaScript(`(()=>{const page=document.querySelector('.pageTransition[data-view="${view}"]');return !!page?.firstElementChild&&!page.querySelector('.collectionLoading')&&!document.querySelector('.appCrashBoundary')&&Number(getComputedStyle(page).opacity)>=0.99})()`).catch(()=>false),view+" "+mode+" "+width);
           if(view==="downloads") {
@@ -380,6 +410,25 @@ server.listen(5173,async()=>{
             await until(()=>win.webContents.executeJavaScript("Array.from(document.querySelectorAll('.downloadsActivityActions button')).some(button=>button.textContent.trim()==='Resume')"),"resume action is visible");
             const resumeUsable=await win.webContents.executeJavaScript("(()=>{const button=Array.from(document.querySelectorAll('.downloadsActivityActions button')).find(button=>button.textContent.trim()==='Resume');button.scrollIntoView({block:'center',behavior:'instant'});const box=button.getBoundingClientRect();return document.elementFromPoint(box.x+box.width/2,box.y+box.height/2)===button})()");
             assert.equal(resumeUsable,true,"resume remains reachable above the player");
+            const downloadAppearance=await win.webContents.executeJavaScript(`(()=>{
+              const fields=[...document.querySelectorAll(".downloadsLinkInput")].filter(el=>el.getClientRects().length);
+              const from=document.querySelector(".downloadsImporter")?.getBoundingClientRect();
+              const to=document.querySelector(".downloadsActivity")?.getBoundingClientRect();
+              const menu=document.querySelector('.downloadsRowMenu button[aria-label="More actions"]');
+              const selected=document.querySelector('.downloadsFilters button[aria-pressed="true"] > span');
+              return {fields:fields.map(field=>({embedded:field.hasAttribute("data-embedded-field"),background:getComputedStyle(field).backgroundColor})),
+                workspaceWidth:document.querySelector('.pageTransition[data-view="downloads"]')?.getBoundingClientRect().width,
+                downloadsWidth:document.querySelector('.downloadsExperience')?.getBoundingClientRect().width,
+                verticalGap:Math.round(to.top-from.bottom),menuIcons:menu?.querySelectorAll("svg").length,
+                selectedRadius:parseFloat(getComputedStyle(selected).borderTopLeftRadius)};
+            })()`);
+            assert.ok(downloadAppearance.fields.length>0,"Downloads has visible embedded URL fields");
+            assert.ok(downloadAppearance.fields.every(field=>field.embedded && (field.background==="transparent" || field.background.replaceAll(" ","")==="rgba(0,0,0,0)")),"Downloads input has no double grey fill: "+JSON.stringify(downloadAppearance));
+            assert.ok(downloadAppearance.verticalGap>=0 && downloadAppearance.verticalGap<=28,"Downloads importer-to-activity spacing is compact: "+JSON.stringify(downloadAppearance));
+            if(width===1920) assert.ok(downloadAppearance.downloadsWidth>=downloadAppearance.workspaceWidth*.93,
+              "Downloads should not leave a huge unused side strip on wide desktop: "+JSON.stringify(downloadAppearance));
+            assert.equal(downloadAppearance.menuIcons,1,"icon-only row menus must not render an extra chevron");
+            assert.ok(downloadAppearance.selectedRadius>=12,"Download activity filter uses rounded, theme-safe selection");
           }
           if(view==="analytics") {
             const history=await win.webContents.executeJavaScript("window.localitfy.getListeningSummary({days:7})");
@@ -387,19 +436,33 @@ server.listen(5173,async()=>{
             assert.equal(history.byDay.length,7,"seven-day history");
             assert.equal(history.byDay.reduce((sum,day)=>sum+day.ms,0),history.totalMs,"daily totals equal recorded total");
             assert.ok(history.comparison.totalMs>0,"historical comparison uses fixture playback events");
-            await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.analyticsChartInspector')"),"recorded listening chart");
-            await win.webContents.executeJavaScript("document.querySelector('button[aria-label=\"Listening history period\"]').click()");
-            await until(()=>win.webContents.executeJavaScript("Array.from(document.querySelectorAll('[role=menuitemradio]')).some(item=>item.textContent.includes('Last 7 days'))"),"history periods");
-            await win.webContents.executeJavaScript("Array.from(document.querySelectorAll('[role=menuitemradio]')).find(item=>item.textContent.includes('Last 7 days')).click()");
-            await until(()=>win.webContents.executeJavaScript("document.querySelector('.analyticsChartInspector')?.max==='6'"),"seven-day chart selection");
-            await until(()=>win.webContents.executeJavaScript("document.querySelector('button[aria-label=\"Listening history period\"] .arcDropdownLabel').textContent==='Last 7 days'"),"selected period label finishes its transition");
-            await win.webContents.executeJavaScript("document.querySelector('.analyticsChartInspector').focus()");
-            win.webContents.sendInputEvent({type:"keyDown",keyCode:"Home"});
-            win.webContents.sendInputEvent({type:"keyUp",keyCode:"Home"});
-            await until(()=>win.webContents.executeJavaScript("document.querySelector('.analyticsChartInspector')?.value==='0'"),"history chart Home key");
-            const readable=await win.webContents.executeJavaScript("document.querySelector('.analyticsChartInspector').getAttribute('aria-valuetext')");
-            assert.ok(readable.includes(history.byDay[0].day),"chart announces the selected UTC day");
-            assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('.analyticsHistoryChartData tbody tr').length"),7,"daily data remains available to assistive technology");
+            const calendar=await win.webContents.executeJavaScript("window.localitfy.getListeningCalendarSummary({range:'month',offset:0})");
+            assert.ok(calendar && Number.isFinite(calendar.totalMs) && calendar.totalMs>=0,"real calendar listening summary");
+            assert.equal(calendar.byBucket.reduce((sum,entry)=>sum+entry.ms,0),calendar.totalMs,"calendar sums match recorded events");
+            await until(()=>win.webContents.executeJavaScript("!!document.querySelector('[aria-label=\"Listening analytics\"]')"),"Analytics 4.0 page");
+            await until(()=>win.webContents.executeJavaScript("!!document.querySelector('section[data-slot=\"line-chart\"]')"),"genuine beUI recorded listening chart");
+            assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('.analyticsV4Overview').length"),1,"single listening overview");
+            assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('.analyticsV4Rankings .analyticsV4Ranking').length"),2,"artwork rankings");
+            const analyticsAppearance=await win.webContents.executeJavaScript(`(()=>{
+              const controls=document.querySelector(".analyticsV4Controls");
+              const header=document.querySelector(".analyticsExperienceV4 .pageHeader");
+              const selection=controls?.querySelector('[aria-pressed="true"] > span');
+              const trigger=controls?.querySelector('button[aria-label="Analytics options"]');
+              return {headerBottom:header?.getBoundingClientRect().bottom,
+                controlTop:controls?.getBoundingClientRect().top,
+                selectedRadius:selection?parseFloat(getComputedStyle(selection).borderTopLeftRadius):0,
+                menuIcons:trigger?.querySelectorAll("svg").length,
+                iconOnly:trigger?.dataset.iconOnly};
+            })()`);
+            assert.ok(analyticsAppearance.controlTop>=analyticsAppearance.headerBottom-1,"Analytics period controls follow their own header instead of colliding");
+            assert.ok(analyticsAppearance.selectedRadius>=12,"Analytics selection is a rounded, themed pill");
+            assert.equal(analyticsAppearance.iconOnly,"true","Analytics options are an icon-only control");
+            assert.equal(analyticsAppearance.menuIcons,1,"Analytics options do not render a redundant chevron");
+            assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('section[data-slot=\"line-chart\"] table tbody tr').length"),Math.max(calendar.byBucket.length,calendar.comparison.byBucket.length),"accessible chart preserves the full current and previous UTC months");
+            await win.webContents.executeJavaScript("(()=>{const button=[...document.querySelectorAll('button')].find(b=>b.getAttribute('aria-label')==='Previous period');button?.click();})()");
+            await until(()=>win.webContents.executeJavaScript("document.querySelector('.analyticsV4PeriodNav span')?.textContent.includes('October')"),"historic calendar navigation");
+            const previous=await win.webContents.executeJavaScript("window.localitfy.getListeningCalendarSummary({range:'month',offset:1})");
+            assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('section[data-slot=\"line-chart\"] table tbody tr').length"),Math.max(previous.byBucket.length,previous.comparison.byBucket.length),"historical comparison retains both UTC calendars");
           }
           const geometry=await win.webContents.executeJavaScript(`(()=>{
             const page=document.querySelector('.pageTransition[data-view="${view}"]');
@@ -421,6 +484,28 @@ server.listen(5173,async()=>{
           if(view==="artists") {
             await until(()=>win.webContents.executeJavaScript(`(()=>{const covers=[...document.querySelectorAll(".artistCard .coverImage")].filter(img=>{const r=img.getBoundingClientRect();return r.width>0&&r.height>0&&r.bottom>0&&r.top<window.innerHeight});return covers.length>0&&covers.every(img=>img.complete&&img.naturalWidth>0&&img.classList.contains("isLoaded"))})()`).catch(()=>false),"visible artist fixture artwork "+mode+" "+width,10000);
           }
+          if((width===1280 || width===1920) && view==="home"){
+            const volumeGeometry=await win.webContents.executeJavaScript(`(()=>{
+              const slider=document.querySelector('.playerRight .volumeWrap input[type="range"]');
+              const player=document.querySelector('.playerBar');
+              if(!slider||!player)return null;
+              const rect=slider.getBoundingClientRect(),outer=player.getBoundingClientRect();
+              return {width:rect.width,left:rect.left,right:rect.right,playerLeft:outer.left,playerRight:outer.right,viewport:window.innerWidth};
+            })()`);
+            assert.ok(volumeGeometry && volumeGeometry.width>=95 &&
+              volumeGeometry.left>=volumeGeometry.playerLeft &&
+              volumeGeometry.right<=Math.min(volumeGeometry.playerRight-5,volumeGeometry.viewport-5),
+              "volume slider must remain visible and within the player: "+JSON.stringify(volumeGeometry));
+            if(width===1280){
+              const volumeBefore=await win.webContents.executeJavaScript("Number(document.querySelector('.playerRight input[aria-label=\"volume level\"]').value)");
+              assert.ok(volumeBefore>0,"fixture should begin with audible volume");
+              const muted=await win.webContents.executeJavaScript("(()=>{const button=document.querySelector('.playerRight button[aria-label=\"mute volume\"]');if(!button)return false;button.click();return true})()");
+              assert.equal(muted,true,"mute control must be interactive");
+              await until(()=>win.webContents.executeJavaScript("(()=>{const slider=document.querySelector('.playerRight input[aria-label=\"volume level\"]');return !!document.querySelector('.playerRight button[aria-label=\"restore volume\"]')&&Number(slider?.value)===0})()").catch(()=>false),"volume slider reflects mute");
+              await win.webContents.executeJavaScript("document.querySelector('.playerRight button[aria-label=\"restore volume\"]').click()");
+              await until(()=>win.webContents.executeJavaScript(`(()=>{const slider=document.querySelector('.playerRight input[aria-label="volume level"]');return !!document.querySelector('.playerRight button[aria-label="mute volume"]')&&Math.abs(Number(slider?.value)-${volumeBefore})<=1})()`).catch(()=>false),"volume slider restores audible state");
+            }
+          }
           await screenshot(win,view+"-"+mode+"-"+width);
         }
         await win.webContents.executeJavaScript("document.querySelector('.playerLyricsButton').click()");
@@ -433,6 +518,32 @@ server.listen(5173,async()=>{
       await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=settings]').click()");
       await until(()=>win.webContents.executeJavaScript("document.querySelectorAll('.settingsModeButton').length===2").catch(()=>false),"appearance navigation");
     }
+    // Render the actual title-bar update banner and remote What's New flow without installing a fake package.
+    win.webContents.send("localitfy:auto-update-event",{
+      type:"available",version:"9.9.9",manualOnly:true,silent:false,
+      message:"QA update preview",releaseNotes:"## QA release details\n- Verified original release notes"
+    });
+    await until(()=>win.webContents.executeJavaScript("!!document.querySelector('.localtifyUpdateBanner.available')"),"blue release banner");
+    assert.equal(await win.webContents.executeJavaScript("getComputedStyle(document.querySelector('.localtifyUpdateBanner')).backgroundImage.includes('linear-gradient')"),true,"banner has the proper blue treatment");
+    await screenshot(win,"updates-blue-banner");
+    await win.webContents.executeJavaScript("Array.from(document.querySelectorAll('.localtifyUpdateBanner button')).find(b=>b.textContent.includes('What'))?.click()");
+    await until(()=>win.webContents.executeJavaScript("document.querySelector('.releaseNotesDialog .releaseNotesMarkdown')?.textContent.includes('QA release details')"),"versioned release notes");
+    const doneContrast=await win.webContents.executeJavaScript(`(()=>{
+      const element=document.querySelector('.releaseNotesFooter button');
+      const style=getComputedStyle(element);
+      const channel=s=>s.match(/[0-9.]+/g).slice(0,3).map(Number).map(v=>{
+        const n=v/255;return n<=0.04045?n/12.92:((n+0.055)/1.055)**2.4;
+      });
+      const luminance=c=>{const v=channel(c);return v[0]*0.2126+v[1]*0.7152+v[2]*0.0722;};
+      const text=luminance(style.color),fill=luminance(style.backgroundColor);
+      return (Math.max(text,fill)+0.05)/(Math.min(text,fill)+0.05);
+    })()`);
+    assert.ok(doneContrast>=4.5,"Changelog Done button must meet WCAG AA text contrast: "+doneContrast);
+    await screenshot(win,"whats-new-release-history");
+    await win.webContents.executeJavaScript("document.querySelector('.releaseNotesClose').click()");
+    await until(()=>win.webContents.executeJavaScript("!document.querySelector('.releaseNotesDialog')"),"close release notes");
+    await win.webContents.executeJavaScript("document.querySelector('.localtifyUpdateBanner [aria-label=\"Dismiss update notice\"]').click()");
+    await until(()=>win.webContents.executeJavaScript("!document.querySelector('.localtifyUpdateBanner')"),"dismiss update banner");
     // Exercise shared menu navigation, queue editing and both listening layouts.
     await win.webContents.executeJavaScript("document.querySelector('.playerBar [aria-label=pause]')?.click()");
     await win.webContents.executeJavaScript("document.querySelector('.sidebar [data-nav-id=home]').click()");
@@ -489,7 +600,8 @@ server.listen(5173,async()=>{
     assert.ok(collection.hero&&collection.row&&collection.play,"compact collections retain keyboard playback: "+JSON.stringify(collection));
     await screenshot(win,"collection-narrow");
     win.setSize(1280,800);
-    const result={startupMs,reloadMs,libraryNavigationMs,playbackStartMs,interactionDefinition:"click to observed DOM/audio readiness, polling interval 16ms plus IPC overhead",startupDefinition:"desktop entry to first rendered screen (onboarding or shell); excludes fixture creation and Electron process spawn",metrics:[idle,playing,hiddenPlayback],hiddenPlaybackObservation,gpuNote:"GPU process CPU and working set are reported by process type; these are not hardware GPU utilization",memoryDefinition:"sum of Electron process working sets; may double count shared pages",platform:process.platform,fixtureSongs:songs.length,layouts,artworkTransitionLayers:samples};
+    const journalBlocking=profileMainThreadJournalBlocking();
+    const result={startupMs,reloadMs,libraryNavigationMs,playbackStartMs,journalBlocking,interactionDefinition:"click to observed DOM/audio readiness, polling interval 16ms plus IPC overhead",startupDefinition:"desktop entry to first rendered screen (onboarding or shell); excludes fixture creation and Electron process spawn",metrics:[idle,playing,hiddenPlayback],hiddenPlaybackObservation,gpuNote:"GPU process CPU and working set are reported by process type; these are not hardware GPU utilization",memoryDefinition:"sum of Electron process working sets; may double count shared pages",platform:process.platform,fixtureSongs:songs.length,layouts,artworkTransitionLayers:samples};
     fs.writeFileSync(path.join(output,"desktop-runtime.json"),JSON.stringify(result,null,2));console.log("[desktop-qa]",JSON.stringify(result));
     clearTimeout(watchdog);server.close();app.exit(0);
   }catch(error){

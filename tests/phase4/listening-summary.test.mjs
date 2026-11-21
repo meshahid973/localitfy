@@ -5,10 +5,10 @@ import { createRequire } from "node:module";
 import fs from "node:fs";
 import ts from "typescript";
 const require = createRequire(import.meta.url);
-const { getRecordedListeningSummary } = require("../../electron/db/listening-summary.cjs");
+const { getRecordedListeningSummary, getRecordedListeningCalendarSummary } = require("../../electron/db/listening-summary.cjs");
 const { createPlayEventsTable } = require("../../electron/db/play-events.cjs");
 const compiled = ts.transpileModule(fs.readFileSync("src/features/analytics/listeningSummary.ts", "utf8"), { compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 } }).outputText;
-const { isListeningSummary } = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString("base64")}`);
+const { isListeningSummary, isListeningCalendarSummary } = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString("base64")}`);
 
 function fixture() {
   const database = new DatabaseSync(":memory:");
@@ -84,4 +84,88 @@ test("empty periods and cleared history contain no invented baseline or percenta
     assert.equal(getRecordedListeningSummary(database, { days: 90, now }).totalMs, 0);
     assert.throws(() => getRecordedListeningSummary(database, { days: 365, now }), /Invalid listening period/);
   } finally { database.close(); }
+});
+
+
+test("Calendar month and year are real UTC ranges, exclude future events and include exact previous periods",()=>{
+  const {database,event}=fixture();
+  try {
+    const now=Date.UTC(2026,2,1,0,0,20);
+    event("feb1","song",Date.UTC(2026,1,1,12),1000);
+    event("feb2","song",Date.UTC(2026,1,28,23,59),2000);
+    event("mar1","other",Date.UTC(2026,2,1,0,0,1),3000);
+    event("late","song",now+10,1000);
+    const month=getRecordedListeningCalendarSummary(database,{range:"month",offset:0,now});
+    assert.equal(month.startAt,Date.UTC(2026,2,1));
+    assert.equal(month.comparison.startAt,Date.UTC(2026,1,1));
+    assert.equal(month.comparison.totalMs,3000);
+    assert.equal(month.comparison.comparableTotalMs,0,"March 1st compared to February 1st so far, not the full February");
+    assert.equal(month.comparison.changePercent,null);
+    assert.equal(month.totalMs,3000);
+    assert.equal(month.sessions,1);
+    assert.equal(month.activeDays,1);
+    assert.equal(month.byBucket.length,31);
+    assert.deepEqual(month.bySong,[{id:"other",ms:3000}]);
+    assert.equal(isListeningCalendarSummary(month,{range:"month",offset:0}),true);
+    const feb=getRecordedListeningCalendarSummary(database,{range:"month",offset:1,now});
+    assert.equal(feb.totalMs,3000);
+    assert.equal(feb.byBucket.length,28);
+    assert.equal(feb.comparison.byBucket.length,31,"previous January must remain complete when February has fewer days");
+    assert.equal(feb.comparison.totalMs,0);
+    assert.equal(feb.comparison.comparableTotalMs,0,"completed historical month uses complete previous baseline");
+    assert.equal(feb.partial,false);
+    assert.equal(isListeningCalendarSummary(feb,{range:"month",offset:1}),true);
+    const year=getRecordedListeningCalendarSummary(database,{range:"year",offset:0,now});
+    assert.equal(year.byBucket.length,12);
+    assert.deepEqual(year.byBucket.slice(0,3),[{id:"2026-01",ms:0},{id:"2026-02",ms:3000},{id:"2026-03",ms:3000}]);
+    assert.equal(year.totalMs,6000);
+    assert.equal(isListeningCalendarSummary(year,{range:"year",offset:0}),true);
+  }finally{database.close();}
+});
+
+test("Calendar ISO week, leap February and tampered cached snapshot remain accurate",()=>{
+  const {database,event}=fixture();
+  try {
+    const now=Date.UTC(2024,1,29,19);
+    event("leap","song",Date.UTC(2024,1,29,3),900);
+    event("prior","song",Date.UTC(2024,1,25,3),100);
+    const feb=getRecordedListeningCalendarSummary(database,{range:"month",offset:0,now});
+    assert.equal(feb.byBucket.length,29);
+    assert.equal(feb.totalMs,1000);
+    const week=getRecordedListeningCalendarSummary(database,{range:"week",offset:0,now});
+    assert.equal(week.startAt,Date.UTC(2024,1,26));
+    assert.equal(week.byBucket.length,7);
+    assert.equal(week.totalMs,900);
+    assert.equal(week.comparison.totalMs,100);
+    assert.equal(isListeningCalendarSummary(week,{range:"week",offset:0}),true);
+    assert.equal(isListeningCalendarSummary({...week,totalMs:10000}),false);
+    assert.equal(isListeningCalendarSummary({...week,activeDays:400}),false);
+    assert.equal(isListeningCalendarSummary({...week,bySong:[...week.bySong,...week.bySong]}),false);
+    assert.equal(isListeningCalendarSummary({...week,comparison:{...week.comparison,changePercent:999}}),false);
+    assert.throws(()=>getRecordedListeningCalendarSummary(database,{range:"decade",now}),/Invalid listening calendar range/);
+    assert.throws(()=>getRecordedListeningCalendarSummary(database,{range:"year",offset:121,now}),/Invalid listening calendar range/);
+  }finally{database.close();}
+});
+
+
+test("In-progress calendar period compares to equivalent elapsed UTC time, not the full prior month",()=>{
+  const {database,event}=fixture();
+  try {
+    const now=Date.UTC(2026,2,15,12,0,0);
+    event("prior-before","song",Date.UTC(2026,1,3,11),3000);
+    event("prior-after","song",Date.UTC(2026,1,25,11),8000);
+    event("current","song",Date.UTC(2026,2,3,11),6000);
+    const nowMonth=getRecordedListeningCalendarSummary(database,{range:"month",now});
+    assert.equal(nowMonth.totalMs,6000);
+    assert.equal(nowMonth.comparison.totalMs,11000,"the chart retains the complete previous February");
+    assert.equal(nowMonth.comparison.comparableTotalMs,3000,"the current-to-date comparison excludes later February records");
+    assert.equal(nowMonth.comparison.changePercent,100);
+    assert.equal(isListeningCalendarSummary(nowMonth,{range:"month",offset:0}),true);
+    const corrupted=structuredClone(nowMonth);
+    corrupted.comparison.comparableTotalMs=12000;
+    assert.equal(isListeningCalendarSummary(corrupted),false);
+    const feb=getRecordedListeningCalendarSummary(database,{range:"month",offset:1,now});
+    assert.equal(feb.comparison.comparableTotalMs,feb.comparison.totalMs,"completed periods compare complete periods");
+    assert.equal(isListeningCalendarSummary(feb),true);
+  } finally {database.close();}
 });

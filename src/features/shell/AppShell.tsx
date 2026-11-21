@@ -16,9 +16,9 @@ import { AppActionsContext, playableIds, type AppActions } from "./appActions";
 import { useCollectionActions } from "./useCollectionActions";
 import { CollectionLoading } from "../../shared/ui/CollectionLoading";
 import { PageErrorBoundary } from "./PageErrorBoundary";
-import { MascotStateArt, UpdateStatusIcon, WindowCloseIcon } from "../../shared/ui/LocaltifyViewUi";
+import { MascotStateArt } from "../../shared/ui/LocaltifyViewUi";
 import type { MascotStateKey } from "../../shared/ui/LocaltifyViewUi";
-import WhatsNewModal from "../updates/WhatsNewModal";
+const WhatsNewModal = lazy(() => import("../updates/WhatsNewModal"));
 import { clamp } from "../../shared/utils/format";
 import type { AppShellProps } from "./appShell.contract";
 import type { Song } from "../library/song.types";
@@ -26,9 +26,8 @@ import { useDownloadTagPrompt } from "../tagging/useDownloadTagPrompt";
 import SidebarNav from "./SidebarNav";
 import { isAndroidApp } from "../../app/platform";
 import {
-  APP_VERSION, defaultUpdatePrompt, updateRibbonChildSpring, updateRibbonEnterSpring
+  APP_VERSION
 } from "../updates/update.constants";
-import { updateRibbonTitle } from "../updates/update.utils";
 import { yukariUpdateImage } from "../../core/app.constants";
 import "./app-core.css";
 import "./motion.css";
@@ -78,7 +77,7 @@ export default function AppShell(props: AppShellProps) {
     themeSettling, effectiveTheme,
     effectiveAmbient, effectiveCoverColorSyncMode, effectiveNotes, statusText, draggedSongTitle
   } = frame;
-  const { updatePrompt, askUpdaterToDownload, askUpdaterToInstall, manualUpdateCheck, setUpdatePrompt } = updates;
+  const { updatePrompt, askUpdaterToDownload, askUpdaterToInstall, manualUpdateCheck, onWhatsNew, onDismiss } = updates;
   const {
     previewActive: screensaverPreviewActive, visible: screensaverVisible,
     dismissFromActivity: dismissScreensaverFromActivity, setVisible: setScreensaverVisible,
@@ -123,6 +122,10 @@ export default function AppShell(props: AppShellProps) {
   const homeHeroCoverSaturation = clamp(1.04 + (homeHeroCoverBrightness - 1) * 0.14, 1, 1.14);
   const homeHeroCoverGlowBrightness = clamp(0.72 + (homeHeroCoverBrightness - 1) * 0.34, 0.62, 0.92);
   const platformId = String(platformInfo.id || "unknown").toLowerCase();
+  const updateBanner=mountUpdateIsland?<Suspense fallback={null}><UpdateIsland
+    show={showTopUpdateRibbon} updatePrompt={updatePrompt} appVersion={APP_VERSION} reducedMotion={settings.reducedMotion}
+    onDownload={askUpdaterToDownload} onInstall={askUpdaterToInstall} onCheckAgain={manualUpdateCheck}
+    onWhatsNew={onWhatsNew} onDismiss={onDismiss}/></Suspense>:null;
   const mascotDebugMode =
     typeof window !== "undefined" &&
     window.localStorage.getItem("localtify:mascotDebug") === "1";
@@ -181,22 +184,7 @@ export default function AppShell(props: AppShellProps) {
 
       {artworkEnabled && workspaceSources.length ? <WorkspaceArtworkBackdrop sources={workspaceSources} /> : null}
       <TitleBar showWindowButtons={platformId !== "mac"} history={nav}>
-        {mountUpdateIsland ? <Suspense fallback={null}><UpdateIsland
-          show={showTopUpdateRibbon}
-          updatePrompt={updatePrompt}
-          appVersion={APP_VERSION}
-          reducedMotion={settings.reducedMotion}
-          yukariUpdateImage={yukariUpdateImage}
-          enterSpring={updateRibbonEnterSpring}
-          childSpring={updateRibbonChildSpring}
-          titleForPrompt={updateRibbonTitle}
-          StatusIcon={UpdateStatusIcon}
-          CloseIcon={WindowCloseIcon}
-          onDownload={askUpdaterToDownload}
-          onInstall={askUpdaterToInstall}
-          onCheckAgain={manualUpdateCheck}
-          onDismiss={() => setUpdatePrompt(defaultUpdatePrompt)}
-        /></Suspense> : null}
+        {!isAndroidApp()?updateBanner:null}
       </TitleBar>
 
       {mountScreensaver ? <Suspense fallback={null}><ScreensaverOverlay
@@ -250,6 +238,7 @@ export default function AppShell(props: AppShellProps) {
           </aside>}
 
           <section className="content" ref={contentRef}>
+            {isAndroidApp()&&updateBanner?<div className="androidUpdateNotice">{updateBanner}</div>:null}
             {mascotDebugMode ? (
               <section className="mascotDebugPanelV498" aria-label="Mascot state debug gallery">
                 <div className="panelHead mascotDebugHeadV498">
@@ -349,7 +338,7 @@ function ShellDialogs({ modals, menu, actions, collections, downloads, taggingEn
         titleOf={(id) => modals.songContextMenu.songsById.get(id)?.title || "Unknown song"} onClose={downloadTagPrompt.dismiss} /></Suspense> : null}
       {modals.similarSongs.seed ? <Suspense fallback={null}><SimilarSongsDialog key={modals.similarSongs.seed.key} {...modals.similarSongs} /></Suspense> : null}
 
-      <WhatsNewModal {...modals.whatsNew} />
+      {modals.whatsNew.open?<Suspense fallback={null}><WhatsNewModal {...modals.whatsNew} /></Suspense>:null}
 
       {modals.songEditor.song ? <Suspense fallback={null}><SongEditorModal {...modals.songEditor} /></Suspense> : null}
 

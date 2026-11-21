@@ -1,287 +1,245 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
+import { isAndroidApp } from "../../app/platform";
 import type { AppToastKind } from "../shell/view.types";
-import { APP_VERSION, WHATS_NEW_SEEN_KEY, defaultUpdatePrompt } from "./update.constants";
+import { APP_VERSION, WHATS_NEW_SEEN_KEY, UPDATE_LEAVE_ALONE_PREFIX, defaultUpdatePrompt } from "./update.constants";
 import type { AutoUpdateEvent, UpdatePromptState } from "./update.types";
 import { friendlyUpdateError, updateWasLeftAlone } from "./update.utils";
+import { fetchOfficialAndroidRelease, compareStableVersions, ANDROID_RELEASE_PREFIX } from "./androidRelease";
 
 type UpdatesControllerOptions = {
   ready: boolean;
   autoUpdateEnabled: boolean;
+  autoUpdateNotifyOnly: boolean;
   setStatusText: Dispatch<SetStateAction<string>>;
   showAppToast: (message: string, kind?: AppToastKind) => void;
 };
+const CHECK_INTERVAL = 6 * 60 * 60 * 1000;
+const LAST_CHECK_KEY = "localitfy.updateLastSuccessfulCheckAt";
 
-export function useUpdatesController({
-  ready,
-  autoUpdateEnabled,
-  setStatusText,
-  showAppToast
-}: UpdatesControllerOptions) {
-  const [updatePrompt, setUpdatePrompt] = useState<UpdatePromptState>(defaultUpdatePrompt);
-  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
-  const [lastUpdateCheckedLabel, setLastUpdateCheckedLabel] = useState("not checked yet");
-  const updateNagTimerRef = useRef<number | null>(null);
-  const updateNagVersionRef = useRef("");
-  const updateNagStatusRef = useRef<"available" | "downloaded">("available");
+export function useUpdatesController({ ready,autoUpdateEnabled,autoUpdateNotifyOnly,setStatusText,showAppToast }: UpdatesControllerOptions) {
+  const [updatePrompt,setUpdatePrompt] = useState<UpdatePromptState>(defaultUpdatePrompt);
+  const [whatsNewOpen,setWhatsNewOpen] = useState(false);
+  const [whatsNewVersion,setWhatsNewVersion] = useState(APP_VERSION);
+  const [whatsNewReleaseNotes,setWhatsNewReleaseNotes] = useState("");
+  const [lastUpdateCheckedLabel,setLastUpdateCheckedLabel] = useState(()=>{
+    try { const timestamp=Number(window.localStorage.getItem(LAST_CHECK_KEY)||0); return timestamp?new Date(timestamp).toLocaleString():"Not checked yet"; }
+    catch { return "Not checked yet"; }
+  });
+  const notifyOnlyRef=useRef(autoUpdateNotifyOnly);
+  const downloadAttemptedRef=useRef(new Set<string>());
+  const lastAttemptRef=useRef(0);
+  const checkingRef=useRef(false);
+  const failureCountRef=useRef(0);
+  const retryRef=useRef<number|null>(null);
+  notifyOnlyRef.current=autoUpdateNotifyOnly;
 
-  const clearUpdateNagTimer = useCallback(() => {
-    if (updateNagTimerRef.current !== null) {
-      window.clearTimeout(updateNagTimerRef.current);
-      updateNagTimerRef.current = null;
+  const applyEvent=useCallback((payload:AutoUpdateEvent)=>{
+    if(!payload || typeof payload!=="object")return;
+    const version=payload.version||"";
+    const checkedAt=Number(payload.checkedAt||0);
+    if(checkedAt>0 && Number.isFinite(checkedAt)) {
+      setLastUpdateCheckedLabel(new Date(checkedAt).toLocaleString());
+      try { window.localStorage.setItem(LAST_CHECK_KEY,String(checkedAt)); } catch {}
     }
-  }, []);
-
-  const showUpdateNag = useCallback((stage: 1 | 2 | 3, versionInput?: string) => {
-    const version = versionInput || updateNagVersionRef.current || updatePrompt.version || "latest";
-    if (updateWasLeftAlone(version)) return;
-
-    updateNagVersionRef.current = version;
-    setUpdatePrompt({
-      visible: true,
-      status: updateNagStatusRef.current,
-      version,
-      percent: updateNagStatusRef.current === "downloaded" ? 100 : 0,
-      nagStage: stage,
-      message: "",
-      error: "",
-      libraryBackedUp: true
-    });
-  }, [updatePrompt.version]);
-
-  const scheduleUpdateNag = useCallback((
-    versionInput?: string,
-    stageInput?: 1 | 2 | 3,
-    customDelayMs?: number,
-    statusInput?: "available" | "downloaded"
-  ) => {
-    const version = versionInput || updatePrompt.version || updateNagVersionRef.current || "latest";
-    const stage = stageInput || 1;
-    if (updateWasLeftAlone(version)) return;
-
-    updateNagVersionRef.current = version;
-    updateNagStatusRef.current = statusInput || updateNagStatusRef.current || "available";
-    clearUpdateNagTimer();
-
-    const delayMs = typeof customDelayMs === "number" ? customDelayMs : stage === 1 ? 120_000 : 60_000;
-    updateNagTimerRef.current = window.setTimeout(() => {
-      updateNagTimerRef.current = null;
-      showUpdateNag(stage, version);
-    }, delayMs);
-  }, [clearUpdateNagTimer, showUpdateNag, updatePrompt.version]);
-
-  useEffect(() => {
-    if (!ready) return;
-    const seenVersion = window.localStorage.getItem(WHATS_NEW_SEEN_KEY);
-    if (seenVersion === APP_VERSION) return;
-    const timer = window.setTimeout(() => setWhatsNewOpen(true), 420);
-    return () => window.clearTimeout(timer);
-  }, [ready]);
-
-  useEffect(() => {
-    if (!window.localitfy.onAutoUpdate) return;
-
-    const off = window.localitfy.onAutoUpdate((payload: AutoUpdateEvent) => {
-      if (!payload || typeof payload !== "object") return;
-
-      const version = payload.version || "latest";
-      const percent = Math.min(100, Math.max(0, Number(payload.percent || 0)));
-
-      if (!payload.silent && ["checking", "not-available", "available", "error", "dev"].includes(payload.type)) {
-        setLastUpdateCheckedLabel(payload.type === "checking" ? "checking now" : "just now");
-      }
-
-      if (payload.type === "backup") {
-        setUpdatePrompt((old) => ({
-          ...old,
-          visible: old.visible,
-          backupPath: payload.backupPath || old.backupPath,
-          libraryBackedUp: Boolean(payload.libraryBackedUp),
-          message: old.message || payload.message || "your library has been backed up"
-        }));
-        return;
-      }
-
-      if (payload.type === "checking") {
-        if (payload.silent) return;
-        setUpdatePrompt({ visible: true, status: "checking", version: "", percent: 0, message: payload.message || "Checking for updates...", error: "" });
-        showAppToast("Checking for updates", "work");
-        return;
-      }
-
-      if (payload.type === "available") {
-        updateNagVersionRef.current = version;
-        updateNagStatusRef.current = "available";
-        if (version && updateWasLeftAlone(version)) return;
-        setUpdatePrompt({
-          visible: true,
-          status: "available",
-          version,
-          percent: 0,
-          message: payload.message || `localtify ${version} is ready to download.`,
-          error: "",
-          backupPath: payload.backupPath || "",
-          libraryBackedUp: Boolean(payload.libraryBackedUp),
-          releaseNotes: payload.releaseNotes || ""
-        });
-        showAppToast("Update available", "success");
-        return;
-      }
-
-      if (payload.type === "downloading") {
-        setUpdatePrompt((old) => ({
-          ...old,
-          visible: true,
-          status: "downloading",
-          percent,
-          message: payload.message || `Downloading update... ${Math.round(percent)}%`,
-          error: "",
-          backupPath: payload.backupPath || old.backupPath,
-          libraryBackedUp: Boolean(payload.libraryBackedUp || old.libraryBackedUp),
-          downloadedBytes: payload.downloadedBytes,
-          totalBytes: payload.totalBytes,
-          sizeBytes: payload.sizeBytes,
-          speedBytesPerSecond: payload.speedBytesPerSecond
-        }));
-        return;
-      }
-
-      if (payload.type === "downloaded") {
-        updateNagVersionRef.current = version || updateNagVersionRef.current || "latest";
-        updateNagStatusRef.current = "downloaded";
-        setUpdatePrompt((old) => ({
-          ...old,
-          visible: true,
-          status: "downloaded",
-          percent: 100,
-          version: version || old.version,
-          message: payload.message || "Update ready. Your library has been backed up. Restart localtify to install it.",
-          error: "",
-          backupPath: payload.backupPath || old.backupPath,
-          libraryBackedUp: Boolean(payload.libraryBackedUp || old.libraryBackedUp),
-          releaseNotes: payload.releaseNotes || old.releaseNotes
-        }));
-        showAppToast("Update ready to install", "success");
-        return;
-      }
-
-      if (payload.type === "not-available") {
-        if (payload.silent) return;
-        setUpdatePrompt(defaultUpdatePrompt);
-        setStatusText("localtify is up to date");
-        showAppToast("localtify is up to date", "success");
-        return;
-      }
-
-      if (payload.type === "dev") {
-        if (payload.silent) return;
-        setUpdatePrompt(defaultUpdatePrompt);
-        setStatusText("update checks work in the installed app");
-        showAppToast("Update checks work after installing the app", "work");
-        return;
-      }
-
-      if (payload.type === "error") {
-        if (payload.silent) return;
-        const message = friendlyUpdateError(payload.error || payload.message);
-        setUpdatePrompt({ visible: true, status: "error", version: "", percent: 0, message, error: message });
-        showAppToast("Update check failed", "error");
-      }
-    });
-
-    return () => off();
-  }, [setStatusText, showAppToast]);
-
-  useEffect(() => {
-    if (!ready || !autoUpdateEnabled || !window.localitfy.checkForUpdates) return;
-    const timer = window.setTimeout(() => {
-      window.localitfy.checkForUpdates?.({ silent: true }).catch(() => undefined);
-    }, 1800);
-    return () => window.clearTimeout(timer);
-  }, [ready, autoUpdateEnabled]);
-
-  useEffect(() => () => clearUpdateNagTimer(), [clearUpdateNagTimer]);
-
-  useEffect(() => {
-    if (!updatePrompt.visible) return;
-    if (updatePrompt.status !== "latest" && updatePrompt.status !== "dev") return;
-    const timer = window.setTimeout(() => setUpdatePrompt(defaultUpdatePrompt), updatePrompt.status === "latest" ? 1400 : 2600);
-    return () => window.clearTimeout(timer);
-  }, [updatePrompt.visible, updatePrompt.status]);
-
-  const askUpdaterToDownload = useCallback(async () => {
-    if (!window.localitfy.downloadUpdate) {
-      setUpdatePrompt((old) => ({ ...old, visible: true, status: "error", message: "Could not check for updates. Try again later.", error: "Updater is not available in this build." }));
+    if(payload.type==="idle"||payload.type==="backup")return;
+    if(payload.type==="checking") {
+      if(!payload.silent) setUpdatePrompt(old=>old.status==="downloaded"?old:{...defaultUpdatePrompt,status:"checking",message:"Checking for updates..."});
       return;
     }
-    setUpdatePrompt((old) => ({ ...old, visible: true, status: "downloading", percent: 0, message: "Backing up your library, then starting download...", error: "" }));
-    await window.localitfy.downloadUpdate().catch((error: unknown) => {
-      const message = friendlyUpdateError(error);
-      setUpdatePrompt((old) => ({ ...old, visible: true, status: "error", message, error: message }));
-    });
-  }, []);
-
-  const askUpdaterToInstall = useCallback(async () => {
-    if (!window.localitfy.installUpdate) return;
-    await window.localitfy.installUpdate().catch(() => {
-      setUpdatePrompt((old) => ({ ...old, visible: true, status: "error", message: "Could not restart to install the update.", error: "Could not restart to install the update." }));
-    });
-  }, []);
-
-  const manualUpdateCheck = useCallback(async () => {
-    setLastUpdateCheckedLabel("checking now");
-    if (!window.localitfy.checkForUpdates) {
-      setUpdatePrompt({ visible: true, status: "error", version: "", percent: 0, message: "Could not check for updates. Try again later.", error: "Updater is not available in this build." });
-      setLastUpdateCheckedLabel("just now");
+    if(payload.type==="available") {
+      const next:UpdatePromptState={visible:!updateWasLeftAlone(version),status:"available",version,percent:0,
+        message:payload.message||"A new Localtify version is available.",error:"",
+        releaseNotes:payload.releaseNotes||"",manualOnly:payload.manualOnly,downloadUrl:payload.downloadUrl,checkedAt};
+      setUpdatePrompt(old=>old.status==="downloaded"&&old.version===version?old:next);
+      if(!payload.manualOnly && !notifyOnlyRef.current && !downloadAttemptedRef.current.has(version) &&
+          !updateWasLeftAlone(version) && window.localitfy.downloadUpdate) {
+        downloadAttemptedRef.current.add(version);
+        void window.localitfy.downloadUpdate()
+          .then(started=>{
+            if(started)return;
+            downloadAttemptedRef.current.delete(version);
+            setUpdatePrompt(old=>old.version===version && old.status==="downloading"
+              ? {...old,visible:true,status:"error",message:"Update download failed.",error:"Try again from Updates settings."}
+              : old);
+          })
+          .catch(()=>{
+            downloadAttemptedRef.current.delete(version);
+            setUpdatePrompt(old=>old.version===version
+              ? {...old,visible:true,status:"error",message:"Update download failed.",error:"Try again."}
+              : old);
+          });
+      }
       return;
     }
-    setUpdatePrompt({ visible: true, status: "checking", version: "", percent: 0, message: "Checking for updates...", error: "" });
-    await window.localitfy.checkForUpdates({ silent: false }).catch((error: unknown) => {
-      const message = friendlyUpdateError(error);
-      setUpdatePrompt({ visible: true, status: "error", version: "", percent: 0, message, error: message });
-      setLastUpdateCheckedLabel("just now");
-    });
-  }, []);
+    if(payload.type==="downloading") {
+      setUpdatePrompt(old=>({...old,visible:true,status:"downloading",version:version||old.version,
+        percent:Math.min(100,Math.max(0,Number(payload.percent||0))),message:payload.message||"Downloading update…",
+        error:"",downloadedBytes:payload.downloadedBytes,totalBytes:payload.totalBytes,
+        speedBytesPerSecond:payload.speedBytesPerSecond}));
+      return;
+    }
+    if(payload.type==="downloaded") {
+      setUpdatePrompt(old=>({...old,visible:!updateWasLeftAlone(version||old.version),status:"downloaded",version:version||old.version,
+        percent:100,message:"Update ready. Restart to install.",error:"",releaseNotes:payload.releaseNotes||old.releaseNotes}));
+      return;
+    }
+    if(payload.type==="not-available") {
+      setUpdatePrompt(old=>old.status==="downloading"||old.status==="downloaded"?old:defaultUpdatePrompt);
+      if(!payload.silent)setStatusText("Localtify is up to date.");
+      return;
+    }
+    if(payload.type==="error") {
+      if(payload.silent)return; // Background network failures must not become false update banners.
+      const message=friendlyUpdateError(payload.error||payload.message);
+      setUpdatePrompt(old=>({...old,visible:true,status:"error",message,error:message,percent:0}));
+      showAppToast("Update check failed","error");
+      return;
+    }
+    if(payload.type==="dev"&&!payload.silent) {
+      setUpdatePrompt(defaultUpdatePrompt);
+      setStatusText("Updates are available in packaged apps.");
+    }
+  },[setStatusText,showAppToast]);
 
-  const openUpdateChangelog = useCallback(() => setWhatsNewOpen(true), []);
-  const closeWhatsNew = useCallback(() => {
-    window.localStorage.setItem(WHATS_NEW_SEEN_KEY, APP_VERSION);
+  // Subscribing before loading the main-process snapshot prevents missing a download event while mounting.
+  useEffect(()=>{
+    if(isAndroidApp()||!window.localitfy.onAutoUpdate)return;
+    let received=false,active=true;
+    const off=window.localitfy.onAutoUpdate(payload=>{received=true;applyEvent(payload);});
+    void window.localitfy.getUpdateState?.().then(state=>{if(active&&!received)applyEvent(state);}).catch(()=>undefined);
+    return()=>{active=false;off();};
+  },[applyEvent]);
+
+  useEffect(()=>{
+    if(!ready)return;
+    try {if(window.localStorage.getItem(WHATS_NEW_SEEN_KEY)===APP_VERSION)return;}
+    catch {return;}
+    const timer=window.setTimeout(()=>{setWhatsNewVersion(APP_VERSION);setWhatsNewReleaseNotes("");setWhatsNewOpen(true);},420);
+    return()=>window.clearTimeout(timer);
+  },[ready]);
+
+  const checkAndroid=useCallback(async(silent:boolean)=>{
+    try {
+      const release=await fetchOfficialAndroidRelease();
+      const checkedAt=Date.now();
+      if(compareStableVersions(release.version,APP_VERSION)>0)
+        applyEvent({type:"available",silent,checkedAt,version:release.version,manualOnly:true,downloadUrl:release.downloadUrl,releaseNotes:release.releaseNotes});
+      else applyEvent({type:"not-available",silent,checkedAt,version:release.version,manualOnly:true});
+      return true;
+    }catch(error){
+      applyEvent({type:"error",silent,manualOnly:true,message:"Could not verify Android releases.",error:String(error)});
+      return false;
+    }
+  },[applyEvent]);
+
+  // One renderer-owned scheduler respects autoUpdateEnabled; the Electron main process does not also poll.
+  useEffect(()=>{
+    if(!ready||!autoUpdateEnabled||(!isAndroidApp()&&!window.localitfy.checkForUpdates))return;
+    let alive=true;
+    const run=async()=>{
+      if(!alive||checkingRef.current)return;
+      checkingRef.current=true;
+      lastAttemptRef.current=Date.now();
+      try {
+        const ok=isAndroidApp()?await checkAndroid(true):await window.localitfy.checkForUpdates?.({silent:true});
+        if(!alive)return;
+        if(ok===false) {
+          failureCountRef.current=Math.min(4,failureCountRef.current+1);
+          const delay=Math.min(CHECK_INTERVAL,15*60*1000*Math.pow(2,failureCountRef.current-1));
+          if(retryRef.current!==null)window.clearTimeout(retryRef.current);
+          retryRef.current=window.setTimeout(()=>{retryRef.current=null;void run();},delay);
+        } else failureCountRef.current=0;
+      } catch { /* Scheduled checks must never block application startup. */ }
+      finally { checkingRef.current=false; }
+    };
+    const startup=window.setTimeout(()=>void run(),1800);
+    const interval=window.setInterval(()=>{if(Date.now()-lastAttemptRef.current>=CHECK_INTERVAL)void run();},CHECK_INTERVAL);
+    const resumed=()=>{if(!document.hidden&&Date.now()-lastAttemptRef.current>=CHECK_INTERVAL)void run();};
+    const online=()=>{if(Date.now()-lastAttemptRef.current>=CHECK_INTERVAL)void run();};
+    document.addEventListener("visibilitychange",resumed);
+    window.addEventListener("online",online);
+    return()=>{alive=false;window.clearTimeout(startup);window.clearInterval(interval);
+      if(retryRef.current!==null)window.clearTimeout(retryRef.current);retryRef.current=null;
+      document.removeEventListener("visibilitychange",resumed);window.removeEventListener("online",online);};
+  },[ready,autoUpdateEnabled,checkAndroid]);
+
+  const manualUpdateCheck=useCallback(async()=>{
+    if(isAndroidApp()){
+      setUpdatePrompt(old=>old.status==="downloaded"?old:{...defaultUpdatePrompt,status:"checking",message:"Checking Android releases..."});
+      await checkAndroid(false);
+      return;
+    }
+    if(!window.localitfy.checkForUpdates) {
+      setUpdatePrompt({...defaultUpdatePrompt,status:"error",visible:true,message:"Updater is unavailable.",error:"This platform does not have a supported updater."});
+      return;
+    }
+    setUpdatePrompt(old=>old.status==="downloaded"?old:{...defaultUpdatePrompt,status:"checking",message:"Checking for updates..."});
+    await window.localitfy.checkForUpdates({silent:false}).catch(error=>{
+      const message=friendlyUpdateError(error);
+      setUpdatePrompt({...defaultUpdatePrompt,status:"error",visible:true,message,error:message});
+    });
+  },[checkAndroid]);
+
+  const askUpdaterToDownload=useCallback(async()=>{
+    if(isAndroidApp()) {
+      const url=updatePrompt.downloadUrl||"";
+      if(!updatePrompt.manualOnly || !url.startsWith(ANDROID_RELEASE_PREFIX) || !/^https:\/\/github\.com\/meshahid973\/localtify\/releases\/download\/v\d+\.\d+\.\d+\/localtify-\d+\.\d+\.\d+-android\.apk$/.test(url)){
+        setUpdatePrompt(old=>({...old,status:"error",visible:true,message:"No verified APK for this release.",error:"Try checking for updates again."}));
+        return;
+      }
+      try { await window.localitfy.openExternal(url); } catch {
+        setUpdatePrompt(old=>({...old,status:"error",visible:true,message:"Unable to open the Android installer.",error:"Open official GitHub releases in your browser."}));
+      }
+      return;
+    }
+    if(!window.localitfy.downloadUpdate)return;
+    const manual=updatePrompt.manualOnly;
+    if(!manual)setUpdatePrompt(old=>({...old,visible:true,status:"downloading",message:"Starting update download…",percent:0,error:""}));
+    const success=await window.localitfy.downloadUpdate().catch(()=>false);
+    if(!success && !manual) {
+      // The main process also sends detailed errors; retain them when they have arrived.
+      setUpdatePrompt(old=>old.status==="downloading"?{...old,status:"error",message:"Download could not be started.",error:"Try again."}:old);
+    }
+  },[updatePrompt.manualOnly,updatePrompt.downloadUrl]);
+
+  const askUpdaterToInstall=useCallback(async()=>{
+    if(!window.localitfy.installUpdate)return;
+    const ok=await window.localitfy.installUpdate().catch(()=>false);
+    if(!ok)setUpdatePrompt(old=>({...old,visible:true,status:"error",message:"Couldn't restart to install.",error:"Try again from Updates settings."}));
+  },[]);
+
+  const openUpdateChangelog=useCallback((target:"current"|"available"="current")=>{
+    if(target==="available" && updatePrompt.version) {
+      setWhatsNewVersion(updatePrompt.version);
+      setWhatsNewReleaseNotes(updatePrompt.releaseNotes||"");
+    } else {
+      setWhatsNewVersion(APP_VERSION);
+      setWhatsNewReleaseNotes("");
+    }
+    setWhatsNewOpen(true);
+  },[updatePrompt.version,updatePrompt.releaseNotes]);
+
+  const closeWhatsNew=useCallback(()=>{
+    if(whatsNewVersion===APP_VERSION)try {window.localStorage.setItem(WHATS_NEW_SEEN_KEY,APP_VERSION);}catch{}
     setWhatsNewOpen(false);
-  }, []);
+  },[whatsNewVersion]);
 
-  const handleUpdateLater = useCallback(() => {
-    const currentStage = updatePrompt.nagStage || 0;
-    const nextStage = currentStage >= 2 ? 3 : currentStage === 1 ? 2 : 1;
-    const nextDelay = currentStage === 0 ? 120_000 : 60_000;
-    const version = updatePrompt.version || updateNagVersionRef.current || "latest";
-    const reminderStatus = updatePrompt.status === "downloaded" ? "downloaded" : "available";
-    setUpdatePrompt(defaultUpdatePrompt);
-    scheduleUpdateNag(version, nextStage, nextDelay, reminderStatus);
-    setStatusText("update reminder snoozed");
-  }, [scheduleUpdateNag, setStatusText, updatePrompt.nagStage, updatePrompt.status, updatePrompt.version]);
+  const handleUpdateLater=useCallback(()=>{
+    const version=updatePrompt.version;
+    if(version)try{window.localStorage.setItem(UPDATE_LEAVE_ALONE_PREFIX+version,"1");}catch{}
+    setUpdatePrompt(old=>({...old,visible:false}));
+    setStatusText("Update reminder dismissed.");
+  },[updatePrompt.version,setStatusText]);
 
-  const showDebugUpdateAvailable = useCallback(() => {
-    clearUpdateNagTimer();
-    updateNagVersionRef.current = "test";
-    updateNagStatusRef.current = "available";
-    setUpdatePrompt({ visible: true, status: "available", version: "test", percent: 0, message: "localtify test update is ready to download.", error: "", libraryBackedUp: true });
-  }, [clearUpdateNagTimer]);
+  const showDebugUpdateAvailable=useCallback(()=>{
+    setUpdatePrompt({visible:true,status:"available",version:"test",percent:0,message:"Test update preview",error:"",releaseNotes:"## Preview\nThis is a developer-only update banner preview."});
+  },[]);
 
   return {
-    updatePrompt,
-    setUpdatePrompt,
-    whatsNewOpen,
-    setWhatsNewOpen,
-    openUpdateChangelog,
-    closeWhatsNew,
-    askUpdaterToDownload,
-    askUpdaterToInstall,
-    manualUpdateCheck,
-    handleUpdateLater,
-    skipAvailableUpdate: handleUpdateLater,
-    clearUpdateNagTimer,
-    showUpdateNag,
-    showDebugUpdateAvailable,
-    lastUpdateCheckedLabel
+    updatePrompt,whatsNewOpen,setWhatsNewOpen,whatsNewVersion,whatsNewReleaseNotes,
+    openUpdateChangelog,closeWhatsNew,askUpdaterToDownload,askUpdaterToInstall,manualUpdateCheck,
+    handleUpdateLater,skipAvailableUpdate:handleUpdateLater,
+    showDebugUpdateAvailable,lastUpdateCheckedLabel
   };
 }

@@ -8,17 +8,25 @@ function normalizeUpdateVersion(value = "") {
 }
 
 function compareUpdateVersions(leftValue = "", rightValue = "") {
-  const left = normalizeUpdateVersion(leftValue).split(".").map((part) => Number.parseInt(part, 10) || 0);
-  const right = normalizeUpdateVersion(rightValue).split(".").map((part) => Number.parseInt(part, 10) || 0);
-  const length = Math.max(left.length, right.length, 3);
-
-  for (let index = 0; index < length; index += 1) {
-    const a = left[index] || 0;
-    const b = right[index] || 0;
-    if (a > b) return 1;
-    if (a < b) return -1;
+  const parse = value => {
+    const match = /^(\d+)\.(\d+)\.(\d+)(?:-([0-9a-z][0-9a-z.-]*))?$/i.exec(normalizeUpdateVersion(value));
+    return match ? { parts:match.slice(1,4).map(Number), pre:match[4] || "" } : null;
+  };
+  const left=parse(leftValue),right=parse(rightValue);
+  if(!left||!right)return 0; // Unknown tags must never be treated as newer releases.
+  for(let i=0;i<3;i++)if(left.parts[i]!==right.parts[i])return left.parts[i]>right.parts[i]?1:-1;
+  if(!left.pre&&!right.pre)return 0;
+  if(!left.pre)return 1;
+  if(!right.pre)return -1;
+  const a=left.pre.split("."),b=right.pre.split(".");
+  for(let i=0;i<Math.max(a.length,b.length);i++){
+    if(a[i]===undefined)return -1;
+    if(b[i]===undefined)return 1;
+    const ai=/^\d+$/.test(a[i]),bi=/^\d+$/.test(b[i]);
+    if(ai&&bi){const d=Number(a[i])-Number(b[i]);if(d)return Math.sign(d);}
+    else if(ai!==bi)return ai?-1:1;
+    else {const d=a[i].localeCompare(b[i]);if(d)return Math.sign(d);}
   }
-
   return 0;
 }
 
@@ -28,7 +36,7 @@ function safeUpdateInfo(info) {
     version: info.version || "latest",
     releaseName: info.releaseName || "",
     releaseDate: info.releaseDate || "",
-    releaseNotes: typeof info.releaseNotes === "string" ? info.releaseNotes : ""
+    releaseNotes: typeof info.releaseNotes === "string" ? info.releaseNotes.slice(0, 100_000) : Array.isArray(info.releaseNotes) ? info.releaseNotes.map(entry => String(entry?.note || "")).join("\n").slice(0, 100_000) : ""
   };
 }
 
@@ -52,6 +60,9 @@ function createUpdaterRuntime(options = {}) {
   let updaterSilent = true;
   let updateDownloaded = false;
   let lastUpdateInfo = null;
+  let lastUpdateEvent = { type: "idle", currentVersion: app.getVersion() };
+  let lastSuccessfulCheckAt = 0;
+  let updateDownloading = false;
 
   function isLinuxAppImageUpdateRuntime() {
     return Boolean(app.isPackaged && process.platform === "linux");
@@ -67,17 +78,22 @@ function createUpdaterRuntime(options = {}) {
   }
 
   function sendAutoUpdateEvent(payload) {
+    if (payload.type === "available" || payload.type === "not-available") lastSuccessfulCheckAt = Date.now();
     const eventPayload = {
       currentVersion: app.getVersion(),
       silent: updaterSilent,
+      checkedAt: lastSuccessfulCheckAt,
       ...payload
     };
+    if (payload.type !== "checking" || !updaterSilent) lastUpdateEvent = eventPayload;
     const mainWindow = getMainWindow();
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send("localitfy:auto-update-event", eventPayload);
     }
     return eventPayload;
   }
+
+  function getUpdateState() { return { ...lastUpdateEvent, checkedAt: lastSuccessfulCheckAt }; }
 
   function fetchGithubLatestReleaseInfo() {
     return new Promise((resolve) => {
@@ -111,13 +127,22 @@ function createUpdaterRuntime(options = {}) {
                 const tag = String(data.tag_name || data.name || "").trim();
                 const version = normalizeUpdateVersion(tag);
                 const assets = Array.isArray(data.assets) ? data.assets : [];
-                const appImageAsset = assets.find((asset) => /\.AppImage$/i.test(String(asset?.name || "")));
+                // Accept only the nonempty AppImage that belongs to this stable
+                // published version, rather than any similarly named release asset.
+                const assetName = `localtify-${version}-x86_64.AppImage`;
+                const expectedUrl = `https://github.com/meshahid973/localtify/releases/download/${tag}/${assetName}`;
+                const appImageAsset = /^v\d+\.\d+\.\d+$/.test(tag)
+                  ? assets.find(asset => asset?.name === assetName &&
+                      Number.isFinite(Number(asset.size)) && Number(asset.size) > 0 &&
+                      asset.browser_download_url === expectedUrl)
+                  : null;
 
                 resolve({
                   version,
                   tag,
                   releaseUrl: String(data.html_url || LOCALTIFY_LINUX_RELEASES_URL),
-                  downloadUrl: String(appImageAsset?.browser_download_url || data.html_url || LOCALTIFY_LINUX_RELEASES_URL),
+                  downloadUrl: String(appImageAsset?.browser_download_url || ""),
+                  verifiedAsset: Boolean(appImageAsset),
                   releaseNotes: typeof data.body === "string" ? data.body : ""
                 });
               } catch {
@@ -168,15 +193,8 @@ function createUpdaterRuntime(options = {}) {
 
     const latest = await fetchGithubLatestReleaseInfo();
     updaterChecking = false;
-    if (!latest?.version) {
-      if (!payload?.silent) {
-        sendLinuxManualUpdateEvent({
-          version: "latest",
-          downloadUrl: LOCALTIFY_LINUX_RELEASES_URL,
-          reason: "linux-release-check-fallback",
-          message: "Could not check Linux updates automatically. Open GitHub releases to download the latest AppImage."
-        });
-      }
+    if (!latest?.version || !latest.verifiedAsset) {
+      sendAutoUpdateEvent({ type: "error", platform:"linux", manualOnly:true, silent:Boolean(payload?.silent), message:"Unable to verify a Linux AppImage release.", error:"Release metadata is unavailable or the AppImage asset is missing." });
       return false;
     }
 
@@ -190,9 +208,12 @@ function createUpdaterRuntime(options = {}) {
         version: latest.version,
         message: "Linux AppImage is up to date."
       });
-      return false;
+      // A successful check with no new release is not a network failure.
+      // The renderer retries only false results with exponential backoff.
+      return true;
     }
 
+    lastUpdateInfo = latest;
     sendLinuxManualUpdateEvent({
       version: latest.version,
       downloadUrl: latest.downloadUrl || latest.releaseUrl || LOCALTIFY_LINUX_RELEASES_URL,
@@ -203,13 +224,10 @@ function createUpdaterRuntime(options = {}) {
   }
 
   async function openLinuxUpdateReleaseLink(reason = "manual-link") {
-    const url = LOCALTIFY_LINUX_RELEASES_URL;
-    sendLinuxManualUpdateEvent({
-      version: lastUpdateInfo?.version || "latest",
-      downloadUrl: url,
-      reason,
-      message: "Opening GitHub releases for Linux AppImage download..."
-    });
+    const candidate = String(lastUpdateInfo?.downloadUrl || "");
+    const url = /^https:\/\/github\.com\/meshahid973\/localtify\/releases\/download\//.test(candidate) ? candidate : LOCALTIFY_LINUX_RELEASES_URL;
+    // Opening an external URL never changes an update's downloaded/installed state.
+    void reason;
     await shell.openExternal(url).catch((error) => {
       console.log("[localtify linux updater open link error]", error?.message || error);
     });
@@ -226,7 +244,7 @@ function createUpdaterRuntime(options = {}) {
 
     try { autoUpdater.logger = null; } catch {}
     autoUpdater.on("checking-for-update", () => {
-      sendAutoUpdateEvent({ type: "checking", message: "checking for updates..." });
+      if (!updaterSilent) sendAutoUpdateEvent({ type: "checking", message: "Checking for updates..." });
     });
     autoUpdater.on("update-available", (info) => {
       if (linuxUpdaterIsManualOnly()) {
@@ -238,19 +256,20 @@ function createUpdaterRuntime(options = {}) {
       }
       const cleanInfo = safeUpdateInfo(info);
       updaterChecking = false;
-      updateDownloaded = false;
+      if (updateDownloaded) return; // Preserve pending install if a check raced a download.
       lastUpdateInfo = cleanInfo;
       sendAutoUpdateEvent({
         type: "available",
         version: cleanInfo.version,
         info: cleanInfo,
+        releaseNotes: cleanInfo.releaseNotes,
         message: `${appName} ${cleanInfo.version} is available`
       });
     });
     autoUpdater.on("update-not-available", (info) => {
       const cleanInfo = safeUpdateInfo(info);
       updaterChecking = false;
-      updateDownloaded = false;
+      if (updateDownloaded) return;
       lastUpdateInfo = cleanInfo;
       sendAutoUpdateEvent({
         type: "not-available",
@@ -265,6 +284,9 @@ function createUpdaterRuntime(options = {}) {
         type: "downloading",
         version: lastUpdateInfo?.version || "latest",
         percent,
+        downloadedBytes: Number(progress?.transferred || 0),
+        totalBytes: Number(progress?.total || 0),
+        speedBytesPerSecond: Number(progress?.bytesPerSecond || 0),
         message: `downloading update... ${Math.round(percent)}%`
       });
     });
@@ -272,17 +294,21 @@ function createUpdaterRuntime(options = {}) {
       const cleanInfo = safeUpdateInfo(info);
       updaterChecking = false;
       updateDownloaded = true;
+      updateDownloading = false;
       lastUpdateInfo = cleanInfo;
       sendAutoUpdateEvent({
         type: "downloaded",
         version: cleanInfo.version,
         info: cleanInfo,
+        releaseNotes: cleanInfo.releaseNotes,
         percent: 100,
         message: "update downloaded. restart localtify to install it."
       });
     });
     autoUpdater.on("error", (error) => {
+      const failedDownload = updateDownloading;
       updaterChecking = false;
+      updateDownloading = false;
       if (isLinuxUpdateMetadataMissingError(error)) {
         sendAutoUpdateEvent({
           type: "not-available",
@@ -294,7 +320,8 @@ function createUpdaterRuntime(options = {}) {
       }
       sendAutoUpdateEvent({
         type: "error",
-        message: "update check failed",
+        silent: failedDownload ? false : updaterSilent,
+        message: failedDownload ? "update download failed" : "update check failed",
         error: error?.message || String(error || "unknown updater error")
       });
     });
@@ -302,7 +329,22 @@ function createUpdaterRuntime(options = {}) {
 
   async function checkForUpdates(payload = {}) {
     setupAutoUpdater();
+    if (updaterChecking) {
+      // A manual check during a background check should receive the eventual result.
+      if (!payload?.silent) updaterSilent = false;
+      return true;
+    }
+    if (updateDownloading) return true;
     updaterSilent = Boolean(payload?.silent);
+    // Checking again must not invalidate a verified, already downloaded installer.
+    if (updateDownloaded) {
+      if (!updaterSilent) sendAutoUpdateEvent({
+        type: "downloaded", version: lastUpdateInfo?.version || "latest",
+        releaseNotes: lastUpdateInfo?.releaseNotes || "", percent: 100,
+        message: "Update already downloaded. Restart to install it."
+      });
+      return true;
+    }
     if (isDev) {
       sendAutoUpdateEvent({ type: "dev", message: "auto update only works in the packaged app" });
       return false;
@@ -310,8 +352,6 @@ function createUpdaterRuntime(options = {}) {
 
     const linuxManualResult = await checkLinuxManualReleaseUpdate(payload);
     if (linuxManualResult !== null) return linuxManualResult;
-    if (updaterChecking) return true;
-
     updaterChecking = true;
     try {
       await autoUpdater.checkForUpdates();
@@ -343,7 +383,12 @@ function createUpdaterRuntime(options = {}) {
       return false;
     }
     if (linuxUpdaterIsManualOnly()) return openLinuxUpdateReleaseLink("download-button");
-
+    if (updateDownloading || updateDownloaded) return false;
+    if (!lastUpdateInfo || compareUpdateVersions(lastUpdateInfo.version, app.getVersion()) <= 0) {
+      sendAutoUpdateEvent({type:"error",silent:false,error:"Check for a newer verified release before downloading."});
+      return false;
+    }
+    updateDownloading = true;
     try {
       updateDownloaded = false;
       sendAutoUpdateEvent({
@@ -355,8 +400,10 @@ function createUpdaterRuntime(options = {}) {
       await autoUpdater.downloadUpdate();
       return true;
     } catch (error) {
+      updateDownloading = false;
       sendAutoUpdateEvent({
         type: "error",
+        silent: false,
         message: "update download failed",
         error: error?.message || String(error || "unknown download error")
       });
@@ -385,6 +432,7 @@ function createUpdaterRuntime(options = {}) {
 
   return Object.freeze({
     checkForUpdates,
+    getUpdateState,
     downloadUpdate,
     installUpdate,
     setupAutoUpdater,

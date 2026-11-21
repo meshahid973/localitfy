@@ -7,3 +7,6 @@ These files are copied from the original public component registries, not rewrit
 - **beUI** `@beui/button-base` and `@beui/tabs`: `starc007/ui-components/components/motion/`; required original helpers from `lib/` (Motion + Tailwind utilities). Original license: https://github.com/starc007/ui-components/blob/main/LICENSE
 
 The Arc dropdown CSS additionally maps Localtify theme tokens inside its Radix portal. `src/styles/vendor-tailwind.css` imports only utilities/theme and deliberately excludes Tailwind's Preflight reset.
+
+- **beUI** `@beui/line-chart`: original chart, XY interaction and Motion dependencies installed with `bunx --bun shadcn add @beui/line-chart` and remapped to `src/vendor/charts/`.
+- **Arc UI** `@uiarc/dropdown-menu`: original registry installed with `pnpm dlx shadcn@latest add @uiarc/dropdown-menu`; reused the previously source-installed accessible icon-only adaptation to prevent regressions.

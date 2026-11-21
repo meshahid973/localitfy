@@ -499,7 +499,7 @@
   filter: blur(10px) saturate(1.06) !important;
 }
 
-.app[data-platform="linux"] :is(button, input, textarea, select, [role="button"]):focus-visible{
+.app[data-platform="linux"] :is(button, input, textarea, select, [role="button"]):not([data-embedded-field]):focus-visible{
   outline: 2px solid rgba(var(--accent-rgb), .72) !important;
   outline-offset: 2px !important;
 }
@@ -582,8 +582,7 @@
 
 .app .windowButtons button svg,
 .inlineGlyphIcon,
-.localtifyStateIconV373 svg,
-.updateToastIcon svg{
+.localtifyStateIconV373 svg{
   display: block !important;
   width: 1em !important;
   height: 1em !important;
@@ -604,14 +603,12 @@
   opacity: .95 !important;
 }
 
-.localtifyStateIconV373,
-.updateToastIcon{
+.localtifyStateIconV373{
   display: grid !important;
   place-items: center !important;
 }
 
-.localtifyStateIconV373 svg,
-.updateToastIcon svg{
+.localtifyStateIconV373 svg{
   width: 18px !important;
   height: 18px !important;
 }

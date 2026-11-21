@@ -122,7 +122,7 @@ if (!cssOnly) {
 }
 for (const { file, missing } of cssReports.sort((a, b) => b.missing.length - a.missing.length)) {
   console.log("[audit-unused] CSS " + file + ": " + missing.length + " names");
-  if (full) console.log("    " + missing.join(", "));
+  if (full || strictCss) console.log("    " + missing.join(", "));
 }
 console.log("[audit-unused] No files changed.");
 if (strictCss && cssCandidates) process.exitCode = 1;

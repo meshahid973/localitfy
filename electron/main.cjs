@@ -121,7 +121,6 @@ const {
   setAllowQuit: (value) => { allowQuit = Boolean(value); }
 });
 
-const UPDATE_CHECK_STARTUP_DELAY_MS = 2200;
 const PIXEL_ART_CACHE_TTL_MS = 30_000;
 const FILE_INFO_CACHE_TTL_MS = 4_000;
 const MAIN_TASK_YIELD_MS = 0;
@@ -205,6 +204,7 @@ const updaterRuntime = createUpdaterRuntime({
   getMainWindow: () => mainWindow
 });
 const checkForUpdates = updaterRuntime.checkForUpdates;
+const getUpdateState = updaterRuntime.getUpdateState;
 const downloadUpdate = updaterRuntime.downloadUpdate;
 const installUpdate = updaterRuntime.installUpdate;
 
@@ -2121,7 +2121,6 @@ async function sendLocaltifyFeedback(payload = {}) {
 let serviceRuntime = null;
 let shutdownStarted = false;
 let startupWindowTimer = null;
-let startupUpdateTimer = null;
 
 app.whenReady().then(async () => {
   if (shutdownStarted) return;
@@ -2369,6 +2368,7 @@ app.whenReady().then(async () => {
   ipcRouter.handle("spotdl-check", async () => ({ ok: true, installed: true, engine: "localtify-ytdlp-bridge", message: "Spotify downloads use localtify's bundled yt-dlp bridge after metadata is fetched." }));
 
   ipcRouter.handle("localitfy:check-for-updates", async (_event, payload) => checkForUpdates(payload));
+  ipcRouter.handle("localitfy:get-update-state", async () => getUpdateState());
   ipcRouter.handle("localitfy:download-update", async () => downloadUpdate());
   ipcRouter.handle("localitfy:install-update", async () => installUpdate());
   ipcRouter.handle("localitfy:open-external", async (_event, url) => {
@@ -2391,10 +2391,7 @@ app.whenReady().then(async () => {
     startupWindowTimer = null;
     if (!shutdownStarted) { createWindow(); setupNativeWindowsMedia(); }
   }, startupCreateDelayMs);
-  startupUpdateTimer = setTimeout(() => {
-    startupUpdateTimer = null;
-    if (!shutdownStarted) checkForUpdates({ silent: true }).catch((e) => console.log("[localitfy updater startup error]", e?.message));
-  }, UPDATE_CHECK_STARTUP_DELAY_MS);
+  // Renderer owns the update-check schedule so the user's disabled setting is respected.
   app.on("activate", () => { if (!shutdownStarted && BrowserWindow.getAllWindows().length === 0) createWindow(); });
 });
 
@@ -2403,8 +2400,7 @@ app.on("before-quit", async () => {
   shutdownStarted = true;
   allowQuit = true;
   clearTimeout(startupWindowTimer);
-  clearTimeout(startupUpdateTimer);
-  startupWindowTimer = startupUpdateTimer = null;
+  startupWindowTimer = null;
   discoverCacheLifecycle?.flush();
   remoteArtworkCache?.close();
   thumbnailRuntime.stop();

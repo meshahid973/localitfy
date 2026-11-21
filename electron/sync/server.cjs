@@ -11,7 +11,7 @@ const PHONE_FEATURES = new Set([
   "lyrics:get", "lyrics:search", "lyrics:select-match", "lyrics:set-offset", "lyrics:clear-selection",
   "analysis:daily-mixes", "analysis:similar-songs", "analysis:prompt-sound", "discover:get", "discover:artist-bio",
   // Read-only: the phone shows which accounts the Mac sends its plays to.
-  "listening:summary", "scrobble:status"
+  "listening:summary", "listening:calendar-summary", "scrobble:status"
 ]);
 /** Mac settings that switch those features on; the phone follows them so it offers what the Mac can answer. */
 const FEATURE_SETTINGS = ["lyricsEnabled", "lyricsOnlineLookup", "experimentalMusicAnalysis", "discoverEnabled", "songRadio", "listeningHistoryEnabled", "notForMeSongs", "notForMeArtists"];

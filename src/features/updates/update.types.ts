@@ -1,5 +1,5 @@
 export type AutoUpdateEvent = {
-  type: "checking" | "available" | "not-available" | "downloading" | "downloaded" | "error" | "dev" | "backup";
+  type: "idle" | "checking" | "available" | "not-available" | "downloading" | "downloaded" | "error" | "dev" | "backup";
   version?: string;
   currentVersion?: string;
   percent?: number;
@@ -14,6 +14,9 @@ export type AutoUpdateEvent = {
   sizeBytes?: number;
   speedBytesPerSecond?: number;
   nagStage?: 0 | 1 | 2 | 3;
+  manualOnly?: boolean;
+  downloadUrl?: string;
+  checkedAt?: number;
 };
 
 export type UpdatePromptState = {
@@ -31,4 +34,7 @@ export type UpdatePromptState = {
   sizeBytes?: number;
   speedBytesPerSecond?: number;
   nagStage?: 0 | 1 | 2 | 3;
+  manualOnly?: boolean;
+  downloadUrl?: string;
+  checkedAt?: number;
 };

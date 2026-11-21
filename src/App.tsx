@@ -47,7 +47,7 @@ import CatBuddy from "./CatBuddy";
 import { runLocaltifyIdleTask } from "./app/runtime/idle";
 import { useBodyRuntimeClasses } from "./app/runtime/useBodyRuntimeClasses";
 import { useAppLifecycleRuntime } from "./app/runtime/useAppLifecycleRuntime";
-import { formatAnalyticsDuration, localtifyAnalyticsNumber, localtifyAnalyticsString } from "./features/analytics/formatters";
+import { buildAnalyticsRecapCards, buildAnalyticsStatCards, formatAnalyticsDuration, localtifyAnalyticsNumber, localtifyAnalyticsString } from "./features/analytics/formatters";
 import { applyVisualCustomizationDefaults, migrateVisualSettings } from "./features/settings/visualCustomization";
 import { getLocaltifyPlatformInfo } from "./app/platform";
 import {
@@ -272,20 +272,21 @@ function MainModeApp() {
 
   const {
     updatePrompt,
-    setUpdatePrompt,
     whatsNewOpen,
+    whatsNewVersion,
+    whatsNewReleaseNotes,
     openUpdateChangelog,
     closeWhatsNew,
     askUpdaterToDownload,
     askUpdaterToInstall,
     manualUpdateCheck,
-    clearUpdateNagTimer,
-    showUpdateNag,
+    handleUpdateLater,
     showDebugUpdateAvailable,
     lastUpdateCheckedLabel
   } = useUpdatesController({
     ready,
     autoUpdateEnabled: settings.autoUpdateEnabled,
+    autoUpdateNotifyOnly: settings.autoUpdateNotifyOnly,
     setStatusText,
     showAppToast
   });
@@ -1166,63 +1167,17 @@ function MainModeApp() {
       ? `${libraryHealthPercent}% healthy`
       : "100% healthy";
 
-  const analyticsRecapCards = useMemo(() => {
-    return [
-      {
-        label: "monthly recap",
-        value: monthImportCount ? `${monthImportCount.toLocaleString()} imported` : "no imports",
-        note: monthImportCount
-          ? `${formatAnalyticsDuration(monthImportSeconds)} of music added this month`
-          : "import music this month to build a recap",
-        meta: `${monthArtistCount.toLocaleString()} artist${monthArtistCount === 1 ? "" : "s"}`,
-        progress: songs.length ? Math.min(100, Math.round((monthImportCount / Math.max(1, songs.length)) * 100)) : 0
-      },
-      {
-        label: "yearly recap",
-        value: yearImportCount ? `${yearImportCount.toLocaleString()} imported` : "year is quiet",
-        note: yearImportCount
-          ? `${formatAnalyticsDuration(yearImportSeconds)} of music imported this year`
-          : "your yearly recap starts with imports",
-        meta: `${yearAlbumCount.toLocaleString()} album${yearAlbumCount === 1 ? "" : "s"}`,
-        progress: songs.length ? Math.min(100, Math.round((yearImportCount / Math.max(1, songs.length)) * 100)) : 0
-      }
-    ];
-  }, [
-    monthImportCount,
-    monthImportSeconds,
-    monthArtistCount,
-    yearImportCount,
-    yearImportSeconds,
-    yearAlbumCount,
-    songs.length
-  ]);
 
-  const analyticsStatCards = useMemo(() => ([
-    {
-      label: "songs",
-      value: songs.length.toLocaleString(),
-      note: `${libraryArtistCount.toLocaleString()} artist${libraryArtistCount === 1 ? "" : "s"} • ${libraryAlbumCount.toLocaleString()} album${libraryAlbumCount === 1 ? "" : "s"}`
-    },
-    {
-      label: "plays",
-      value: totalPlays.toLocaleString(),
-      note: `${playedSongCount.toLocaleString()} played song${playedSongCount === 1 ? "" : "s"} • ${averagePlaysPerSong} avg`
-    },
-    {
-      label: "library health",
-      value: libraryHealthLabel,
-      note: effectiveMissingFileCount > 0 ? `${effectiveMissingFileCount.toLocaleString()} missing file${effectiveMissingFileCount === 1 ? "" : "s"}` : "all files available"
-    }
-  ]), [
-    songs.length,
-    libraryArtistCount,
-    libraryAlbumCount,
-    totalPlays,
-    playedSongCount,
-    averagePlaysPerSong,
-    libraryHealthLabel,
-    effectiveMissingFileCount
-  ]);
+  const analyticsRecapCards = useMemo(() => buildAnalyticsRecapCards({
+    songCount: songs.length, monthImportCount, monthImportSeconds, monthArtistCount,
+    yearImportCount, yearImportSeconds, yearAlbumCount
+  }), [monthImportCount, monthImportSeconds, monthArtistCount, yearImportCount, yearImportSeconds, yearAlbumCount, songs.length]);
+
+  const analyticsStatCards = useMemo(() => buildAnalyticsStatCards({
+    songCount: songs.length, libraryArtistCount, libraryAlbumCount, totalPlays,
+    playedSongCount, averagePlaysPerSong, libraryHealthLabel, effectiveMissingFileCount
+  }), [songs.length, libraryArtistCount, libraryAlbumCount, totalPlays, playedSongCount, averagePlaysPerSong,
+    libraryHealthLabel, effectiveMissingFileCount]);
 
   // Keep playback progress hot-path out of React renders as much as possible.
   // The animation loop paints the progress DOM directly; React only uses this snapshot when something else renders.
@@ -1828,27 +1783,6 @@ function MainModeApp() {
 
     if (command === "popup1" || command === "/popup1") {
       showDebugUpdateAvailable();
-      setQuery("");
-      return;
-    }
-
-    if (command === "popup2" || command === "/popup2") {
-      clearUpdateNagTimer();
-      showUpdateNag(1, updatePrompt.version || "test");
-      setQuery("");
-      return;
-    }
-
-    if (command === "popup3" || command === "/popup3") {
-      clearUpdateNagTimer();
-      showUpdateNag(2, updatePrompt.version || "test");
-      setQuery("");
-      return;
-    }
-
-    if (command === "popup4" || command === "/popup4") {
-      clearUpdateNagTimer();
-      showUpdateNag(3, updatePrompt.version || "test");
       setQuery("");
       return;
     }
@@ -5777,6 +5711,9 @@ function MainModeApp() {
         updatePrompt={updatePrompt}
         manualUpdateCheck={manualUpdateCheck}
         askUpdaterToInstall={askUpdaterToInstall}
+        askUpdaterToDownload={askUpdaterToDownload}
+        openUpdateChangelog={openUpdateChangelog}
+        lastUpdateCheckedLabel={lastUpdateCheckedLabel}
         copyDiagnosticsInfo={copyDiagnosticsInfo}
         diagnosticsCopied={diagnosticsCopied}
         diagnosticsInfo={diagnosticsInfo}
@@ -5947,7 +5884,8 @@ function MainModeApp() {
       askUpdaterToDownload,
       askUpdaterToInstall,
       manualUpdateCheck,
-      setUpdatePrompt,
+      onWhatsNew: () => openUpdateChangelog("available"),
+      onDismiss: handleUpdateLater,
       progress
     },
     screensaver: {
@@ -6129,7 +6067,8 @@ function MainModeApp() {
       neverPlayedCount,
       playedPercent,
       recentImportWeekCount,
-      songs
+      songs,
+      onSelectSong: (id: string) => void selectSong(id, true)
     },
     settingsView: {
       renderSettingsCategoryContent,
@@ -6298,7 +6237,9 @@ function MainModeApp() {
       }),
       whatsNew: {
         open: Boolean(whatsNewOpen),
-        onClose: closeWhatsNew
+        onClose: closeWhatsNew,
+        initialVersion: whatsNewVersion,
+        availableReleaseNotes: whatsNewReleaseNotes
       },
       songEditor: {
         song: editorSong,

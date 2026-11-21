@@ -1,4 +1,3 @@
-// Adapted from beUI (MIT). See THIRD_PARTY_NOTICES.txt.
 export type XYCurve = "monotone" | "linear" | "step";
 export type XYPathPoint = { x: number; y: number } | null;
 
