@@ -144,7 +144,7 @@ export default function AnalyticsView({
   }
 
   return <section data-page-section="analytics" className="analyticsExperienceV4" aria-label="Listening analytics">
-    <PageHeader title="Analytics" description="Your listening, in perspective.">
+    <PageHeader title="Analytics" description="Your listening, in perspective." />
       <div className="analyticsV4Controls">
         <SegmentedControl options={RANGE_OPTIONS} value={range} onValueChange={selectRange} label="Listening period" />
         <div className="analyticsV4PeriodNav" aria-label="Navigate listening periods">
@@ -158,7 +158,6 @@ export default function AnalyticsView({
           { label: "Open library", onSelect: () => actions.nav.go("library") }
         ]} />
       </div>
-    </PageHeader>
     {!songs.length ? <div className="analyticsV4EmptyLibrary" role="status">
       <span>{isAndroidApp() ? "Sync your music library from your paired computer to build a listening recap." : "Import music and start listening to build your personal recap."}</span>
       {!isAndroidApp() ? <button type="button" onClick={importSongs}>Import music</button> : null}

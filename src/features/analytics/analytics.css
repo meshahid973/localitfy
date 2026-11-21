@@ -1,8 +1,8 @@
 /* Analytics 4.0: one editorial listening recap, not a collection of cards. */
 .analyticsExperienceV4 { min-width:0; display:grid; grid-template-columns:minmax(0,1fr); gap:clamp(25px,3vw,40px); padding-bottom:var(--lt-space-5); color:var(--lt-text); }
 .analyticsExperienceV4 *, .analyticsExperienceV4 *::before { box-sizing:border-box; }
-.analyticsV4Controls { display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; min-width:0; }
-.analyticsV4PeriodNav { display:flex; align-items:center; gap:5px; min-width:0; }
+.analyticsV4Controls { display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-start; min-width:0; padding:1px 0 3px; }
+.analyticsV4PeriodNav { display:flex; align-items:center; gap:5px; min-width:0; margin-left:auto; }
 .analyticsV4PeriodNav span { min-width:95px; max-width:170px; text-align:center; font-size:12px; color:var(--lt-muted); font-variant-numeric:tabular-nums; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 .analyticsV4PeriodNav button { width:32px; height:34px; display:grid; place-items:center; border:0; border-radius:var(--lt-radius-item); background:transparent; color:var(--lt-muted); cursor:pointer; }
 .analyticsV4PeriodNav button:hover:not(:disabled) { background:var(--lt-surface-soft); color:var(--lt-text); }
@@ -71,3 +71,5 @@
 
 .analyticsV4EmptyLibrary { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; border-bottom:1px solid var(--lt-border); padding:10px 0 18px; color:var(--lt-muted); font-size:13px; }
 .analyticsV4EmptyLibrary button { padding:8px 14px; border-radius:var(--lt-radius-item); background:var(--lt-accent); border:0; color:var(--button-text-on-accent); font-size:12px; cursor:pointer; }
+
+@media (max-width:520px) { .analyticsV4PeriodNav { margin-left:0; order:3; width:calc(100% - 46px); } .analyticsV4PeriodNav span { flex:1; max-width:none; } }

@@ -7,7 +7,7 @@
   position: relative !important;
 
   display: grid !important;
-  grid-template-columns: minmax(220px, 350px) minmax(420px, 1fr) minmax(150px, 240px) !important;
+  grid-template-columns: minmax(210px, 340px) minmax(330px, 1fr) minmax(292px, 330px) !important;
   grid-template-areas: "left center right" !important;
   align-items: center !important;
   gap: clamp(14px, 1.7vw, 24px) !important;
@@ -551,7 +551,7 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
   gap: 8px !important;
 }
 
-@media (max-width: 1180px){
+@media (max-width: 1080px){
   .playerBar{
     grid-template-columns: minmax(190px, 310px) minmax(280px, 1fr) 0 !important;
   }
@@ -1327,8 +1327,9 @@ body.localitfyThemePainting .app .volumeWrap input[type="range"],
 
 .playerBar .volumeWrap input[type="range"]{
 
-  width: clamp(118px, 9vw, 178px) !important;
-  min-width: 118px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
   height: 24px !important;
   padding: 0 !important;
   margin: 0 !important;
@@ -2058,14 +2059,21 @@ body.localtifyWindowBackgrounded .app .playerBar:hover::before,
 }
 
 .playerBar .playerRightTools{
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: var(--lt-gap-control);
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:6px;
 }
 
 .playerBar .playerRightTools .volumeWrap{
-  flex: 1 1 auto;
+  flex:1 1 0;
+  min-width:0;
+  width:auto !important;
+  max-width:100%;
+  grid-template-columns:36px minmax(0,1fr) !important;
+  gap:6px !important;
 }
 
 .playerBar .playerQueueButton{
