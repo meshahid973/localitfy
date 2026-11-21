@@ -28,6 +28,7 @@ const { createMediaServerRuntime } = require("./runtime/media-server.cjs");
 const { createThumbnailRuntime } = require("./runtime/thumbnail-runtime.cjs");
 const { createGenreMetadataBackfill } = require("./runtime/genre-backfill.cjs");
 const { bestSpotifyImage, parseSpotifyUrl, shapeSpotifyTrack, decodeHtmlEntities, uniqSpotifyIds } = require("./runtime/spotify-normalize.cjs");
+const { normalizeForLooseMatch, matchSpotifyTrackForFile } = require("./runtime/download-imports.cjs");
 const { safeProviderCover, imageExtension } = require("./runtime/remote-cover.cjs");
 const { createAppMenuRuntime, createAppCommandSender } = require("./runtime/app-menu.cjs");
 const { installRendererSecurityGuards, installSessionPermissionGuards, isTrustedMainFrameIpcEvent } = require("./runtime/security.cjs");
@@ -1217,10 +1218,6 @@ async function makeSongFromFile(filePath, pixelArtFiles = [], usedCovers = new S
   return { id, title, artist, album, genre, filePath, coverPath: coverResult.coverPath || "", coverSource: coverResult.coverSource || "none", coverUpdatedAt: coverResult.coverUpdatedAt || new Date().toISOString(), duration, durationMs: durationMs || (duration > 0 ? duration * 1000 : 0), track: Number(metadata?.track || 0) || 0, disc: Number(metadata?.disc || 0) || 0, year: metadata?.year || "", bitrate: 0, addedAt: Date.now() };
 }
 
-function normalizeForLooseMatch(value = "") {
-  return String(value || "").normalize("NFKC").toLowerCase().replace(/\.[a-z0-9]+$/i, "").replace(/\([^)]*\)|\[[^\]]*\]/g, " ").replace(/[^\p{L}\p{N}]+/gu, " ").replace(/\s+/g, " ").trim();
-}
-
 function listAudioFilesInDirectory(directory, options = {}) {
   const root = String(directory || "");
   const maxDepth = Number.isFinite(Number(options.maxDepth)) ? Number(options.maxDepth) : 2;
@@ -1246,29 +1243,6 @@ function listAudioFilesInDirectory(directory, options = {}) {
   walk(root, 0);
   out.sort((a, b) => (getFileInfoCached(b).mtimeMs || 0) - (getFileInfoCached(a).mtimeMs || 0));
   return out;
-}
-
-function matchSpotifyTrackForFile(filePath, tracks = []) {
-  const fileKey = normalizeForLooseMatch(path.parse(String(filePath || "")).name);
-  if (!fileKey || !Array.isArray(tracks) || !tracks.length) return null;
-  let best = null;
-  let bestScore = 0;
-  for (const track of tracks) {
-    const title = normalizeForLooseMatch(track?.title || track?.name || "");
-    const artist = normalizeForLooseMatch(track?.artist || track?.artists || "");
-    const combined = normalizeForLooseMatch(`${artist} ${title}`);
-    let score = 0;
-    if (title && fileKey.includes(title)) score += 5;
-    if (artist && fileKey.includes(artist)) score += 3;
-    if (combined && (fileKey.includes(combined) || combined.includes(fileKey))) score += 7;
-    const fileWords = new Set(fileKey.split(" ").filter((word) => word.length > 2));
-    const trackWords = new Set(`${artist} ${title}`.split(" ").filter((word) => word.length > 2));
-    let overlap = 0;
-    for (const word of trackWords) if (fileWords.has(word)) overlap += 1;
-    score += overlap;
-    if (score > bestScore) { best = track; bestScore = score; }
-  }
-  return bestScore >= 3 ? best : null;
 }
 
 async function makeSongFromFileWithMetadata(filePath, tracks = [], pixelArtFiles = [], usedCovers = new Set()) {
