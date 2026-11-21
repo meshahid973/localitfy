@@ -4,20 +4,27 @@ import { BookOpen, Check, ChevronDown, ExternalLink, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useModalFocus } from "../../shared/hooks/useModalFocus";
 import { APP_VERSION } from "./update.constants";
-import { findRelease, releaseHistory } from "./releaseHistory";
+import { findRelease, releaseHistory, loadReleaseHistory } from "./releaseHistory";
 
 export type WhatsNewModalProps = { open: boolean; onClose: () => void; initialVersion?: string; availableReleaseNotes?: string };
 
 export default function WhatsNewModal({open,onClose,initialVersion,availableReleaseNotes}:WhatsNewModalProps) {
   const dialogRef=useModalFocus<HTMLElement>(open);
   const [version,setVersion]=useState(APP_VERSION);
+  const [history,setHistory]=useState(releaseHistory);
+  useEffect(()=>{
+    if(!open)return;
+    let active=true;
+    void loadReleaseHistory().then(items=>{if(active)setHistory(items as typeof releaseHistory);});
+    return()=>{active=false;};
+  },[open]);
   const remoteVersion=String(initialVersion||"").replace(/^v/i,"");
   useEffect(()=>{if(open)setVersion(remoteVersion||APP_VERSION);},[open,remoteVersion]);
   const release=useMemo(()=>{
-    const local=findRelease(version);
+    const local=history.find(entry=>entry.version===version)||findRelease(version);
     if(version===remoteVersion && availableReleaseNotes?.trim())return {version,date:null,notes:availableReleaseNotes,published:true,sourceUrl:undefined};
     return local||null;
-  },[version,remoteVersion,availableReleaseNotes]);
+  },[version,remoteVersion,availableReleaseNotes,history]);
   useEffect(()=>{
     if(!open)return;
     const handler=(event:KeyboardEvent)=>{
@@ -41,8 +48,8 @@ export default function WhatsNewModal({open,onClose,initialVersion,availableRele
       </header>
       <div className="releaseNotesMain">
         <nav className="releaseNotesVersions" aria-label="Available versions">
-          {remoteVersion&&availableReleaseNotes&&!findRelease(remoteVersion)?<button type="button" className={version===remoteVersion?"selected":""} onClick={()=>setVersion(remoteVersion)}>v{remoteVersion}<span>Available update</span></button>:null}
-          {releaseHistory.map(item=><button type="button" key={item.version} className={version===item.version?"selected":""} aria-current={version===item.version?"true":undefined} onClick={()=>setVersion(item.version)}>
+          {remoteVersion&&availableReleaseNotes&&!history.some(item=>item.version===remoteVersion)?<button type="button" className={version===remoteVersion?"selected":""} onClick={()=>setVersion(remoteVersion)}>v{remoteVersion}<span>Available update</span></button>:null}
+          {history.map(item=><button type="button" key={item.version} className={version===item.version?"selected":""} aria-current={version===item.version?"true":undefined} onClick={()=>setVersion(item.version)}>
             v{item.version}{item.version===APP_VERSION?<Check size={13}/>:null}
             <span>{item.published?item.date:"Current build"}</span>
           </button>)}
