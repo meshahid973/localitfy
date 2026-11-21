@@ -12,7 +12,7 @@ import { readValue, writeValues } from "./store";
 import { setLibraryChangedHandler } from "./sync";
 import { onLiveEvent, sendLike, sendLive } from "./live";
 import type { SyncPlaylist } from "./syncMerge";
-import { isListeningSummary } from "../../features/analytics/listeningSummary";
+import { isListeningSummary, isListeningCalendarSummary } from "../../features/analytics/listeningSummary";
 
 type Bridge = Window["localitfy"];
 type Listener = (payload: never) => void;
@@ -112,6 +112,7 @@ export function createAndroidBridge(): Bridge {
     recordPlayEvent: async (event: PlayEvent) => phoneLibrary.recordPlayEvent(event),
     getListeningCounts: async () => phoneLibrary.listeningCounts,
     getListeningSummary: (payload) => fromMacOrKept<Awaited<ReturnType<Bridge["getListeningSummary"]>>>("listening:summary", payload, `mac:listening-summary:${payload.days}`, null, result => isListeningSummary(result, payload.days)),
+    getListeningCalendarSummary: (payload) => fromMacOrKept<Awaited<ReturnType<Bridge["getListeningCalendarSummary"]>>>("listening:calendar-summary", payload, `mac:listening-calendar:${payload.range}:${payload.offset}`, null, result => isListeningCalendarSummary(result, payload)),
     onWatchedFoldersChange: subscribe("songs") as Bridge["onWatchedFoldersChange"],
     onPlaylistsChanged: subscribe("playlists") as Bridge["onPlaylistsChanged"],
     onAppMenuCommand: subscribe("appMenu") as Bridge["onAppMenuCommand"],
