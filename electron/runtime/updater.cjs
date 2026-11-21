@@ -200,7 +200,9 @@ function createUpdaterRuntime(options = {}) {
         version: latest.version,
         message: "Linux AppImage is up to date."
       });
-      return false;
+      // A successful check with no new release is not a network failure.
+      // The renderer retries only false results with exponential backoff.
+      return true;
     }
 
     lastUpdateInfo = latest;
