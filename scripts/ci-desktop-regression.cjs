@@ -496,6 +496,15 @@ server.listen(5173,async()=>{
               volumeGeometry.left>=volumeGeometry.playerLeft &&
               volumeGeometry.right<=Math.min(volumeGeometry.playerRight-5,volumeGeometry.viewport-5),
               "volume slider must remain visible and within the player: "+JSON.stringify(volumeGeometry));
+            if(width===1280){
+              const volumeBefore=await win.webContents.executeJavaScript("Number(document.querySelector('.playerRight input[aria-label=\"volume level\"]').value)");
+              assert.ok(volumeBefore>0,"fixture should begin with audible volume");
+              const muted=await win.webContents.executeJavaScript("(()=>{const button=document.querySelector('.playerRight button[aria-label=\"mute volume\"]');if(!button)return false;button.click();return true})()");
+              assert.equal(muted,true,"mute control must be interactive");
+              await until(()=>win.webContents.executeJavaScript("(()=>{const slider=document.querySelector('.playerRight input[aria-label=\"volume level\"]');return !!document.querySelector('.playerRight button[aria-label=\"restore volume\"]')&&Number(slider?.value)===0})()").catch(()=>false),"volume slider reflects mute");
+              await win.webContents.executeJavaScript("document.querySelector('.playerRight button[aria-label=\"restore volume\"]').click()");
+              await until(()=>win.webContents.executeJavaScript(`(()=>{const slider=document.querySelector('.playerRight input[aria-label="volume level"]');return !!document.querySelector('.playerRight button[aria-label="mute volume"]')&&Math.abs(Number(slider?.value)-${volumeBefore})<=1})()`).catch(()=>false),"volume slider restores audible state");
+            }
           }
           await screenshot(win,view+"-"+mode+"-"+width);
         }
