@@ -43,14 +43,42 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y rpm
       - name: Build desktop packages
+        env:
+          WIN_CSC_LINK: ${{ secrets.LOCALTIFY_WINDOWS_CSC_LINK }}
+          WIN_CSC_KEY_PASSWORD: ${{ secrets.LOCALTIFY_WINDOWS_CSC_KEY_PASSWORD }}
         shell: bash
         run: |
           if [[ "$RUNNER_OS" == "Windows" ]]; then
-            npm run dist
+            # Never publish an unsigned installer: the updater requires a trusted
+            # Authenticode publisher and the release workflow is the trust boundary.
+            if [[ -z "$WIN_CSC_LINK" || -z "$WIN_CSC_KEY_PASSWORD" ]]; then
+              echo "::error::Windows signing certificate is not configured (LOCALTIFY_WINDOWS_CSC_LINK / LOCALTIFY_WINDOWS_CSC_KEY_PASSWORD)."
+              exit 1
+            fi
+            npm run dist -- --config.win.forceCodeSigning=true
           else
             npm run dist:linux
           fi
       - run: node scripts/check-release-artifacts.cjs
+      - name: Verify Windows installer and app Authenticode signatures
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $version = node -p "require('./package.json').version"
+          $paths = @("release/localtify-setup-$version.exe", "release/win-unpacked/localtify.exe")
+          $signers = @()
+          foreach ($file in $paths) {
+            if (!(Test-Path -LiteralPath $file)) { throw "Missing signed release file: $file" }
+            $signature = Get-AuthenticodeSignature -LiteralPath $file
+            if ($signature.Status -ne [System.Management.Automation.SignatureStatus]::Valid -or !$signature.SignerCertificate) {
+              throw "Release refused: invalid or absent Authenticode signature on $file ($($signature.Status))"
+            }
+            $signers += $signature.SignerCertificate.Thumbprint
+          }
+          if ($signers[0] -ne $signers[1]) { throw "Installer and application have different signing certificates" }
+          Write-Host "Verified trusted matching Authenticode signatures on installer and application."
+
       - uses: actions/upload-artifact@v7
         with:
           name: release-${{ runner.os }}
