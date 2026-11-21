@@ -167,8 +167,8 @@ export default function DownloadsView(props: DownloadsViewProps) {
         onSelect: () => void (spotifyLoggedIn ? handleSpotifyLogout() : handleSpotifyLogin()), disabled: spotifyLoginBusy }
     ] : [{ label: "Clear pasted links", icon: <X size={15} />, onSelect: () => setDownloadText(""), disabled: !downloadText.trim(), separatorBefore: true }]),
     { label: "Retry failed", icon: <RotateCcw size={15} />, onSelect: () => void retryFailedDownloads(), disabled: working || (!failedDownloadQueueItems.length && !activity.some(item => needsAttention(item.status))), separatorBefore: true },
-    { label: "Clear completed", onSelect: () => void clearFinishedDownloads(), disabled: working || !finishedDownloadQueueItems.length },
-    { label: "Clear failed or cancelled", onSelect: () => void clearFailedDownloads(), disabled: working || !failedDownloadQueueItems.length, destructive: true }
+    { label: "Clear completed", onSelect: () => void clearFinishedDownloads(), disabled: working || (!finishedDownloadQueueItems.length && !visibleDownloadResults.some(item => item.ok !== false)) },
+    { label: "Clear failed or cancelled", onSelect: () => void clearFailedDownloads(), disabled: working || (!failedDownloadQueueItems.length && !visibleDownloadResults.some(item => item.ok === false)), destructive: true }
   ];
 
   return <section data-page-section="downloads" className="downloadsExperience downloadsLayoutV031">
