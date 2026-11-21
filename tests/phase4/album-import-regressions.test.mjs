@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const main = fs.readFileSync(path.join(root, "electron", "main.cjs"), "utf8");
@@ -41,4 +42,15 @@ test("folder imports prefer album metadata and fall back to the folder name", ()
     /cleanAlbumFolderText\(folderTitle\s*\|\|\s*tagAlbumTitle/,
     "a present folder name must not mask embedded album metadata"
   );
+});
+
+test("album filename parsing is pure and keeps original song and folder identity", () => {
+  const require = createRequire(import.meta.url);
+  const { cleanAlbumFolderText, parseAlbumTrackFileName, albumTrackNumberFromFileName } =
+    require("../../electron/runtime/album-import-utils.cjs");
+  assert.equal(cleanAlbumFolderText("  Album__Name "), "Album Name");
+  const parsed = parseAlbumTrackFileName("/music/Artist - Song.mp3", "Folder__Album");
+  assert.deepEqual(parsed, { title: "Song", artist: "Artist", album: "Folder Album" });
+  assert.equal(albumTrackNumberFromFileName("/music/09 - Song.mp3"), 9);
+  assert.equal(albumTrackNumberFromFileName("/music/Untitled.mp3", 2), 3);
 });

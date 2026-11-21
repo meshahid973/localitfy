@@ -29,6 +29,7 @@ const { createThumbnailRuntime } = require("./runtime/thumbnail-runtime.cjs");
 const { createGenreMetadataBackfill } = require("./runtime/genre-backfill.cjs");
 const { bestSpotifyImage, parseSpotifyUrl, shapeSpotifyTrack, decodeHtmlEntities, uniqSpotifyIds } = require("./runtime/spotify-normalize.cjs");
 const { normalizeForLooseMatch, matchSpotifyTrackForFile } = require("./runtime/download-imports.cjs");
+const { cleanAlbumFolderText, parseAlbumTrackFileName, albumTrackNumberFromFileName } = require("./runtime/album-import-utils.cjs");
 const { safeProviderCover, imageExtension } = require("./runtime/remote-cover.cjs");
 const { createAppMenuRuntime, createAppCommandSender } = require("./runtime/app-menu.cjs");
 const { installRendererSecurityGuards, installSessionPermissionGuards, isTrustedMainFrameIpcEvent } = require("./runtime/security.cjs");
@@ -1311,28 +1312,6 @@ const ALBUM_FOLDER_IMPORT_YIELD_EVERY_TRACKS = 12;
 const ALBUM_FOLDER_IMPORT_PROGRESS_EVERY_TRACKS = 5;
 const ALBUM_FOLDER_DISC_FOLDER_RE = /^(?:cd|disc|disk|side|volume|vol)\s*[-_ ]?\d{1,2}$/i;
 
-function cleanAlbumFolderText(value, fallback = "") {
-  const text = String(value || "").replace(/[\u0000-\u001f]/g, " ").replace(/[_]+/g, " ").replace(/\s+/g, " ").trim();
-  return (text || fallback).slice(0, 140);
-}
-function cleanupAlbumTrackName(value = "") {
-  return cleanAlbumFolderText(value).replace(/^\s*(?:cd|disc)?\s*\d{1,2}\s*[-_. ]+\s*/i, "").replace(/^\s*\d{1,3}\s*[-_. ]+\s*/i, "").replace(/^\s*\d{1,2}-\d{1,3}\s*[-_. ]+\s*/i, "").trim();
-}
-function parseAlbumTrackFileName(filePath, fallbackAlbumTitle = "local album") {
-  const parsed = path.parse(String(filePath || ""));
-  const rawName = cleanupAlbumTrackName(parsed.name || "track");
-  const parts = rawName.split(" - ").map((item) => cleanAlbumFolderText(item)).filter(Boolean);
-  let artist = "unknown artist";
-  let title = rawName || parsed.name || "track";
-  if (parts.length >= 2) { artist = parts[0] || artist; title = parts.slice(1).join(" - ") || title; }
-  return { title: cleanAlbumFolderText(title, parsed.name || "track"), artist: cleanAlbumFolderText(artist, "unknown artist"), album: cleanAlbumFolderText(fallbackAlbumTitle, "local album") };
-}
-function albumTrackNumberFromFileName(filePath, index = 0) {
-  const name = path.parse(String(filePath || "")).name;
-  const match = name.match(/^\s*(?:cd|disc)?\s*(\d{1,2})?\s*[-_. ]?\s*(\d{1,3})\b/i) || name.match(/^\s*(\d{1,3})\b/);
-  const value = Number(match?.[2] || match?.[1] || 0);
-  return Number.isFinite(value) && value > 0 ? value : index + 1;
-}
 function findAlbumFolderCoverPath(folderPath) { return findFolderCover(folderPath); }
 function folderHasAudioFiles(folderPath) { return listAudioFilesInDirectory(folderPath, { maxDepth: 0, maxFiles: 8 }).length > 0; }
 function isDiscLikeAlbumSubfolderName(name = "") { return ALBUM_FOLDER_DISC_FOLDER_RE.test(String(name || "").trim()); }
