@@ -19,10 +19,14 @@ async function publishDownloadedFile(source, directory, filename, beforePublish 
     const stat = await fs.promises.stat(temporary);
     if (!stat.size) throw new Error("Downloaded audio is empty");
     const parsed = path.parse(filename);
-    let portableHash;
+    // Checkpoint content even on NTFS/ext4 hard-link publication. Streamed
+    // hashing never stalls the main thread while verifying a completed file.
+    const hash = crypto.createHash("sha256");
+    for await (const chunk of fs.createReadStream(temporary, { highWaterMark: 256 * 1024 })) hash.update(chunk);
+    const portableHash = hash.digest("hex");
     for (let index = 0; index < 10000; index++) {
       const candidate = path.join(directory, index ? `${parsed.name} (${index})${parsed.ext}` : filename);
-      await beforePublish({ filePath: candidate, filename: path.basename(candidate), sizeBytes: stat.size, mtimeMs: stat.mtimeMs });
+      await beforePublish({ filePath: candidate, filename: path.basename(candidate), sizeBytes: stat.size, mtimeMs: stat.mtimeMs, sha256: portableHash });
       try {
         // The journal records this exact inode's size and mtime before the atomic link.
         // A crash on either side can safely reuse it or retry without duplicating audio.
@@ -33,11 +37,6 @@ async function publishDownloadedFile(source, directory, filename, beforePublish 
         if (["ENOTSUP", "EOPNOTSUPP", "EPERM", "ENOSYS"].includes(error.code)) {
           // FAT/exFAT cannot hard-link. Reserve exclusively, then checkpoint ownership
           // before copying, so restart recovery can distinguish our partial file.
-          if (!portableHash) {
-            const hash = crypto.createHash("sha256");
-            for await (const chunk of fs.createReadStream(temporary)) hash.update(chunk);
-            portableHash = hash.digest("hex");
-          }
           let output;
           try { output = await fs.promises.open(candidate, "wx"); }
           catch (reserveError) { if (reserveError.code === "EEXIST") continue; throw reserveError; }
