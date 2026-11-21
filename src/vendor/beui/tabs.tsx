@@ -322,7 +322,7 @@ export function TabsList({
     };
     place();
     const observer = new ResizeObserver(place);
-    for (const tab of list.querySelectorAll('[role="tab"]')) if (tab.parentElement) observer.observe(tab.parentElement);
+    for (const tab of Array.from(list.querySelectorAll('[role="tab"]'))) if (tab.parentElement) observer.observe(tab.parentElement);
     return () => observer.disconnect();
   }, [tracked, value, children, reduce, track, setPlaced]);
 

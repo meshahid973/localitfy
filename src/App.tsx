@@ -131,7 +131,7 @@ import type {
   Song
 } from "./features/library/song.types";
 import { getLibraryDropSideInfoForElement, getLibraryDropSideForElement, getLibraryDropSide, getLibraryDropElement } from "./features/library/dragGeometry";
-import type { DownloadQueueItem, DownloadResult, SpotifyTrack } from "./features/downloads/download.types";
+import type { SpotifyTrack } from "./features/downloads/download.types";
 import type { Settings, SettingsCategory } from "./features/settings/settings.types";
 import type { CoverColorSyncMode, SecretMode, SecretTriggerMode, ThemeId } from "./features/settings/theme.types";
 import type { DiscordArtMode } from "./features/discord/discord.types";
