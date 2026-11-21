@@ -107,6 +107,8 @@
   text-underline-offset: 4px;
 }
 .downloadsTextAction:hover { text-decoration-color: currentColor; }
+.downloadsFetchInline { flex: none; margin-left: auto; padding: 4px 3px; font-size: 11px; }
+
 .downloadsInlineError { display: flex; align-items: center; gap: 9px; color: var(--lt-danger); font-size: 12px; overflow-wrap: anywhere; }
 .downloadsInlineError > span { min-width: 0; flex: 1; }
 

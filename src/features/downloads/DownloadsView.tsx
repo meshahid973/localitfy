@@ -221,6 +221,9 @@ export default function DownloadsView(props: DownloadsViewProps) {
               disabled={spotifyFetchBusy || spotifyDownloadBusy}
               onChange={event => { setSpotifyUrl(event.currentTarget.value); setSpotifyFetchError(""); }}
               onKeyDown={event => { if (event.key === "Enter" && spotifyUrl.trim() && !working) void fetchSpotifyTracks(); }} />
+            {spotifyTracks.length ? <button type="button" className="downloadsTextAction downloadsFetchInline"
+              aria-label="Fetch another Spotify link" title="Fetch Spotify link" disabled={working || !spotifyUrl.trim()}
+              onClick={() => void fetchSpotifyTracks()}>Fetch</button> : null}
           </div>
           {spotifyFetchError ? <div className="downloadsInlineError" role="alert">
             <AlertCircle size={16} /><span>{spotifyFetchError}</span>
