@@ -159,6 +159,10 @@ export default function AnalyticsView({
         ]} />
       </div>
     </PageHeader>
+    {!songs.length ? <div className="analyticsV4EmptyLibrary" role="status">
+      <span>{isAndroidApp() ? "Sync your music library from your paired computer to build a listening recap." : "Import music and start listening to build your personal recap."}</span>
+      {!isAndroidApp() ? <button type="button" onClick={importSongs}>Import music</button> : null}
+    </div> : null}
 
     {loading ? <div className="analyticsV4Loading" role="status">Loading your listening recap…</div> :
       failed || !summary ? <div className="analyticsV4Notice" role="status">

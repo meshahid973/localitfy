@@ -55,7 +55,20 @@ export function useUpdatesController({ ready,autoUpdateEnabled,autoUpdateNotifyO
       if(!payload.manualOnly && !notifyOnlyRef.current && !downloadAttemptedRef.current.has(version) &&
           !updateWasLeftAlone(version) && window.localitfy.downloadUpdate) {
         downloadAttemptedRef.current.add(version);
-        void window.localitfy.downloadUpdate().catch(()=>{ downloadAttemptedRef.current.delete(version); });
+        void window.localitfy.downloadUpdate()
+          .then(started=>{
+            if(started)return;
+            downloadAttemptedRef.current.delete(version);
+            setUpdatePrompt(old=>old.version===version && old.status==="downloading"
+              ? {...old,visible:true,status:"error",message:"Update download failed.",error:"Try again from Updates settings."}
+              : old);
+          })
+          .catch(()=>{
+            downloadAttemptedRef.current.delete(version);
+            setUpdatePrompt(old=>old.version===version
+              ? {...old,visible:true,status:"error",message:"Update download failed.",error:"Try again."}
+              : old);
+          });
       }
       return;
     }

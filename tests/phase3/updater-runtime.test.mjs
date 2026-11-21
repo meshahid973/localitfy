@@ -99,3 +99,25 @@ test("Downloaded update remains installable after background or manual recheck",
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(installed, 1, "approved restart calls the updater once");
 });
+
+
+test("Download failures remain visible even when update discovery was silent", async()=>{
+  const {EventEmitter}=await import("node:events");
+  const emitter=new EventEmitter();
+  const events=[];
+  Object.assign(emitter,{
+    checkForUpdates:async()=>emitter.emit("update-available",{version:"0.5.2"}),
+    downloadUpdate:async()=>{throw Error("connection interrupted");},
+    quitAndInstall:()=>{}
+  });
+  const runtime=updater.createUpdaterRuntime({
+    app:{getVersion:()=>"0.5.1",isPackaged:false},autoUpdater:emitter,
+    shell:{openExternal:async()=>{}},https:{},isDev:false,
+    getMainWindow:()=>({isDestroyed:()=>false,webContents:{send:(_,payload)=>events.push(payload)}})
+  });
+  assert.equal(await runtime.checkForUpdates({silent:true}),true);
+  assert.equal(await runtime.downloadUpdate(),false);
+  assert.equal(runtime.getUpdateState().type,"error");
+  assert.equal(runtime.getUpdateState().silent,false,"download errors must not inherit silent background-check mode");
+  assert.match(runtime.getUpdateState().error,/connection interrupted/);
+});

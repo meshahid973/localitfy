@@ -296,6 +296,7 @@ function createUpdaterRuntime(options = {}) {
       });
     });
     autoUpdater.on("error", (error) => {
+      const failedDownload = updateDownloading;
       updaterChecking = false;
       updateDownloading = false;
       if (isLinuxUpdateMetadataMissingError(error)) {
@@ -309,7 +310,8 @@ function createUpdaterRuntime(options = {}) {
       }
       sendAutoUpdateEvent({
         type: "error",
-        message: "update check failed",
+        silent: failedDownload ? false : updaterSilent,
+        message: failedDownload ? "update download failed" : "update check failed",
         error: error?.message || String(error || "unknown updater error")
       });
     });
@@ -373,7 +375,7 @@ function createUpdaterRuntime(options = {}) {
     if (linuxUpdaterIsManualOnly()) return openLinuxUpdateReleaseLink("download-button");
     if (updateDownloading || updateDownloaded) return false;
     if (!lastUpdateInfo || compareUpdateVersions(lastUpdateInfo.version, app.getVersion()) <= 0) {
-      sendAutoUpdateEvent({type:"error",error:"Check for a newer verified release before downloading."});
+      sendAutoUpdateEvent({type:"error",silent:false,error:"Check for a newer verified release before downloading."});
       return false;
     }
     updateDownloading = true;
@@ -391,6 +393,7 @@ function createUpdaterRuntime(options = {}) {
       updateDownloading = false;
       sendAutoUpdateEvent({
         type: "error",
+        silent: false,
         message: "update download failed",
         error: error?.message || String(error || "unknown download error")
       });
