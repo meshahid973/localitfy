@@ -1,5 +1,5 @@
 /* Analytics 4.0: one editorial listening recap, not a collection of cards. */
-.analyticsExperienceV4 { min-width:0; display:grid; grid-template-columns:minmax(0,1fr); gap:clamp(25px,3vw,40px); padding-bottom:var(--lt-space-5); color:var(--lt-text); }
+.analyticsExperienceV4 { min-width:0; display:grid; grid-template-columns:minmax(0,1fr); gap:clamp(18px,2vw,28px); padding-bottom:var(--lt-space-5); color:var(--lt-text); }
 .analyticsExperienceV4 *, .analyticsExperienceV4 *::before { box-sizing:border-box; }
 .analyticsV4Controls { display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-start; min-width:0; padding:1px 0 3px; }
 .analyticsV4PeriodNav { display:flex; align-items:center; gap:5px; min-width:0; margin-left:auto; }

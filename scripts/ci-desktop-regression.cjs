@@ -380,6 +380,21 @@ server.listen(5173,async()=>{
             await until(()=>win.webContents.executeJavaScript("Array.from(document.querySelectorAll('.downloadsActivityActions button')).some(button=>button.textContent.trim()==='Resume')"),"resume action is visible");
             const resumeUsable=await win.webContents.executeJavaScript("(()=>{const button=Array.from(document.querySelectorAll('.downloadsActivityActions button')).find(button=>button.textContent.trim()==='Resume');button.scrollIntoView({block:'center',behavior:'instant'});const box=button.getBoundingClientRect();return document.elementFromPoint(box.x+box.width/2,box.y+box.height/2)===button})()");
             assert.equal(resumeUsable,true,"resume remains reachable above the player");
+            const downloadAppearance=await win.webContents.executeJavaScript(`(()=>{
+              const fields=[...document.querySelectorAll(".downloadsLinkInput")].filter(el=>el.getClientRects().length);
+              const from=document.querySelector(".downloadsImporter")?.getBoundingClientRect();
+              const to=document.querySelector(".downloadsActivity")?.getBoundingClientRect();
+              const menu=document.querySelector('.downloadsRowMenu button[aria-label="More actions"]');
+              const selected=document.querySelector('.downloadsFilters button[aria-pressed="true"] > span');
+              return {fields:fields.map(field=>({embedded:field.hasAttribute("data-embedded-field"),background:getComputedStyle(field).backgroundColor})),
+                verticalGap:Math.round(to.top-from.bottom),menuIcons:menu?.querySelectorAll("svg").length,
+                selectedRadius:parseFloat(getComputedStyle(selected).borderTopLeftRadius)};
+            })()`);
+            assert.ok(downloadAppearance.fields.length>0,"Downloads has visible embedded URL fields");
+            assert.ok(downloadAppearance.fields.every(field=>field.embedded && /^(?:transparent|rgba\\(0, 0, 0, 0\\))$/.test(field.background)),"Downloads input has no double grey fill: "+JSON.stringify(downloadAppearance));
+            assert.ok(downloadAppearance.verticalGap>=0 && downloadAppearance.verticalGap<=28,"Downloads importer-to-activity spacing is compact: "+JSON.stringify(downloadAppearance));
+            assert.equal(downloadAppearance.menuIcons,1,"icon-only row menus must not render an extra chevron");
+            assert.ok(downloadAppearance.selectedRadius>=12,"Download activity filter uses rounded, theme-safe selection");
           }
           if(view==="analytics") {
             const history=await win.webContents.executeJavaScript("window.localitfy.getListeningSummary({days:7})");
@@ -394,6 +409,21 @@ server.listen(5173,async()=>{
             await until(()=>win.webContents.executeJavaScript("!!document.querySelector('section[data-slot=\"line-chart\"]')"),"genuine beUI recorded listening chart");
             assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('.analyticsV4Overview').length"),1,"single listening overview");
             assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('.analyticsV4Rankings .analyticsV4Ranking').length"),2,"artwork rankings");
+            const analyticsAppearance=await win.webContents.executeJavaScript(`(()=>{
+              const controls=document.querySelector(".analyticsV4Controls");
+              const header=document.querySelector(".analyticsExperienceV4 .pageHeader");
+              const selection=controls?.querySelector('[aria-pressed="true"] > span');
+              const trigger=controls?.querySelector('button[aria-label="Analytics options"]');
+              return {headerBottom:header?.getBoundingClientRect().bottom,
+                controlTop:controls?.getBoundingClientRect().top,
+                selectedRadius:selection?parseFloat(getComputedStyle(selection).borderTopLeftRadius):0,
+                menuIcons:trigger?.querySelectorAll("svg").length,
+                iconOnly:trigger?.dataset.iconOnly};
+            })()`);
+            assert.ok(analyticsAppearance.controlTop>=analyticsAppearance.headerBottom-1,"Analytics period controls follow their own header instead of colliding");
+            assert.ok(analyticsAppearance.selectedRadius>=12,"Analytics selection is a rounded, themed pill");
+            assert.equal(analyticsAppearance.iconOnly,"true","Analytics options are an icon-only control");
+            assert.equal(analyticsAppearance.menuIcons,1,"Analytics options do not render a redundant chevron");
             assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('section[data-slot=\"line-chart\"] table tbody tr').length"),Math.max(calendar.byBucket.length,calendar.comparison.byBucket.length),"accessible chart preserves the full current and previous UTC months");
             await win.webContents.executeJavaScript("(()=>{const button=[...document.querySelectorAll('button')].find(b=>b.getAttribute('aria-label')==='Previous period');button?.click();})()");
             await until(()=>win.webContents.executeJavaScript("document.querySelector('.analyticsV4PeriodNav span')?.textContent.includes('October')"),"historic calendar navigation");
@@ -419,6 +449,19 @@ server.listen(5173,async()=>{
           assert.ok(geometry.width>0&&geometry.scroll<=geometry.width+3,"page overflow "+view+" "+mode+" "+JSON.stringify(geometry));
           if(view==="artists") {
             await until(()=>win.webContents.executeJavaScript(`(()=>{const covers=[...document.querySelectorAll(".artistCard .coverImage")].filter(img=>{const r=img.getBoundingClientRect();return r.width>0&&r.height>0&&r.bottom>0&&r.top<window.innerHeight});return covers.length>0&&covers.every(img=>img.complete&&img.naturalWidth>0&&img.classList.contains("isLoaded"))})()`).catch(()=>false),"visible artist fixture artwork "+mode+" "+width,10000);
+          }
+          if(width===1280 && view==="home"){
+            const volumeGeometry=await win.webContents.executeJavaScript(`(()=>{
+              const slider=document.querySelector('.playerRight .volumeWrap input[type="range"]');
+              const player=document.querySelector('.playerBar');
+              if(!slider||!player)return null;
+              const rect=slider.getBoundingClientRect(),outer=player.getBoundingClientRect();
+              return {width:rect.width,left:rect.left,right:rect.right,playerLeft:outer.left,playerRight:outer.right,viewport:window.innerWidth};
+            })()`);
+            assert.ok(volumeGeometry && volumeGeometry.width>=95 &&
+              volumeGeometry.left>=volumeGeometry.playerLeft &&
+              volumeGeometry.right<=Math.min(volumeGeometry.playerRight-5,volumeGeometry.viewport-5),
+              "volume slider must remain visible and within the player: "+JSON.stringify(volumeGeometry));
           }
           await screenshot(win,view+"-"+mode+"-"+width);
         }
