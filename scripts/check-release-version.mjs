@@ -26,6 +26,7 @@ function checkReleaseVersion() {
   const mismatches = findVersionMismatches(pkg.version, {
     "package-lock.json version": lock.version,
     "package-lock.json root package version": lock.packages?.[""]?.version,
+    "published release notes version": read(".github/release-notes.md").match(/^\s*(?:#{1,3}\s*)?Localtify\s+(\d+\.\d+\.\d+)\b/im)?.[1] || null,
     "renderer version": literalVersion("src/features/updates/update.constants.ts", "APP_VERSION"),
     "Discord Activity version": literalVersion("discord-activity/src/main.ts", "APP_VERSION"),
     "Android package version": read("android/app/build.gradle").match(/\bversionName\s+["']([^"']+)["']/)?.[1] || null
