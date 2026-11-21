@@ -9,7 +9,7 @@ import { artistTarget, useAppActions } from "../shell/appActions";
 import { formatAnalyticsDuration } from "./formatters";
 import { isListeningCalendarSummary, type ListeningCalendarRange, type ListeningCalendarSummary } from "./listeningSummary";
 import type { Song } from "../library/song.types";
-import { LineChart, type LineChartSeries } from "../../vendor/charts/line-chart";
+import { LineChart, LineChartPlot, LineChartTooltip, LineChartLegend, type LineChartSeries } from "../../vendor/charts/line-chart";
 import SegmentedControl from "../../vendor/arc/segmented-control/segmented-control";
 import { DropdownMenu } from "../../vendor/arc/dropdown-menu/dropdown-menu";
 
@@ -192,7 +192,11 @@ export default function AnalyticsView({
                 label={"Recorded listening time for " + listeningPeriodName(summary)}
                 formatValue={value => formatAnalyticsDuration(value * 60)}
                 formatTick={value => Math.round(value) + "m"}
-              />
+              >
+                <LineChartPlot height={218} />
+                <LineChartTooltip />
+                <LineChartLegend />
+              </LineChart>
             </div>
           ) : <p className="analyticsV4Empty">No recorded listening in this period yet.</p>}
           <p className="analyticsV4FinePrint">Actual listening events, grouped by their start date in UTC. Older unrecorded playback is not estimated.{isAndroidApp() ? " Phone plays not yet synced to your computer are excluded." : ""} Last snapshot: {new Date(summary.generatedAt).toLocaleString()}.</p>

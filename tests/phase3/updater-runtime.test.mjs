@@ -42,3 +42,22 @@ test("updater and packaged publishing use the canonical repository", () => {
   assert.equal(pkg.repository.url, "git+https://github.com/" + expected + ".git");
   assert.equal(updater.LOCALTIFY_LINUX_RELEASES_URL, "https://github.com/" + expected + "/releases/latest");
 });
+
+test("Android official release discovery rejects missing/mismatched APKs and compares versions correctly",async()=>{
+  const ts=await import("typescript");
+  const source=fs.readFileSync(path.join(root,"src/features/updates/androidRelease.ts"),"utf8");
+  const emitted=ts.default.transpileModule(source,{compilerOptions:{module:ts.default.ModuleKind.ES2022,target:ts.default.ScriptTarget.ES2022}}).outputText;
+  const {compareStableVersions,fetchOfficialAndroidRelease}=await import("data:text/javascript;base64,"+Buffer.from(emitted).toString("base64"));
+  assert.equal(compareStableVersions("0.5.2","0.5.1"),1);
+  assert.equal(compareStableVersions("0.5.1","0.5.1"),0);
+  assert.equal(compareStableVersions("v0.5.0","0.5.1"),-1);
+  const valid={tag_name:"v0.5.2",draft:false,prerelease:false,body:"## Fixes\n- Correct update",
+    assets:[{name:"localtify-0.5.2-android.apk",size:100000,browser_download_url:"https://github.com/meshahid973/localtify/releases/download/v0.5.2/localtify-0.5.2-android.apk"}]};
+  const response=(data)=>async()=>({ok:true,json:async()=>data});
+  const accepted=await fetchOfficialAndroidRelease(response(valid));
+  assert.equal(accepted.version,"0.5.2");
+  assert.match(accepted.downloadUrl,/^https:\/\/github\.com\/meshahid973\/localtify\/releases\/download\//);
+  await assert.rejects(()=>fetchOfficialAndroidRelease(response({...valid,assets:[]})),/APK/);
+  await assert.rejects(()=>fetchOfficialAndroidRelease(response({...valid,draft:true})),/Unverified/);
+  await assert.rejects(()=>fetchOfficialAndroidRelease(response({...valid,assets:[{...valid.assets[0],browser_download_url:"https://evil.example/malware.apk"}]})),/APK/);
+});

@@ -1,5 +1,5 @@
 /* Analytics 4.0: one editorial listening recap, not a collection of cards. */
-.analyticsExperienceV4 { min-width:0; display:grid; gap:clamp(25px,3vw,40px); padding-bottom:var(--lt-space-5); color:var(--lt-text); }
+.analyticsExperienceV4 { min-width:0; display:grid; grid-template-columns:minmax(0,1fr); gap:clamp(25px,3vw,40px); padding-bottom:var(--lt-space-5); color:var(--lt-text); }
 .analyticsExperienceV4 *, .analyticsExperienceV4 *::before { box-sizing:border-box; }
 .analyticsV4Controls { display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; min-width:0; }
 .analyticsV4PeriodNav { display:flex; align-items:center; gap:5px; min-width:0; }
@@ -19,8 +19,8 @@
 .analyticsV4SectionHeading { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; }
 .analyticsV4SectionHeading h2,.analyticsV4Ranking h2 { margin:0; font-size:clamp(18px,2vw,23px); font-weight:670; letter-spacing:-.02em; }
 .analyticsV4SectionHeading p { color:var(--lt-muted); font-size:12px; margin:0; }
-.analyticsV4History { min-width:0; display:grid; gap:16px; }
-.analyticsV4Chart { min-width:0; padding:16px 4px 2px; color:var(--lt-text); }
+.analyticsV4History { min-width:0; display:grid; grid-template-columns:minmax(0,1fr); gap:16px; }
+.analyticsV4Chart { min-width:0; padding:16px 20px 2px; color:var(--lt-text); }
 .analyticsV4Chart [data-slot="line-chart"] { width:100%; min-width:0; }
 .analyticsV4FinePrint,.analyticsV4Footer { margin:0; color:var(--lt-muted); font-size:11px; line-height:1.55; }
 .analyticsV4Rankings { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:clamp(20px,3vw,46px); }
