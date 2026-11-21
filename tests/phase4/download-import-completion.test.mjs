@@ -9,7 +9,7 @@ const require = createRequire(import.meta.url);
 require("../../electron/runtime/yt-dlp.cjs").ensureYtDlpBinary = async () => assert.fail("import recovery must not access the network");
 const downloader = require("../../electron/downloader.cjs");
 const { createDownloadJobStore } = require("../../electron/download-jobs.cjs");
-const { finalizeDownloadImport } = require("../../electron/runtime/download-imports.cjs");
+const { finalizeDownloadImport, matchSpotifyTrackForFile } = require("../../electron/runtime/download-imports.cjs");
 
 test("import failure retains saved audio and a later committed import clears its recovery state", async () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "localtify-import-completion-"));
@@ -50,4 +50,20 @@ test("completion notification failure does not change a successful result", () =
   const results = [item];
   assert.equal(finalizeDownloadImport({ sender: { isDestroyed: () => false, send: () => { throw new Error("window closed"); } } }, results, []), results);
   assert.equal(item.ok, true);
+});
+
+test("filename metadata fallback needs a full title and refuses ambiguous recordings", () => {
+  const kickBack = { id: "kick-back", title: "KICK BACK", artist: "Kenshi Yonezu" };
+  const lemonade = { id: "lemonade", title: "Lemonade", artist: "Kenshi Yonezu" };
+  const other = { id: "intro-other", title: "Intro", artist: "Someone Else" };
+  const intro = { id: "intro", title: "Intro", artist: "Kenshi Yonezu" };
+  assert.equal(matchSpotifyTrackForFile("/music/Kenshi Yonezu - KICK BACK.mp3", [lemonade, kickBack]), kickBack);
+  assert.equal(matchSpotifyTrackForFile("/music/KICK BACK.mp3", [kickBack]), kickBack);
+  assert.equal(matchSpotifyTrackForFile("/music/Kenshi Yonezu unreleased mix.mp3", [kickBack, lemonade]), null,
+    "an artist match alone must not overwrite a local file's metadata");
+  assert.equal(matchSpotifyTrackForFile("/music/Intro.mp3", [intro, other]), null,
+    "an ambiguous title cannot select an arbitrary artist");
+  assert.equal(matchSpotifyTrackForFile("/music/Kenshi Yonezu - Intro.mp3", [intro, other]), intro);
+  assert.equal(matchSpotifyTrackForFile("/music/Backtrack demo.mp3", [{ title: "Back", artist: "demo" }]), null,
+    "substring-only title matches are not recording identities");
 });
