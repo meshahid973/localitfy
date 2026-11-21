@@ -180,3 +180,50 @@
   .downloadsLayoutV031 .downloadResult { grid-template-columns: 25px minmax(0,1fr); }
   .downloadsLayoutV031 .downloadResult > button,.downloadsLayoutV031 .downloadResultActionsV502 { grid-column: 2; }
 }
+
+/* Source and activity share one workspace, not two disconnected page sections. */
+.downloadsLayoutV031 .downloadsOverview {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  gap: 16px; padding: 0 0 14px; border-bottom: 1px solid var(--downloads-edge);
+}
+.downloadsLayoutV031 .downloadsOverview > p {
+  min-width: 250px; max-width: 560px; flex: 1 1 280px; margin: 0;
+  font-size: 13px; line-height: 1.6; color: var(--downloads-muted);
+}
+.downloadsLayoutV031 .downloadsSummary { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; }
+.downloadsLayoutV031 .downloadsSummary > span { display: inline-flex; align-items: baseline; gap: 6px; white-space: nowrap; font-size: 12px; color: var(--downloads-muted); }
+.downloadsLayoutV031 .downloadsSummary strong { font-size: 16px; font-weight: 750; font-variant-numeric: tabular-nums; color: var(--downloads-text); }
+.downloadsLayoutV031 .downloadWorkspace { display: grid; grid-template-columns: minmax(0,1.15fr) minmax(320px,1fr); align-items: start; gap: var(--lt-section-gap); min-width: 0; }
+.downloadsLayoutV031 .downloadWorkspace > * { min-width: 0; }
+.downloadsLayoutV031 .downloadsSectionLabel { display: block; margin: 0 0 5px; font-size: 10px; line-height: 1.2; font-weight: 760; letter-spacing: .11em; text-transform: uppercase; color: var(--downloads-muted); }
+.downloadsLayoutV031 .downloadQueuePanel { align-content: start; }
+.downloadsLayoutV031 .downloadQueuePanel > .panelHead { align-items: flex-start; gap: 12px; }
+.downloadsLayoutV031 .downloadQueueHeaderActions { gap: 6px; }
+.downloadsLayoutV031 .downloadQueueHeaderActions > button { min-height: 30px; padding: 5px 8px; font-size: 11px; }
+.downloadsLayoutV031 .downloadQueueFilters { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; border-bottom: 1px solid var(--downloads-edge); padding-bottom: 12px; }
+.downloadsLayoutV031 .downloadQueueFilter { padding: 7px 10px; min-height: 31px; border-radius: 7px; border: 1px solid transparent; background: transparent; color: var(--downloads-muted); font: inherit; font-size: 11px; font-weight: 650; cursor: pointer; }
+.downloadsLayoutV031 .downloadQueueFilter.selected { background: var(--downloads-raised); border-color: var(--downloads-edge); color: var(--downloads-text); }
+.downloadsLayoutV031 .downloadQueueFilter:hover:not(:disabled) { color: var(--downloads-text); }
+.downloadsLayoutV031 .downloadQueueEmpty { padding: 42px 12px; display: grid; justify-items: center; gap: 8px; text-align: center; border: 1px dashed var(--downloads-edge); border-radius: var(--lt-radius-item); }
+.downloadsLayoutV031 .downloadQueueEmpty strong { font-size: 13px; color: var(--downloads-text); }
+.downloadsLayoutV031 .downloadQueueEmpty p { max-width: 260px; margin: 0; color: var(--downloads-muted); font-size: 12px; line-height: 1.55; }
+.downloadsLayoutV031 .downloadQueueIndex { width: 30px; height: 30px; display: grid; place-items: center; font-size: 11px; font-weight: 760; border: 1px solid var(--downloads-edge); border-radius: 7px; color: var(--downloads-text); background: var(--downloads-surface); }
+.downloadsLayoutV031 .downloadQueueTop { grid-template-columns: 30px minmax(0,1fr) 42px; gap: 9px; }
+.downloadsLayoutV031 .downloadQueueTop strong { font-size: 12px; }
+.downloadsLayoutV031 .downloadQueueMeta { gap: 7px 11px; }
+.downloadsLayoutV031 .downloadQueueItem.failed .downloadQueueTrack i,
+.downloadsLayoutV031 .downloadQueueItem.cancelled .downloadQueueTrack i,
+.downloadsLayoutV031 .downloadQueueItem.interrupted .downloadQueueTrack i { background: var(--lt-danger); }
+.downloadsLayoutV031 .downloadQueueItem :is(.downloadRetryButtonV502,.softButton) { min-height: 32px; }
+.downloadsLayoutV031 .downloadsResultHeading { display: grid; gap: 4px; }
+.downloadsLayoutV031 .converterBox > div:first-child { gap: 4px; }
+@media (max-width: 1150px) {
+  .downloadsLayoutV031 .downloadWorkspace { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .downloadsLayoutV031 .downloadsSummary { width: 100%; justify-content: space-between; gap: 8px; }
+  .downloadsLayoutV031 .downloadQueueHeaderActions { width: 100%; }
+  .downloadsLayoutV031 .downloadQueueFilters { gap: 2px; }
+  .downloadsLayoutV031 .downloadQueueFilter { padding: 7px 8px; }
+  .downloadsLayoutV031 .downloadQueueTop { grid-template-columns: 30px minmax(0,1fr) 38px; }
+}

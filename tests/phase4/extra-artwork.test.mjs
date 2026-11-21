@@ -87,10 +87,10 @@ test("keyed artwork sources resolve before a blocked Deezer service",async()=>{
  const {createArtworkLookup}=require("../../electron/discover/artwork.cjs");
  let deezer=0,mb=0;
  const lookup=createArtworkLookup({searchRecordings:async()=>{mb++;return [];}},Date.now,
-  async()=>({name:"Bang Bang",artist:{name:"B.A. Robertson"},album:{image:[{"#text":cover}]}}),
+  async()=>({name:"Bang Bang",artist:{name:"B.A. Robertson"},album:{image:[{"#text":"https://lastfm.freetls.fastly.net/i/u/300x300/0123456789abcdef0123456789abcdef.jpg"}]}}),
   async()=>({coverUrl:portrait}),undefined,async()=>{deezer++;return {};});
  const result=await lookup("Bang Bang","B.A. Robertson");
- assert.equal(result.coverUrl,cover);
+ assert.equal(result.coverUrl,"https://lastfm.freetls.fastly.net/i/u/300x300/0123456789abcdef0123456789abcdef.jpg");
  assert.equal(deezer,0,"never hit optional Deezer while a verified image exists");
  assert.equal(mb,0);
 });
