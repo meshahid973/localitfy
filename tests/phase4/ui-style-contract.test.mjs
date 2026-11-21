@@ -177,8 +177,8 @@ test("shared focus remains visible and component insets override the app and Lin
   const dropdown = read("src/shared/ui/ArcDropdownMenu.css");
 
   assert.doesNotMatch(globals, /button:focus-visible\s*\{\s*outline: 0 !important/);
-  assert.match(read("src/shared/ui/controls.css"), /\.app :is\(button, a, input, textarea, select, \[role="button"\]\):focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\) !important/);
-  assert.match(linux, /\.app\[data-platform="linux"\] :is\(button, input, textarea, select, \[role="button"\]\):focus-visible\s*\{\s*outline:[^}]*!important/);
+  assert.match(read("src/shared/ui/controls.css"), /\.app :is\(button, a, input, textarea, select, \[role="button"\]\):not\(\[data-embedded-field\]\):focus-visible\s*\{\s*outline: 2px solid var\(--lt-accent\) !important/);
+  assert.match(linux, /\.app\[data-platform="linux"\] :is\(button, input, textarea, select, \[role="button"\]\):not\(\[data-embedded-field\]\):focus-visible\s*\{\s*outline:[^}]*!important/);
   assert.match(discover, /\.app \.discoverPage [^{]*:focus-visible\s*\{\s*outline:[^}]*!important/);
   assert.match(queue, /\.app \.queuePanel button\.queuePanelRowMain:focus-visible\s*\{\s*outline:[^}]*!important/);
   assert.match(dropdown, /\.arcDropdownOption:focus-visible\s*\{\s*outline:[^}]*!important/);

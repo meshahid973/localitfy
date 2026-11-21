@@ -499,7 +499,7 @@
   filter: blur(10px) saturate(1.06) !important;
 }
 
-.app[data-platform="linux"] :is(button, input, textarea, select, [role="button"]):focus-visible{
+.app[data-platform="linux"] :is(button, input, textarea, select, [role="button"]):not([data-embedded-field]):focus-visible{
   outline: 2px solid rgba(var(--accent-rgb), .72) !important;
   outline-offset: 2px !important;
 }
