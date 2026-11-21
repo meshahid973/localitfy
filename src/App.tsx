@@ -274,6 +274,8 @@ function MainModeApp() {
     updatePrompt,
     setUpdatePrompt,
     whatsNewOpen,
+    whatsNewVersion,
+    whatsNewReleaseNotes,
     openUpdateChangelog,
     closeWhatsNew,
     askUpdaterToDownload,
@@ -286,6 +288,7 @@ function MainModeApp() {
   } = useUpdatesController({
     ready,
     autoUpdateEnabled: settings.autoUpdateEnabled,
+    autoUpdateNotifyOnly: settings.autoUpdateNotifyOnly,
     setStatusText,
     showAppToast
   });
@@ -5947,6 +5950,8 @@ function MainModeApp() {
       askUpdaterToDownload,
       askUpdaterToInstall,
       manualUpdateCheck,
+      onWhatsNew: () => openUpdateChangelog("available"),
+      onDismiss: handleUpdateLater,
       setUpdatePrompt,
       progress
     },
@@ -6299,7 +6304,9 @@ function MainModeApp() {
       }),
       whatsNew: {
         open: Boolean(whatsNewOpen),
-        onClose: closeWhatsNew
+        onClose: closeWhatsNew,
+        initialVersion: whatsNewVersion,
+        availableReleaseNotes: whatsNewReleaseNotes
       },
       songEditor: {
         song: editorSong,
