@@ -46,9 +46,13 @@ function matchSpotifyTrackForFile(filePath, tracks = []) {
   const fileName = normalizeForLooseMatch(require("node:path").parse(String(filePath || "")).name);
   if (!fileName || !Array.isArray(tracks)) return null;
   const matches = [];
+  const seenIds = new Set();
   for (const track of tracks) {
     const title = normalizeForLooseMatch(track?.title || track?.name || "");
     if (!title || !hasWholePhrase(fileName, title)) continue;
+    const id = String(track?.id || "").trim();
+    if (id && seenIds.has(id)) continue;
+    if (id) seenIds.add(id);
     const artist = normalizeForLooseMatch(track?.artist || track?.artists || "");
     matches.push({ track, title, artistConfirmed: hasWholePhrase(fileName, artist) });
   }

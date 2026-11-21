@@ -30,8 +30,8 @@ export function Progress({ value = 0, max = 100, label, showValue = false, class
   const reduce = useReducedMotion();
   const safeMax = max > 0 ? max : 100;
   const safeValue = Math.min(Math.max(value, 0), safeMax);
-  const percentage = Math.round((safeValue / safeMax) * 100);
-  const complete = percentage >= 100;
+  const complete = safeValue >= safeMax;
+  const percentage = complete ? 100 : Math.min(99, Math.round((safeValue / safeMax) * 100));
   // One spring drives both the fill and the counted label, so the number always matches the bar.
   const progress = useMotionValue(percentage);
   // The fill slides in from the left instead of scaling, so its rounded end keeps its shape at every value.

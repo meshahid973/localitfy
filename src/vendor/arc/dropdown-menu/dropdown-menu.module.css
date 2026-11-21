@@ -39,3 +39,7 @@
 
 /* Localtify theme bridge for portalled dropdown content. */
 .menu { --border:var(--lt-border); --border-subtle:var(--lt-border); --border-strong:var(--lt-border-strong); --radius-panel:12px; --surface-raised:var(--lt-bg-elevated); --surface-muted:var(--lt-fill-hover); --surface:var(--lt-bg-elevated); --shadow-floating:var(--lt-shadow-menu); --foreground:var(--lt-text); --text-secondary:var(--lt-muted); --text-muted:var(--lt-muted); --danger:var(--lt-danger); --duration-fast:120ms; --duration-instant:0ms; --duration-standard:180ms; --duration-spring:180ms; --ease-standard:var(--lt-ease-out); --ease-enter:var(--lt-ease-out); --ease-spring:var(--lt-ease-out); --space-1:4px; --text-sm:12px; }
+
+@media (forced-colors: active) {
+  .item:focus-visible { outline: 2px solid Highlight; outline-offset: -2px; }
+}
