@@ -68,9 +68,9 @@ function initDownloader({ userDataPath, ffmpegPath }) {
   catch (error) { mediaConverter = null; console.error("[localtify conversion storage]", error.message); }
 }
 
-function prepareDownloadJob(request) {
+async function prepareDownloadJob(request) {
   if (!downloadJobs || downloadStorageError) throw new Error(downloadStorageError || "Download recovery storage is not initialized");
-  const job = downloadJobs.prepare(request);
+  const job = await downloadJobs.prepareAsync(request);
   batchJobIds.add(job.id);
   return job;
 }
@@ -925,11 +925,12 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
   const seenTracks = new Set();
   tracks = tracks.filter(track => { const id = getSpotifyTrackId(track); if (!id) return true; if (seenTracks.has(id)) return false; seenTracks.add(id); return true; });
   const total = tracks.length;
-  const savedJobs = tracks.map(track => {
+  const savedJobs = [];
+  for (const track of tracks) {
     const id = getSpotifyTrackId(track) || crypto.createHash("sha256").update(JSON.stringify([track.title || track.name, track.artist || track.artists])).digest("hex").slice(0, 22);
-    return prepareDownloadJob({ source: "spotify", url: require("./discover/track-identity.cjs").selectedYouTubeUrl(id) || `https://open.spotify.com/track/${id}`, folder: destinationDirectory, options,
-      track: { ...track, id, title: String(track.title || track.name || "unknown"), artist: String(track.artist || track.artists || "") } });
-  });
+    savedJobs.push(await prepareDownloadJob({ source: "spotify", url: require("./discover/track-identity.cjs").selectedYouTubeUrl(id) || `https://open.spotify.com/track/${id}`, folder: destinationDirectory, options,
+      track: { ...track, id, title: String(track.title || track.name || "unknown"), artist: String(track.artist || track.artists || "") } }));
+  }
 
   for (let index = 0; index < total; index++) {
     if (activeDownloadCancelled) break;
@@ -1054,7 +1055,11 @@ async function downloadSpotifyBatch(tracks, destinationDirectory, onProgress, op
 async function downloadAudioUrls(input, destinationDirectory, onProgress, options = {}) {
   const urls = [...new Set(parseUrls(input).map(url => normalizeYouTubeUrl(url) || url))];
   const results = [];
-  const planned = urls.map(url => normalizeYouTubeUrl(url) ? prepareDownloadJob({ source: "youtube", url: normalizeYouTubeUrl(url), folder: destinationDirectory, options }) : null);
+  const planned = [];
+  for (const url of urls) {
+    const normalized = normalizeYouTubeUrl(url);
+    planned.push(normalized ? await prepareDownloadJob({ source: "youtube", url: normalized, folder: destinationDirectory, options }) : null);
+  }
 
   for (let index = 0; index < urls.length; index += 1) {
     if (activeDownloadCancelled) break;
