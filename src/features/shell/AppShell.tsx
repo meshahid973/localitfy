@@ -26,7 +26,7 @@ import { useDownloadTagPrompt } from "../tagging/useDownloadTagPrompt";
 import SidebarNav from "./SidebarNav";
 import { isAndroidApp } from "../../app/platform";
 import {
-  APP_VERSION, defaultUpdatePrompt, updateRibbonChildSpring, updateRibbonEnterSpring
+  APP_VERSION, updateRibbonChildSpring, updateRibbonEnterSpring
 } from "../updates/update.constants";
 import { updateRibbonTitle } from "../updates/update.utils";
 import { yukariUpdateImage } from "../../core/app.constants";
@@ -78,7 +78,7 @@ export default function AppShell(props: AppShellProps) {
     themeSettling, effectiveTheme,
     effectiveAmbient, effectiveCoverColorSyncMode, effectiveNotes, statusText, draggedSongTitle
   } = frame;
-  const { updatePrompt, askUpdaterToDownload, askUpdaterToInstall, manualUpdateCheck, setUpdatePrompt } = updates;
+  const { updatePrompt, askUpdaterToDownload, askUpdaterToInstall, manualUpdateCheck, onWhatsNew, onDismiss } = updates;
   const {
     previewActive: screensaverPreviewActive, visible: screensaverVisible,
     dismissFromActivity: dismissScreensaverFromActivity, setVisible: setScreensaverVisible,
@@ -195,7 +195,8 @@ export default function AppShell(props: AppShellProps) {
           onDownload={askUpdaterToDownload}
           onInstall={askUpdaterToInstall}
           onCheckAgain={manualUpdateCheck}
-          onDismiss={() => setUpdatePrompt(defaultUpdatePrompt)}
+          onWhatsNew={onWhatsNew}
+          onDismiss={onDismiss}
         /></Suspense> : null}
       </TitleBar>
 

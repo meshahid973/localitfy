@@ -281,6 +281,7 @@ function MainModeApp() {
     askUpdaterToDownload,
     askUpdaterToInstall,
     manualUpdateCheck,
+    handleUpdateLater,
     clearUpdateNagTimer,
     showUpdateNag,
     showDebugUpdateAvailable,
@@ -5780,6 +5781,9 @@ function MainModeApp() {
         updatePrompt={updatePrompt}
         manualUpdateCheck={manualUpdateCheck}
         askUpdaterToInstall={askUpdaterToInstall}
+        askUpdaterToDownload={askUpdaterToDownload}
+        openUpdateChangelog={openUpdateChangelog}
+        lastUpdateCheckedLabel={lastUpdateCheckedLabel}
         copyDiagnosticsInfo={copyDiagnosticsInfo}
         diagnosticsCopied={diagnosticsCopied}
         diagnosticsInfo={diagnosticsInfo}
