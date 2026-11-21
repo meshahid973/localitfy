@@ -367,8 +367,11 @@ server.listen(5173,async()=>{
             const recovered=saved.jobs.find(job=>job.id===recoveryJob.id);
             assert.equal(recovered?.status,"interrupted","restart restores interrupted downloads");
             assert.equal(recovered?.progress,37,"restart retains recorded progress");
-            await until(()=>win.webContents.executeJavaScript("Array.from(document.querySelectorAll('.downloadQueueActions button')).some(button=>button.textContent==='resume')"),"resume action is visible");
-            const resumeUsable=await win.webContents.executeJavaScript("(()=>{const button=Array.from(document.querySelectorAll('.downloadQueueActions button')).find(button=>button.textContent==='resume');button.scrollIntoView({block:'center',behavior:'instant'});const box=button.getBoundingClientRect();return document.elementFromPoint(box.x+box.width/2,box.y+box.height/2)===button})()");
+            await until(()=>win.webContents.executeJavaScript("document.querySelector('.downloadsActivityTitle p')?.textContent.includes('need attention')").catch(()=>false),"interrupted count visible");
+            const attentionSelectable=await win.webContents.executeJavaScript("(()=>{const button=[...document.querySelectorAll('.downloadsFilters button')].find(button=>button.textContent.trim()==='Attention');if(!button)return false;button.click();return true})()");
+            assert.equal(attentionSelectable,true,"Attention filter is reachable");
+            await until(()=>win.webContents.executeJavaScript("Array.from(document.querySelectorAll('.downloadsActivityActions button')).some(button=>button.textContent.trim()==='Resume')"),"resume action is visible");
+            const resumeUsable=await win.webContents.executeJavaScript("(()=>{const button=Array.from(document.querySelectorAll('.downloadsActivityActions button')).find(button=>button.textContent.trim()==='Resume');button.scrollIntoView({block:'center',behavior:'instant'});const box=button.getBoundingClientRect();return document.elementFromPoint(box.x+box.width/2,box.y+box.height/2)===button})()");
             assert.equal(resumeUsable,true,"resume remains reachable above the player");
           }
           if(view==="analytics") {

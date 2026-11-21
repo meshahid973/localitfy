@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": false,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "src/styles/vendor-tailwind.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/vendor",
+    "utils": "@/vendor/beui/lib/utils",
+    "ui": "@/vendor",
+    "lib": "@/vendor/beui/lib",
+    "hooks": "@/vendor/beui/lib/hooks"
+  },
+  "registries": {
+    "@react-bits": "https://reactbits.dev/r/{name}.json",
+    "@uiarc": "https://uiarc.dev/r/{name}.json",
+    "@beui": "https://beui.dev/r/{name}.json"
+  }
+}

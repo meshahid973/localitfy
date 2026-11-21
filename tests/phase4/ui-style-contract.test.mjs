@@ -305,11 +305,12 @@ test("playlist hints use semantic tokens, not fixed dark-theme paints", () => {
   assert.doesNotMatch(playlists, /#eba4ad|#d0b8a3/);
 });
 
-test("download errors, progress and warnings follow Localtify tokens", () => {
+test("Downloads Experience preserves theme tokens and error semantics", () => {
   const css = read("src/features/downloads/downloads.css");
-  assert.match(css, /border: 1px solid color-mix\(in srgb, var\(--lt-danger\) 28%, transparent\)/);
-  assert.match(css, /background: color-mix\(in srgb, var\(--lt-danger\) 8%, var\(--downloads-surface\)\)/);
-  assert.match(css, /background: var\(--downloads-accent\)/);
+  assert.match(css, /\.downloadsExperience\s*\{/);
+  assert.ok(css.includes("--accent: var(--lt-accent)"));
+  assert.ok(css.includes("color: var(--lt-danger)"));
+  assert.ok(css.includes("border: 1px solid var(--lt-border)"));
   assert.doesNotMatch(css, /#efb5b7|#e7b2a3|#79a7c4/);
 });
 

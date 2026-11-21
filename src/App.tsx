@@ -5845,10 +5845,9 @@ function MainModeApp() {
     failedResults: failedDownloadResults,
     firstError: firstDownloadError
   } = downloadPageState;
-  const visibleDownloadQueueItems = downloadQueue.filter(
-    (item: DownloadQueueItem) => !["failed", "cancelled", "error"].includes(String(item.status || "").toLowerCase())
-  );
-  const visibleDownloadResults = downloadResults.filter((item: DownloadResult) => item?.ok !== false);
+  // Downloads owns its view filters. Never discard failed/cancelled jobs upstream.
+  const visibleDownloadQueueItems = downloadQueue;
+  const visibleDownloadResults = downloadResults;
   const copyDownloadError = async (errorText?: string) => {
     const text = String(errorText || firstDownloadError || "No download error found.");
     try {
@@ -6187,7 +6186,8 @@ function MainModeApp() {
       spotifyTracks,
       spotifyUrl,
       visibleDownloadQueueItems,
-      visibleDownloadResults
+      visibleDownloadResults,
+      songs
     },
     playerBar: connect.playerBar({
       ambientStyle,
